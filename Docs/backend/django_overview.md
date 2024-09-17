@@ -88,42 +88,45 @@ In this example, the root URL (`''`) is mapped to the `index` view.
 
 ---
 
-## 4. **Model vs DB**
-Django models define the structure of your application’s database tables. Django’s ORM (Object Relational Mapper) allows you to interact with the database using Python code instead of SQL.
-We have to chose wether to use a Postgres DB or use a Django native model
+## 4. ** Models in Django **
 
-### Pros of Django Models:
-- **Easy to Use:** Simplifies database operations through Python classes and methods.
-- **Database Abstraction:** Works with multiple database backends (e.g., SQLite, PostgreSQL, MySQL).
-- **Auto Migrations:** Django handles database schema changes automatically.
+- Models are used to define and manage the structure of the database.
+- A Django model is a Python class that represents a table in a database.
 
-### Cons of Django Models:
-- **Overhead:** The ORM can introduce overhead compared to raw SQL, especially in complex queries.
-- **Customization Limits:** Fine-tuned control of database queries may require bypassing the ORM in favor of raw SQL.
+### Example of a Django Model
 
-#### PostgreSQL Integration:
-PostgreSQL is a powerful, open-source relational database management system supported by Django. It offers advanced features like JSON support, full-text search, and various index types that can enhance the performance and capabilities of your application.
-
-### Pros of PostgreSQL:
-- **Advanced Features:** Supports rich data types (JSON, array fields).
-- **Performance:** Optimized for large-scale applications and complex queries.
-- **Security and Reliability:** Provides ACID compliance and advanced security features.
-
-### Cons of PostgreSQL:
-- **Setup Complexity:** Requires more configuration compared to simpler databases like SQLite.
-- **Heavier Resource Use:** Requires more system resources for operation.
-
-#### Example Model:
 ```python
-from django.db import models
+class Game(models.Model):
+    player1_score = models.IntegerField(default=0)
+    player2_score = models.IntegerField(default=0)
+```
 
-class Book(models.Model):
-    title = models.CharField(max_length=100)
-    author = models.CharField(max_length=100)
-    published_date = models.DateField()
+- This defines a table `Game` with two columns: `player1_score` and `player2_score`, which store integer values with a default value of `0`.
+- `models.IntegerField` is a field type that stores integer values in the database.
 
-    def __str__(self):
-        return self.title
+### Data Interaction (CRUD Operations)
+
+Django models allow you to perform **CRUD** (Create, Read, Update, Delete) operations easily without needing to write raw SQL queries.
+You can use Django’s **ORM (Object-Relational Mapping)** to interact with the database through Python code, which abstracts away the underlying SQL.
+
+#### Examples:
+
+- **Create** a new `Game` record:
+
+  ```python
+  Game.objects.create(player1_score=5, player2_score=3)
+  ```
+
+### Django Migrations
+
+- Django’s migration system automatically generates and applies database changes (schema updates) based on the model definitions.This eliminates the need to manually write SQL for altering tables.
+- Running the following commands will create and apply changes to the database schema:
+
+  ```bash
+  python manage.py makemigrations
+  python manage.py migrate
+  ```
+
 ```
 
 ---
