@@ -8,6 +8,7 @@ class Player
 
 # paddle's position, speed, dimensions...
 class Paddle(models.Model):
+    id = models.IntegerField()
     #position_x = models.FloatField(default=0.0)  needed ?
     position_y = models.FloatField(default=0.0)
     height = models.FloatField(default=100.0)
