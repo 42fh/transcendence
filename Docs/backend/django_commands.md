@@ -38,7 +38,17 @@ INSTALLED_APPS = [
 
 
 
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python manage.py makemigrations game
+python manage.py migrate
 
+   python manage.py shell
+from game.models import Paddle
+paddle = Paddle.objects.create(position_y=0.0, height=100.0, width=10.0)
+
+python manage.py runserver  
 
 
 
@@ -93,4 +103,4 @@ python manage.py makemigrations game
 Apply Migrations: After creating the migration files, apply them to your database with:
 ```bash
 python manage.py migrate
-```
+```python manage.py runserver  
