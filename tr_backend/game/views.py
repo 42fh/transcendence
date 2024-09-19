@@ -6,9 +6,9 @@ from .models import Paddle
 from .serializers import PaddleSerializer
 
 class PaddleMoveView(APIView):
-    def post(self, request, player_id, format=None):
+    def post(self, request, paddle_id, format=None):  # Use paddle_id here
         try:
-            paddle = Paddle.objects.get(id=id)
+            paddle = Paddle.objects.get(id=paddle_id)  # Use paddle_id to get the paddle
         except Paddle.DoesNotExist:
             return Response({'error': 'Paddle not found'}, status=status.HTTP_404_NOT_FOUND)
         

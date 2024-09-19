@@ -22,3 +22,5 @@ urlpatterns = [
     path('api/', include('game.urls')),  # Include URLs from the 'game' app (pong)
     #  include other app URLs 
 ]
+
+
