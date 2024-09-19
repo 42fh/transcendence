@@ -38,3 +38,7 @@ htmlcov/
 *.bak
 *.swp
 *.swo
+
+#db
+db.sqlite3
+
