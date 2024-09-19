@@ -31,3 +31,61 @@ INSTALLED_APPS = [
     'rest_framework',
 ]
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   Start Django shell:
+   ```bash
+   python manage.py shell
+   ```
+
+  list all paddles in the database
+  ```python
+   from game.models import Paddle
+   Paddle.objects.all() 
+   ```
+   If there are no paddles, you can create one in the Django shell:
+   ```python
+   paddle = Paddle.objects.create(position_y=0.0, height=100.0, width=10.0)
+   print(paddle.id)  
+   ```
+
+Execute `curl` command (this is for a paddle with default id 1)
+
+   ```bash
+   curl -X POST http://127.0.0.1:8000/api/match/1/move/ \
+        -H "Content-Type: application/json" \
+        -d '{"position_y": 150.0}'
+   ```
+
+
+
+
+
+
+
+
+
+
+Make Migrations: 
+
+This will generate the necessary migration files for your Paddle model.
+```bash
+python manage.py makemigrations game
+```
+
+Apply Migrations: After creating the migration files, apply them to your database with:
+```bash
+python manage.py migrate
+```
