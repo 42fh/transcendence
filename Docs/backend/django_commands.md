@@ -1,4 +1,3 @@
-Here’s a more polished and clear version of the commands:
 
 ---
 
@@ -32,28 +31,20 @@ INSTALLED_APPS = [
 ]
 ```
 
+___________db management
 
 
+Make Migrations: 
 
-
-
-
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+This will generate the necessary migration files for your Paddle model.
+```bash
 python manage.py makemigrations game
+```
+
+Apply Migrations: After creating the migration files, apply them to your database with:
+```bash
 python manage.py migrate
-
-   python manage.py shell
-from game.models import Paddle
-paddle = Paddle.objects.create(position_y=0.0, height=100.0, width=10.0)
-
-python manage.py runserver  
-
-
-
-
-
+```python manage.py runserver  
 
    Start Django shell:
    ```bash
@@ -70,6 +61,10 @@ python manage.py runserver
    paddle = Paddle.objects.create(position_y=0.0, height=100.0, width=10.0)
    print(paddle.id)  
    ```
+
+
+_____________curl
+
 
 Execute `curl` command  to change position (this is for a paddle with default id 1)
 
@@ -91,16 +86,19 @@ Execute `curl` command  to change position (this is for a paddle with default id
 
 
 
+Overall command to test the project:
 
 
-Make Migrations: 
-
-This will generate the necessary migration files for your Paddle model.
-```bash
+cd tr_backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
 python manage.py makemigrations game
-```
-
-Apply Migrations: After creating the migration files, apply them to your database with:
-```bash
 python manage.py migrate
-```python manage.py runserver  
+
+python manage.py shell
+from game.models import Paddle
+paddle = Paddle.objects.create(position_y=0.0, height=100.0, width=10.0)
+exit()
+
+python manage.py runserver  
