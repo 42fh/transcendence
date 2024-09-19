@@ -61,7 +61,7 @@ INSTALLED_APPS = [
    print(paddle.id)  
    ```
 
-Execute `curl` command (this is for a paddle with default id 1)
+Execute `curl` command  to change position (this is for a paddle with default id 1)
 
    ```bash
    curl -X POST http://127.0.0.1:8000/api/match/1/move/ \
@@ -70,7 +70,12 @@ Execute `curl` command (this is for a paddle with default id 1)
    ```
 
 
+   curl Command to Get Paddle Position
+   Replace <paddle_id> with the ID of the paddle you want to retrieve:
 
+   ```bash
+   curl -X GET http://127.0.0.1:8000/api/match/1/move/
+   ```
 
 
 
