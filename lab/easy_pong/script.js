@@ -1,11 +1,12 @@
 // Configuration object for easily adjustable values
 const CONFIG = {
-  ballSpeed: 4, // Ball speed in pixels per frame
+  baseSpeed: 0.1, // Base speed factor (adjust this to control overall speed)
+
   ballSize: parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--ball-size")), // Get ball size from CSS
 };
 
-let ballSpeedX = CONFIG.ballSpeed;
-let ballSpeedY = CONFIG.ballSpeed;
+let ballSpeedX = CONFIG.baseSpeed * CONFIG.ballSize; // Speed proportional to ball size
+let ballSpeedY = CONFIG.baseSpeed * CONFIG.ballSize;
 
 // Get references to the game area and ball elements
 const gameArea = document.getElementById("gameArea");
