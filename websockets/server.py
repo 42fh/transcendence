@@ -34,10 +34,22 @@ async def broadcaster(message, clients):
 	# Wait for all tasks to complete
 	await asyncio.gather(*tasks)
             
+            
+
 async def main():
     async with websockets.serve(handler, "", 8001):
         await asyncio.Future()
 		# await broadcaster()
 
+
 if __name__ == "__main__":
     asyncio.run(main())
+
+# async def broadcaster():
+# 	while True:
+# 		if connected_clients:
+# 			message = "Hello!"
+# 			tasks = [asyncio.create_task(client.send(message)) for client in connected_clients]
+# 			# Wait for all tasks to complete
+# 			await asyncio.gather(*tasks)
+# 		await asyncio.sleep(5)
