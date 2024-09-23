@@ -1,0 +1,91 @@
+:root {
+  --game-width: 320px;
+  --game-height: 240px; /* 4:3 aspect ratio */
+  --ball-size: 10px; /* Base ball size for 320px */
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: black;
+}
+
+/* Wrapper to center the game area */
+#wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Fixed game area */
+#gameArea {
+  width: var(--game-width);
+  height: var(--game-height);
+  background-color: #333;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Ball relative to the game area */
+#ball {
+  width: var(--ball-size);
+  height: var(--ball-size);
+  background-color: white;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+/* Media queries for larger screens */
+
+/* For screens larger than 320px (e.g., 390px) */
+@media (min-width: 390px) {
+  :root {
+    --game-width: 390px;
+    --game-height: 292.5px; /* Maintain 4:3 ratio */
+    --ball-size: 12px;
+  }
+}
+
+/* For 640px screens and above */
+@media (min-width: 640px) {
+  :root {
+    --game-width: 640px;
+    --game-height: 480px;
+    --ball-size: 20px;
+  }
+}
+
+/* For 768px screens and above */
+@media (min-width: 768px) {
+  :root {
+    --game-width: 800px;
+    --game-height: 600px;
+    --ball-size: 25px;
+  }
+}
+
+/* For 1024px screens and above */
+@media (min-width: 1024px) {
+  :root {
+    --game-width: 1024px;
+    --game-height: 768px;
+    --ball-size: 32px;
+  }
+}
+
+/* For 1280px screens and above */
+@media (min-width: 1280px) {
+  :root {
+    --game-width: 1280px;
+    --game-height: 960px;
+    --ball-size: 40px;
+  }
+}
