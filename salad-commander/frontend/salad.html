@@ -1,0 +1,49 @@
+<!DOCTYPE html><html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<body style="padding: 1cm; font-family: Helvetica, sans-serif;">
+    <h1 id="myH1">web socket demo</h1>
+    <p>use the <a href="/commander.html">commander</a> page to steer all open salad pages</p>
+    <div id="myDiv" style="height: 100vh; min-width: 180px;">
+        <p id="saladEmoji" style="max-width: 50px; max-height: 50px; font-size: 50px; position: relative; 
+            top: 10%; left: 10%;">	&#x1F96C; </p>
+    </div>
+</body>
+<footer><hr><p style="font-size: small;">salad demo</p></footer>
+</html> 
+<style>
+html   {overscroll-behavior: none;}
+footer {margin-top: 1cm;}
+</style>
+<script>
+    let div = document.getElementById("myDiv");
+    let dim = Math.floor(Math.min(
+        parseFloat(window.getComputedStyle(div).width), 
+        parseFloat(window.getComputedStyle(div).height)
+    ));
+    div.style.height = dim + "px";
+
+    let salad = document.getElementById("saladEmoji");
+    let h1    = document.getElementById("myH1");
+
+    function toggleDotted() {
+        div.style.outline   = (div.style.outline   == "dotted") ? "none": "dotted";
+        salad.style.outline = (salad.style.outline == "dotted") ? "none": "dotted";
+    }
+    h1.onclick = toggleDotted;
+
+    var posXY = [0.3, 0.3];
+    var socket_open = false;
+    echosocket = new WebSocket("wss://salad-commander.onrender.com");
+    echosocket.onopen    = (() => socket_open = true);
+    echosocket.onmessage = (msg => {
+        posXY = JSON.parse(msg.data);
+    });
+
+    function main() {
+        salad.style.top  = (posXY[0] * 85) + "%";
+        salad.style.left = (posXY[1] * 85) + "%";
+        if (socket_open) {echosocket.send("client")}
+    }
+    setInterval(main, 20);
+</script>

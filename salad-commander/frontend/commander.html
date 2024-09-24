@@ -1,0 +1,55 @@
+<!DOCTYPE html><html></html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<body style="padding: 1cm; font-family: Helvetica, sans-serif;">
+    <h1 id="myH1">web socket commander</h1>
+    <div id="myDiv" style="height: 100vh; min-width: 180px; outline: dotted;">
+        <p id="wand" style="max-width: 50px; max-height: 50px; font-size: 50px; position: relative; outline: dotted;
+            top: 10%; left: 10%;">	&#129668; </p>
+    </div>
+</body>
+</html> 
+<style>
+html   {overscroll-behavior: none;}
+footer {margin-top: 1cm;}
+</style>
+<script>
+    let div = document.getElementById("myDiv");
+    let dim = Math.floor(Math.min(
+        parseFloat(window.getComputedStyle(div).width), 
+        parseFloat(window.getComputedStyle(div).height)
+    ));
+    div.style.height = dim + "px";
+
+    let wand = document.getElementById("wand");
+    let h1    = document.getElementById("myH1");
+
+    function toggleDotted() {
+        div.style.outline   = (div.style.outline   == "dotted") ? "none": "dotted";
+        wand.style.outline = (wand.style.outline == "dotted") ? "none": "dotted";
+    }
+    h1.onclick = toggleDotted;
+
+    var posXY = [0.3, 0.3];
+    var socket_open = false;
+    echosocket = new WebSocket("wss://salad-commander.onrender.com");
+    echosocket.onopen    = (() => socket_open = true);
+    echosocket.onmessage = (msg => {
+        posXY = JSON.parse(msg.data);
+        wand.style.top  = (posXY[0] * 85) + "%";
+        wand.style.left = (posXY[1] * 85) + "%";
+    });
+
+    function mouseEvent(ev){
+        let x = Math.min(1, Math.max(0, (ev.clientX - div.getBoundingClientRect().left) / (div.getBoundingClientRect().right - div.getBoundingClientRect().left)) )
+        let y = Math.min(1, Math.max(0, (ev.clientY - div.getBoundingClientRect().top)  / (div.getBoundingClientRect().bottom - div.getBoundingClientRect().top)) )
+        console.log(x, y);
+        if (socket_open) {echosocket.send((x) + "," + (y))}
+    }    
+    div.onmousemove = mouseEvent;
+    function touchEvent(ev){
+        mouseEvent(ev.touches[0])
+    }
+    div.ontouchmove = touchEvent;
+
+</script>
