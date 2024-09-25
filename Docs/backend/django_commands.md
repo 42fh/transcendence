@@ -6,7 +6,7 @@
 ## Installation and setup
 
 ### 1. Start the Development Server
-To start the development server, navigate to your project directory (`/tr_backend` in this case) and run:
+To start the development server, navigate to your project directory (`/django` in this case) and run:
 ```bash
 python manage.py runserver
 ```
@@ -79,7 +79,7 @@ python manage.py migrate
 ## Overall commands to test a Django project:
 
    ```bash
-cd tr_backend
+cd django
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
