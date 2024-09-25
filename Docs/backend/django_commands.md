@@ -1,14 +1,16 @@
 
 ---
 
-## Useful Django Commands
+# Useful Commands related to Django
+
+## Installation and setup
 
 ### 1. Start the Development Server
 To start the development server, navigate to your project directory (`/tr_backend` in this case) and run:
-
 ```bash
 python manage.py runserver
 ```
+`django-admin` command is the main administrative interface for Django. It provides a set of commands to perform tasks in Django projects (creating new applications, migrating databases...) `manage.py` is a wrapper script that provides the same commands as `django-admin`, but with the added benefit of automatically setting the environment and the settings module for your specific project.
 
 ### 2. Create a New Django App
 ```bash
@@ -17,7 +19,9 @@ python manage.py startapp <name_of_the_app>
 
 Then add it to your project settings: open `project/settings.py` and Add `'name_of_the_app'` to the `INSTALLED_APPS` list.
 
-### 3. Install Django REST Framework (DRF)
+*The Django framework is designed for backend development, enabling the creation of applications that generate web pages. In contrast, Django REST Framework is an API that provides server data to frontend applications, allowing them to operate without needing to consider the backend.*### To Install Django REST Framework (DRF)
+### To Install Django REST Framework (DRF)
+
 ```bash
 pip install djangorestframework
 ```
@@ -31,12 +35,18 @@ INSTALLED_APPS = [
 ]
 ```
 
-___________db management
+
+## DB management
+
+Migrations are files that contain the instructions to change the database schema.
+Migrations automate the process of updating the database schema based on code changes, reducing the risk of manual errors.
+
+Each migration file has a unique name, often including a timestamp, and contains a class that defines the changes to be made to the database.
+It can help keep track of how a project evolved
+ - Migrations can also be reversed, allowing  to undo changes if necessary (version control)
 
 
-Make Migrations: 
-
-This will generate the necessary migration files for your Paddle model.
+This will generate the necessary migration files:
 ```bash
 python manage.py makemigrations game
 ```
@@ -51,6 +61,7 @@ python manage.py migrate
    python manage.py shell
    ```
 
+### Example:
   list all paddles in the database
   ```python
    from game.models import Paddle
@@ -63,32 +74,11 @@ python manage.py migrate
    ```
 
 
-_____________curl
 
 
-Execute `curl` command  to change position (this is for a paddle with default id 1)
-
-   ```bash
-   curl -X POST http://127.0.0.1:8000/api/match/1/move/ \
-        -H "Content-Type: application/json" \
-        -d '{"position_y": 150.0}'
-   ```
-
-
-   curl Command to Get Paddle Position
-   Replace <paddle_id> with the ID of the paddle you want to retrieve:
+## Overall commands to test a Django project:
 
    ```bash
-   curl -X GET http://127.0.0.1:8000/api/match/1/move/
-   ```
-
-
-
-
-
-Overall command to test the project:
-
-
 cd tr_backend
 python3 -m venv venv
 source venv/bin/activate
@@ -102,3 +92,5 @@ paddle = Paddle.objects.create(position_y=0.0, height=100.0, width=10.0)
 exit()
 
 python manage.py runserver  
+   ```
+
