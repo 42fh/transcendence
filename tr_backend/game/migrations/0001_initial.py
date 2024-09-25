@@ -11,13 +11,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.CreateModel(
-            name='Paddle',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('position_y', models.FloatField(default=0.0)),
-                ('height', models.FloatField(default=100.0)),
-                ('width', models.FloatField(default=10.0)),
-            ],
-        ),
+
     ]
