@@ -34,9 +34,9 @@ export class Player
 		// cube
 		const geometry = new THREE.BoxGeometry( 1, 3, 1 );
 		const material = new THREE.MeshStandardMaterial( { color: 0x00ff00 } );
-		const cube = new THREE.Mesh( geometry, material );
-		cube.position.set(x, y, 0);
-		this.scene.add( cube );
+		this.cube = new THREE.Mesh( geometry, material );
+		this.cube.position.set(x, y, 0);
+		this.scene.add( this.cube );
 
 		// renderer
 		this.renderer = new THREE.WebGLRenderer({canvas});
