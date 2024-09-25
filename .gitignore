@@ -4,6 +4,11 @@ env/
 .myenv/
 myenv/
 .venv/
+bin/
+lib/
+Include/
+Scripts/
+pyvenv.cfg
 
 # Python bytecode and cache files
 __pycache__/
