@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Page with CSS</title>
+    <!-- Load static files -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'hello_app/style.css' %}" />
+  </head>
+  <body>
+    <h1>This page uses CSS!</h1>
+    <p>The background color and font styles are coming from an external CSS file.</p>
+  </body>
+</html>

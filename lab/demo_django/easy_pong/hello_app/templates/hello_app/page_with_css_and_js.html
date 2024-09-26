@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Page with CSS and JS</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'hello_app/style.css' %}" />
+    <script src="{% static 'hello_app/script.js' %}"></script>
+  </head>
+  <body>
+    <h1>This page uses both CSS and JavaScript!</h1>
+    <p>The background color comes from the CSS file, and an alert box is triggered by the JavaScript file.</p>
+  </body>
+</html>

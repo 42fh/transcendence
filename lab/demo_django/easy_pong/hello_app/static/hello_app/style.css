@@ -1,0 +1,10 @@
+/* hello_app/static/hello_app/style.css */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f8ff;
+}
+
+h1 {
+  color: #4682b4;
+  text-align: center;
+}
