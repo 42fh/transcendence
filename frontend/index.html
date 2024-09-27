@@ -1,0 +1,35 @@
+<!-- a demo single page application -->
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1 id="h1Greeting">moin</h1>
+    <button id="getGreetingButton" style="position: lef;"><h1>get a fresh greeting</h1></button>
+</body>
+</html>
+<style>
+body    {padding: 0.5cm;}
+h1      {padding: 0.3cm;}
+h1, p   {font-family: Helvetica, sans-serif;}
+</style>
+<script>
+    const h1 = document.getElementById("h1Greeting");
+    const button = document.getElementById("getGreetingButton");
+    var state = 0;
+
+    function getGreeting() {
+        console.log("as")
+        fetch("http://127.0.0.1:8000/")
+            .then(res => {return res.text()})
+            .then(txt => {return JSON.parse(txt)})
+            .then(obj => h1.innerHTML = obj.greeting)
+        ;
+    }
+    
+    button.onclick = getGreeting;
+
+</script>
