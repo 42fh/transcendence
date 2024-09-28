@@ -18,8 +18,16 @@ class GameConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
 
-        # Start the ball movement update loop
-        self.ball_task = asyncio.create_task(self.update_ball_position())
+        # Check if this is the first or second player
+        player_count = await self.get_player_count()
+        if player_count == 1:
+            await self.send(text_data=json.dumps({
+                'message': 'Waiting for another player to join...'
+            }))
+        elif player_count == 2:
+            # Start the game when the second player joins
+            await self.start_game()
+
 
     async def disconnect(self, close_code):
         # Leave the game group
@@ -28,8 +36,45 @@ class GameConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
 
-        # Cancel the ball update task
-        self.ball_task.cancel()
+        # Decrease player count
+        await self.decrease_player_count()
+
+        if hasattr(self, 'ball_task'):
+            self.ball_task.cancel()
+
+    @database_sync_to_async
+    def get_player_count(self):
+        count = cache.get(f'player_count_{self.game_id}', 0)
+        count += 1
+        cache.set(f'player_count_{self.game_id}', count)
+        return count
+
+    @database_sync_to_async
+    def decrease_player_count(self):
+        count = cache.get(f'player_count_{self.game_id}', 0)
+        if count > 0:
+            count -= 1
+            cache.set(f'player_count_{self.game_id}', count)
+
+    async def start_game(self):
+        # Notify both players that the game is starting
+        await self.channel_layer.group_send(
+            self.game_group_name,
+            {
+                'type': 'game_message',
+                'message': 'Both players have joined. The game is starting!'
+            }
+        )
+
+        # Start the ball movement update loop
+        self.ball_task = asyncio.create_task(self.update_ball_position())
+
+    async def game_message(self, event):
+        message = event['message']
+        await self.send(text_data=json.dumps({
+            'message': message
+        }))
+
 
     async def receive(self, text_data):
         data = json.loads(text_data)

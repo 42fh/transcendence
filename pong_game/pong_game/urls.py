@@ -18,12 +18,11 @@ from django.urls import path
 from game.views import game_state, game_view
 from django.conf import settings
 from django.conf.urls.static import static
-
+import os
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/game/', game_state, name='game_state'),
     path('', game_view, name='game_view'),
 ]
-
 if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, 'game', 'static'))

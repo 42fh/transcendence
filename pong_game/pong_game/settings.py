@@ -16,13 +16,34 @@ import os
 
 # Base directory of the project
 #BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BASE_DIR = Path(__file__).resolve().parent.parent
+#BASE_DIR = Path(__file__).resolve().parent.parent
 # Static files configuration
+#STATIC_URL = '/static/'
+#STATICFILES_DIRS = [
+#    os.path.join(BASE_DIR, 'game', 'static'),
+#]
+#STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# Base directory of the project
+
+
+# Base directory of the project
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# URL for accessing static files
 STATIC_URL = '/static/'
+
+# During development, Django will look in this directory for static files
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'game', 'static'),
+    os.path.join(BASE_DIR, 'game', 'static'),  # Your custom static folder
 ]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# In production, collected static files will be placed in this directory
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # You can change this if necessary
+
+
+
+
+
 
 
 
@@ -41,10 +62,10 @@ DEBUG = True
 
 
 # Add this at the end of the file
-if DEBUG:
-    STATICFILES_DIRS = [os.path.join(BASE_DIR, 'game', 'static')]
-else:
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+#if DEBUG:
+#   STATICFILES_DIRS = [os.path.join(BASE_DIR, 'game', 'static')]
+#else:
+#    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
 CACHES = {
@@ -160,7 +181,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-STATIC_URL = '/static/'
+#STATIC_URL = '/static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

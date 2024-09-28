@@ -1,4 +1,3 @@
-
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -7,6 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pong Game</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        #message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+    </style>
 </head>
 <body>
     <div id="game-container">
@@ -15,6 +29,7 @@
             <span id="player1-score">0</span>
             <span id="player2-score">0</span>
         </div>
+        <div id="message"></div>
     </div>
     <script src="{% static 'js/pong.js' %}"></script>
 </body>
