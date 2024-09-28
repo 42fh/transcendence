@@ -32,10 +32,13 @@ DEBUG = False
 
 ALLOWED_HOSTS = ['transcendence-ctqy.onrender.com']
 
+# need to point Daphne at a routing configuration
+ASGI_APPLICATION = "pong.asgi.application"
 
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
