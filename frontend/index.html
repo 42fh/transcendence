@@ -104,7 +104,7 @@ div     {display: none;}
     const h1 = document.getElementById("h1Greeting");
     function getGreeting() {
         console.log("as")
-        fetch("http://127.0.0.1:8000/")
+        fetch("https://transcendence-ctqy.onrender.com")
             .then(res => {return res.text()})
             .then(txt => {return JSON.parse(txt)})
             .then(obj => h1.innerHTML = obj.greeting)
