@@ -7,20 +7,101 @@
     <title>Document</title>
 </head>
 <body>
-    <h1 id="h1Greeting">moin</h1>
-    <button id="getGreetingButton" style="position: lef;"><h1>get a fresh greeting</h1></button>
+    <table>
+        <tr>
+            <th><button id="previousButton">⬅️</button></th>
+            <th><button id="nextButton">➡️</button></th>
+          </tr>
+    </table>
+    <div id="page1" style="display: block;">
+        <h3>Complying with pesky EU rules is small price to pay</h3>
+        <p> Isn’t it a bore having to comply with all those pesky EU regulations that are so burdensome for business (“Europe’s red tape problem”, The Big Read, September 9)?
+            The problem is the costs of business as usual are not even remotely comparable. Take one small element of these, resulting from PFAS (per- and polyfluoroalkyl substances), the so- called “forever chemicals” — persistent toxic substances that accumulate in our bodies.
+            The annual health-related costs from PFAS are estimated to be €52bn– €84bn in EEA countries. The cost of remediating the water and soil in contaminated areas is likely to run into trillions. Compare this with the figure of €2.3bn in extra administrative costs to businesses cited in your report — a fraction of a percentage of EU gross domestic product. PFAS is just one aspect of the backdrop against which Green Deal regulations have been developed. These laws are probably seen by most Europeans as the bare minimum required.
+            Anne-Sofie Bäckar
+            Executive Director, ChemSec Gothenburg, Sweden</p>
+    </div>
+
+    <div id="page2">
+        <h1 id="h1Greeting">moin</h1>
+        <button id="getGreetingButton" style="position: lef;"><h1>get a fresh greeting</h1></button>
+        <p>this makes a dynamic GET request using fetch to retrieve a random greeting from the backend server</p>
+    </div>
+
+    <div id="page3">
+        <h1>Curved motion</h1>
+        <svg width="300" height="100">
+            <title>SVG SMIL Animate with Path</title>
+            <rect x="0" y="0" width="300" height="100" stroke="black" stroke-width="0" fill="lightgrey"/>
+            <rect
+              x="0"
+              y="0"
+              width="20"
+              height="20"
+              fill="blue"
+              stroke="black"
+              stroke-width="0">
+              <animateMotion
+                path="M 250,80 H 50 Q 30,80 30,50 Q 30,20 50,20 H 250 Q 280,20,280,50 Q 280,80,250,80Z"
+                dur="6s"
+                repeatCount="indefinite"
+                rotate="auto" />
+            </rect>
+          </svg>
+          <br>
+          <small>SVG animation with SMIL by Mozilla Contributors is licensed under CC-BY-SA 2.5.</small>
+    </div>
+
+    <div id="page4">
+        <br>
+        <i>you can change what is here in the next page</i>
+    </div>
+
+    <div id="page5">
+        <h3>change the page</h3>
+        <p>whatever you put in here will appear on the previous page after you click the button below</p>
+        <textarea id="textfield" name="story" rows="8" cols="35">
+<p>Apollo astronauts:</p>
+<ul>
+    <li>Neil Armstrong</li>
+    <li>Alan Bean</li>
+    <li>Peter Conrad</li>
+    <li>Edgar Mitchell</li>
+    <li>Alan Shepard</li>
+</ul>
+        </textarea> 
+    <br>
+    <button id="localchange">make local change</button>      
+    </div>
 </body>
 </html>
 <style>
-body    {padding: 0.5cm;}
+body    {padding: 0.5cm; max-width: 20cm;}
 h1      {padding: 0.3cm;}
-h1, p   {font-family: Helvetica, sans-serif;}
+h1, p, h3, label   {font-family: Helvetica, sans-serif;}
+div     {display: none;}
 </style>
-<script>
-    const h1 = document.getElementById("h1Greeting");
-    const button = document.getElementById("getGreetingButton");
-    var state = 0;
+<script id="myScript">    
+    const nextButton     = document.getElementById("nextButton");
+    const previousButton = document.getElementById("previousButton");
+    
+    const pages = [document.getElementById("page1"),
+                    document.getElementById("page2"),
+                    document.getElementById("page3"),
+                    document.getElementById("page4"),
+                    document.getElementById("page5")]
+    var visiblePage = 0;
+    
+    function advanceBy(numer_of_pager) {
+        pages[visiblePage].style.display = "none";
+        visiblePage = (visiblePage + (numer_of_pager) + pages.length) % pages.length;
+        pages[visiblePage].style.display = "block";
+    }
+    nextButton.onclick = () => advanceBy(1);
+    previousButton.onclick = () => advanceBy(-1);
 
+    const button = document.getElementById("getGreetingButton");
+    const h1 = document.getElementById("h1Greeting");
     function getGreeting() {
         console.log("as")
         fetch("http://127.0.0.1:8000/")
@@ -29,7 +110,12 @@ h1, p   {font-family: Helvetica, sans-serif;}
             .then(obj => h1.innerHTML = obj.greeting)
         ;
     }
-    
     button.onclick = getGreeting;
+    
+    {
+        const textfield = document.getElementById("textfield");
+        const localchange = document.getElementById("localchange");
+        localchange.onclick = () => page4.innerHTML = textfield.value;
+    }
 
 </script>
