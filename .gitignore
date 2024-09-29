@@ -1,0 +1,50 @@
+# Virtual environment directories
+venv/
+env/
+.myenv/
+myenv/
+.venv/
+bin/
+lib/
+Include/
+Scripts/
+pyvenv.cfg
+
+# Python bytecode and cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django migrations
+*/migrations/*.py
+*/migrations/*.pyc
+
+# Sensitive information
+.env
+
+# macOS specific files
+.DS_Store
+
+# Python virtual environment management files
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+.cache
+
+# pytest cache
+.pytest_cache/
+
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*.swo
+
+#db
+db.sqlite3
+
