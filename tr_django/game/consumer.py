@@ -13,4 +13,4 @@ class GameConsumer(AsyncWebsocketConsumer):
 		message = text_data_json['message']
 
 		#echo server (sends back message)
-		await self.send(text_data=json.dumps({'message':message}))
+		await self.send(text_data=json.dumps({'message': message}))

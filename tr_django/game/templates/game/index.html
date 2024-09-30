@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pong Game WebSocket Test</title>
+</head>
+<body>
+    <h1>WebSocket Pong Game Test</h1>
+    <button id="send">Send Message</button>
+    <ul id="messages"></ul>
+
+    <script>
+        const socket = new WebSocket('ws://' + window.location.host + '/ws/game/');
+
+        socket.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            const messages = document.getElementById('messages');
+            const message = document.createElement('li');
+            message.textContent = data['message'];
+            messages.appendChild(message);
+        };
+
+        document.getElementById('send').onclick = function() {
+            socket.send(JSON.stringify({
+                'message': 'Ping!'
+            }));
+        };
+    </script>
+</body>
+</html>
