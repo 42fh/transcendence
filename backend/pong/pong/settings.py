@@ -28,9 +28,10 @@ SECRET_KEY = os.environ["SECRET_KEY"]
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+# DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['transcendence-ctqy.onrender.com']
+ALLOWED_HOSTS = ['transcendence-ctqy.onrender.com', 'localhost']
 
 # need to point Daphne at a routing configuration
 ASGI_APPLICATION = "pong.asgi.application"
