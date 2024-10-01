@@ -2,6 +2,11 @@
 
 **Django Channels** extends Django to handle WebSockets, long-running connections, and asynchronous protocols, enabling real-time features in Django applications.
 
+**Daphne** 
+We use Daphne as the ASGI server to handle both HTTP and WebSocket connections. It acts as the interface between the Django app and the client, managing the lifecycle of WebSocket connections and routing requests to the appropriate handlers.
+
+
+
 ### Key Features:
 We need it in transcendance fo **WebSocket Support**: bi-directional, real-time communication (useful for the chat and game itself)
 
