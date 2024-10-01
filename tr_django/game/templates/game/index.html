@@ -5,10 +5,15 @@
 </head>
 <body>
     <h1>WebSocket Pong Game Test</h1>
+    <p id="client-type">You are client: </p>
     <button id="send">Send Message</button>
     <ul id="messages"></ul>
 
     <script>
+        const clientID = new URLSearchParams(window.location.search).get('client');// Get clientType from query string
+        document.getElementById('client-type').textContent = "You are client type: " + clientID;
+
+
         const socket = new WebSocket('ws://' + window.location.host + '/ws/game/');
 
         socket.onmessage = function(event) {
@@ -20,8 +25,7 @@
         };
 
         document.getElementById('send').onclick = function() {
-            const clientType = new URLSearchParams(window.location.search).get('clientType'); // Get clientType from query string
-            const message = clientType === '1' ? 'Ping' : 'Pong';
+            const message = clientID === '1' ? 'Ping' : 'Pong';
             socket.send(JSON.stringify({'message': message
             }));
         };

@@ -127,9 +127,6 @@ You can use Django’s **ORM (Object-Relational Mapping)** to interact with the 
   python manage.py migrate
   ```
 
-```
-
----
 
 ## 5. **Commands**
 Django comes with a built-in command-line utility called `manage.py` to interact with your Django project. Common commands include:
@@ -141,7 +138,6 @@ Django comes with a built-in command-line utility called `manage.py` to interact
 
 You can also create custom management commands by creating a `management/commands` directory in one of your apps and adding a Python script for your command.
 
----
 
 ## 6. **Signals and Event Listeners**
 Django’s signal framework allows decoupled components to get notified when certain actions happen within the application, such as when a model is saved or a user logs in. 
@@ -164,8 +160,6 @@ def notify_admin(sender, instance, **kwargs):
 ```
 
 In this example, the `notify_admin` function will run whenever a `Book` instance is saved.
-
----
 
 ## 7. **Django Rest Framework (DRF)**
 The **Django Rest Framework (DRF)** is a powerful and flexible toolkit for building Web APIs. It makes it easy to convert Django models into RESTful APIs, providing built-in support for:
@@ -209,7 +203,7 @@ urlpatterns = [
 
 In this example, the `BookListCreateView` provides an API endpoint for listing and creating books.
 
----
+## 7. **Django Rest Framework (DRF)**
 
 ## Summary
 - **Apps** are modular components of a Django project.
