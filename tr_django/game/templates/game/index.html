@@ -20,8 +20,9 @@
         };
 
         document.getElementById('send').onclick = function() {
-            socket.send(JSON.stringify({
-                'message': 'Ping!'
+            const clientType = new URLSearchParams(window.location.search).get('clientType'); // Get clientType from query string
+            const message = clientType === '1' ? 'Ping' : 'Pong';
+            socket.send(JSON.stringify({'message': message
             }));
         };
     </script>
