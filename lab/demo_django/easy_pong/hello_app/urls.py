@@ -11,4 +11,7 @@ urlpatterns = [
     path(
         "page_with_css_and_js/", views.page_with_css_and_js, name="page_with_css_and_js"
     ),
+    path(
+        "cbv-example/", views.CBVExamplePage.as_view(), name="cbv_example"
+    ),  # Class-based view
 ]

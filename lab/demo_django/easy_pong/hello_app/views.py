@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.views.generic import TemplateView
 
 
 # Create your views here.
@@ -12,7 +13,9 @@ def hello_page(request):
         Hello, welcome to the Hello App!<br>
         <a href='/helloapp/htmlcss/'>Go to HTML & CSS Page</a><br>
         <a href='/helloapp/page_with_css/'>Go to Page with CSS</a><br>
-        <a href='/helloapp/page_with_css_and_js/'>Go to Page with CSS and JS</a>
+        <a href='/helloapp/page_with_css_and_js/'>Go to Page with CSS and JS</a><br>
+        <a href='/helloapp/cbv-example/'>Go to Class-Based View Page</a>
+
         """
     )
 
@@ -32,3 +35,7 @@ def page_with_css(request):
 
 def page_with_css_and_js(request):
     return render(request, "hello_app/page_with_css_and_js.html")
+
+
+class CBVExamplePage(TemplateView):
+    template_name = "hello_app/cbv_example.html"
