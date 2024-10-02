@@ -9,32 +9,7 @@ from django.middleware.csrf import get_token
 from django.views.decorators.csrf import csrf_exempt
 
 def index(request):
-    response = HttpResponse("""
-
-<link rel="icon" href="data:,">              
-<html>welcome to index</html>
-<script>
-                            
-var o = false;
-w = new WebSocket("ws://localhost:8000/ws/a");
-w.onopen = (() => o = true);
-w.onmessage = (msg => {console.log(JSON.parse(msg.data))});
-
-function main() {
-    if (o) {
-    w.send(JSON.stringify({"greeting": "hallo7"}));
-    }
-}
-
-setInterval(main, 1000)
-
-</script>
-
-""")
-    # response['Access-Control-Allow-Origin'] = '*'
-    # response['Content-Security-Policy'] = "default-src 'self'"
-    return response
-    
+    return render(request, "index.html")    
 
 def greeting(request):
     words = ["hi", "hey", "hallo", "salu", "säli", "tschou", "grüezi", "tagwohl", "tach", "buongiorno", "ciao", "bonjour"]
@@ -49,9 +24,13 @@ def page(request):
 
 def my_page(request):
     if request.user.is_authenticated :
-        return HttpResponse("Ok, logged in!")
+        return HttpResponse("Welcome " + str(request.user) + "!")
     else:
         return HttpResponse("not logged in")
+
+def get_csrf_token(request):
+    csrf_token = get_token(request)
+    return HttpResponse(csrf_token)
 
 def my_login(request):
     if request.user.is_authenticated:

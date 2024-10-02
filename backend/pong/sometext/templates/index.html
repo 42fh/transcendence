@@ -73,6 +73,35 @@
     <br>
     <button id="localchange">make local change</button>      
     </div>
+
+    <div id="page6">
+        <br>
+        <h1>ws msg</h1>
+        <p id="page6p"></p>
+    </div>
+
+    <div id="page7">
+        <br>
+        <h1>login page</h1>
+        <form id="page7form" action="/login" method="POST" onsubmit="client_login() ; return false;">
+            <label for="username">user:</label><br>
+            <input type="text" id="username" name="username" value="jack"><br>
+            <label for="password">password: (it's qqwweerr for jack)</label><br>
+            <input type="text" id="password" name="password" value="12345678"><br><br>
+            <label for="csrfmiddlewaretoken">csrfmiddlewaretoken (get it form your cookies):</label><br>
+            <input type="text" id="csrfmiddlewaretoken" name="csrfmiddlewaretoken" value=""><br><br>
+            <input type="submit" value="Submit">
+          </form> 
+        <p id="page7csrf"></p>
+    </div>
+
+    <div id="page8">
+        <br>
+        <h1>check your login status</h1>
+        <p id="page8p"></p>
+        <button id="page8button">check again</button>
+    </div>
+
 </body>
 </html>
 <style>
@@ -89,21 +118,29 @@ div     {display: none;}
                     document.getElementById("page2"),
                     document.getElementById("page3"),
                     document.getElementById("page4"),
-                    document.getElementById("page5")]
+                    document.getElementById("page5"),
+                    document.getElementById("page6"),
+                    document.getElementById("page7"),
+                    document.getElementById("page8")]
     var visiblePage = 0;
     
-    function advanceBy(numer_of_pager) {
+    function advanceBy(number_of_pages) {
         pages[visiblePage].style.display = "none";
-        visiblePage = (visiblePage + (numer_of_pager) + pages.length) % pages.length;
+        visiblePage = (visiblePage + (number_of_pages) + pages.length) % pages.length;
         pages[visiblePage].style.display = "block";
     }
     nextButton.onclick = () => advanceBy(1);
     previousButton.onclick = () => advanceBy(-1);
 
+    // enable switching page with keyboard
+    document.addEventListener("keydown", ev => {
+        if (ev.key == "ArrowLeft") {advanceBy(-1)}
+        if (ev.key == "ArrowRight") {advanceBy(1)}
+    })
+
     const button = document.getElementById("getGreetingButton");
     const h1 = document.getElementById("h1Greeting");
     function getGreeting() {
-        console.log("as")
         fetch("https://transcendence-ctqy.onrender.com")
             .then(res => {return res.text()})
             .then(txt => {return JSON.parse(txt)})
@@ -117,5 +154,52 @@ div     {display: none;}
         const localchange = document.getElementById("localchange");
         localchange.onclick = () => page4.innerHTML = textfield.value;
     }
+
+    const wsp = document.getElementById("page6p");
+    var o = false;
+    w = new WebSocket("ws://localhost:8000/ws/a");
+    w.onopen = (() => o = true);
+    w.onmessage = (msg => {wsp.innerHTML = (msg.data + "<br> received at: " + Date.now())});
+
+    const page7f = document.getElementById("page7form");
+    
+    function client_login() {
+        const data = new URLSearchParams(new FormData(page7f));
+        fetch("/login", {
+            method: 'post',
+            body: data,
+            })
+        .then(console.log("fetched: ", data));
+    }
+
+    const page7p = document.getElementById("page7csrf")
+
+    fetch("/get_csrf_token")
+        .then(res => {return res.text()})
+        .then(text => page7p.innerHTML = text)
+    ;
+
+
+    function main() {
+        if (o) {
+        w.send(JSON.stringify({"greeting": "hallo0978"}));
+        }
+    }
+
+    setInterval(main, 1000)
+
+    const page8p = document.getElementById("page8p");
+    
+    function update_login_status() {
+        fetch("/my_page")
+            .then(res => {return res.text()})
+            .then(text => page8p.innerHTML = text)
+            .then("updated login status")
+        ;
+    }
+    update_login_status();
+    const page8button = document.getElementById("page8button");
+    page8button.onclick = update_login_status;
+
 
 </script>
