@@ -6,7 +6,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
         self.connected_clients.append(self)
-
         await self.accept()
 
     async def disconnect(self, close_code):
@@ -14,12 +13,14 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        message = text_data_json['message']
+        if 'message' in text_data_json:
+            message = text_data_json['message']
+            await self.send_to_all_clients({'message': message})
+        elif 'type' in text_data_json and text_data_json['type'] == 'position':
+            position = text_data_json['position']
+            await self.send_to_all_clients({'type': 'position', 'position': position})
 
-        await self.send_to_all_clients(message)
-
-    async def send_to_all_clients(self, message):
+    async def send_to_all_clients(self, data):
         for client in self.connected_clients:
-            await client.send(text_data=json.dumps({
-                'message': message
-            }))
+            await client.send(text_data=json.dumps(data))
+        

@@ -2,25 +2,43 @@
 <html>
 <head>
     <title>Pong Game WebSocket Test</title>
+    <style>
+        #paddle {
+            width: 50px;
+            height: 150px;
+            background-color: red;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
 </head>
 <body>
     <h1>WebSocket Pong Game Test</h1>
     <p id="client-type">You are client: </p>
     <button id="send">Send Message</button>
     <ul id="messages"></ul>
+    <div id="paddle"></div>
 
     <script>
-        const clientID = new URLSearchParams(window.location.search).get('client');// Get clientType from query string
+        const clientID = new URLSearchParams(window.location.search).get('client');
         document.getElementById('client-type').textContent = "You are client type: " + clientID;
 
         const socket = new WebSocket('ws://' + window.location.host + '/ws/game/');
 
+        const paddle = document.getElementById('paddle');
+        let paddlePosition = { top: 0, left: 0 };
+
         socket.onmessage = function(event) {
             const data = JSON.parse(event.data);
-            const messages = document.getElementById('messages');
-            const message = document.createElement('li');
-            message.textContent = data['message'];
-            messages.appendChild(message);
+            if (data.type === 'position') {
+                updatePaddlePosition(data.position);
+            } else {
+                const messages = document.getElementById('messages');
+                const message = document.createElement('li');
+                message.textContent = data['message'];
+                messages.appendChild(message);
+            }
         };
 
         document.getElementById('send').onclick = function() {
@@ -30,11 +48,18 @@
 
         document.addEventListener('keydown', function(event) {
             if (event.key === 'ArrowUp') {
-                socket.send(JSON.stringify({'message': 'Up arrow pressed'}));
+                paddlePosition.top -= 10;
             } else if (event.key === 'ArrowDown') {
-                socket.send(JSON.stringify({'message': 'Down arrow pressed'}));
+                paddlePosition.top += 10;
             }
+            updatePaddlePosition(paddlePosition);
+            socket.send(JSON.stringify({'type': 'position', 'position': paddlePosition}));
         });
+
+        function updatePaddlePosition(position) {
+            paddle.style.top = position.top + 'px';
+            paddle.style.left = position.left + 'px';
+        }
     </script>
 </body>
 </html>
