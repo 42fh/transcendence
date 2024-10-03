@@ -3,63 +3,62 @@
 <head>
     <title>Pong Game WebSocket Test</title>
     <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
         #paddle {
-            width: 50px;
+            width: 25px;
             height: 150px;
             background-color: red;
             position: absolute;
-            top: 0;
-            left: 0;
+            left: 0px;
+            transform: translateY(-50%);
         }
     </style>
 </head>
 <body>
     <h1>WebSocket Pong Game Test</h1>
-    <p id="client-type">You are client: </p>
-    <button id="send">Send Message</button>
-    <ul id="messages"></ul>
     <div id="paddle"></div>
 
     <script>
         const clientID = new URLSearchParams(window.location.search).get('client');
-        document.getElementById('client-type').textContent = "You are client type: " + clientID;
+        console.log('Client ID:', clientID);
 
         const socket = new WebSocket('ws://' + window.location.host + '/ws/game/');
 
         const paddle = document.getElementById('paddle');
-        let paddlePosition = { top: 0, left: 0 };
+        let paddlePosition = { top: paddle.offsetTop, left: paddle.offsetLeft };
 
         socket.onmessage = function(event) {
             const data = JSON.parse(event.data);
             if (data.type === 'position') {
                 updatePaddlePosition(data.position);
             } else {
-                const messages = document.getElementById('messages');
-                const message = document.createElement('li');
-                message.textContent = data['message'];
-                messages.appendChild(message);
+                console.log('Received:', data);
             }
-        };
-
-        document.getElementById('send').onclick = function() {
-            const message = clientID === '1' ? 'Ping' : 'Pong';
-            socket.send(JSON.stringify({'message': message}));
         };
 
         document.addEventListener('keydown', function(event) {
-            if (event.key === 'ArrowUp') {
+            if (event.key === 'ArrowUp' && paddlePosition.top > 0) {
                 paddlePosition.top -= 10;
-            } else if (event.key === 'ArrowDown') {
+            } else if (event.key === 'ArrowDown' && paddlePosition.top < window.innerHeight - paddle.offsetHeight) {
                 paddlePosition.top += 10;
             }
             updatePaddlePosition(paddlePosition);
-            socket.send(JSON.stringify({'type': 'position', 'position': paddlePosition}));
+            socket.send(JSON.stringify({'type': 'position', 'clientID': clientID, 'position': paddlePosition}));
         });
 
         function updatePaddlePosition(position) {
             paddle.style.top = position.top + 'px';
             paddle.style.left = position.left + 'px';
+            paddlePosition = position; // Update the local position to the received position
         }
+
+        // Send the initial position to the server when the connection is established
+        socket.onopen = function() {
+            socket.send(JSON.stringify({'type': 'position', 'clientID': clientID, 'position': paddlePosition}));
+        };
     </script>
 </body>
 </html>
