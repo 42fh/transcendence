@@ -15,7 +15,8 @@ const canvas = document.querySelector(".webgl");
 
 // camera
 const aspectRatio = window.innerWidth / window.innerHeight;
-let camera = new THREE.PerspectiveCamera( 75, aspectRatio, 0.1, 1000 );
+const vertical_field_of_view = 75;
+let camera = new THREE.PerspectiveCamera( vertical_field_of_view, aspectRatio, 1, 1000 );
 camera.position.set(0, 0, 5);
 
 // light
@@ -25,7 +26,7 @@ scene.add(light);
 
 // controls
 let controls = new OrbitControls(camera, canvas);
-controls.enableDamping = true;
+controls.enableDamping = true; // makes controls smoother
 controls.enablePan = true;
 controls.enableZoom = true;
 controls.enableRotate = true;
@@ -37,7 +38,7 @@ scene.add(helper);
 // renderer
 let renderer = new THREE.WebGLRenderer({canvas});
 renderer.setSize( window.innerWidth, window.innerHeight );
-renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // ratio more than 2 is too computationally expensive
 renderer.physicallyCorrectLights = true;
 
 // group
@@ -78,15 +79,27 @@ function gameLoop()
     if (moveRight) cube1.position.x += movementSpeed * deltaTime;
 
     controls.update();
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
     camera.lookAt(cube1.position);
-    renderer.setSize( window.innerWidth, window.innerHeight );
-    renderer.setPixelRatio(window.devicePixelRatio);
     
     // update the screen
 	renderer.render( scene, camera );
 }
+
+document.addEventListener('dblclick', () => {
+    if (!document.fullscreenElement) {
+        canvas.requestFullscreen();
+    }
+    else {
+        document.exitFullscreen();
+    }
+});
+
+document.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // ratio more than 2 is too computationally expensive
+});
 
 document.addEventListener('keydown', (event) => {
     switch (event.code) {
