@@ -13,7 +13,6 @@
         const clientID = new URLSearchParams(window.location.search).get('client');// Get clientType from query string
         document.getElementById('client-type').textContent = "You are client type: " + clientID;
 
-
         const socket = new WebSocket('ws://' + window.location.host + '/ws/game/');
 
         socket.onmessage = function(event) {
@@ -26,9 +25,16 @@
 
         document.getElementById('send').onclick = function() {
             const message = clientID === '1' ? 'Ping' : 'Pong';
-            socket.send(JSON.stringify({'message': message
-            }));
+            socket.send(JSON.stringify({'message': message}));
         };
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowUp') {
+                socket.send(JSON.stringify({'message': 'Up arrow pressed'}));
+            } else if (event.key === 'ArrowDown') {
+                socket.send(JSON.stringify({'message': 'Down arrow pressed'}));
+            }
+        });
     </script>
 </body>
 </html>
