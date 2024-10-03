@@ -41,11 +41,40 @@ renderer.setSize( window.innerWidth, window.innerHeight );
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // ratio more than 2 is too computationally expensive
 renderer.physicallyCorrectLights = true;
 
+// custom geometry
+let geometry = new THREE.BufferGeometry();
+// create custom geometry with 50 triangles with 3 vertices each where each vertex has 3 values (x, y, z)
+const positions = new Float32Array(50 * 3 * 3);
+// fill the positions with random values
+for (let i = 0; i < 50 * 3 * 3; ++i) {
+    positions[i] = Math.random();
+}
+// one vertex is 3 values (x, y, z)
+const positionAttribute = new THREE.BufferAttribute(positions, 3);
+geometry.setAttribute('position', positionAttribute);
+let custom = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: true}));
+scene.add(custom);
+
+// custom triangle
+let triangle = new THREE.BufferGeometry();
+const vertices = new Float32Array([
+    0, 0, 0,
+    1, 0, 0,
+    0, 1, 0
+]);
+const positionAttribute2 = new THREE.BufferAttribute(vertices, 3);
+triangle.setAttribute('position', positionAttribute2);
+let customTriangle = new THREE.Mesh(triangle, new THREE.MeshBasicMaterial({color: 0x00ff00, wireframe: true}));
+scene.add(customTriangle);
+
 // group
 let group = new THREE.Group();
 let cube1 = new THREE.Mesh (
     new THREE.BoxGeometry(1, 1, 1),
-    new THREE.MeshStandardMaterial({color: 0xff0000})
+    new THREE.MeshStandardMaterial({
+        color: 0xff0000,
+        wireframe: true
+    })
 )
 let cube2 = new THREE.Mesh (
     new THREE.BoxGeometry(1, 1, 1),
