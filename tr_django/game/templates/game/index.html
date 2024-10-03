@@ -7,19 +7,27 @@
             margin: 0;
             overflow: hidden;
         }
-        #paddle {
+        /* Class selector */
+        .paddle {
             width: 25px;
             height: 150px;
             background-color: red;
             position: absolute;
-            left: 0px;
             transform: translateY(-50%);
+        }
+        /* ID selector */
+        #paddle1 {
+            left: 50px;
+        }
+        #paddle2 {
+            left: 750px;
         }
     </style>
 </head>
 <body>
     <h1>WebSocket Pong Game Test</h1>
-    <div id="paddle"></div>
+    <div id="paddle1" class="paddle"></div>
+    <div id="paddle2" class="paddle"></div>
 
     <script>
         const clientID = new URLSearchParams(window.location.search).get('client');
@@ -27,38 +35,69 @@
 
         const socket = new WebSocket('ws://' + window.location.host + '/ws/game/');
 
-        const paddle = document.getElementById('paddle');
-        let paddlePosition = { top: paddle.offsetTop, left: paddle.offsetLeft };
+        //retrieves element in html and assign constant
+        const paddle1 = document.getElementById('paddle1');
+        const paddle2 = document.getElementById('paddle2');
 
+
+
+
+        let paddlePosition = {};
+        const viewportHeight = window.innerHeight;
+        const paddleHeight = paddle1.offsetHeight;
+
+        paddlePosition.top = (viewportHeight / 2) - (paddleHeight / 2);
+
+        //left refers to the distance from the left of the viewport to the left of the specified element
+        if (clientID === '1') {
+            paddlePosition.left = paddle1.offsetLeft;
+        } else {
+            paddlePosition.left = paddle2.offsetLeft;
+        }
+
+
+        //receive
         socket.onmessage = function(event) {
             const data = JSON.parse(event.data);
             if (data.type === 'position') {
-                updatePaddlePosition(data.position);
+                if (data.clientID === '1') {
+                    updatePaddlePosition(paddle1, data.position);
+                } else if (data.clientID === '2') {
+                    updatePaddlePosition(paddle2, data.position);
+                }
             } else {
-                console.log('Received:', data);
+                console.log('Unexpected, received:', data);
             }
         };
 
+        //send
         document.addEventListener('keydown', function(event) {
             if (event.key === 'ArrowUp' && paddlePosition.top > 0) {
                 paddlePosition.top -= 10;
-            } else if (event.key === 'ArrowDown' && paddlePosition.top < window.innerHeight - paddle.offsetHeight) {
+            } else if (event.key === 'ArrowDown' && paddlePosition.top < window.innerHeight - paddle1.offsetHeight) {
                 paddlePosition.top += 10;
             }
-            updatePaddlePosition(paddlePosition);
+            updatePaddlePosition(clientID === '1' ? paddle1 : paddle2, paddlePosition);
             socket.send(JSON.stringify({'type': 'position', 'clientID': clientID, 'position': paddlePosition}));
         });
 
-        function updatePaddlePosition(position) {
+        //update html with new position
+        function updatePaddlePosition(paddle, position) {
             paddle.style.top = position.top + 'px';
             paddle.style.left = position.left + 'px';
-            paddlePosition = position; // Update the local position to the received position
+            console.log(`Updated ${paddle.id} position to:`, position);
         }
 
-        // Send the initial position to the server when the connection is established
         socket.onopen = function() {
             socket.send(JSON.stringify({'type': 'position', 'clientID': clientID, 'position': paddlePosition}));
         };
+
+        // Initialize paddle positions based on the client ID
+        if (clientID === '1') {
+            updatePaddlePosition(paddle1, paddlePosition);
+        } else if (clientID === '2') {
+            updatePaddlePosition(paddle2, paddlePosition);
+        }
     </script>
 </body>
 </html>
