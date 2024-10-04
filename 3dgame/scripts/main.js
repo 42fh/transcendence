@@ -1,10 +1,24 @@
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as THREE from 'three';
 import gsap from 'gsap';
+import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.19/+esm';
+
+const gui = new GUI({
+    title: 'Transendence UI',
+});
 
 let moveLeft = false;
 let moveRight = false;
 const movementSpeed = 0.01;
+
+let debugObject = {};
+debugObject.color = '#c47e7e';
+debugObject.spin = () => {
+    gsap.to(group.rotation, {duration: 1, y: group.rotation.y + Math.PI * 2});
+}
+debugObject.subdivision = 2;
+
+const firstCube = gui.addFolder('First Cube');
 
 // scene
 let scene = new THREE.Scene();
@@ -52,7 +66,7 @@ for (let i = 0; i < 50 * 3 * 3; ++i) {
 // one vertex is 3 values (x, y, z)
 const positionAttribute = new THREE.BufferAttribute(positions, 3);
 geometry.setAttribute('position', positionAttribute);
-let custom = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: true}));
+let custom = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color: '#c47e7e', wireframe: true}));
 scene.add(custom);
 
 // custom triangle
@@ -71,10 +85,7 @@ scene.add(customTriangle);
 let group = new THREE.Group();
 let cube1 = new THREE.Mesh (
     new THREE.BoxGeometry(1, 1, 1),
-    new THREE.MeshStandardMaterial({
-        color: 0xff0000,
-        wireframe: true
-    })
+    new THREE.MeshStandardMaterial({color: debugObject.color, wireframe: true})
 )
 let cube2 = new THREE.Mesh (
     new THREE.BoxGeometry(1, 1, 1),
@@ -86,9 +97,7 @@ group.add(cube2);
 group.position.y = -1;
 scene.add(group);
 
-renderer.render(scene, camera)
-
-let time = Date.now();
+renderer.render(scene, camera);
 
 // can be used instead of requestAnimationFrame. It will call the function every frame
 renderer.setAnimationLoop( gameLoop );
@@ -96,6 +105,19 @@ renderer.setAnimationLoop( gameLoop );
 // animation
 gsap.to(cube1.position, {duration: 1, x: -2, delay: 1});
 
+let time = Date.now();
+
+gui.add(group.position, 'x').min(-3).max(3).step(0.01).name('group x');
+gui.add(group, 'visible').name('group visible');
+firstCube.add(cube1.material, 'wireframe').name('wireframe');
+firstCube.addColor(debugObject, 'color').name('cube1 color').onChange((value) => {
+    cube1.material.color.set(value);
+});
+firstCube.add(debugObject, 'spin').name('spin');
+firstCube.add(debugObject, 'subdivision').min(1).max(20).step(1).name('subdivision').onFinishChange((value) => {
+    cube1.geometry.dispose(); // dispose of the old geometry
+    cube1.geometry = new THREE.BoxGeometry(1, 1, 1, value, value, value);
+});
 // function to be called every frame
 function gameLoop()
 {
