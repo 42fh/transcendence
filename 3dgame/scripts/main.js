@@ -3,6 +3,17 @@ import * as THREE from 'three';
 import gsap from 'gsap';
 import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.19/+esm';
 
+const loadingManager = new THREE.LoadingManager();
+const texture = new THREE.TextureLoader(loadingManager).load('/static/textures/checkerboard-1024x1024.png');
+const texture2 = new THREE.TextureLoader(loadingManager).load('/static/textures/checkerboard-8x8.png');
+texture.colorSpace = THREE.SRGBColorSpace;
+
+// NearestFilter is better for performance than default LinearFilter
+texture.minFilter = THREE.NearestFilter; // change mipmapping algorithm (texture minification)
+texture2.magFilter = THREE.NearestFilter; // without magfilter it is blurry
+texture.generateMipmaps = false; // disable mipmapping for performance
+texture2.generateMipmaps = false; // disable mipmapping for performance
+
 const gui = new GUI({
     title: 'Transendence UI',
 });
@@ -30,7 +41,7 @@ const canvas = document.querySelector(".webgl");
 // camera
 const aspectRatio = window.innerWidth / window.innerHeight;
 const vertical_field_of_view = 75;
-let camera = new THREE.PerspectiveCamera( vertical_field_of_view, aspectRatio, 1, 1000 );
+let camera = new THREE.PerspectiveCamera( vertical_field_of_view, aspectRatio, 0.1, 1000 );
 camera.position.set(0, 0, 5);
 
 // light
@@ -85,15 +96,20 @@ scene.add(customTriangle);
 let group = new THREE.Group();
 let cube1 = new THREE.Mesh (
     new THREE.BoxGeometry(1, 1, 1),
-    new THREE.MeshStandardMaterial({color: debugObject.color, wireframe: true})
+    new THREE.MeshBasicMaterial({color: debugObject.color, wireframe: true})
 )
 let cube2 = new THREE.Mesh (
     new THREE.BoxGeometry(1, 1, 1),
-    new THREE.MeshStandardMaterial({color: 0x00ff00})
+    new THREE.MeshBasicMaterial({map: texture})
+)
+let cube3 = new THREE.Mesh (
+    new THREE.BoxGeometry(1, 1, 1),
+    new THREE.MeshBasicMaterial({map: texture2})
 )
 cube2.position.x = 2;
 group.add(cube1);
 group.add(cube2);
+group.add(cube3);
 group.position.y = -1;
 scene.add(group);
 
