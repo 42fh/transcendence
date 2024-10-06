@@ -7,6 +7,12 @@
             margin: 0;
             overflow: hidden;
         }
+        #gameField {
+            width: 800px;
+            height: 400px;
+            background-color: #000;
+            position: relative;
+        }
         /* Class selector */
         .paddle {
             width: 25px;
@@ -26,8 +32,10 @@
 </head>
 <body>
     <h1>WebSocket Pong Game Test</h1>
+    <div id="gameField">
     <div id="paddle1" class="paddle"></div>
     <div id="paddle2" class="paddle"></div>
+    </div>
 
     <script>
         const clientID = new URLSearchParams(window.location.search).get('client');
