@@ -8,25 +8,24 @@
             overflow: hidden;
         }
         #gameField {
-            width: 800px;
-            height: 400px;
+            width: 50vw; /* 50% of the viewport */
+            height: 50vh;
             background-color: #000;
             position: relative;
         }
-        /* Class selector */
+        /* Class selector for paddles */
         .paddle {
-            width: 25px;
-            height: 150px;
+            width: 2%;
+            height: 20%;
             background-color: red;
             position: absolute;
-            transform: translateY(-50%);
         }
         /* ID selector */
         #paddle1 {
-            left: 50px;
+            left: 2%;
         }
         #paddle2 {
-            left: 750px;
+            left: 96%;
         }
     </style>
 </head>
