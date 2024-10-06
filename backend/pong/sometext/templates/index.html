@@ -87,9 +87,6 @@
             <label for="right">Right</label><br>
           
           </form>
-          <button id="page6button">check radio</button>
-          <button id="page6_init_game">init game</button>
-          <button id="page6_add_game">add game</button>
           <button id="page6_start_ball">start ball</button>
           <button id="page6_start_ping">start pinging evey 0.1s</button>
           <br>
@@ -97,6 +94,10 @@
           <canvas id="page6canvas" width="300" height="300" ></canvas>
           <br>
           <p id="page6p"></p>
+          <h5>various buttons</h5>
+          <button id="page6button">check radio</button>
+          <button id="page6_init_game">init game</button>
+          <button id="page6_add_game">add game</button>
     </div>
 
     <div id="page7">
@@ -220,6 +221,9 @@ canvas  {outline: dotted;}
     const p6a = document.getElementById("page6_add_game")
     p6i.onclick = () => {fetch("/init_game")}
     p6a.onclick = () => {fetch("/add_game")}
+
+    const p6sb = document.getElementById("page6_start_ball")
+    p6sb.onclick = () => {fetch("/start_ball")}
 
     function ping_server() {
         w.send("ping")
