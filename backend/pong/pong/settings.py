@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 
-SECRET_KEY = os.environ["SECRET_KEY"]
+# SECRET_KEY = os.environ["SECRET_KEY"]
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,7 +31,7 @@ SECRET_KEY = os.environ["SECRET_KEY"]
 # DEBUG = False
 DEBUG = True
 
-ALLOWED_HOSTS = ['transcendence-ctqy.onrender.com', 'localhost']
+ALLOWED_HOSTS = ['transcendence-ctqy.onrender.com', 'localhost', 't.000031.xyz']
 
 # need to point Daphne at a routing configuration
 ASGI_APPLICATION = "pong.asgi.application"
