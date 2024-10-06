@@ -32,8 +32,8 @@
 <body>
     <h1>WebSocket Pong Game Test</h1>
     <div id="gameField">
-    <div id="paddle1" class="paddle"></div>
-    <div id="paddle2" class="paddle"></div>
+        <div id="paddle1" class="paddle"></div>
+        <div id="paddle2" class="paddle"></div>
     </div>
 
     <script>
@@ -42,28 +42,17 @@
 
         const socket = new WebSocket('ws://' + window.location.host + '/ws/game/');
 
-        //retrieves element in html and assign constant
+        // Retrieves element in HTML and assign constant
         const paddle1 = document.getElementById('paddle1');
         const paddle2 = document.getElementById('paddle2');
 
-
-
-
-        let paddlePosition = {};
-        const viewportHeight = window.innerHeight;
-        const paddleHeight = paddle1.offsetHeight;
-
-        paddlePosition.top = (viewportHeight / 2) - (paddleHeight / 2);
-
         //left refers to the distance from the left of the viewport to the left of the specified element
-        if (clientID === '1') {
-            paddlePosition.left = paddle1.offsetLeft;
-        } else {
-            paddlePosition.left = paddle2.offsetLeft;
-        }
+        let paddlePosition = {
+            top: (window.innerHeight / 2) - (paddle1.offsetHeight / 2), // Initialize position
+            left: (clientID === '1') ? paddle1.offsetLeft : paddle2.offsetLeft
+        };
 
-
-        //receive
+        // Receive messages from the server
         socket.onmessage = function(event) {
             const data = JSON.parse(event.data);
             if (data.type === 'position') {
@@ -77,18 +66,18 @@
             }
         };
 
-        //send
+        // Send
         document.addEventListener('keydown', function(event) {
-            if (event.key === 'ArrowUp' && paddlePosition.top > 0) {
+            if (event.key === 'ArrowUp') {
                 paddlePosition.top -= 10;
-            } else if (event.key === 'ArrowDown' && paddlePosition.top < window.innerHeight - paddle1.offsetHeight) {
+            } else if (event.key === 'ArrowDown') {
                 paddlePosition.top += 10;
             }
-            updatePaddlePosition(clientID === '1' ? paddle1 : paddle2, paddlePosition);
+            //updatePaddlePosition is done only when receiving a message from the server
             socket.send(JSON.stringify({'type': 'position', 'clientID': clientID, 'position': paddlePosition}));
         });
 
-        //update html with new position
+        // Update HTML with new position
         function updatePaddlePosition(paddle, position) {
             paddle.style.top = position.top + 'px';
             paddle.style.left = position.left + 'px';
