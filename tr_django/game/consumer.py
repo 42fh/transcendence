@@ -19,21 +19,21 @@ class GameConsumer(AsyncWebsocketConsumer):
             position = text_data_json['position']
             clientID = text_data_json['clientID']
             
-            valid_position = self.validate_position(position['y'])
+            valid_position = self.validate_position(position['top'])
             if valid_position is not None:
-                position['y'] = valid_position
+                position['top'] = valid_position
                 await self.send_to_all_clients({
                     'type': 'position',
                     'clientID': clientID,
                     'position': position
                 })
 
-    def validate_position(self, y):
-        if y < 0:
-            return 0  # Reset to the y
-        elif y > self.GAME_FIELD_HEIGHT - self.PADDLE_HEIGHT:
+    def validate_position(self, top):
+        if top < 0:
+            return 0
+        elif top > self.GAME_FIELD_HEIGHT - self.PADDLE_HEIGHT:
             return self.GAME_FIELD_HEIGHT - self.PADDLE_HEIGHT 
-        return y
+        return top
 
     async def send_to_all_clients(self, data):
         for client in self.connected_clients:
