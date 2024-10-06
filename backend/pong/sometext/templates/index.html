@@ -180,7 +180,7 @@ canvas  {outline: dotted;}
     const ctx = document.getElementById("page6canvas").getContext("2d")
     const wsp = document.getElementById("page6p");
     var o = false;
-    const w = new WebSocket("ws://localhost:8000/ws/a");
+    const w = new WebSocket("wss://t.000031.xyz/ws/a");
     w.onopen = (() => o = true);
     w.onmessage = (msg => {
         wsp.innerHTML = (msg.data + "<br> received at: " + Date.now())
