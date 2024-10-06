@@ -2,11 +2,66 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.http import HttpResponse
 import random
+import time
+import asyncio
 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.middleware.csrf import get_token
-from django.views.decorators.csrf import csrf_exempt
+
+# test for a global variable
+import sometext.globalvar
+
+# background task see https://stackoverflow.com/q/66809088/
+from daphne.server import twisted_loop
+
+# SO example
+# heres a view that you want to start a background function in
+# def hello_background(request):
+#     twisted_loop.create_task(long_task())
+
+def start_ball(request):
+    # asyncio.run(sometext.globalvar.wiggle_ball())
+    # asyncio.run(sometext.globalvar.update_game())
+    # asyncio.create_task(sometext.globalvar.update_game())
+    twisted_loop.create_task(sometext.globalvar.update_game())
+    return HttpResponse("hi")
+
+def all_games(request):
+    games_string = "<br>".join([str(game) for game in sometext.globalvar.game_array])
+    return HttpResponse(games_string)
+
+def view_init_game(request):
+    sometext.globalvar.init_games()
+    return HttpResponse("init game done")
+
+def view_add_game(request):
+    sometext.globalvar.add_game()
+    return HttpResponse("added game")
+
+def get_jack_email(request):
+    timestamp_before = time.time()
+    jack = User.objects.get(id=2)
+    email = jack.get_email_field_name()
+    timestamp_after = time.time()
+    time_delta = timestamp_after - timestamp_before
+    return HttpResponse("email: " + email
+        + " measured time delta in 'get_jack_email' was: " + str(time_delta) + "sec")
+
+def delta_time(request):
+    timestamp_before = time.time()
+    print("function 'delta_time' was called")
+    timestamp_after = time.time()
+    time_delta = timestamp_after - timestamp_before
+    return HttpResponse("measured time delta in 'delta_time' was: " + str(time_delta) + "sec")
+
+def create_int(request):
+    sometext.globalvar.createVar()
+    return HttpResponse("global var created")
+
+def next_int(request):
+    sometext.globalvar.glob_int += 1
+    return HttpResponse(str(sometext.globalvar.glob_int))
 
 def index(request):
     return render(request, "index.html")    

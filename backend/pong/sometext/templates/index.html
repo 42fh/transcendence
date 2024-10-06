@@ -1,5 +1,6 @@
 <!-- a demo single page application -->
 <!DOCTYPE html>
+<link rel="icon" href="data:;base64,iVBORw0KGgo=">
 <html lang="en">
     <head>
         <meta charset="UTF-8">
@@ -76,8 +77,26 @@
 
     <div id="page6">
         <br>
-        <h1>ws msg</h1>
-        <p id="page6p"></p>
+        <h1>pong prototype</h1>
+        <form name="page6form" onsubmit="return false;">
+            <p>Select to steer the left or right peddle</p>
+            
+            <input name="direction" type="radio" id="left" value="left">
+            <label for="left">Left</label><br>
+            <input name="direction" type="radio" id="right" value="right">
+            <label for="right">Right</label><br>
+          
+          </form>
+          <button id="page6button">check radio</button>
+          <button id="page6_init_game">init game</button>
+          <button id="page6_add_game">add game</button>
+          <button id="page6_start_ball">start ball</button>
+          <button id="page6_start_ping">start pinging evey 0.1s</button>
+          <br>
+          <br>
+          <canvas id="page6canvas" width="300" height="300" ></canvas>
+          <br>
+          <p id="page6p"></p>
     </div>
 
     <div id="page7">
@@ -109,6 +128,8 @@ body    {padding: 0.5cm; max-width: 20cm;}
 h1      {padding: 0.3cm;}
 h1, p, h3, label   {font-family: Helvetica, sans-serif;}
 div     {display: none;}
+canvas  {outline: dotted;}
+#page6p {font-size: 14px;}
 </style>
 <script id="myScript">    
     const nextButton     = document.getElementById("nextButton");
@@ -132,11 +153,7 @@ div     {display: none;}
     nextButton.onclick = () => advanceBy(1);
     previousButton.onclick = () => advanceBy(-1);
 
-    // enable switching page with keyboard
-    document.addEventListener("keydown", ev => {
-        if (ev.key == "ArrowLeft") {advanceBy(-1)}
-        if (ev.key == "ArrowRight") {advanceBy(1)}
-    })
+
 
     const button = document.getElementById("getGreetingButton");
     const h1 = document.getElementById("h1Greeting");
@@ -155,11 +172,60 @@ div     {display: none;}
         localchange.onclick = () => page4.innerHTML = textfield.value;
     }
 
+    // Page 6
+
+    // start at page 6:
+    advanceBy(5)
+
+    const ctx = document.getElementById("page6canvas").getContext("2d")
     const wsp = document.getElementById("page6p");
     var o = false;
-    w = new WebSocket("ws://localhost:8000/ws/a");
+    const w = new WebSocket("ws://localhost:8000/ws/a");
     w.onopen = (() => o = true);
-    w.onmessage = (msg => {wsp.innerHTML = (msg.data + "<br> received at: " + Date.now())});
+    w.onmessage = (msg => {
+        wsp.innerHTML = (msg.data + "<br> received at: " + Date.now())
+        ctx.clearRect(0, 0, 300, 300)
+
+        ctx.fillStyle = 'black';
+        arr = String(msg.data).split(',')
+        y1 = arr[0] * 300
+        y2 = arr[1] * 300
+        bx = arr[2] * 300
+        by = arr[3] * 300
+        const w = 10
+        const h = 60
+        // ctx.fillRect(x, y, width, height)
+        ctx.fillRect(1, y1 - h/2, w, h)
+        ctx.fillRect(289, y2 - h/2, w, h)
+
+        ctx.beginPath();
+        ctx.arc(bx, by, 10, 0, 2*Math.PI)
+        ctx.fill();
+
+        ctx.fillStyle = 'red';
+        ctx.beginPath();
+        ctx.arc(bx, by, 3, 0, 2*Math.PI)
+        ctx.fill();
+
+    });
+    p6b = document.getElementById("page6button")
+    p6b.onclick = () => {
+        var dir = document.forms.page6form.elements.direction.value
+        ctx.clearRect(0, 0, 300, 300)
+        ctx.font = "48px sans-serif";
+        ctx.fillText(dir, 10, 50);
+    }
+
+    const p6i = document.getElementById("page6_init_game")
+    const p6a = document.getElementById("page6_add_game")
+    p6i.onclick = () => {fetch("/init_game")}
+    p6a.onclick = () => {fetch("/add_game")}
+
+    function ping_server() {
+        w.send("ping")
+    }
+    const p6p = document.getElementById("page6_start_ping")
+    p6p.onclick = () => {setInterval(ping_server, 100)}
 
     const page7f = document.getElementById("page7form");
     
@@ -182,7 +248,7 @@ div     {display: none;}
 
     function main() {
         if (o) {
-        w.send(JSON.stringify({"greeting": "hallo0978"}));
+        // w.send(JSON.stringify({"greeting": "hallo0978"}));
         }
     }
 
@@ -201,5 +267,16 @@ div     {display: none;}
     const page8button = document.getElementById("page8button");
     page8button.onclick = update_login_status;
 
+
+    // document wide keydown listener
+        document.addEventListener("keydown", ev => {
+        if (ev.key == "ArrowLeft") {advanceBy(-1)}
+        if (ev.key == "ArrowRight") {advanceBy(1)}
+        if (ev.key == "j" || ev.key == "k") {
+            var dir = document.forms.page6form.elements.direction.value
+            msg = {"key" : ev.key, "direction" : dir}
+            w.send(JSON.stringify(msg))
+        }
+    })
 
 </script>
