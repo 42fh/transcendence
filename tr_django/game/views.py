@@ -4,7 +4,7 @@ from .models import Game, GameMode
 from django.views.decorators.csrf import csrf_exempt
 
 def transcendance(request):
-    return HttpResponse("Initial view for transcendance")
+    return render(request, "index.html")
 
 @csrf_exempt
 def create_game(request):
