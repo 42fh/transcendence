@@ -27,29 +27,36 @@ loader.load(fontUrl, (font) => {
         bevelOffset: 0,
         bevelSegments: 2, // roundness of the bevel
     });
-    const textMaterial = new THREE.MeshMatcapMaterial({matcap: texture3});
+    
+    /*You cannot use THREE.MeshMatcapMaterial with light. 
+    This material is designed to work independently of scene lighting. 
+    It uses a special kind of texture called a matcap (material capture), 
+    which simulates the lighting and shading directly from the texture itself,
+    making the object look like it’s already lit.*/
+
+    const textMaterial = new THREE.MeshStandardMaterial({map: texture3});
+    // const textMaterial = new THREE.MeshMatcapMaterial({matcap: texture3, metalness: 0.7, roughness: 0.5});
     const text = new THREE.Mesh(textGeometry, textMaterial);
     textGeometry.center();
     scene.add(text);
 
-    const donutGeometry = new THREE.TorusGeometry(0.3, 0.2, 20, 45);
+    // const donutGeometry = new THREE.TorusGeometry(0.3, 0.2, 20, 45);
 
-    for (let i = 0; i < 300; ++i) {
-        const donut = new THREE.Mesh(donutGeometry, textMaterial);
+    // for (let i = 0; i < 300; ++i) {
+    //     const donut = new THREE.Mesh(donutGeometry, textMaterial);
 
-        donut.position.x = (Math.random() - 0.5) * 10; // -0.5 to get negative values too
-        donut.position.y = (Math.random() - 0.5) * 10;
-        donut.position.z = (Math.random() - 0.5) * 10;
+    //     donut.position.x = (Math.random() - 0.5) * 10; // -0.5 to get negative values too
+    //     donut.position.y = (Math.random() - 0.5) * 10;
+    //     donut.position.z = (Math.random() - 0.5) * 10;
 
-        donut.rotation.x = Math.random() * Math.PI;
-        donut.rotation.y = Math.random() * Math.PI;
+    //     donut.rotation.x = Math.random() * Math.PI;
+    //     donut.rotation.y = Math.random() * Math.PI;
 
-        const scale = Math.random();
-        donut.scale.set(scale, scale, scale);
+    //     const scale = Math.random();
+    //     donut.scale.set(scale, scale, scale);
 
-        scene.add(donut);
-    }
-    gui.add(textMaterial, 'wireframe').name('text wireframe');
+    //     scene.add(donut);
+    // }
 });
 // -----------------------------------------
 
@@ -57,7 +64,7 @@ loader.load(fontUrl, (font) => {
 const loadingManager = new THREE.LoadingManager();
 const texture = new THREE.TextureLoader(loadingManager).load('/static/textures/checkerboard-1024x1024.png');
 const texture2 = new THREE.TextureLoader(loadingManager).load('/static/textures/checkerboard-8x8.png');
-const texture3 = new THREE.TextureLoader(loadingManager).load('/static/textures/matcaps/3.png');
+const texture3 = new THREE.TextureLoader(loadingManager).load('/static/textures/matcaps/8.png');
 texture.colorSpace = THREE.SRGBColorSpace; // TODO: find out what this does
 
 /*  Texture filtering determines how a texture is sampled 
@@ -96,23 +103,9 @@ texture.generateMipmaps = false; // disable mipmapping to reduce memory usage
 texture2.generateMipmaps = false; // disable mipmapping to reduce memory usage
 // -----------------------------------------
 
-// Debug UI to tweak values
-const gui = new GUI({
-    title: 'Transendence UI',
-});
-// Create a folder to structure the UI
-const firstCube = gui.addFolder('First Cube');
-
-let debugObject = {};
-debugObject.color = '#64b8c9';
-debugObject.spin = () => {
-    gsap.to(group.rotation, {duration: 1, y: group.rotation.y + Math.PI * 2});
-}
-debugObject.subdivision = 2;
-
 // scene
 let scene = new THREE.Scene();
-scene.background = new THREE.Color(0x08121E);
+// scene.background = new THREE.Color(0x08121E);
 
 // canvas from html
 const canvas = document.querySelector(".webgl");
@@ -123,10 +116,54 @@ const vertical_field_of_view = 75;
 let camera = new THREE.PerspectiveCamera( vertical_field_of_view, aspectRatio, 0.1, 1000 );
 camera.position.set(0, 0, 5);
 
-// light
-const light = new THREE.DirectionalLight('white', 8);
+// ----------------- Lights -----------------
+/* Minimal cost:
+    - Ambient light
+    - Hemisphere light
+   Medium cost:
+    - Directional light
+    - Point light
+   High cost:
+    - Spot light
+    - RectAreaLight
+
+- Directional light is like the sun, it lights up the whole scene from a specific direction
+
+- Ambient light lights up the whole scene
+Ambient light is used together with directional light to simulate light bouncing
+
+- Point light is like a light bulb, candle, it lights up from a specific point
+
+- RectAreaLight is like a light panel from photoshoots, it lights up from a rectangle
+
+- SpotLight is like a flashlight, it lights up from a specific point in a specific direction
+To rotate the spot light, add spotLight.target to the scene and rotate the target
+
+- HemisphereLight simulates the lighting difference between 
+the top and bottom parts of a scene, creating a more natural look 
+without needing specific directional lighting
+*/
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+const hemisphereLight = new THREE.HemisphereLight(0xff0000, 0x0000ff, 0.5);
+const pointLight = new THREE.PointLight(0xffffff, 1.5, 2, 2);
+const rectAreaLight = new THREE.RectAreaLight(0x4e00ff, 5, 3, 5);
+const spotLight = new THREE.SpotLight(0xffffff, 5, 10, Math.PI * 0.3, 0.25, 1);
+const light = new THREE.DirectionalLight(0xffffff, 2);
+
+const spotLightHelper = new THREE.SpotLightHelper(spotLight);
+
 light.position.set(10, 10, 10);
-scene.add(light);
+pointLight.position.set(0, -1, 0);
+rectAreaLight.position.set(2, 2, 2);
+spotLight.position.set(0, 2, 3);
+// scene.add(light);
+// scene.add(ambientLight);
+// scene.add(hemisphereLight);
+// scene.add(pointLight);
+// scene.add(rectAreaLight);
+scene.add(spotLight);
+scene.add(spotLightHelper, 0.2);
+// -----------------------------------------
 
 // controls
 let controls = new OrbitControls(camera, canvas);
@@ -145,6 +182,17 @@ renderer.setSize( window.innerWidth, window.innerHeight );
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // ratio more than 2 is too computationally expensive
 renderer.physicallyCorrectLights = true;
 
+const terrain = new THREE.Mesh(
+    new THREE.PlaneGeometry(10, 10, 100, 100), 
+    new THREE.MeshStandardMaterial({map: texture3})
+);
+terrain.rotation.x = -Math.PI / 2;
+terrain.position.y = -1.5;
+rectAreaLight.lookAt(terrain.position);
+spotLight.lookAt(terrain.position);
+scene.add(terrain);
+
+// ----------------- Basics lessions -----------------
 /*
 // custom geometry
 let geometry = new THREE.BufferGeometry();
@@ -171,7 +219,7 @@ const positionAttribute2 = new THREE.BufferAttribute(vertices, 3);
 triangle.setAttribute('position', positionAttribute2);
 let customTriangle = new THREE.Mesh(triangle, new THREE.MeshBasicMaterial({color: 0x00ff00, wireframe: true}));
 scene.add(customTriangle);
-*/
+
 
 // group
 let geometry = new THREE.BoxGeometry(1, 1, 1);
@@ -192,18 +240,26 @@ let cube3 = new THREE.Mesh (
 group.add(cube1);
 group.add(cube2);
 group.add(cube3);
-// scene.add(group);
+scene.add(group);
 
 cube2.position.x = 2;
 group.position.y = -1;
 
-renderer.render(scene, camera);
-
-// can be used instead of requestAnimationFrame. It will call the function every frame
-renderer.setAnimationLoop( gameLoop );
-
-// initial animation
 gsap.to(cube1.position, {duration: 1, x: -2, delay: 1});
+
+// Debug UI to tweak values
+const gui = new GUI({
+    title: 'Transendence UI',
+});
+// Create a folder to structure the UI
+const firstCube = gui.addFolder('First Cube');
+
+let debugObject = {};
+debugObject.color = '#64b8c9';
+debugObject.spin = () => {
+    gsap.to(group.rotation, {duration: 1, y: group.rotation.y + Math.PI * 2});
+}
+debugObject.subdivision = 2;
 
 // GUI
 gui.add(group.position, 'x').min(-3).max(3).step(0.01).name('group x');
@@ -217,20 +273,25 @@ firstCube.add(debugObject, 'subdivision').min(1).max(20).step(1).name('subdivisi
     cube1.geometry.dispose(); // dispose of the old geometry
     cube1.geometry = new THREE.BoxGeometry(1, 1, 1, value, value, value);
 });
+*/
+// --------------------------------------------------
+
+// can be used instead of requestAnimationFrame. It will call the function every frame
+renderer.setAnimationLoop( gameLoop );
 
 // function to be called every frame
 function gameLoop()
 {
     // calculate deltaTime to move objects consistently
-    const currentTime = Date.now();
-    const deltaTime = currentTime - time;
-    time = currentTime;
+    // const currentTime = Date.now();
+    // const deltaTime = currentTime - time;
+    // time = currentTime;
 
-    if (moveLeft) cube1.position.x -= movementSpeed * deltaTime;
-    if (moveRight) cube1.position.x += movementSpeed * deltaTime;
+    // if (moveLeft) cube1.position.x -= movementSpeed * deltaTime;
+    // if (moveRight) cube1.position.x += movementSpeed * deltaTime;
 
     controls.update();
-    camera.lookAt(cube1.position);
+    // camera.lookAt(cube1.position);
     
     // update the screen
 	renderer.render( scene, camera );
