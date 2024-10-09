@@ -39,6 +39,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'game',
+    'chat',
+    'user',
+    'blockchain',	
     'channels',
 ]
 
