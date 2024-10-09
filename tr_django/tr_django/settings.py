@@ -127,3 +127,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 ASGI_APPLICATION = 'tr_django.asgi.application'
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379",
+    }
+}
