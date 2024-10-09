@@ -15,6 +15,10 @@ class EchoConsumer(WebsocketConsumer):
         text_data_json = json.loads(text_data)
         message = text_data_json["message"]
         print("message received: ", message)
-        cache.set("message", message)
         time_stamp = str(time.time())
+        try:
+            cache.set("message", message)
+        except:
+            self.send(text_data=json.dumps({"message": "redis is not available: " + time_stamp}))
+            return
         self.send(text_data=json.dumps({"message": "backend greets: " + time_stamp}))
