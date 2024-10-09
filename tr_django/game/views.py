@@ -1,10 +1,10 @@
-from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
+from django.shortcuts import redirect
+from django.http import JsonResponse
 from .models import Game, GameMode
 from django.views.decorators.csrf import csrf_exempt
 
 def transcendance(request):
-    return render(request, "index.html")
+    return redirect("/static/index.html")
 
 @csrf_exempt
 def create_game(request):
