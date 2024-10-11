@@ -4,7 +4,7 @@ import gsap from 'gsap';
 import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.19/+esm';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
-
+// import { Timer } from 'three/addons/misc/Timer.js'; - use instead of Clock
 
 // global variables
 let moveLeft = false;
@@ -13,7 +13,7 @@ const movementSpeed = 0.01;
 let time = Date.now();
 
 // ----------------- Fonts -----------------
-const loader = new FontLoader();
+// const loader = new FontLoader();
 const fontUrl = 'https://cdn.jsdelivr.net/npm/three@0.149.0/examples/fonts/helvetiker_regular.typeface.json'; // TODO: download font and move to the static folder
 loader.load(fontUrl, (font) => {
     const textGeometry = new TextGeometry('42 Berlin', {
@@ -40,32 +40,53 @@ loader.load(fontUrl, (font) => {
     textGeometry.center();
     scene.add(text);
 
-    // const donutGeometry = new THREE.TorusGeometry(0.3, 0.2, 20, 45);
+    const donutGeometry = new THREE.TorusGeometry(0.3, 0.2, 20, 45);
 
-    // for (let i = 0; i < 300; ++i) {
-    //     const donut = new THREE.Mesh(donutGeometry, textMaterial);
+    for (let i = 0; i < 300; ++i) {
+        const donut = new THREE.Mesh(donutGeometry, textMaterial);
 
-    //     donut.position.x = (Math.random() - 0.5) * 10; // -0.5 to get negative values too
-    //     donut.position.y = (Math.random() - 0.5) * 10;
-    //     donut.position.z = (Math.random() - 0.5) * 10;
+        donut.position.x = (Math.random() - 0.5) * 10; // -0.5 to get negative values too
+        donut.position.y = (Math.random() - 0.5) * 10;
+        donut.position.z = (Math.random() - 0.5) * 10;
 
-    //     donut.rotation.x = Math.random() * Math.PI;
-    //     donut.rotation.y = Math.random() * Math.PI;
+        donut.rotation.x = Math.random() * Math.PI;
+        donut.rotation.y = Math.random() * Math.PI;
 
-    //     const scale = Math.random();
-    //     donut.scale.set(scale, scale, scale);
+        const scale = Math.random();
+        donut.scale.set(scale, scale, scale);
 
-    //     scene.add(donut);
-    // }
+        scene.add(donut);
+    }
 });
 // -----------------------------------------
-
 // ----------------- Textures -----------------
 const loadingManager = new THREE.LoadingManager();
-const texture = new THREE.TextureLoader(loadingManager).load('/static/textures/checkerboard-1024x1024.png');
-const texture2 = new THREE.TextureLoader(loadingManager).load('/static/textures/checkerboard-8x8.png');
-const texture3 = new THREE.TextureLoader(loadingManager).load('/static/textures/matcaps/8.png');
-texture.colorSpace = THREE.SRGBColorSpace; // TODO: find out what this does
+const textureLoader = new THREE.TextureLoader(loadingManager);
+const floorAlphaTexture = textureLoader.load('/static/floor/alpha.jpg');
+const floorColorTexture = textureLoader.load('/static/floor/color.jpg');
+const floorARMTexture = textureLoader.load('/static/floor/arm.jpg');
+const floorNormalTexture = textureLoader.load('/static/floor/normal.jpg');
+const floorDisplacementTexture = textureLoader.load('/static/floor/displacement.jpg');
+
+floorColorTexture.repeat.set(8, 8);
+floorNormalTexture.repeat.set(8, 8);
+floorARMTexture.repeat.set(8, 8);
+floorDisplacementTexture .repeat.set(8, 8);
+
+floorColorTexture.wrapS = THREE.RepeatWrapping;
+floorColorTexture.wrapT = THREE.RepeatWrapping; 
+floorNormalTexture.wrapS = THREE.RepeatWrapping;
+floorNormalTexture.wrapT = THREE.RepeatWrapping; 
+floorARMTexture.wrapS = THREE.RepeatWrapping;
+floorARMTexture.wrapT = THREE.RepeatWrapping; 
+floorDisplacementTexture.wrapS = THREE.RepeatWrapping; // avoid last pixel to be stretched on x axis
+floorDisplacementTexture.wrapT = THREE.RepeatWrapping; // avoid last pixel to be stretched on y axis
+
+floorAlphaTexture.repeat.set(1, 1);
+floorAlphaTexture.wrapS = THREE.RepeatWrapping;
+floorAlphaTexture.wrapT = THREE.RepeatWrapping;
+
+// texture2.colorSpace = THREE.SRGBColorSpace; // TODO: find out what this does
 
 /*  Texture filtering determines how a texture is sampled 
     when it needs to be scaled down (minification) or up (magnification)
@@ -85,7 +106,7 @@ texture.colorSpace = THREE.SRGBColorSpace; // TODO: find out what this does
         THREE.LinearFilter (default): Uses linear interpolation for smoother results.
         THREE.NearestFilter: Chooses the nearest texel's color, resulting in a blocky appearance but faster performance.
 */
-texture.minFilter = THREE.NearestFilter;
+// texture2.minFilter = THREE.NearestFilter;
 
 /*  magFilter (Magnification Filter):
     Defines how the texture is sampled when it is displayed larger than its actual size.
@@ -93,14 +114,13 @@ texture.minFilter = THREE.NearestFilter;
         THREE.LinearFilter (default): Smoothens the texture when magnified.
         THREE.NearestFilter: Maintains a pixelated look, which can be desirable for certain visual styles like retro or pixel art.
 */
-texture2.magFilter = THREE.NearestFilter;
+// texture2.magFilter = THREE.NearestFilter;
 
 /*  Mipmapping is a technique used to improve rendering performance and 
     visual quality when textures are viewed at a distance or at smaller sizes. 
     It involves creating multiple scaled-down versions (mipmaps) of the original texture.
 */
-texture.generateMipmaps = false; // disable mipmapping to reduce memory usage
-texture2.generateMipmaps = false; // disable mipmapping to reduce memory usage
+// texture2.generateMipmaps = false; // disable mipmapping to reduce memory usage
 // -----------------------------------------
 
 // scene
@@ -144,25 +164,25 @@ the top and bottom parts of a scene, creating a more natural look
 without needing specific directional lighting
 */
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-const hemisphereLight = new THREE.HemisphereLight(0xff0000, 0x0000ff, 0.5);
-const pointLight = new THREE.PointLight(0xffffff, 1.5, 2, 2);
-const rectAreaLight = new THREE.RectAreaLight(0x4e00ff, 5, 3, 5);
-const spotLight = new THREE.SpotLight(0xffffff, 5, 10, Math.PI * 0.3, 0.25, 1);
-const light = new THREE.DirectionalLight(0xffffff, 2);
+// const hemisphereLight = new THREE.HemisphereLight(0xff0000, 0x0000ff, 0.5);
+// const pointLight = new THREE.PointLight(0xffffff, 1.5, 2, 2);
+// const rectAreaLight = new THREE.RectAreaLight(0x4e00ff, 5, 3, 5);
+// const spotLight = new THREE.SpotLight(0xffffff, 5, 10, Math.PI * 0.3, 0.25, 1);
+const directLight = new THREE.DirectionalLight(0xffffff, 2);
 
-const spotLightHelper = new THREE.SpotLightHelper(spotLight);
+// const spotLightHelper = new THREE.SpotLightHelper(spotLight);
 
-light.position.set(10, 10, 10);
-pointLight.position.set(0, -1, 0);
-rectAreaLight.position.set(2, 2, 2);
-spotLight.position.set(0, 2, 3);
-// scene.add(light);
-// scene.add(ambientLight);
+directLight.position.set(10, 10, 10);
+// pointLight.position.set(0, -1, 0);
+// rectAreaLight.position.set(2, 2, 2);
+// spotLight.position.set(0, 2, 3);
+scene.add(directLight);
+scene.add(ambientLight);
 // scene.add(hemisphereLight);
 // scene.add(pointLight);
 // scene.add(rectAreaLight);
-scene.add(spotLight);
-scene.add(spotLightHelper, 0.2);
+// scene.add(spotLight);
+// scene.add(spotLightHelper, 0.2);
 // -----------------------------------------
 
 // controls
@@ -182,18 +202,8 @@ renderer.setSize( window.innerWidth, window.innerHeight );
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // ratio more than 2 is too computationally expensive
 renderer.physicallyCorrectLights = true;
 
-const terrain = new THREE.Mesh(
-    new THREE.PlaneGeometry(10, 10, 100, 100), 
-    new THREE.MeshStandardMaterial({map: texture3})
-);
-terrain.rotation.x = -Math.PI / 2;
-terrain.position.y = -1.5;
-rectAreaLight.lookAt(terrain.position);
-spotLight.lookAt(terrain.position);
-scene.add(terrain);
-
 // ----------------- Basics lessions -----------------
-/*
+
 // custom geometry
 let geometry = new THREE.BufferGeometry();
 // create custom geometry with 50 triangles with 3 vertices each where each vertex has 3 values (x, y, z)
@@ -222,7 +232,7 @@ scene.add(customTriangle);
 
 
 // group
-let geometry = new THREE.BoxGeometry(1, 1, 1);
+let geometry2 = new THREE.BoxGeometry(1, 1, 1);
 let group = new THREE.Group();
 let cube1 = new THREE.Mesh (
     geometry,
@@ -273,15 +283,11 @@ firstCube.add(debugObject, 'subdivision').min(1).max(20).step(1).name('subdivisi
     cube1.geometry.dispose(); // dispose of the old geometry
     cube1.geometry = new THREE.BoxGeometry(1, 1, 1, value, value, value);
 });
-*/
+
 // --------------------------------------------------
 
 // can be used instead of requestAnimationFrame. It will call the function every frame
-renderer.setAnimationLoop( gameLoop );
-
-// function to be called every frame
-function gameLoop()
-{
+renderer.setAnimationLoop( () => {
     // calculate deltaTime to move objects consistently
     // const currentTime = Date.now();
     // const deltaTime = currentTime - time;
@@ -295,7 +301,9 @@ function gameLoop()
     
     // update the screen
 	renderer.render( scene, camera );
-}
+});
+
+
 
 // ----------------- Event Listeners -----------------
 document.addEventListener('dblclick', () => {
