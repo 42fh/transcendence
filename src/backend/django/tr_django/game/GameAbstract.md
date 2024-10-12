@@ -5,15 +5,18 @@
 
 * CACHE
 * WEBSOCKET
+* GAMEELEMENT
+* DRAWELEMENT
+* MOVINGELEMNT
+* WINDOW
+* BALL
 * PADLE
+* PLAYER
 * GAMESTATE
 * GAME
-* PLAYER
-* BALL
-* GAMESTATE
+* GAMEMANAGER
 * TOURNAMENT
 * *DEPENDENCIES*
-* QUESTION
 
 
 ****
@@ -39,7 +42,17 @@
 
 > Parent Class from things that are intaragized with 
 
+### implementation
 
+#### Abtributes
+
+* lenght
+* hight
+* surface property
+  
+#### Functions
+
+*no function*
 
 ****
 
@@ -48,6 +61,33 @@
 ## DRAWELEMENT
 
 > Parent CLass from things that are drawn
+
+#### Functions
+
+* draw()
+
+****
+
+****
+## MOVINGELEMENT
+
+> Parent Class from things that move 
+
+
+### implementation
+
+#### Abtributes
+
+* position
+* vectore direction
+* speed / nextSteppValue
+
+#### Functions
+
+* void move(void)
+* void directionChange(value)
+* void speedChange(value)
+
 
 ****
 
@@ -63,21 +103,11 @@
 
 #### Abtributes
 
-* lenght
-* hight
-* surface property
+*no*
   
 #### Functions
 
 *no function*
-
-****
-
-
-****
-## MOVINGELEMENT
-
-> Parent Class from things that move 
 
 ****
 
@@ -97,17 +127,10 @@
 
 #### Abtributes
 
-* position
-* vectore direction
-* speed / nextSteppValue
 * list of PLAYER.id
-* surface property
 
 #### Functions
 
-* void move(void)
-* void directionChange(value)
-* void speedChange(value)
 * bool assigneToPlayer(PLAYER)	
 * bool connectedWithPlayer(PLAYER)
 
@@ -130,17 +153,11 @@
 
 #### Abtributes
 
-* position
-* vectore direction
-* speed / nextSteppValue
-* surface property
-* PLAYER.id 
+* (const) PLAYER.uuid 
 
 #### Functions
 
 * void usePadle( 1 || -1 ) 
-* void move(void)
-* void speedChange(value)
 * bool assigneToPlayer(PLAYER)	
 * bool connectedWithPlayer(PLAYER)
 
@@ -163,8 +180,10 @@
 
 #### Abtributes
 
-* const UUID
+* const uuid
 * (&PADLE) -> depends on where the Padle
+* (list of BALLs) ->
+
 
 #### Functions
 
@@ -179,7 +198,22 @@
 ## GAMESTATE
 
 > the data from a GAME 
+> cordinate to save GAMESTATE in CACHE and send parts of GAMESTATE with WEBSOCKETS  
 
+### implementation
+
+#### Abtributes
+
+#### Functions
+
+* ? 	getGamestate(GAME)
+* ? 	setGamestate(GAME)
+* ? 	sendGamstate(GAME)	 
+* bool	checkGamstateSize(GAME)
+
+****
+
+****
 
 ## GAME
 
@@ -190,8 +224,74 @@
 * n PLAYER
 * n BALL
 * 1 WINDOW
-* 1 GAMEFIELD (default WINDOW)
 * 1 GAMESTATE
+* 1 GAMEMANAGER
+
+### implementation
+
+#### Abtributes
+* bool    				 			pause
+* list/map[GAMEMANAGER.playerAmount]				PLAYERs	
+* list/map[GAMEMANAGER.playerAmount/GAMEMANAFER.playMode]	BALLs
+* WINDOW 							win
+* GAMESTATE 							state
+
+#### Functions
+
+* PLAYER 	run()
+* void		pause()
+* void		start()
+* void		finish(UUID)
+* void		actionPlayer(UUID)
+* void		updateGane()
+* void		updateBall()
+* void		makeBounce()
+* void		checkCollision()
+* void		checkScore()	  
+
+****
+
+****
+
+## GAMEMANAGER
+
+> manage a GAME. 
+
+### **GAMEMANAGER** needs:
+
+* a GAME
+
+### implementation
+
+#### Abtributes
+
+* gameId
+* playerAmount
+* playerMode
+* playerReady
+* GAME
+
+#### Functions
+
+* makePlayerReady(UUID)
+* makePlayerUnready(UUID)
+* addPlayerToGame(UUID)
+* removePlayerFromGame(UUID)
+* waitForPlayer(UUID)
+
+****
+
+****
+
+## TOURNAMENT
+
+> n Games in specific order 
+
+A **TOURNAMENT** needs:
+* n PLAYER
+* n TOURNAMENTMODE *( e.g each again each = 2n(n−1) GAMEMANAGER)*
+* a SCORE
+
 
 ### implementation
 
@@ -199,19 +299,7 @@
 
 #### Functions
 
-
-
-
-
-### Abstract
-
-### implementation
-
-#### Abtributes
-
-#### Functions
-
-
+****
 
 ## *DEPENDENCIES*
 
@@ -226,25 +314,4 @@
 ### *USERDATA*
 
 > date from a *USER*
-
-
-
-
-
-
-
-
-
-
-## TOURNAMENT
-
-A **TOURNAMENT** needs:
-* n PLAYER
-* n TOURNAMENTMODE *( e.g each again each = 2n(n−1) GAMES)*
-* a SCORE
-
-
-
-
-
 
