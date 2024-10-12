@@ -5,6 +5,12 @@ import random
 from channels.generic.websocket import WebsocketConsumer
 from django.core.cache import cache
 
+
+# game_state
+# paddles
+# ball (pos, velocity)
+
+
 # dummy function
 def random_game_state(scale):
     game_state = {
@@ -16,11 +22,14 @@ def random_game_state(scale):
     return game_state
 
 def vary_game_state(game_state, scale):
-    game_state["paddle_left"]  += (random.random() - 0.5) * scale     
-    game_state['paddle_right'] += (random.random() - 0.5) * scale    
-    game_state["ball_x"] += (random.random() - 0.5) * scale     
-    game_state["ball_y"] += (random.random() - 0.5) * scale         
-    return game_state
+    try: 
+        game_state['paddle_left']  += (random.random() - 0.5) * scale     
+        game_state['paddle_right'] += (random.random() - 0.5) * scale    
+        game_state['ball_x'] += (random.random() - 0.5) * scale     
+        game_state['ball_y'] += (random.random() - 0.5) * scale         
+        return game_state
+    except:
+        return None
 
 class EchoConsumer(WebsocketConsumer):
     def connect(self):
