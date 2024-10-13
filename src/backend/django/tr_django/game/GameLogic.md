@@ -36,10 +36,13 @@
 
 ****
 
-~~
+
 ****
 
-## GAMEELEMENT
+
+## *all Data from Game is stored in cache so no class needed*
+
+## ~~GAMEELEMENT~~
 
 > Parent Class from things that are intaragized with 
 
@@ -59,7 +62,7 @@
 
 ****
 
-## DRAWELEMENT
+## ~~DRAWELEMENT~~
 
 > Parent CLass from things that are drawn
 
@@ -70,7 +73,7 @@
 ****
 
 ****
-## MOVINGELEMENT
+## ~~MOVINGELEMENT~~
 
 > Parent Class from things that move 
 
@@ -94,7 +97,7 @@
 
 ****
 
-## WINDOW(GAMEELEMNT, DRAWELEMENT)
+## ~~WINDOW(GAMEELEMNT, DRAWELEMENT)~~
 
 > the GAME take place in this area 
 > It is an area defined at the start of the game in which PADELS and BALLS can move.
@@ -114,7 +117,7 @@
 
 ****
 
-## BALL(GAMEELEMENT,  DRAWELEMENT, MOVINGELEMENT)
+## ~~BALL(GAMEELEMENT,  DRAWELEMENT, MOVINGELEMENT)~~
 
 > it has an arbitrary but at the start of the game a fixed shape, movement properties and player dependency.  
 > it moves at a speed and in one direction in the WINDOW. It is passiv. It only interacts with its surface properties 
@@ -139,7 +142,7 @@
 
 ****
 
-## PADLE(GAMEELEMENT, DRAWELEMENT, MOVINGELEMENT)
+## ~~PADLE(GAMEELEMENT, DRAWELEMENT, MOVINGELEMENT)~~
 
 > it has an arbitrary but at the start of the game a fixed shape and movement possibilities.
 > It can influence n BALL through collision.  It is limited by the WINDOW.
