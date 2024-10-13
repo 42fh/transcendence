@@ -1,3 +1,5 @@
+## GAMELOGIC
+````mermaid
 classDiagram
     class Game {
         +Cache cache
@@ -111,3 +113,4 @@ class GameElement {
         MovingElement --|> Ball
         MovingElement --|> Padle
     end
+```
