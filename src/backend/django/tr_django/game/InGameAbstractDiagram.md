@@ -1,5 +1,5 @@
 ## Detail in Game
-´´´´mermaid
+````mermaid
 sequenceDiagram
     participant Cl as Client
     participant GC  as GameCordinator
@@ -83,4 +83,4 @@ sequenceDiagram
         Note over Cl,D: RESTAPI
         D->>Cl: GameResult
     end
-´´´
+````
