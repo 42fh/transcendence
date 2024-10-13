@@ -1,6 +1,6 @@
 ## GAME ABSTRACT
 ````mermaid
-sequenceDiagram
+      sequenceDiagram
     participant Cl as Client
     participant U as User
     participant GC as GameCordinator
@@ -12,7 +12,7 @@ sequenceDiagram
     Note over Cl: CL decided the GAME(GAMESETTINGS) 
     Cl ->>+ U: User want to play GAME 
     alt User is not valid
-        U->>Cl: sorry are ar not allowed
+        U ->> Cl: close connection
         Note over Cl, U: close conection 
     else User is valid
         U -> U: generate UUID
@@ -37,17 +37,21 @@ sequenceDiagram
             Cl->>W: open connection 
         end
         W->>GC:Player ready
-        par GC to G         
+        par GameLoop         
             GC ->> G: Player ready
             G->>G: start Game
             loop every n ms
             Ca->>G: getGamestate
             G->>G: caculate Gamsate
-            G->>Ca: setGamestate
-            G->>W: new Gaestate
-            W->>Cl: update Gamestate
+            alt Gamestate Client could know
+                Note over G: doing nothing 
+            else Gamestate Cleint couln not know 
+                 G->>W: new Gamestate
+                W->>Cl: update Gamestate
             end
-        and GC to W
+            G->>Ca: setGamestate
+            end
+        and Client Input
             GC ->>W: start Game
             W->>Cl: start Game
             opt Client want to move Padle
@@ -78,8 +82,10 @@ sequenceDiagram
                 W->>Cl: game over 
             end
             note over Cl,D: RESTAPI
-            GC->>Cl: you are wo or loose, result, statistic ....
+            GC->>Cl: result, statistic ....
         end
     end
       
+
+
 ````

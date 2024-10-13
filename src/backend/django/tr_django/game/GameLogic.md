@@ -5,12 +5,12 @@
 
 * CACHE
 * WEBSOCKET
-* GAMEELEMENT
-* DRAWELEMENT
-* MOVINGELEMNT
-* WINDOW
-* BALL
-* PADLE
+* ~~GAMEELEMENT~~
+* ~~DRAWELEMENT~~
+* ~~MOVINGELEMNT~~
+* ~~WINDOW~~
+* ~~BALL~~
+* ~~PADLE~~
 * PLAYER
 * GAMESTATE
 * GAME
@@ -36,6 +36,7 @@
 
 ****
 
+~~
 ****
 
 ## GAMEELEMENT
@@ -192,6 +193,7 @@
 * bool usePadle(PADLE, value(1 || -1))	
 
 ****
+~~
 
 ****
 
