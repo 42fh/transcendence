@@ -85,13 +85,13 @@ sequenceDiagram
     end
     break A Player have 11 Points
         G->>W: finished
-        W->>Cl:finished
         G->>D:store Gamestate
         G->>Ca: delete Cache
         G->>GM: finished
-        GM->>GC: finished
+        W->>GC: finished
+        W->>Cl:finished
         Note over Cl,D: RESTAPI
+        GM->>D: giveResult
         D->>Cl: GameResult
     end
-
 ````
