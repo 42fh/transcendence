@@ -13,30 +13,39 @@ sequenceDiagram
     Cl ->> GC: i want to play Game
     GC ->> D: is Game waiting
     alt Game is not waiting
+        D->>D: create new waiting Game
         D->>GC: here is your new GameID
-        GC->>+ GM: new Gamemanager Instance to list in GameCordinator
-        GM->>+GM: add active player to Game
-        GM->>+ G: create new Game
-        G->>D:ask for default GameState
-        D->>G:get default Gamestate
-
-        G->>GS: create GameState
-        GS->>Ca: create Cache
-        G->>W: create and add new Layer with GameID group
         GC->> Cl: GameId
     else Game is waiting
-        GC->>GM: new Player
-        GM->>+GM: add active player to Game
+        D->>GC: here is your new GameID
         GC->> Cl: GameId 
     end 
     Cl->>W: connect to GameId 
     Note over Cl, W: WEBSOCKT
-    alt all Players are not ready
+    alt you are first Player
+        W->>W: will create new GameIdLayer
+        W->>GM:will create new GameManager Instance
+        note over GM,W: all this is happaning in the Instance of the WebsocketConsumer
+        GM->>+ GM: 
+        GM->>+GM: add active player to Game
+        GM->>+ G: create new Game
+        G->>D:ask for default GameState
+        D->>G:get default Gamestate
+        G->>GS: create GameState
+        GS->>Ca: create Cache
+
         Note over GM, W: Waiting 
-    else all Players are ready
+    else not first player
+    note over GM,W: all this is happaning in the Instance of the WebsocketConsumer
+        W->>GM: new Player
+        GM->>+GM: add active player to Game
+        alt not all player ar ready
+        Note over GM, W: Waiting 
+        else all player are ready
         GM ->>G: Game.run()
         G->>W: start Game
-        W->>Cl: start Game    
+        W->>Cl: start Game  
+        end
     end
     par  GameLoop
         loop every n ms
@@ -58,7 +67,8 @@ sequenceDiagram
         alt move is not valid
             Note over GC: do nothing
         else move is valid
-            GC->>GM: move Padle
+            GC->>W: move Padle aproved
+            W->> GM: move Padle aproved
             GM->>G:move Padle
             Ca ->>GS: load from cache
             GS->>G:get GameState
@@ -72,15 +82,5 @@ sequenceDiagram
                 note over G: Do nothing
             end    
         end
-    end
-    break A Player have 11 Points
-        G->>W: finished
-        W->>Cl:finished
-        G->>D:store Gamestate
-        G->>Ca: delete Cache
-        G->>GM: finished
-        GM->>GC: finished
-        Note over Cl,D: RESTAPI
-        D->>Cl: GameResult
     end
 ````
