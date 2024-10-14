@@ -91,7 +91,7 @@ sequenceDiagram
         W->>GC: finished
         W->>Cl:finished
         Note over Cl,D: RESTAPI
-        GM->>D: giveResult
+        GC->>D: giveResult
         D->>Cl: GameResult
     end
 ````
