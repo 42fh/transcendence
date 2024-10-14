@@ -3,12 +3,16 @@
 sequenceDiagram
     participant Cl as Client
     participant GC  as GameCordinator
+    participant D as Database
+    box green AsyncWebsocketConsumer
+    participant W as Websocket
     participant GM as GameManager
     participant G as Game
     participant GS as GamState
     participant Ca as Cache 
-    participant D as Database
-    participant W as Websocket
+    end
+    
+    
     Note over Cl, D: RESTAPI
     Cl ->> GC: i want to play Game
     GC ->> D: is Game waiting
@@ -21,7 +25,7 @@ sequenceDiagram
         GC->> Cl: GameId 
     end 
     Cl->>W: connect to GameId 
-    Note over Cl, W: WEBSOCKT
+    Note over W, Ca: WEBSOCKT
     alt you are first Player
         W->>W: will create new GameIdLayer
         W->>GM:will create new GameManager Instance
