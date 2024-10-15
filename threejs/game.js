@@ -2,6 +2,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as THREE from 'three';
 import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.19/+esm';
 import { Sky } from 'three/addons/objects/Sky.js';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 
 const gui = new GUI();
 
@@ -52,6 +53,60 @@ skyGroup.add(sky.material.uniforms['mieCoefficient'], 'value').min(0).max(0.1).s
 skyGroup.add(sky.material.uniforms['mieDirectionalG'], 'value').min(0).max(1).step(0.001).name('Mie directional G');
 skyGroup.add(sky.material.uniforms['sunPosition'].value, 'x').min(-1).max(1).step(0.001).name('Sun x');
 
+// Helper function to set properties
+function setupModel(gltfScene, scale, position, rotation) {
+    gltfScene.scale.set(scale.x, scale.y, scale.z);
+    gltfScene.position.set(position.x, position.y, position.z);
+    if (rotation) {
+        gltfScene.rotation.set(rotation.x || 0, rotation.y || 0, rotation.z || 0);
+    }
+    scene.add(gltfScene);
+}
+
+
+// Models
+const gltfLoader = new GLTFLoader();
+// Load models in parallel using Promise.all
+Promise.all([
+    gltfLoader.loadAsync('static/models/palm/quiver_tree_02_1k.gltf'),
+    gltfLoader.loadAsync('static/models/bush/fern_02_1k.gltf'),
+    gltfLoader.loadAsync('static/models/coconut/scene.gltf'),
+    gltfLoader.loadAsync('static/models/umbrella/scene.gltf'),
+    gltfLoader.loadAsync('static/models/ball/scene.gltf'),
+    gltfLoader.loadAsync('static/models/chair/plastic_monobloc_chair_01_1k.gltf'),
+    gltfLoader.loadAsync('static/models/log/dead_quiver_trunk_1k.gltf'),
+    gltfLoader.loadAsync('static/models/duck/rubber_duck_toy_1k.gltf')
+]).then(models => {
+    // Palm trees
+    setupModel(models[0].scene, {x: 6, y: 6, z: 6}, {x: 9, y: 0, z: 0});
+    setupModel(models[0].scene.clone(), {x: 6, y: 6, z: 6}, {x: -9, y: 0, z: 0});
+
+    // Bush
+    setupModel(models[1].scene, {x: 3, y: 3, z: 3}, {x: 8, y: 0, z: -2});
+
+    // Coconut
+    setupModel(models[2].scene, {x: 1, y: 1, z: 1}, {x: 8, y: 0.5, z: -5});
+
+    // Umbrella
+    setupModel(models[3].scene, {x: 0.01, y: 0.01, z: 0.01}, {x: 9, y: -0.3, z: 5}, {x: Math.PI * 0.08});
+
+    // Ball
+    setupModel(models[4].scene, {x: 0.5, y: 0.5, z: 0.5}, {x: -9, y: 0.5, z: 5});
+
+    // Chairs
+    setupModel(models[5].scene, {x: 2, y: 2, z: 2}, {x: -8.5, y: 0, z: -6}, {y: Math.PI * 0.5});
+    setupModel(models[5].scene.clone(), {x: 2, y: 2, z: 2}, {x: -8.5, y: 0, z: -4}, {y: Math.PI * 0.5});
+    setupModel(models[5].scene.clone(), {x: 2, y: 2, z: 2}, {x: -8.5, y: 0, z: -2}, {y: Math.PI * 0.5});
+
+    // Logs
+    setupModel(models[6].scene, {x: 8, y: 10, z: 10}, {x: -6, y: 0.5, z: -10}, {x: Math.PI * 0.5, y: Math.PI * 0.5});
+    setupModel(models[6].scene.clone(), {x: 8, y: 10, z: 10}, {x: 6, y: 0.5, z: 10}, {x: Math.PI * 0.5, z: Math.PI});
+
+    // Rubber Duck
+    setupModel(models[7].scene, {x: 2, y: 2, z: 2}, {x: -8.5, y: 0.9, z: -2}, {y: Math.PI * 0.5});
+}).catch(error => {
+    console.error('Error loading models:', error);
+});
 
 // Textures
 const textureLoader = new THREE.TextureLoader();
@@ -78,28 +133,8 @@ floorARMTexture.wrapS = THREE.RepeatWrapping;
 floorNormalTexture.wrapS = THREE.RepeatWrapping;
 floorNormalTexture.wrapT = THREE.RepeatWrapping;
 
-// Walls textures
-const wallColorTexture = textureLoader.load('static/walls/color.jpg');
-const wallNormalTexture = textureLoader.load('static/walls/normal.jpg');
-const wallARMTexture = textureLoader.load('static/walls/arm.jpg');
-const wallDisplacementTexture = textureLoader.load('static/walls/displacement.jpg');
-
-wallColorTexture.colorSpace = THREE.SRGBColorSpace
-
-wallColorTexture.repeat.set(1, 5);
-wallNormalTexture.repeat.set(1, 5);
-wallARMTexture.repeat.set(1, 5);
-wallDisplacementTexture.repeat.set(1, 5);
-wallColorTexture.wrapS = THREE.RepeatWrapping;
-wallColorTexture.wrapT = THREE.RepeatWrapping;
-wallNormalTexture.wrapS = THREE.RepeatWrapping;
-wallNormalTexture.wrapT = THREE.RepeatWrapping;
-wallARMTexture.wrapS = THREE.RepeatWrapping;
-wallARMTexture.wrapT = THREE.RepeatWrapping;
-
 // playground group
 const playground = new THREE.Group();
-scene.add(playground);
 
 const floor = new THREE.Mesh(
     new THREE.PlaneGeometry(30, 30, 100, 100),
@@ -121,40 +156,7 @@ gui.add(floor.material, 'displacementScale').min(0).max(1).step(0.001).name('Dis
 gui.add(floor.material, 'displacementBias').min(-1).max(1).step(0.001).name('Displacement bias');
 floor.rotation.x = - Math.PI * 0.5;
 playground.add(floor);
-
-const leftWall = new THREE.Mesh(
-    new THREE.CapsuleGeometry(0.7, 15, 2, 50, 50),
-    new THREE.MeshStandardMaterial({ 
-        map: wallColorTexture,
-        normalMap: wallNormalTexture,
-        roughnessMap: wallARMTexture,
-        aoMap: wallARMTexture,
-        metalnessMap: wallARMTexture,
-        displacementMap: wallDisplacementTexture,
-        displacementScale: 0.2,
-     })
-)
-leftWall.rotation.x = - Math.PI * 0.5;
-leftWall.position.y = 0.5;
-leftWall.position.x = -6;
-playground.add(leftWall);
-
-const rightWall = new THREE.Mesh(
-    new THREE.CapsuleGeometry(0.5, 15, 2, 50, 50),
-    new THREE.MeshStandardMaterial({ 
-        map: wallColorTexture,
-        normalMap: wallNormalTexture,
-        roughnessMap: wallARMTexture,
-        aoMap: wallARMTexture,
-        metalnessMap: wallARMTexture,
-        displacementMap: wallDisplacementTexture,
-        displacementScale: 0.2,
-     })
-)
-rightWall.rotation.x = - Math.PI * 0.5;
-rightWall.position.y = 0.5;
-rightWall.position.x = 6;
-playground.add(rightWall);
+scene.add(playground);
 
 // renderer
 let renderer = new THREE.WebGLRenderer({canvas});
