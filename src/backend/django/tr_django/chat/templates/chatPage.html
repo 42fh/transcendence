@@ -1,29 +1,41 @@
 <!DOCTYPE html>
 <html>
   <body>
-    <center><h1>Hello , Welcome to my chat site ! {{request.user}}</h1></center>
+    <center><h1>Hello, Welcome to my chat site! {{request.user}}</h1></center>
     <br>
-    {% if request.user.is_authenticated  %}
-    <center> Logout the chat Page <a href = "{% url 'logout-user' %}">Logout</a></center>
+    {% if request.user.is_authenticated %}
+    <center>Logout the chat Page <a href="{% url 'logout-user' %}">Logout</a></center>
     {% endif %}
-    <div
-      class="chat__item__container"
-      id="id_chat_item_container"
-      style="font-size: 20px"
-    >
-      <br />
-      <input type="text" id="id_message_send_input" />
-      <button type="submit" id="id_message_send_button">Send Message</button>
-      <br />
-      <br />
+    <div style="display: flex;">
+      <div
+        class="chat__item__container"
+        id="id_chat_item_container"
+        style="font-size: 20px; width: 70%;"
+      >
+        <br />
+        <input type="text" id="id_message_send_input" />
+        <button type="submit" id="id_message_send_button">Send Message</button>
+        <br />
+        <br />
+      </div>
+
+      <div
+        class="user__list__container"
+        id="id_user_list_container"
+        style="font-size: 20px; width: 30%; border-left: 1px solid #000; padding-left: 10px;"
+      >
+        <h3>Connected Users:</h3>
+        <ul id="id_user_list"></ul>
+      </div>
     </div>
+
     <script>
       const chatSocket = new WebSocket("ws://" + window.location.host + "/");
       chatSocket.onopen = function (e) {
-        console.log("The connection was setup successfully !");
+        console.log("The connection was set up successfully!");
       };
       chatSocket.onclose = function (e) {
-        console.log("Something unexpected happened !");
+        console.log("Something unexpected happened!");
       };
       document.querySelector("#id_message_send_input").focus();
       document.querySelector("#id_message_send_input").onkeyup = function (e) {
@@ -35,14 +47,32 @@
         var messageInput = document.querySelector(
           "#id_message_send_input"
         ).value;
-        chatSocket.send(JSON.stringify({ message: messageInput, username : "{{request.user.username}}"}));
+        chatSocket.send(
+          JSON.stringify({
+            message: messageInput,
+            username: "{{request.user.username}}",
+          })
+        );
       };
       chatSocket.onmessage = function (e) {
         const data = JSON.parse(e.data);
-        var div = document.createElement("div");
-        div.innerHTML = data.username + " : " + data.message;
-        document.querySelector("#id_message_send_input").value = "";
-        document.querySelector("#id_chat_item_container").appendChild(div);
+        if (data.type === "user_list") {
+          const userListContainer = document.querySelector("#id_user_list");
+          userListContainer.innerHTML = "";
+          data.users.forEach(function (user) {
+            const li = document.createElement("li");
+            li.textContent = user;
+            userListContainer.appendChild(li);
+          });
+        } else {
+          // if not "user_list" then it's a mesage
+          var div = document.createElement("div");
+          div.innerHTML = data.username + " : " + data.message;
+          document.querySelector("#id_message_send_input").value = "";
+          document
+            .querySelector("#id_chat_item_container")
+            .appendChild(div);
+        }
       };
     </script>
   </body>
