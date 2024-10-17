@@ -64,8 +64,7 @@
             li.textContent = user;
             userListContainer.appendChild(li);
           });
-        } else {
-          // if not "user_list" then it's a mesage
+        } else if (data.type === "sendMessage"){
           var div = document.createElement("div");
           div.innerHTML = data.username + " : " + data.message;
           document.querySelector("#id_message_send_input").value = "";
