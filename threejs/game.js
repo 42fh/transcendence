@@ -29,13 +29,16 @@ controls.enableRotate = true;
 
 // lights
 // Ambient light
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.3)
+const ambientLight = new THREE.AmbientLight(0xffffff, 1)
 scene.add(ambientLight)
 
 // Sun light
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1)
-directionalLight.position.set(3, 2, -8)
+directionalLight.position.set(3, 7.5, 3)
 scene.add(directionalLight)
+gui.add(directionalLight.position, 'x').min(-10).max(10).step(0.001).name('Light x');
+gui.add(directionalLight.position, 'y').min(-10).max(10).step(0.001).name('Light y');
+gui.add(directionalLight.position, 'z').min(-10).max(10).step(0.001).name('Light z');
 
 // // Sky
 const sky = new Sky();
@@ -44,7 +47,7 @@ sky.material.uniforms['turbidity'].value = 10;
 sky.material.uniforms['rayleigh'].value = 1.3;
 sky.material.uniforms['mieCoefficient'].value = 0.001;
 sky.material.uniforms['mieDirectionalG'].value = 0.7;
-sky.material.uniforms['sunPosition'].value.set(0.3, -0.02, -0.95);
+sky.material.uniforms['sunPosition'].value.set(0.3, 0.001, -0.95);
 scene.add(sky);
 
 const skyGroup = gui.addFolder('Sky');
@@ -108,7 +111,8 @@ Promise.all([
     gltfLoader.loadAsync('static/models/ball/scene.gltf'),
     gltfLoader.loadAsync('static/models/chair/plastic_monobloc_chair_01_1k.gltf'),
     gltfLoader.loadAsync('static/models/log/dead_quiver_trunk_1k.gltf'),
-    gltfLoader.loadAsync('static/models/duck/rubber_duck_toy_1k.gltf')
+    gltfLoader.loadAsync('static/models/duck/rubber_duck_toy_1k.gltf'),
+    // gltfLoader.loadAsync('static/models/fin/scene.gltf')
 ]).then(models => {
     // Palm trees
     setupModel(models[0].scene, {x: 6, y: 6, z: 6}, {x: 9, y: 0, z: 0});
@@ -137,8 +141,29 @@ Promise.all([
 
     // Rubber Duck
     setupModel(models[7].scene, {x: 2, y: 2, z: 2}, {x: -8.5, y: 0.9, z: -2}, {y: Math.PI * 0.5});
+
+    // Shark Fins
+    // setupModel(models[8].scene, {x: 2, y: 2, z: 2}, {x: 8, y: 2, z: -8});
 }).catch(error => {
     console.error('Error loading models:', error);
+});
+
+let sharkFin1;
+let sharkFin2;
+let sharkFin3;
+
+gltfLoader.load('static/models/fin/scene.gltf', (gltf) => {
+    gltf.scene.scale.set(2, 2, 2);
+    sharkFin1 = gltf.scene;
+    sharkFin2 = gltf.scene.clone();
+    sharkFin3 = gltf.scene.clone();
+    scene.add(sharkFin1);
+    scene.add(sharkFin2);
+    scene.add(sharkFin3);
+    sharkFin1.rotation.y = Math.PI; // 180 degrees in radians
+    sharkFin2.rotation.y = Math.PI;
+    sharkFin3.rotation.y = Math.PI;
+
 });
 
 // Textures
@@ -197,9 +222,33 @@ let renderer = new THREE.WebGLRenderer({canvas});
 renderer.setSize( window.innerWidth, window.innerHeight );
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // ratio more than 2 is too computationally expensive
 
-// game loop
+let time = Date.now();
+
 renderer.setAnimationLoop( () => {
+
+    const deltaTime = time - Date.now();
     water.material.uniforms[ 'time' ].value += 1.0 / 60.0;
+    
+    const sharkAngle = deltaTime * 0.0003;
+
+    if (sharkFin1) {
+        sharkFin1.position.x = Math.cos(sharkAngle) * 20;
+        sharkFin1.position.z = Math.sin(sharkAngle) * 20;
+        sharkFin1.rotation.y = Math.PI - sharkAngle;
+    }
+
+    if (sharkFin2) {
+        sharkFin2.position.x = Math.cos(-sharkAngle) * 30;
+        sharkFin2.position.z = Math.sin(-sharkAngle) * 30;
+        sharkFin2.rotation.y = sharkAngle;
+    }
+
+    if (sharkFin3) {
+        sharkFin3.position.x = Math.cos(sharkAngle) * 40;
+        sharkFin3.position.z = Math.sin(sharkAngle) * 40;
+        sharkFin3.rotation.y = Math.PI - sharkAngle;
+    }
+
     controls.update();
 	renderer.render( scene, camera );
 });
