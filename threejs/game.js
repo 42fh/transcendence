@@ -2,6 +2,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as THREE from 'three';
 import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.19/+esm';
 import { Sky } from 'three/addons/objects/Sky.js';
+import { Water } from 'three/addons/objects/Water.js';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 
 const gui = new GUI();
@@ -36,14 +37,14 @@ const directionalLight = new THREE.DirectionalLight(0xffffff, 1)
 directionalLight.position.set(3, 2, -8)
 scene.add(directionalLight)
 
-// Sky
+// // Sky
 const sky = new Sky();
-sky.scale.set(100, 100, 100);
+sky.scale.setScalar(1000);
 sky.material.uniforms['turbidity'].value = 10;
-sky.material.uniforms['rayleigh'].value = 3;
-sky.material.uniforms['mieCoefficient'].value = 0.1;
-sky.material.uniforms['mieDirectionalG'].value = 0.95;
-sky.material.uniforms['sunPosition'].value.set(0.3, -0.038, -0.95);
+sky.material.uniforms['rayleigh'].value = 1.3;
+sky.material.uniforms['mieCoefficient'].value = 0.001;
+sky.material.uniforms['mieDirectionalG'].value = 0.7;
+sky.material.uniforms['sunPosition'].value.set(0.3, -0.02, -0.95);
 scene.add(sky);
 
 const skyGroup = gui.addFolder('Sky');
@@ -52,7 +53,41 @@ skyGroup.add(sky.material.uniforms['rayleigh'], 'value').min(0).max(4).step(0.1)
 skyGroup.add(sky.material.uniforms['mieCoefficient'], 'value').min(0).max(0.1).step(0.001).name('Mie coefficient');
 skyGroup.add(sky.material.uniforms['mieDirectionalG'], 'value').min(0).max(1).step(0.001).name('Mie directional G');
 skyGroup.add(sky.material.uniforms['sunPosition'].value, 'x').min(-1).max(1).step(0.001).name('Sun x');
+skyGroup.add(sky.material.uniforms['sunPosition'].value, 'y').min(-1).max(1).step(0.001).name('Sun y');
+skyGroup.add(sky.material.uniforms['sunPosition'].value, 'z').min(-1).max(1).step(0.001).name('Sun z');
 
+const waterGeometry = new THREE.PlaneGeometry( 10000, 10000 );
+
+let water = new Water(
+    waterGeometry,
+    {
+        textureWidth: 512,
+        textureHeight: 512,
+        waterNormals: new THREE.TextureLoader().load( 'static/textures/waternormals.jpg', function ( texture ) {
+
+            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+
+        } ),
+        sunDirection: new THREE.Vector3(),
+        sunColor: 0xffffff,
+        waterColor: 0x001e0f,
+        distortionScale: 3.7,
+        fog: scene.fog !== undefined
+    }
+);
+
+water.rotation.x = - Math.PI / 2;
+water.material.uniforms['size'].value = 10;
+scene.add( water );
+
+const waterUniforms = water.material.uniforms;
+const folderWater = gui.addFolder( 'Water' );
+folderWater.add( waterUniforms.distortionScale, 'value', 0, 8, 0.1 ).name( 'distortionScale' );
+folderWater.add( waterUniforms.size, 'value', 0.1, 10, 0.1 ).name( 'size' );
+
+const island = new THREE.Group();
+island.position.y = 1;
+scene.add(island);
 // Helper function to set properties
 function setupModel(gltfScene, scale, position, rotation) {
     gltfScene.scale.set(scale.x, scale.y, scale.z);
@@ -60,13 +95,11 @@ function setupModel(gltfScene, scale, position, rotation) {
     if (rotation) {
         gltfScene.rotation.set(rotation.x || 0, rotation.y || 0, rotation.z || 0);
     }
-    scene.add(gltfScene);
+    island.add(gltfScene);
 }
 
-
-// Models
+// // Models
 const gltfLoader = new GLTFLoader();
-// Load models in parallel using Promise.all
 Promise.all([
     gltfLoader.loadAsync('static/models/palm/quiver_tree_02_1k.gltf'),
     gltfLoader.loadAsync('static/models/bush/fern_02_1k.gltf'),
@@ -91,7 +124,7 @@ Promise.all([
     setupModel(models[3].scene, {x: 0.01, y: 0.01, z: 0.01}, {x: 9, y: -0.3, z: 5}, {x: Math.PI * 0.08});
 
     // Ball
-    setupModel(models[4].scene, {x: 0.5, y: 0.5, z: 0.5}, {x: -9, y: 0.5, z: 5});
+    setupModel(models[4].scene, {x: 0.5, y: 0.5, z: 0.5}, {x: 8, y: 0.5, z: 4});
 
     // Chairs
     setupModel(models[5].scene, {x: 2, y: 2, z: 2}, {x: -8.5, y: 0, z: -6}, {y: Math.PI * 0.5});
@@ -139,7 +172,7 @@ const playground = new THREE.Group();
 const floor = new THREE.Mesh(
     new THREE.PlaneGeometry(30, 30, 100, 100),
     new THREE.MeshStandardMaterial({ 
-        // color: '#fffdff',
+        color: '#fffdff',
         alphaMap: floorAplhaTexture,
         transparent: true,
         map: floorColorTexture,
@@ -155,6 +188,7 @@ const floor = new THREE.Mesh(
 gui.add(floor.material, 'displacementScale').min(0).max(1).step(0.001).name('Displacement scale');
 gui.add(floor.material, 'displacementBias').min(-1).max(1).step(0.001).name('Displacement bias');
 floor.rotation.x = - Math.PI * 0.5;
+floor.position.y = 1;
 playground.add(floor);
 scene.add(playground);
 
@@ -165,6 +199,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // ratio more than
 
 // game loop
 renderer.setAnimationLoop( () => {
+    water.material.uniforms[ 'time' ].value += 1.0 / 60.0;
     controls.update();
 	renderer.render( scene, camera );
 });
