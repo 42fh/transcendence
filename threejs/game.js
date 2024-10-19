@@ -18,7 +18,10 @@ const canvas = document.querySelector(".webgl");
 const aspectRatio = window.innerWidth / window.innerHeight;
 const vertical_field_of_view = 75;
 let camera = new THREE.PerspectiveCamera( vertical_field_of_view, aspectRatio, 0.1, 1000 );
-camera.position.set(5, 5, 10);
+camera.position.set(0, 8, 19);
+gui.add(camera.position, 'x').min(-10).max(100).step(0.001).name('Camera x');
+gui.add(camera.position, 'y').min(-10).max(100).step(0.001).name('Camera y');
+gui.add(camera.position, 'z').min(-10).max(100).step(0.001).name('Camera z');
 
 // controls
 let controls = new OrbitControls(camera, canvas);
@@ -84,9 +87,6 @@ water.material.uniforms['size'].value = 10;
 scene.add( water );
 
 const waterUniforms = water.material.uniforms;
-const folderWater = gui.addFolder( 'Water' );
-folderWater.add( waterUniforms.distortionScale, 'value', 0, 8, 0.1 ).name( 'distortionScale' );
-folderWater.add( waterUniforms.size, 'value', 0.1, 10, 0.1 ).name( 'size' );
 
 const island = new THREE.Group();
 island.position.y = 1;
@@ -112,38 +112,40 @@ Promise.all([
     gltfLoader.loadAsync('static/models/chair/plastic_monobloc_chair_01_1k.gltf'),
     gltfLoader.loadAsync('static/models/log/dead_quiver_trunk_1k.gltf'),
     gltfLoader.loadAsync('static/models/duck/rubber_duck_toy_1k.gltf'),
+    gltfLoader.loadAsync('static/models/glasses/scene.gltf'),
     // gltfLoader.loadAsync('static/models/fin/scene.gltf')
 ]).then(models => {
     // Palm trees
-    setupModel(models[0].scene, {x: 6, y: 6, z: 6}, {x: 9, y: 0, z: 0});
-    setupModel(models[0].scene.clone(), {x: 6, y: 6, z: 6}, {x: -9, y: 0, z: 0});
+    setupModel(models[0].scene, {x: 6, y: 6, z: 6}, {x: 12, y: 0, z: 0});
+    setupModel(models[0].scene.clone(), {x: 6, y: 6, z: 6}, {x: -12, y: 0, z: 0});
 
     // Bush
-    setupModel(models[1].scene, {x: 3, y: 3, z: 3}, {x: 8, y: 0, z: -2});
+    setupModel(models[1].scene, {x: 3, y: 3, z: 3}, {x: 11, y: 0, z: -2});
 
     // Coconut
-    setupModel(models[2].scene, {x: 1, y: 1, z: 1}, {x: 8, y: 0.5, z: -5});
+    setupModel(models[2].scene, {x: 1, y: 1, z: 1}, {x: 11, y: 0.5, z: -5});
+    setupModel(models[2].scene.clone(), {x: 1, y: 1, z: 1}, {x: -11.5, y: 1.3, z: 4}, {z: Math.PI, x: Math.PI * 0.2});
 
     // Umbrella
-    setupModel(models[3].scene, {x: 0.01, y: 0.01, z: 0.01}, {x: 9, y: -0.3, z: 5}, {x: Math.PI * 0.08});
+    setupModel(models[3].scene, {x: 0.01, y: 0.01, z: 0.01}, {x: 12, y: -0.3, z: 5}, {x: Math.PI * 0.08});
 
     // Ball
-    setupModel(models[4].scene, {x: 0.5, y: 0.5, z: 0.5}, {x: 8, y: 0.5, z: 4});
+    setupModel(models[4].scene, {x: 0.5, y: 0.5, z: 0.5}, {x: 11, y: 0.5, z: 4});
 
     // Chairs
-    setupModel(models[5].scene, {x: 2, y: 2, z: 2}, {x: -8.5, y: 0, z: -6}, {y: Math.PI * 0.5});
-    setupModel(models[5].scene.clone(), {x: 2, y: 2, z: 2}, {x: -8.5, y: 0, z: -4}, {y: Math.PI * 0.5});
-    setupModel(models[5].scene.clone(), {x: 2, y: 2, z: 2}, {x: -8.5, y: 0, z: -2}, {y: Math.PI * 0.5});
+    setupModel(models[5].scene, {x: 2, y: 2, z: 2}, {x: -11.5, y: 0, z: 6}, {y: Math.PI * 0.5});
+    setupModel(models[5].scene.clone(), {x: 2, y: 2, z: 2}, {x: -11.5, y: 0, z: 4}, {y: Math.PI * 0.5});
+    setupModel(models[5].scene.clone(), {x: 2, y: 2, z: 2}, {x: -11.5, y: 0, z: 2}, {y: Math.PI * 0.5});
 
     // Logs
-    setupModel(models[6].scene, {x: 8, y: 10, z: 10}, {x: -6, y: 0.5, z: -10}, {x: Math.PI * 0.5, y: Math.PI * 0.5});
-    setupModel(models[6].scene.clone(), {x: 8, y: 10, z: 10}, {x: 6, y: 0.5, z: 10}, {x: Math.PI * 0.5, z: Math.PI});
+    setupModel(models[6].scene, {x: 8, y: 14, z: 10}, {x: -9, y: 0.5, z: -15}, {x: Math.PI * 0.5, y: Math.PI * 0.5});
+    setupModel(models[6].scene.clone(), {x: 8, y: 14, z: 10}, {x: 9, y: 0.5, z: 13}, {x: Math.PI * 0.5, z: Math.PI});
 
     // Rubber Duck
-    setupModel(models[7].scene, {x: 2, y: 2, z: 2}, {x: -8.5, y: 0.9, z: -2}, {y: Math.PI * 0.5});
+    setupModel(models[7].scene, {x: 4, y: 4, z: 4}, {x: -11.5, y: 0.9, z: 2}, {y: Math.PI * 0.5});
 
-    // Shark Fins
-    // setupModel(models[8].scene, {x: 2, y: 2, z: 2}, {x: 8, y: 2, z: -8});
+    // Glasses
+    setupModel(models[8].scene, {x: 0.8, y: 0.8, z: 0.8}, {x: -11.32, y: 1.4, z: 3.97}, {y: Math.PI});
 }).catch(error => {
     console.error('Error loading models:', error);
 });
@@ -170,11 +172,11 @@ gltfLoader.load('static/models/fin/scene.gltf', (gltf) => {
 const textureLoader = new THREE.TextureLoader();
 
 // Floor textures
-const floorAplhaTexture = textureLoader.load('static/floor/alpha.webp');
-const floorColorTexture = textureLoader.load('static/floor/color.jpg');
-const floorNormalTexture = textureLoader.load('static/floor/normal.jpg');
-const floorDisplacementTexture = textureLoader.load('static/floor/displacement.jpg');
-const floorARMTexture = textureLoader.load('static/floor/arm.jpg');
+const floorAplhaTexture = textureLoader.load('static/textures/floor/alpha.webp');
+const floorColorTexture = textureLoader.load('static/textures/floor/color.jpg');
+const floorNormalTexture = textureLoader.load('static/textures/floor/normal.jpg');
+const floorDisplacementTexture = textureLoader.load('static/textures/floor/displacement.jpg');
+const floorARMTexture = textureLoader.load('static/textures/floor/arm.jpg');
 
 floorColorTexture.colorSpace = THREE.SRGBColorSpace
 
@@ -191,11 +193,18 @@ floorARMTexture.wrapS = THREE.RepeatWrapping;
 floorNormalTexture.wrapS = THREE.RepeatWrapping;
 floorNormalTexture.wrapT = THREE.RepeatWrapping;
 
+// Player textures
+const playerColorTexture = textureLoader.load('static/textures/player/color.jpg');
+const playerNormalTexture = textureLoader.load('static/textures/player/normal.jpg');
+const playerARMTexture = textureLoader.load('static/textures/player/arm.jpg');
+
+playerColorTexture.colorSpace = THREE.SRGBColorSpace
+
 // playground group
 const playground = new THREE.Group();
 
 const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(30, 30, 100, 100),
+    new THREE.PlaneGeometry(45, 42, 100, 100),
     new THREE.MeshStandardMaterial({ 
         color: '#fffdff',
         alphaMap: floorAplhaTexture,
@@ -209,12 +218,31 @@ const floor = new THREE.Mesh(
         displacementScale: 0.2,
         displacementBias: -0.1,
      })
-)
-gui.add(floor.material, 'displacementScale').min(0).max(1).step(0.001).name('Displacement scale');
-gui.add(floor.material, 'displacementBias').min(-1).max(1).step(0.001).name('Displacement bias');
+);
+
 floor.rotation.x = - Math.PI * 0.5;
 floor.position.y = 1;
 playground.add(floor);
+
+const player1 = new THREE.Mesh(
+    new THREE.BoxGeometry(3, 1, 1),
+    new THREE.MeshStandardMaterial({ 
+        map: playerColorTexture,
+        normalMap: playerNormalTexture,
+        roughnessMap: playerARMTexture,
+        aoMap: playerARMTexture,
+        metalnessMap: playerARMTexture,
+     })
+)
+player1.position.set(0, 1.6, 12);
+playground.add(player1);
+
+const player2 = new THREE.Mesh(
+    new THREE.BoxGeometry(3, 1, 1),
+    new THREE.MeshStandardMaterial({ color: 'blue' })
+)
+player2.position.set(0, 1.6, -12);
+playground.add(player2);
 scene.add(playground);
 
 // renderer
