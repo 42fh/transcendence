@@ -44,6 +44,9 @@ class Player(models.Model):
             raise ValueError("A user cannot add themselves as a friend.")
         self.friends.add(friend)
 
+from django.db import models
+from user.models import UserProfile
+
 class GameMode(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField()
@@ -53,12 +56,12 @@ class GameMode(models.Model):
 
 class Game(models.Model):
     date = models.DateField()
-    players = models.ManyToManyField(Player, blank=True)
+#   allows to access the games associated with a UserProfile without needing a games field in UserProfile.
+    players = models.ManyToManyField(UserProfile, blank=True, related_name='games')
     duration = models.IntegerField(blank=True, null=True)
     mode = models.ForeignKey(GameMode, on_delete=models.SET_NULL, null=True)
     # won_games = player.games_won.all() - get all games won by player
-    winner = models.ForeignKey(Player, related_name='games_won', null=True, blank=True, on_delete=models.SET_NULL)
+    winner = models.ForeignKey(UserProfile, related_name='games_won', null=True, blank=True, on_delete=models.SET_NULL)
 
     def __str__(self):
-        return self.mode.name + ' ' + str(self.date)
-
+        return f"{self.mode.name} on {self.date}"
