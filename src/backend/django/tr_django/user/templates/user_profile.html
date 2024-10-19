@@ -18,5 +18,21 @@
     <p><strong>Bio:</strong> {{ profile.bio }}</p>
     <p><strong>Location:</strong> {{ profile.location }}</p>
     <p><strong>Level:</strong> {{ profile.level }}</p>
+
+	{% if profile.player_picture %}
+	<h4>Profile Picture:</h4>
+	<img src="{{ profile.player_picture.url }}" alt="Profile Picture" width="100">
+	{% else %}
+	<h4>No profile picture uploaded.</h4>
+	{% endif %}
+
+	<h3>Update Profile</h3>
+	<form method="POST" enctype="multipart/form-data">
+	{% csrf_token %}
+	{{ form.as_p }}
+	<button type="submit">Update Profile</button>
+	</form>
+
+
 </body>
 </html>

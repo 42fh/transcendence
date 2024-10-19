@@ -9,7 +9,7 @@ class UserProfile(models.Model):
     location = models.CharField(max_length=100, blank=True)
     level = models.IntegerField(default=1)
     # Have to use pillow for images
-    # player_picture = models.ImageField(upload_to='player_pics/', null=True, blank=True)
+    player_picture = models.ImageField(upload_to='player_pics/', null=True, blank=True)
     # ManyToManyField - user can have many games
     friends = models.ManyToManyField('self', blank=True, symmetrical=True)
 

@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from user.models import UserProfile
 
 # Explanation of `on_delete` Behavior:
 # The `on_delete` argument is used in ForeignKey and OneToOneField relationships 
@@ -23,29 +23,6 @@ from django.contrib.auth.models import User
 #
 # These options are used to manage how related objects behave when their parent object is deleted.
 
-class Player(models.Model):
-    # About User model: https://docs.djangoproject.com/en/5.1/ref/contrib/auth/#user-model
-    # OneToOneField - one user has one player profile
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    bio = models.TextField(max_length=500, blank=True)
-    location = models.CharField(max_length=100, blank=True)
-    level = models.IntegerField(default=1)
-    # Have to use pillow for images
-    # player_picture = models.ImageField(upload_to='player_pics/', null=True, blank=True)
-    # ManyToManyField - user can have many games
-    games = models.ManyToManyField('Game', blank=True)
-    friends = models.ManyToManyField('Player', blank=True)
-    
-    def __str__(self):
-        return self.user.username
-    
-    def add_friend(self, friend):
-        if self == friend:
-            raise ValueError("A user cannot add themselves as a friend.")
-        self.friends.add(friend)
-
-from django.db import models
-from user.models import UserProfile
 
 class GameMode(models.Model):
     name = models.CharField(max_length=200)
@@ -56,8 +33,8 @@ class GameMode(models.Model):
 
 class Game(models.Model):
     date = models.DateField()
-#   allows to access the games associated with a UserProfile without needing a games field in UserProfile.
-    players = models.ManyToManyField(UserProfile, blank=True, related_name='games')
+    # 
+    player = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     duration = models.IntegerField(blank=True, null=True)
     mode = models.ForeignKey(GameMode, on_delete=models.SET_NULL, null=True)
     # won_games = player.games_won.all() - get all games won by player
