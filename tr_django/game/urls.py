@@ -5,6 +5,7 @@ from . import views
 
 urlpatterns = [
     path('', views.transcendance, name='transcendance_home'),
+    path('join_any_game/', views.join_any_game),
     path('create_game/', views.create_game, name='create_game'),
     path('create_game_mode/', views.create_game_mode, name='create_game_mode'),
     path('get_games/', views.get_games, name='get_games'),

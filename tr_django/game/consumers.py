@@ -1,15 +1,13 @@
 import json
 import time
 import random
+from dataclasses import asdict
+
 
 from channels.generic.websocket import WebsocketConsumer
 from django.core.cache import cache
 
-
-# game_state
-# paddles
-# ball (pos, velocity)
-
+from game import game_state
 
 # dummy function
 def random_game_state(scale):
@@ -30,9 +28,15 @@ def vary_game_state(game_state, scale):
         return game_state
     except:
         return None
+    
+def add_noise(gs, amount):
+    gs.ball[0] += (random.random() - 0.5) * amount
+    return gs
 
 class EchoConsumer(WebsocketConsumer):
     def connect(self):
+        self.unique_game_id = self.scope["url_route"]["kwargs"]["unique_game_id"]
+        print("self.unique_game_id ", self.unique_game_id)
         self.accept()
 
     def disconnect(self, close_code):
@@ -40,24 +44,31 @@ class EchoConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        message = text_data_json["message"]
-        print("message received: ", message)
+        # message = text_data_json["message"]
+        print("json received: ", text_data_json)
         time_stamp = str(time.time())
 
-        game_state = None
-        redis_error = ""
+        gs = None
         try:
-            game_state = cache.get_or_set("game_state", random_game_state(300))
+            gs = cache.get(self.unique_game_id)
         except:
-            redis_error = "redis is not available: "
-        
-        game_state = vary_game_state(game_state, 30)
-        try:
-            cache.set("game_state", game_state)
-        except:
-            pass
+            self.send(text_data="Error: failed to get state from redis")
+            self.close()
 
-        self.send(text_data=json.dumps({
-            "message": ("backend greets: " + redis_error + time_stamp),
-            "game_state" : game_state,
-        }))
+        print("gs is\n", str(gs))
+        # game_state = vary_game_state(game_state, 30)
+        # game_state = add_noise(game_state, 0.1)
+
+        try:
+            cache.set(self.unique_game_id, gs)
+        except:
+            self.send(text_data="Error: failed to set state to redis")
+            self.close()
+
+        message = {
+            "message": "backend greets: 1729343754.7230139",
+            "game_state": asdict(gs)
+        }
+        json_message = json.dumps(message)
+
+        self.send(text_data=json_message)

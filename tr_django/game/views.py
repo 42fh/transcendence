@@ -2,9 +2,32 @@ from django.shortcuts import redirect
 from django.http import JsonResponse
 from .models import Game, GameMode
 from django.views.decorators.csrf import csrf_exempt
+from django.core.cache import cache
+
+from game.game_state import * 
+import uuid
 
 def transcendance(request):
     return redirect("/static/index.html")
+
+def join_any_game(request):
+    game_id = cache.get('pending_game_id')
+    print(game_id)
+    if game_id == None:
+        new_game = game_state() 
+        new_game.unique_game_id = str(uuid.uuid4())
+        cache.set('pending_game_id', new_game.unique_game_id)
+        cache.set(new_game.unique_game_id, new_game)
+        return JsonResponse({
+            'game_id': new_game.unique_game_id,
+            'message': 'created new game',
+        })
+    else:
+        cache.set('pending_game_id', None)
+        return JsonResponse({
+            'game_id': str(game_id),
+            'message': 'joining existing game',
+        })
 
 @csrf_exempt
 def create_game(request):
