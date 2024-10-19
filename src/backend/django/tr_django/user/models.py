@@ -11,7 +11,6 @@ class UserProfile(models.Model):
     # Have to use pillow for images
     # player_picture = models.ImageField(upload_to='player_pics/', null=True, blank=True)
     # ManyToManyField - user can have many games
-	games = models.ManyToManyField('game.Game', blank=True
     friends = models.ManyToManyField('self', blank=True, symmetrical=True)
 
     def __str__(self):
@@ -21,3 +20,4 @@ class UserProfile(models.Model):
         if self == friend:
             raise ValueError("A user cannot add themselves as a friend.")
         self.friends.add(friend)
+        
