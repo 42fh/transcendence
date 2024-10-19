@@ -5,10 +5,7 @@ from user.models import UserProfile
 
 def user_profile(request, username):
     user = get_object_or_404(User, username=username)
-    profile = UserProfile.objects.get(user=user)
+    profile = get_object_or_404(UserProfile, user=user)
 
-    context = {
-        'user': user,
-        'profile': profile,
-    }
-    return render(request, 'user_profile.html', context)
+    return render(request, 'user_profile.html', {'user': user, 'profile': profile})
+
