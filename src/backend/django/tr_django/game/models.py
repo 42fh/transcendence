@@ -1,5 +1,5 @@
 from django.db import models
-from user.models import UserProfile
+from django.contrib.auth.models import User
 
 # Explanation of `on_delete` Behavior:
 # The `on_delete` argument is used in ForeignKey and OneToOneField relationships
@@ -34,12 +34,12 @@ class GameMode(models.Model):
 
 class Game(models.Model):
     date = models.DateField()
-    players = models.ManyToManyField(UserProfile)
+    players = models.ManyToManyField(User)
     duration = models.IntegerField(blank=True, null=True)
     mode = models.ForeignKey(GameMode, on_delete=models.SET_NULL, null=True)
     # won_games = player.games_won.all() - get all games won by player
     winner = models.ForeignKey(
-        UserProfile,
+        User,
         related_name="games_won",
         null=True,
         blank=True,
