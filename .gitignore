@@ -7,7 +7,6 @@ myenv/
 bin/
 lib/
 Include/
-Scripts/
 pyvenv.cfg
 
 # Media directory
