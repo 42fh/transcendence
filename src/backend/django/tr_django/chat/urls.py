@@ -1,16 +1,11 @@
-from django.urls import path, include
-from chat import views as chat_views
-from django.contrib.auth.views import LoginView, LogoutView
-from . import views
-
+from django.urls import path
+from .views import chatPage, testPage, create_one_to_one_chat, one_to_one_chat
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
-    path("", chat_views.chatPage, name="chat-page"),
-
-    # login-section
-    path("auth/login/", LoginView.as_view
-         (template_name="LoginPage.html"), name="login-user"),
-    path("auth/logout/", LogoutView.as_view(), name="logout-user"),
-    path('', views.testPage, name='test_chats'),
-
+    path('', chatPage, name='chat-page'), 
+    path('test/', testPage, name='test-page'),
+    path('create_one_to_one_chat/', create_one_to_one_chat, name='create-one-to-one-chat'),
+    path('<str:room_name>/', one_to_one_chat, name='one-to-one-chat'),
+	path('logout/', auth_views.LogoutView.as_view(), name='logout-user'),
 ]

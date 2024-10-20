@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <body>
-    <center><h1>Hello, Welcome to my chat site! {{request.user}}</h1></center>
+    <center><h1>One-to-One Chat with {{ room_name }}</h1></center>
     <br>
     {% if request.user.is_authenticated %}
     <center>Logout the chat Page <a href="{% url 'logout-user' %}">Logout</a></center>
@@ -18,19 +18,11 @@
         <br />
         <br />
       </div>
-
-      <div
-        class="user__list__container"
-        id="id_user_list_container"
-        style="font-size: 20px; width: 30%; border-left: 1px solid #000; padding-left: 10px;"
-      >
-        <h3>Connected Users:</h3>
-        <ul id="id_user_list"></ul>
-      </div>
     </div>
 
     <script>
-      const chatSocket = new WebSocket("ws://" + window.location.host + "/ws/chat/");
+      const roomName = "{{ room_name }}";
+      const chatSocket = new WebSocket("ws://" + window.location.host + "/ws/chat/" + roomName + "/");
       chatSocket.onopen = function (e) {
         console.log("The connection was set up successfully!");
       };
@@ -56,19 +48,7 @@
       };
       chatSocket.onmessage = function (e) {
         const data = JSON.parse(e.data);
-        if (data.type === "user_list") {
-          const userListContainer = document.querySelector("#id_user_list");
-          userListContainer.innerHTML = "";
-          data.users.forEach(function (user) {
-            const li = document.createElement("li");
-            li.textContent = user;
-            li.style.cursor = "pointer";  // Add cursor style to indicate clickability
-            li.onclick = function() {
-              createOneToOneChat(user);
-            };
-            userListContainer.appendChild(li);
-          });
-        } else if (data.type === "sendMessage"){
+        if (data.type === "chat_message"){
           var div = document.createElement("div");
           div.innerHTML = data.username + " : " + data.message;
           document.querySelector("#id_message_send_input").value = "";
@@ -77,28 +57,6 @@
             .appendChild(div);
         }
       };
-
-      function createOneToOneChat(otherUser) {
-        fetch('/chat/create_one_to_one_chat/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-CSRFToken': '{{ csrf_token }}'
-          },
-          body: new URLSearchParams({
-            'other_user': otherUser
-          })
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.chat_room_url) {
-            window.location.href = data.chat_room_url;
-          } else {
-            console.error('Failed to create chat room');
-          }
-        })
-        .catch(error => console.error('Error:', error));
-      }
     </script>
   </body>
 </html>
