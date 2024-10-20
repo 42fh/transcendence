@@ -1,8 +1,8 @@
 from django.contrib.auth.models import User
 
 # Define the username and password
-username = 'userX'
-password = 'password123' 
+username = "userX"
+password = "password123"
 
 # Create a new user
 user, created = User.objects.get_or_create(username=username)

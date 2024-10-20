@@ -7,19 +7,27 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('user', '0001_initial'),
-        ('game', '0003_player_level_alter_game_players'),
+        ("user", "0001_initial"),
+        ("game", "0003_player_level_alter_game_players"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='game',
-            name='players',
-            field=models.ManyToManyField(blank=True, related_name='games', to='user.UserProfile'),
+            model_name="game",
+            name="players",
+            field=models.ManyToManyField(
+                blank=True, related_name="games", to="user.UserProfile"
+            ),
         ),
         migrations.AlterField(
-            model_name='game',
-            name='winner',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='games_won', to='user.userprofile'),
+            model_name="game",
+            name="winner",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="games_won",
+                to="user.userprofile",
+            ),
         ),
     ]

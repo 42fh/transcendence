@@ -3,14 +3,15 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 
 # Native Django tests
-# - automatically creates a temporary database 
+# - automatically creates a temporary database
 # - provides a test client that allows to simulate GET, POST, and other requests
-# - has fixtures like pytest 
+# - has fixtures like pytest
 # python manage.py test - to test
+
 
 class GameAppTests(TestCase):
     def test_game_related_models(self):
-        user = User.objects.create_user(username='testuser', password='12345')
+        user = User.objects.create_user(username="testuser", password="12345")
 
         user_profile = UserProfile.objects.create(
             user=user, bio="Test bio", location="Test location", level=1

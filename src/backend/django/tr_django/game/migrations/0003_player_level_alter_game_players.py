@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('game', '0002_alter_game_players'),
+        ("game", "0002_alter_game_players"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='player',
-            name='level',
+            model_name="player",
+            name="level",
             field=models.IntegerField(default=1),
         ),
         migrations.AlterField(
-            model_name='game',
-            name='players',
-            field=models.ManyToManyField(blank=True, to='game.player'),
+            model_name="game",
+            name="players",
+            field=models.ManyToManyField(blank=True, to="game.player"),
         ),
     ]

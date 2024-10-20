@@ -27,16 +27,16 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'game',
-    'chat',
-    'user',
-    'blockchain',	
-    'channels',
+    "game",
+    "chat",
+    "user",
+    "blockchain",
+    "channels",
 ]
 
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -122,4 +122,4 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-ASGI_APPLICATION = 'tr_django.asgi.application'
+ASGI_APPLICATION = "tr_django.asgi.application"
