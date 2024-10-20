@@ -38,7 +38,7 @@
 </head>
 <body>
 
-    <h1>Pong Game</h1>
+   <h1>Pong Game</h1>
     <label for="playerId">Choose Player ID:</label>
     <input type="text" id="playerId" placeholder="Enter player ID" />
     <label for="gameId">Enter Game ID:</label>
@@ -57,20 +57,16 @@
     <button onclick="movePaddle('down')">Move Paddle Down</button>
 
     <script>
-        let socket;
-        let playerId = '';
 
-        function connect() {
-            }
-       	 document.getElementById('startGame').addEventListener('click', function() {
+         document.getElementById('startGame').addEventListener('click', function() {
 
             playerId = document.getElementById('playerId').value;
             if (!playerId) {
                 alert('Please enter a Player ID.');
                 return;
-		}		
+        }       
             
-	const gameId = document.getElementById('gameId').value;
+    const gameId = document.getElementById('gameId').value;
 
             if (!gameId) {
                 alert("Please enter a valid Game ID");
@@ -78,7 +74,7 @@
             }
 
             
-	const wsUrl = `ws://localhost:8000/ws/game/${gameId}/?user=${playerId}`;  // Adjust for your WebSocket URL
+    const wsUrl = `ws://localhost:8000/ws/game/${gameId}/?user=${playerId}`;  // Adjust for 
 
             socket = new WebSocket(wsUrl);
 
@@ -91,7 +87,6 @@
                 if (data.game_state) {
                     updateGameState(data.game_state);
                 }
-		console.log("Parsed data:", data);
             };
 
             socket.onclose = function(event) {
@@ -104,7 +99,7 @@
         });
 
         function movePaddle(direction) {
-            if (!socket || socket.readyState !== WebSocket.OPEN) {
+            if (!socket || socket.readyState !== WebSocket.OPEN){ 
                 alert('WebSocket connection is not open.');
                 return;
             }
@@ -112,18 +107,36 @@
             // Send paddle movement action
             const message = JSON.stringify({
                 action: 'move_paddle',
-                direction: direction
+                direction: direction,
+		user_id: playerId
             });
 
             socket.send(message);
         }
+
+
 	function updateGameState(gameState) {
-    	// Update paddles and ball positions based on gameState from server
-    	document.getElementById('paddle1').style.top = `${gameState.paddle_left.y * 10}px`; // Correcting to access paddle_left.y
-    	document.getElementById('paddle2').style.top = `${gameState.paddle_right.y * 10}px`; // Correcting to access paddle_right.y
-    	document.getElementById('ball').style.top = `${gameState.ball.y * 10}px`; // Correcting to access ball.y
-    	document.getElementById('ball').style.left = `${gameState.ball.x * 10}px`; // Correcting to access ball.x
-        }
+    		const gameWidth = document.getElementById('game').clientWidth;
+    		const gameHeight = document.getElementById('game').clientHeight;
+
+    		document.getElementById('paddle1').style.top = `${gameState.paddle_left.y * gameHeight}px`;
+    		document.getElementById('paddle2').style.top = `${gameState.paddle_right.y * gameHeight}px`;
+
+    		document.getElementById('ball').style.top = `${gameState.ball.y * gameHeight}px`;
+    		document.getElementById('ball').style.left = `${gameState.ball.x * gameWidth}px`;
+
+/*const gameWidth = 400;  // Fixed game width as per the #game div
+    const gameHeight = 600; // Fixed game height as per the #game div
+
+    // Ensure paddles and ball positions are scaled to the actual game field dimensions
+    document.getElementById('paddle1').style.top = `${gameState.paddle_left.y}px`; // Paddle height is 100px
+    document.getElementById('paddle2').style.top = `${gameState.paddle_right.y }px`;
+
+    document.getElementById('ball').style.top = `${gameState.ball.y}px`; // Ball height is 20px
+    document.getElementById('ball').style.left = `${gameState.ball.x }px`; // Ball width is 20px
+*/
+}
+
     </script>
 
 </body>
