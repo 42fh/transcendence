@@ -33,8 +33,7 @@ class GameMode(models.Model):
 
 class Game(models.Model):
     date = models.DateField()
-    # 
-    player = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    players = models.ManyToManyField(UserProfile)
     duration = models.IntegerField(blank=True, null=True)
     mode = models.ForeignKey(GameMode, on_delete=models.SET_NULL, null=True)
     # won_games = player.games_won.all() - get all games won by player
