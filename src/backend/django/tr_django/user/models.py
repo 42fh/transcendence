@@ -8,9 +8,7 @@ class UserProfile(models.Model):
     bio = models.TextField(max_length=500, blank=True)
     location = models.CharField(max_length=100, blank=True)
     level = models.IntegerField(default=1)
-    # Have to use pillow for images
     player_picture = models.ImageField(upload_to='player_pics/', null=True, blank=True)
-    # ManyToManyField - user can have many games
     friends = models.ManyToManyField('self', blank=True, symmetrical=True)
 
     def __str__(self):
