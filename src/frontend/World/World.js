@@ -17,7 +17,7 @@ export default class World
         // Canvas
         this.canvas = canvas;
         
-        // GUI
+        // GUI - TODO: make one global GUI
         this.gui = new GUI();
 
         // Camera
@@ -29,6 +29,7 @@ export default class World
 
         // Renderer
         this.renderer = new THREE.WebGLRenderer({canvas: this.canvas});
+        this.renderer.outputEncoding = THREE.sRGBEncoding;
         this.renderer.setSize( window.innerWidth, window.innerHeight );
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // ratio more than 2 is too computationally expensive
 
@@ -54,8 +55,18 @@ export default class World
         }
 
         this.game = newGame;
-        this.renderer.setAnimationLoop( () => {
-            this.game.gameLoop(this, this.game.scene);
-        });
+
+        if (this.game.loader != null) {
+            window.addEventListener('resourcesLoaded', () => {
+                this.renderer.setAnimationLoop( () => {
+                    this.game.gameLoop(this, this.game.scene);
+                });
+            });
+        }
+        else {
+            this.renderer.setAnimationLoop( () => {
+                this.game.gameLoop(this, this.game.scene);
+            });
+        }
     }
 }
