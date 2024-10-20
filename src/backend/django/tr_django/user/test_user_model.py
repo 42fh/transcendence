@@ -5,7 +5,6 @@ from .models import UserProfile
 
 class UserProfileTests(TestCase):
     def setUp(self):
-        # Create a user for testing
         self.user1 = User.objects.create_user(username="testuser1", password="12345")
         self.user2 = User.objects.create_user(username="testuser2", password="54321")
         self.user_profile1 = UserProfile.objects.create(
@@ -28,12 +27,10 @@ class UserProfileTests(TestCase):
         self.assertIn(self.user_profile2, self.user_profile1.friends.all())
 
     def test_add_self_as_friend(self):
-        """Test that a user cannot add themselves as a friend."""
+        self.user_profile1.send_friend_request(self.user_profile2)
         with self.assertRaises(ValueError) as context:
             self.user_profile1.add_friend(self.user_profile1)
-        self.assertEqual(
-            str(context.exception), "A user cannot add themselves as a friend."
-        )
+        self.assertEqual(str(context.exception), "You cannot add yourself as a friend.")
 
     def test_friends_symmetry(self):
         """Test that friendship is symmetrical."""
@@ -44,6 +41,32 @@ class UserProfileTests(TestCase):
         """Test the string representation of UserProfile."""
         self.assertEqual(str(self.user_profile1), "testuser1")
         self.assertEqual(str(self.user_profile2), "testuser2")
+
+    def test_send_friend_request(self):
+        """Test sending a friend request."""
+        self.user_profile1.send_friend_request(self.user_profile2)
+        self.assertIn(self.user_profile2, self.user_profile1.friend_requests_sent.all())
+        self.assertIn(
+            self.user_profile1, self.user_profile2.friend_requests_received.all()
+        )
+
+    def test_send_friend_request_to_self(self):
+        """Test that a user cannot send a friend request to themselves."""
+        with self.assertRaises(ValueError) as context:
+            self.user_profile1.send_friend_request(self.user_profile1)
+        self.assertEqual(
+            str(context.exception), "A user cannot send a friend request to themselves."
+        )
+
+    def test_accept_friend_request(self):
+        self.user_profile1.send_friend_request(self.user_profile2)
+        self.user_profile2.accept_friend_request(self.user_profile1)
+
+    def test_accept_nonexistent_friend_request(self):
+        """Test that accepting a non-existent friend request raises an error."""
+        with self.assertRaises(ValueError) as context:
+            self.user_profile2.accept_friend_request(self.user_profile1)
+        self.assertEqual(str(context.exception), "No friend request from this user.")
 
     def tearDown(self):
         """Clean up after tests."""

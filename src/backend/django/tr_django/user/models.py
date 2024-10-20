@@ -1,5 +1,5 @@
-from django.contrib.auth.models import User
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class UserProfile(models.Model):
@@ -10,12 +10,31 @@ class UserProfile(models.Model):
     location = models.CharField(max_length=100, blank=True)
     level = models.IntegerField(default=1)
     player_picture = models.ImageField(upload_to="player_pics/", null=True, blank=True)
-    friends = models.ManyToManyField("self")
+
+    friends = models.ManyToManyField("self", symmetrical=True, blank=True)
+    friend_requests_sent = models.ManyToManyField(
+        "self", symmetrical=False, related_name="friend_requests_received"
+    )
+
+    def add_friend(self, user_profile):
+        if user_profile == self:
+            raise ValueError("You cannot add yourself as a friend.")
+        if not self.friends.filter(pk=user_profile.pk).exists():
+            self.friends.add(user_profile)
+
+    def send_friend_request(self, friend):
+        if self == friend:
+            raise ValueError("A user cannot send a friend request to themselves.")
+        self.friend_requests_sent.add(friend)
+        friend.friend_requests_received.add(self)
+
+    def accept_friend_request(self, friend):
+        if friend not in self.friend_requests_received.all():
+            raise ValueError("No friend request from this user.")
+        self.friends.add(friend)
+        friend.friends.add(self)
+        self.friend_requests_received.remove(friend)
+        friend.friend_requests_sent.remove(self)
 
     def __str__(self):
         return self.user.username
-
-    def add_friend(self, friend):
-        if self == friend:
-            raise ValueError("A user cannot add themselves as a friend.")
-        self.friends.add(friend)

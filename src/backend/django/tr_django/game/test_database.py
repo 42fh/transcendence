@@ -1,4 +1,4 @@
-from .models import Game, GameMode, UserProfile
+from .models import Game, GameMode
 from django.contrib.auth.models import User
 from django.test import TestCase
 
@@ -13,9 +13,7 @@ class GameAppTests(TestCase):
     def test_game_related_models(self):
         user = User.objects.create_user(username="testuser", password="12345")
 
-        user_profile = UserProfile.objects.create(
-            user=user, bio="Test bio", location="Test location", level=1
-        )
+        user_profile = User.objects.create(username="testuser1", password="12345")
 
         game_mode = GameMode.objects.create(
             name="Test mode", description="Test description"
