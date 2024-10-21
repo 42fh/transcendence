@@ -1,6 +1,6 @@
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as THREE from 'three';
-import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.19/+esm';
+import Debug from '../Utils/Debug.js';
 
 let instance = null;
 
@@ -17,16 +17,18 @@ export default class World
         // Canvas
         this.canvas = canvas;
         
-        // GUI - TODO: make one global GUI
-        this.gui = new GUI();
+        // GUI
+        this.gui = new Debug();
 
         // Camera
         this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
         this.camera.position.set(0, 8, 19);
-        this.gui.add(this.camera.position, 'x').min(-10).max(100).step(0.001).name('Camera x');
-        this.gui.add(this.camera.position, 'y').min(-10).max(100).step(0.001).name('Camera y');
-        this.gui.add(this.camera.position, 'z').min(-10).max(100).step(0.001).name('Camera z');
-
+        if (this.gui.debug) {
+            this.gui.gui.add(this.camera.position, 'x').min(-10).max(100).step(0.001).name('Camera x');
+            this.gui.gui.add(this.camera.position, 'y').min(-10).max(100).step(0.001).name('Camera y');
+            this.gui.gui.add(this.camera.position, 'z').min(-10).max(100).step(0.001).name('Camera z');
+        }
+        
         // Renderer
         this.renderer = new THREE.WebGLRenderer({canvas: this.canvas});
         this.renderer.outputEncoding = THREE.sRGBEncoding;
