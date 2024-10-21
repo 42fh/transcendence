@@ -113,7 +113,7 @@ window.addEventListener('resourcesLoaded', () => {
     // Glasses
     const glasses = game.loader.items['glasses'].scene;
     glasses.scale.set(0.8, 0.8, 0.8);
-    glasses.position.set(-11.32, 1.4, 3.97);
+    glasses.position.set(-11.32, 1.4, 4.02);
     glasses.rotation.set(0, Math.PI, 0);
 
     // Floor
@@ -203,5 +203,5 @@ function gameLoop(world, scene) {
 game.addGameLoop(gameLoop);
 
 world.addGame(game);
-// TODO: add destroy game method
+// TODO: add destroy game method(destroys all objects and removes event listeners)
 

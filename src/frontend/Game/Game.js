@@ -2,8 +2,9 @@ import * as THREE from 'three';
 import { Sky } from 'three/addons/objects/Sky.js';
 import { Water } from 'three/addons/objects/Water.js';
 import Loader from '../Utils/Loader.js';
-import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.19/+esm';
 import World from '../World/World.js';
+import Debug from '../Utils/Debug.js';
+
 export default class Game 
 {
     constructor()
@@ -21,8 +22,8 @@ export default class Game
         // Loader
         this.loader = null;
 
-        // GUI - TODO: make one global GUI
-        this.gui = new GUI();
+        // GUI
+        this.gui = new Debug();
     }
 
     addAmbientLight(intensity, color)
@@ -35,9 +36,11 @@ export default class Game
     {
         const directionalLight = new THREE.DirectionalLight(color, intensity)
         directionalLight.position.set(Vector3.x, Vector3.y, Vector3.z);
-        this.gui.add(directionalLight.position, 'x').min(-10).max(10).step(0.001).name('Light x');
-        this.gui.add(directionalLight.position, 'y').min(-10).max(10).step(0.001).name('Light y');
-        this.gui.add(directionalLight.position, 'z').min(-10).max(10).step(0.001).name('Light z');
+        if (this.gui.debug) {
+            this.gui.gui.add(directionalLight.position, 'x').min(-10).max(10).step(0.001).name('Light x');
+            this.gui.gui.add(directionalLight.position, 'y').min(-10).max(10).step(0.001).name('Light y');
+            this.gui.gui.add(directionalLight.position, 'z').min(-10).max(10).step(0.001).name('Light z');
+        }
         this.scene.add(directionalLight)
     }
 
