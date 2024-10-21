@@ -32,7 +32,6 @@ class UserProfile(models.Model):
         if friend not in self.friend_requests_received.all():
             raise ValueError("No friend request from this user.")
         self.friends.add(friend)
-        friend.friends.add(self)
         self.friend_requests_received.remove(friend)
         friend.friend_requests_sent.remove(self)
 
