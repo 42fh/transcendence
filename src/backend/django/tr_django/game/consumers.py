@@ -9,39 +9,43 @@ class PongConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.last_move_time = 0
-        self.move_cooldown = 0.5 
+        self.move_cooldown = 0.3 #cooldown of paddle moves
 
     async def connect(self):
         self.game_id = self.scope['url_route']['kwargs']['game_id']
         self.player_id = self.scope['query_string'].decode('utf-8').split('=')[1]
-        #self.player_id = self.scope['user'].id  
-        self.group_name = f'game_{self.game_id}'
-        print(self.game_id, self.player_id)
-        await self.channel_layer.group_add(self.group_name, self.channel_name)
+        self.game_group = f'game_{self.game_id}'
+        await self.channel_layer.group_add(self.game_group, self.channel_name)
         
 
         self.game_manager = GameManager.get_instance(self.game_id)
 
         if len(self.game_manager.players) == 0:
-            await self.game_manager.initialize_game_state()  
+            await self.game_manager.initialize()  
             asyncio.create_task(self.game_manager.start_game())
         await self.game_manager.add_player(self.player_id)
-        if len(self.game_manager.players) == 1:
-            self.paddle='left'
-        else :
-            self.paddle='right'
-        print(self.game_id, self.player_id, self.paddle)
+        self.paddle = 'left' if len(self.game_manager.players) == 1 else 'right'
+        
+        print(f"Player {self.player_id} connected to game {self.game_id} as {self.paddle} paddle")
         await self.accept()
+        
+        # Send initial game state after connection
+        initial_state = await self.game_manager.load_game_state()
+        await self.send(text_data=json.dumps({
+            'type': 'initial_state',
+            'game_state': initial_state
+            }))
+
 
     async def disconnect(self, close_code):
         game_manager = GameManager.get_instance(self.game_id)
-        
-        await game_manager.remove_player(self.player_id)
-        
-        await self.channel_layer.group_discard(self.group_name, self.channel_name)
-
+        await game_manager.remove_player(self.player_id)    
+        await self.channel_layer.group_discard(self.game_group, self.channel_name)
+        print(f"Player {self.player_id} disconnected from game {self.game_id}")
+    
     async def receive(self, text_data):
         try:
+            print(f"player:{self.player_id} get a message")
             text_data_json = json.loads(text_data)
             action = text_data_json.get('action')
             if action == 'move_paddle':
@@ -53,11 +57,14 @@ class PongConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             print(f"Error processing message: {str(e)}")
 
+    async def paddle_move(self, event):
+        await self.handle_paddle_move(event['direction'])
+
     async def handle_paddle_move(self, direction, user_id):
         current_time = time.time()
         if current_time - self.last_move_time < self.move_cooldown:
             print(f"Invalid move attempt: to fast=(cooldown{self.move_cooldown}/your{current_time - self.last_move_time} , user_id={user_id}")
-            return  # Ignore move if it's too soon after the last one
+            return  
 
         if await self.is_valid_paddle_move(direction, user_id):
             await self.update_paddle_position(direction)
@@ -101,63 +108,25 @@ class PongConsumer(AsyncWebsocketConsumer):
             
             await self.game_manager.save_game_state(game_state)
 
-
-    """async def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        action = text_data_json.get('action')
-
-        if action == 'move_paddle':
-            direction = text_data_json.get('direction')
-            
-            if await self.is_valid_paddle_move(self.player_id, direction):
-                await self.update_paddle_position_in_redis(self.player_id, direction)
-                
-    async def update_paddle_position_in_redis(self, player_id, direction):
-        game_manager = GameManager.get_instance(self.game_id)
-
-        # Use Redis to update paddle movement directly
-        async with game_manager.redis_lock():
-            game_state = await game_manager.load_game_state()
-            
-            # Example logic to move the player's paddle
-            if player_id == game_state['player1_id']:
-                if direction == 'up':
-                    game_state['player1_paddle'] = max(0, game_state['player1_paddle'] - 1)
-                elif direction == 'down':
-                    game_state['player1_paddle'] = min(game_state['max_height'], game_state['player1_paddle'] + 1)
-            elif player_id == game_state['player2_id']:
-                if direction == 'up':
-                    game_state['player2_paddle'] = max(0, game_state['player2_paddle'] - 1)
-                elif direction == 'down':
-                    game_state['player2_paddle'] = min(game_state['max_height'], game_state['player2_paddle'] + 1)
-            
-            # Save the updated state back to Redis
-            await game_manager.save_game_state(game_state)
-
-    async def is_valid_paddle_move(self, player_id, direction):
-        game_manager = GameManager.get_instance(self.game_id)
-        game_state = await game_manager.load_game_state()
-
-        if player_id == game_state['player1_id']:
-            paddle_position = game_state['player1_paddle']
-        elif player_id == game_state['player2_id']:
-            paddle_position = game_state['player2_paddle']
-        else:
-            return False
-
-        # Add logic to check if the move is valid (e.g., not moving out of bounds)
-        if direction == 'up' and paddle_position == 0:
-            return False
-        if direction == 'down' and paddle_position == game_state['max_height']:
-            return False
-
-        return True"""
+    async def game_finished(self, event):
+        game_state = event['game_state']
+        msg_type = event['type'] 
+        winner = 'you' if event['winner'] == self.paddle else 'other' 
+        
+        await self.send(text_data=json.dumps({
+            'type': msg_type,
+            'game_state': game_state,
+            'winner' : winner
+        }))
+        
+        
 
     async def game_state(self, event):
         game_state = event['game_state']
+        msg_type = event['type'] 
 
-        # Send game state to WebSocket
         await self.send(text_data=json.dumps({
+            'type': msg_type,
             'game_state': game_state
         }))
 

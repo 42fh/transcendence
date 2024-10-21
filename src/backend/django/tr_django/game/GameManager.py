@@ -10,37 +10,22 @@ This class must ensure that each game has only one GameManger. This GameManger m
 
 class GameManager:
     running_games = {}
-    
+
     def __init__(self, game_id):
         self.game_id = game_id
-        self.redis_conn = redis.Redis()
-        self.channel_layer = get_channel_layer()
-        self.game_state = self.load_game_state()
         self.redis_lock = asyncio.Lock()
-        self.players = []  
-        self.min_players = 2
+        self.redis_conn = None #get value in self.initialize()
+        self.channel_layer = None #get value in self.initialize()
+        self.players = []
+        self.min_players = 2 #later to be NONE. get value in self.init_game_state()
 
-    """# gamestate data not final  
+
+    #This comes from the database/cache in which the game settings with the game_id are stored.
+    #self.min_players are set here.
     def init_game_state(self):
         gamestate = {
             'ball': {
-                'x': 0.5, 
-                'y': 0.5,
-                'velocity_x': 0.01,
-                'velocity_y': 0.01,
-            },
-            'paddle_left': {'y': 0.5},
-            'paddle_right': {'y': 0.5},
-            'score': {'left': 0, 'right': 0}
-        }
-
-        return gamestate
-    """
-
-    def init_game_state(self):
-        gamestate = {
-            'ball': {
-                'x': 0.5, 
+                'x': 0.5,
                 'y': 0.5,
                 'velocity_x': 0.004,
                 'velocity_y': 0.004,
@@ -56,27 +41,6 @@ class GameManager:
         }
         return gamestate
 
-
-    """       
-    # where come this from database or chache ?
-    from django.core.cache import cache  ||  from .models import GameState
-    game_state = cache.get(f'game_state_{self.game_id}') || game_state = GameState.objects.get(id=game_id)
-    # how does a game_state look like ?  
-    # dict -> json 
-    game_state = {
-    'ball_position': [xpostion, yposition, VelocityX, VelocityY, deltatime],
-    'players': {
-        'player1': {'paddle_position': 0, 'uuid':uuid, last_move:timestemp },
-        'player2': {'paddle_position': 0, 'uuid':uuid, last_move:timestemp },
-    },
-    'score': [0, 0]
-    }
-    # pythonClass -> pickle -> attention pickle excecute code
-    game_state = GameState(...)
-    return game_state
-    """
-
-
     @classmethod
     def get_instance(cls, game_id):
         if game_id in cls.running_games:
@@ -87,15 +51,13 @@ class GameManager:
 
 
     def decode_game_state(self, game_state_bytes):
-        """Convert bytes from Redis into a Python dictionary."""
         if game_state_bytes:
             game_state_str = game_state_bytes.decode('utf-8')
             return json.loads(game_state_str)
         else:
-            return self.init_game_state()  # Create a new game state if none exists
+            return self.init_game_state()  # load game settings
 
     def encode_game_state(self, game_state):
-        """Convert a Python dictionary into bytes for storage in Redis."""
         game_state_str = json.dumps(game_state)
         return game_state_str.encode('utf-8')
 
@@ -108,33 +70,36 @@ class GameManager:
         game_state_bytes = self.encode_game_state(game_state)
         await self.redis_conn.set(f'game_state:{self.game_id}', game_state_bytes)
 
+
+    async def initialize(self):
+        self.redis_conn = await redis.Redis()
+        self.channel_layer = get_channel_layer()
+        await self.initialize_game_state()
+
     async def initialize_game_state(self):
-        game_state_bytes = await self.redis_conn.get(f'game_state:{self.game_id}')
+        game_state_bytes = await self.load_game_state()
         if game_state_bytes is None:
             initial_state = self.init_game_state()
             await self.save_game_state(initial_state)
 
     async def wait_for_players(self):
-        # Wait until both players are connected
         while len(self.players) < self.min_players:
             print("Waiting for players to join...")
-            await asyncio.sleep(1) 
+            await asyncio.sleep(1)
         print("All players connected. Starting the game.")
-        self.game_running = True
 
+    async def end_game(self):
+        print(f"Game {self.game_id} has ended.")
 
-    # ? start game or  
     async def start_game(self):
-        # what is the end of the game
         await self.wait_for_players()
         while len(self.players) > 0:
             game_over = await self.update_game()
             if game_over:
-                print("Game over!")
+                await self.end_game()
                 break
             await asyncio.sleep(0.05)
         #load gamestate to datatbase
-
 
     async def update_game(self):
         async with self.redis_lock:
@@ -142,12 +107,15 @@ class GameManager:
             current_state = self.decode_game_state(game_state_bytes)
             new_state, game_over = self.game_logic(current_state)
             await self.save_game_state(new_state)
+            msg_type = 'game_state' if game_over is False else 'game_finished'
+            winner = 'left' if new_state['score']['left'] >= 11 else ('right' if new_state['score']['right'] >= 11 else None)
             await self.channel_layer.group_send(f'game_{self.game_id}', {
-                'type': 'game_state',
-                'game_state': new_state
+                'type': msg_type,
+                'game_state': new_state,
+                'winner' : winner
                 })
         return game_over
-   
+
     def game_logic(self, current_state):
         if current_state['score']['left'] >= 11 or current_state['score']['right'] >= 11:
             return current_state, True
@@ -210,7 +178,7 @@ class GameManager:
         ball['y'] = 0.5
         ball['velocity_x'] = random.choice([-1, 1]) * 0.002
         ball['velocity_y'] = random.choice([-1, 1]) * 0.002
-    
+
     def reset_ball_velocity(self):
         initial_velocity_x = random.choice([-1, 1]) * random.uniform(0.01, 0.015)
         initial_velocity_y = random.uniform(-0.005, 0.005)
@@ -225,12 +193,12 @@ class GameManager:
         else:
             print(f"Player {player_id} is already in the game {self.game_id}.")
             return False
-    
+
     async def remove_player(self, player_id):
         if player_id in self.players:
             self.players.remove(player_id)
             print(f"Player {player_id} removed from game {self.game_id}. Remaining players: {self.players}")
-            
+
             if len(self.players) == 0:
                 # If no players left, end the game and clean up
                 print(f"Game {self.game_id} ended. No more players.")

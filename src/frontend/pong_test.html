@@ -48,7 +48,12 @@
             <button onclick="startGame()">Start Game</button>
         </div>
 
-        <div id="score-display">
+	<div id="winner-display" style="display: none;">
+        <h2>Game Over!</h2>
+        <p>Winner: <span id="winner"></span></p>
+    	</div>
+        
+	<div id="score-display">
             <div id="left-score" class="score">Left: 0</div>
             <div id="right-score" class="score">Right: 0</div>
         </div>
@@ -59,6 +64,8 @@
             <button onmousedown="movePaddle('up')" onmouseup="stopPaddle()">Move Paddle Up</button>
             <button onmousedown="movePaddle('down')" onmouseup="stopPaddle()">Move Paddle Down</button>
         </div>
+	
+    
     </div>
 
     <script>
@@ -76,16 +83,42 @@
             socket.onmessage = function(e) {
                 const data = JSON.parse(e.data);
 		console.log(data);
-		 if (data.game_state){                                                                                                                                                   
+		if (data.type === 'initial_state') 
+		{
+        		alert("Game initialized!");
                     gameState = data.game_state;
                     updateGameDisplay();
-                }
+    		} 
+		else if (data.type === 'game_state') 
+		{
+                    gameState = data.game_state;
+                    updateGameDisplay();
+    		} 
+		else if (data.type === 'game_finished') 
+		{
+                    gameState = data.game_state;
+                    updateGameDisplay();
+        	    displayWinner(data.winner);
+   		 }
             };
 
             socket.onopen = function(e) {
                 console.log("Connected to WebSocket");
             };
-        }
+	        
+	socket.onclose = function(event) {
+            if (event.wasClean) {
+                console.log(`Connection closed cleanly, code=${event.code} reason=${event.reason}`);
+            } else {
+                console.log('Connection died');
+            }
+        };
+
+        socket.onerror = function(error) {
+            console.log(`WebSocket Error: ${error.message}`);
+        };
+        
+	}
 
         function updateGameDisplay() {
             const gameDiv = document.getElementById('game');
@@ -152,8 +185,12 @@
                 user_id: playerId
             }));
         }
-
-        function stopPaddle() {
+	function displayWinner(winner) {
+    		document.getElementById('winner').textContent = winner;
+    		document.getElementById('winner-display').style.display = 'block';
+	}
+        
+	function stopPaddle() {
             // You might want to implement paddle stopping logic here
         }
     </script>
