@@ -2,10 +2,11 @@ import * as THREE from 'three';
 import World from './World/World.js';
 import Game from './Game/Game.js';
 
-let fin1, fin2, fin3;
+let fin1, fin2, fin3, player1, player2, moveDown, moveUp, gameState, playerId, socket;
 
+let canvas = document.querySelector('.webgl');
 
-const world = new World(document.querySelector('.webgl'));
+const world = new World(canvas);
 
 const game = new Game();
 game.addAmbientLight(1, 0xffffff);
@@ -136,7 +137,7 @@ window.addEventListener('resourcesLoaded', () => {
     floor.rotation.x = - Math.PI * 0.5;
     floor.position.y = 0.1;
 
-    const player1 = new THREE.Mesh(
+    player1 = new THREE.Mesh(
     new THREE.BoxGeometry(3, 1, 1),
     new THREE.MeshStandardMaterial({ 
             map: game.loader.items['playerColorTexture'],
@@ -147,8 +148,10 @@ window.addEventListener('resourcesLoaded', () => {
         })
     );
     player1.position.set(0, 0.63, 12);
+    player1.name = 'player1';
 
-    const player2 = player1.clone();
+    player2 = player1.clone();
+    player2.name = 'player2';
     player2.position.set(0, 0.63, -12);
 
     // Fins
@@ -174,14 +177,19 @@ window.addEventListener('resourcesLoaded', () => {
     fin1 = game.scene.children[0].getObjectByName('sharkFin1');
     fin2 = game.scene.children[0].getObjectByName('sharkFin2');
     fin3 = game.scene.children[0].getObjectByName('sharkFin3');
+    player1 = game.scene.children[0].getObjectByName('player1');
+    player2 = game.scene.children[0].getObjectByName('player2');
 });
 
 let time = Date.now();
 function gameLoop(world, scene) {
 
     const deltaTime = time - Date.now();
+    
+    // water animation
     world.game.water.material.uniforms[ 'time' ].value += 1.0 / 60.0;
     
+    // shark animation
     const sharkAngle = 0.0003 * deltaTime;
     fin1.position.x = Math.cos(sharkAngle) * 25;
     fin1.position.z = Math.sin(sharkAngle) * 25;
@@ -195,8 +203,22 @@ function gameLoop(world, scene) {
     fin3.position.z = Math.sin(sharkAngle) * 45;
     fin3.rotation.y = sharkAngle;
 
-    // console.log(fin1);
-    // console.log(world.game.scene.children[0].getObjectByName('sharkFin1').position);
+    // move paddle
+    if (moveDown) {
+        socket.send(JSON.stringify({
+            action: 'move_paddle',
+            direction: 'down',
+            user_id: playerId
+        }));
+    }
+    if (moveUp) {
+        socket.send(JSON.stringify({
+            action: 'move_paddle',
+            direction: 'up',
+            user_id: playerId
+        }));
+    }
+
     world.controls.update();
 	world.renderer.render( scene, world.camera );
 };
@@ -205,3 +227,69 @@ game.addGameLoop(gameLoop);
 world.addGame(game);
 // TODO: add destroy game method(destroys all objects and removes event listeners)
 
+document.querySelector('.joinGame').addEventListener('click', function() {
+    var gameId = document.getElementById('gameId').value;
+    playerId = document.getElementById('playerId').value;
+    socket = new WebSocket(`ws://localhost:8000/ws/game/${gameId}/?player=${playerId}`);
+    
+    socket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        if (data.type === 'initial_state') 
+        {
+            alert("Game initialized!");
+            gameState = data.game_state;
+        } 
+        else if (data.type === 'game_state') 
+        {
+            gameState = data.game_state;
+            player1.position.x = gameState.paddle_left.y * 10;
+            player2.position.x = gameState.paddle_right.y * 10;
+        } 
+        else if (data.type === 'game_finished') 
+        {
+            gameState = data.game_state;
+        }
+    };
+
+    socket.onopen = function(e) {
+        console.log("Connected to WebSocket");
+    };
+});
+
+// Move paddle
+document.addEventListener('keydown', (event) => {
+    switch (event.code) {
+        case 'ArrowLeft':
+        case 'KeyA':
+            moveUp = true;
+            break;
+        case 'ArrowRight':
+        case 'KeyD':
+            moveDown = true;
+            break;
+    }
+});
+
+// Stop moving paddle
+document.addEventListener('keyup', (event) => {
+    switch (event.code) {
+        case 'ArrowLeft':
+        case 'KeyA':
+            moveUp = false;
+            break;
+        case 'ArrowRight':
+        case 'KeyD':
+            moveDown = false;
+            break;
+    }
+});
+
+// Fullscreen
+document.addEventListener('dblclick', () => {
+    if (!document.fullscreenElement) {
+        canvas.requestFullscreen();
+    }
+    else {
+        document.exitFullscreen();
+    }
+});
