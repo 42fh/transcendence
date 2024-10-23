@@ -3,19 +3,19 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 
 # Native Django tests
-# - automatically creates a temporary database 
+# - automatically creates a temporary database
 # - provides a test client that allows to simulate GET, POST, and other requests
-# - has fixtures like pytest 
+# - has fixtures like pytest
 # python manage.py test - to test
+
 
 class DatabaseModelsTest(TestCase):
     def test_database(self):
-        user = User.objects.create_user(username='testuser', password='12345')
+        user = User.objects.create_user(username="testuser", password="12345")
         player = Player.objects.create(
-            user=user, bio="Test bio", location="Test location",
-            level=1
+            user=user, bio="Test bio", location="Test location", level=1
         )
-        self.assertEqual(player.user.username, 'testuser')
+        self.assertEqual(player.user.username, "testuser")
         self.assertEqual(player.bio, "Test bio")
         self.assertEqual(player.location, "Test location")
         self.assertEqual(player.level, 1)
@@ -26,9 +26,7 @@ class DatabaseModelsTest(TestCase):
         self.assertEqual(game_mode.name, "Test mode")
         self.assertEqual(game_mode.description, "Test description")
 
-        game = Game.objects.create(
-            date="2024-10-07", mode=game_mode, winner=player
-        )
+        game = Game.objects.create(date="2024-10-07", mode=game_mode, winner=player)
         game.players.add(player)
         self.assertEqual(game.date, "2024-10-07")
         self.assertEqual(game.mode, game_mode)

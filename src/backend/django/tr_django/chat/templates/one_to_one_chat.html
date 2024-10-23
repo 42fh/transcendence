@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
   <body>
-    <center><h1>One-to-One Chat with {{ room_name }}</h1></center>
+    <center><h1>One-to-One Chat</h1></center>
+    <center><h2>room name: {{ room_name }}</h2></center>
+
     <br>
     {% if request.user.is_authenticated %}
     <center>Logout the chat Page <a href="{% url 'logout-user' %}">Logout</a></center>

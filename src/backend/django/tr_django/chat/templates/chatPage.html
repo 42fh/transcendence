@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <body>
-    <center><h1>Hello, Welcome to my chat site! {{request.user}}</h1></center>
+    <center><h1>Chat {{request.user}}</h1></center>
     <br>
     {% if request.user.is_authenticated %}
     <center>Logout the chat Page <a href="{% url 'logout-user' %}">Logout</a></center>
@@ -30,48 +30,58 @@
     </div>
 
     <script>
-      const chatSocket = new WebSocket("ws://" + window.location.host + "/ws/chat/");
+      // Initialize with group_chat room name
+      const chatSocket = new WebSocket(
+        "ws://" + window.location.host + "/ws/chat/group_chat/"
+      );
+
       chatSocket.onopen = function (e) {
         console.log("The connection was set up successfully!");
       };
+
       chatSocket.onclose = function (e) {
         console.log("Something unexpected happened!");
       };
+
       document.querySelector("#id_message_send_input").focus();
+      
       document.querySelector("#id_message_send_input").onkeyup = function (e) {
         if (e.keyCode == 13) {
           document.querySelector("#id_message_send_button").click();
         }
       };
+
       document.querySelector("#id_message_send_button").onclick = function (e) {
-        var messageInput = document.querySelector(
-          "#id_message_send_input"
-        ).value;
-        chatSocket.send(
-          JSON.stringify({
-            message: messageInput,
-            username: "{{request.user.username}}",
-          })
-        );
+        var messageInput = document.querySelector("#id_message_send_input").value;
+        if (messageInput.trim()) {  // Only send if message is not empty
+          chatSocket.send(
+            JSON.stringify({
+              message: messageInput,
+            })
+          );
+          document.querySelector("#id_message_send_input").value = "";
+        }
       };
+
       chatSocket.onmessage = function (e) {
         const data = JSON.parse(e.data);
+        console.log("Received message:", data);  // Debug log
+
         if (data.type === "user_list") {
           const userListContainer = document.querySelector("#id_user_list");
           userListContainer.innerHTML = "";
           data.users.forEach(function (user) {
             const li = document.createElement("li");
             li.textContent = user;
-            li.style.cursor = "pointer";  // Add cursor style to indicate clickability
+            li.style.cursor = "pointer";
             li.onclick = function() {
               createOneToOneChat(user);
             };
             userListContainer.appendChild(li);
           });
-        } else if (data.type === "sendMessage"){
+        } else if (data.type === "chat_message") {  // Changed from sendMessage to chat_message
           var div = document.createElement("div");
           div.innerHTML = data.username + " : " + data.message;
-          document.querySelector("#id_message_send_input").value = "";
           document
             .querySelector("#id_chat_item_container")
             .appendChild(div);
