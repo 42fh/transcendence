@@ -10,4 +10,5 @@ urlpatterns = [
     ),
     path("<str:room_name>/", one_to_one_chat, name="one-to-one-chat"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout-user"),
+    path("login/", auth_views.LoginView.as_view(), name="login-user"),
 ]
