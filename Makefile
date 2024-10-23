@@ -56,7 +56,7 @@ install_dependencies:
 # Run Django development server
 run_backend: 
 	@echo "Starting Django development server..."
-	python src/backend/django/tr_django/manage.py runserver 0.0.0.0:8000
+	python src/backend/django/tr_django/manage.py runserver 127.0.0.1:8000
 
 # Start Redis in Docker
 run_docker_redis:
