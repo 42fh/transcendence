@@ -29,6 +29,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
 
         await self.accept()
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "chat_message",
+                "message": f"{self.username} joined the chat",
+                "username": "System",
+            },
+        )
 
         await self.update_user_list()
         print(
@@ -46,6 +54,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
                 if not ChatConsumer.connected_users[self.room_group_name]:
                     del ChatConsumer.connected_users[self.room_group_name]
+
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        "type": "chat_message",
+                        "message": f"{self.username} left the chat",
+                        "username": "System",
+                    },
+                )
 
             await self.channel_layer.group_discard(
                 self.room_group_name, self.channel_name
