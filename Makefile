@@ -1,37 +1,48 @@
 #MAKEFILE
 .PHONY: help rundev run_backend run_docker_redis stop_docker_redis clean
 
-
+# Allow passing the virtual environment path as an argument
+# If not provided, check for a default virtual environment in common directories
+VENV_PATH ?=
+POSSIBLE_VENVS = venv .venv env myenvyenv
 
 # Show available commands
 help:
 	@echo "Available commands:"
-	@echo "  make rundev             - Start Django development server and Redis (Dockerized Redis)"
-	@echo "  make run_backend        - Start only Django development server"
-	@echo "  make run_docker_redis   - Start Redis server in Docker"
-	@echo "  make stop_docker_redis  - Stop the Redis Docker container"
-	@echo "  make clean              - Clean up and remove temporary files"
+	@echo "  make rundev             - Start Django development server and Redis (Dockerized Redis)."
+	@echo "                           Use VENV_PATH=<path> to specify a custom virtual environment path."
+	@echo "                           Example: make rundev VENV_PATH=/path/to/your/venv"
+	@echo "  make run_backend        - Start only Django development server."
+	@echo "  make run_docker_redis   - Start Redis server in Docker."
+	@echo "  make stop_docker_redis  - Stop the Redis Docker container."
+	@echo "  make clean              - Clean up and remove temporary files."
+
 
 # Run Django development server and Redis (Dockerized Redis)
 rundev: check_venv install_dependencies migrate run_docker_redis run_backend
 
-# Define a list of possible virtual environment directories
-POSSIBLE_VENVS = venv .venv env myenv
+
 check_venv:
-	@VENV_DIR=""; \
-	for dir in $(POSSIBLE_VENVS); do \
-		if [ -d "$$dir" ]; then \
-			VENV_DIR="$$dir"; \
-			break; \
+	@if [ -z "$(VENV_PATH)" ]; then \
+		VENV_DIR=""; \
+		echo "VENV_PATH is not set, checking for possible virtual environments..."; \
+		for dir in $(POSSIBLE_VENVS); do \
+			if [ -d "$$dir" ]; then \
+				VENV_DIR="$$dir"; \
+				break; \
+			fi; \
+		done; \
+		if [ -z "$$VENV_DIR" ]; then \
+			echo "It looks like the virtual environment was not found."; \
+			echo "We checked for: $(POSSIBLE_VENVS)."; \
+			echo "Please create a virtual with environment something like:"; \
+			echo "python3 -m venv venv"; \
+			echo "Alternatively, you can add the name of your virtual environment folder in the Makefile adding it to the POSSIBLE_VENVS variable."; \
+			exit 1; \
 		fi; \
-	done; \
-	if [ -z "$$VENV_DIR" ]; then \
-		echo "It looks like the virtual environment was not found."; \
-		echo "We checked for: $(POSSIBLE_VENVS)."; \
-		echo "Please create a virtual with environment something like:"; \
-		echo "python3 -m venv venv"; \
-		echo "Alternatively, you can add the name of your virtual environment folder in the Makefile adding it to the POSSIBLE_VENVS variable."; \
-		exit 1; \
+		VENV_PATH="$$VENV_DIR"; \
+	else \
+		echo "Using provided virtual environment: $$VENV_PATH"; \
 	fi; \
 	if [ -z "$$VIRTUAL_ENV" ]; then \
 		echo "Error: The virtual environment is not activated."; \
