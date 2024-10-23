@@ -1,10 +1,17 @@
 #MAKEFILE
 .PHONY: help rundev run_backend run_docker_redis stop_docker_redis clean
 
-# Allow passing the virtual environment path as an argument
-# If not provided, check for a default virtual environment in common directories
-VENV_PATH ?=
-POSSIBLE_VENVS = venv .venv env myenvyenv
+# Define a list of possible virtual environment directories
+POSSIBLE_VENVS = venv .venv env myenv
+
+# Allow passing VENV_PATH as an argument. If not passed, attempt to auto-detect.
+VENV_PATH ?= $(shell for dir in $(POSSIBLE_VENVS); do \
+                    if [ -d "$$dir" ]; then \
+                        echo $$dir; \
+                        break; \
+                    fi; \
+                 done)
+	
 
 # Show available commands
 help:
@@ -12,54 +19,49 @@ help:
 	@echo "  make rundev             - Start Django development server and Redis (Dockerized Redis)."
 	@echo "                           Use VENV_PATH=<path> to specify a custom virtual environment path."
 	@echo "                           Example: make rundev VENV_PATH=/path/to/your/venv"
+	@echo "  make re-rundev          - Restart Django development server and Redis, removing all Redis data."
 	@echo "  make run_backend        - Start only Django development server."
 	@echo "  make run_docker_redis   - Start Redis server in Docker."
-	@echo "  make stop_docker_redis  - Stop the Redis Docker container."
+	@echo "  make stop_docker_redis  - Stop the Redis Docker container, retaining data."
+	@echo "  make stop_docker_redis_clean - Stop Redis and remove all data (volume is deleted)."
 	@echo "  make clean              - Clean up and remove temporary files."
+
 
 
 # Run Django development server and Redis (Dockerized Redis)
 rundev: check_venv install_dependencies migrate run_docker_redis run_backend
 
+# Re-run the development environment with a clean Redis setup
+re-rundev: stop_docker_redis_clean rundev
+
 
 check_venv:
 	@if [ -z "$(VENV_PATH)" ]; then \
-		VENV_DIR=""; \
-		echo "VENV_PATH is not set, checking for possible virtual environments..."; \
-		for dir in $(POSSIBLE_VENVS); do \
-			if [ -d "$$dir" ]; then \
-				VENV_DIR="$$dir"; \
-				break; \
-			fi; \
-		done; \
-		if [ -z "$$VENV_DIR" ]; then \
-			echo "It looks like the virtual environment was not found."; \
-			echo "We checked for: $(POSSIBLE_VENVS)."; \
-			echo "Please create a virtual with environment something like:"; \
-			echo "python3 -m venv venv"; \
-			echo "Alternatively, you can add the name of your virtual environment folder in the Makefile adding it to the POSSIBLE_VENVS variable."; \
-			exit 1; \
-		fi; \
-		VENV_PATH="$$VENV_DIR"; \
-	else \
-		echo "Using provided virtual environment: $$VENV_PATH"; \
+		echo "It looks like the virtual environment was not found."; \
+		echo "We checked for: $(POSSIBLE_VENVS)."; \
+		echo "Please create a virtual environment with something like:"; \
+		echo "python3 -m venv venv"; \
+		echo "Alternatively, you can specify your virtual environment path when running the Makefile like this:"; \
+		echo "make rundev VENV_PATH=path/to/your/venv"; \
+		exit 1; \
 	fi; \
 	if [ -z "$$VIRTUAL_ENV" ]; then \
 		echo "Error: The virtual environment is not activated."; \
 		echo "Please activate it with:"; \
-		echo "source $$VENV_DIR/bin/activate"; \
+		echo "source $(VENV_PATH)/bin/activate"; \
 		exit 1; \
 	else \
-		echo "Virtual environment activated at: $$VENV_DIR"; \
+		echo "Virtual environment activated at: $(VENV_PATH)"; \
 	fi
 
+
 # Apply migrations
-migrate: 
+migrate: check_venv
 	@echo "Applying migrations..."
-	venv/bin/python src/backend/django/tr_django/manage.py migrate
+	$(VENV_PATH)/bin/python src/backend/django/tr_django/manage.py migrate
 
 # Install project dependencies inside virtual environment and upgrade pip before
-install_dependencies:
+install_dependencies: check_venv
 	@echo "Upgrading pip..."
 	$(VENV_PATH)/bin/pip install --upgrade pip
 	@echo "Installing dependencies..."
@@ -68,7 +70,7 @@ install_dependencies:
 
 
 # Run Django development server
-run_backend: 
+run_backend: check_venv
 	@echo "Starting Django development server..."
 	python src/backend/django/tr_django/manage.py runserver 127.0.0.1:8000
 
@@ -87,6 +89,12 @@ stop_docker_redis:
 	@echo "Stopping Redis server in Docker..."
 	docker stop redis-dev || true
 	docker rm redis-dev || true
+
+# Stop Redis Docker container and remove the data (volume is deleted)
+stop_docker_redis_clean:
+	@echo "Stopping Redis server in Docker and removing data..."
+	docker stop redis-dev || true
+	docker rm -v redis-dev || true
 
 # Clean up temporary files (extend this based on specific project needs)
 clean:
