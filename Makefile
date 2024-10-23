@@ -58,10 +58,13 @@ migrate:
 	@echo "Applying migrations..."
 	venv/bin/python src/backend/django/tr_django/manage.py migrate
 
-# Install project dependencies inside virtual environment
+# Install project dependencies inside virtual environment and upgrade pip before
 install_dependencies:
+	@echo "Upgrading pip..."
+	$(VENV_PATH)/bin/pip install --upgrade pip
 	@echo "Installing dependencies..."
-	@venv/bin/pip install -r src/backend/django/requirements.txt
+	$(VENV_PATH)/bin/pip install -r src/backend/django/requirements.txt
+
 
 
 # Run Django development server
