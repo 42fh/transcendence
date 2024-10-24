@@ -19,6 +19,7 @@ help:
 	@echo "  make rundev             - Start Django development server and Redis (Dockerized Redis)."
 	@echo "                           Use VENV_PATH=<path> to specify a custom virtual environment path."
 	@echo "                           Example: make rundev VENV_PATH=/path/to/your/venv"
+	@echo "                           Note: This command may not work on all environments."
 	@echo "  make re-rundev          - Restart Django development server and Redis, removing all Redis data."
 	@echo "  make run_backend        - Start only Django development server."
 	@echo "  make run_docker_redis   - Start Redis server in Docker."
@@ -29,6 +30,7 @@ help:
 
 
 # Run Django development server and Redis (Dockerized Redis)
+# Note: This command may not work on all environments.
 rundev: check_venv install_dependencies migrate run_docker_redis run_backend
 
 # Re-run the development environment with a clean Redis setup
