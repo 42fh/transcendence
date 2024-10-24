@@ -16,15 +16,20 @@ VENV_PATH ?= $(shell for dir in $(POSSIBLE_VENVS); do \
 # Show available commands
 help:
 	@echo "Available commands:"
-	@echo "  make rundev             - Start Django development server and Redis (Dockerized Redis)."
-	@echo "                           Use VENV_PATH=<path> to specify a custom virtual environment path."
-	@echo "                           Example: make rundev VENV_PATH=/path/to/your/venv"
-	@echo "  make re-rundev          - Restart Django development server and Redis, removing all Redis data."
-	@echo "  make run_backend        - Start only Django development server."
-	@echo "  make run_docker_redis   - Start Redis server in Docker."
-	@echo "  make stop_docker_redis  - Stop the Redis Docker container, retaining data."
+	@echo "  make rundev                  - Start Django development server and Redis (Dockerized Redis)."
+	@echo "                                Use VENV_PATH=<path> to specify a custom virtual environment path."
+	@echo "                                Example: make rundev VENV_PATH=/path/to/your/venv"
+	@echo "  make re-rundev               - Restart Django development server and Redis, removing all Redis data."
+	@echo "  make run_backend             - Start only the Django development server."
+	@echo "  make run_docker_redis        - Start Redis server in Docker."
+	@echo "  make stop_docker_redis       - Stop the Redis Docker container, retaining data."
 	@echo "  make stop_docker_redis_clean - Stop Redis and remove all data (volume is deleted)."
-	@echo "  make clean              - Clean up and remove temporary files."
+	@echo "  make up-dev                  - Start the development environment (using Docker Compose) with automatic build."
+	@echo "  make down-dev                - Stop and remove all containers in the development environment."
+	@echo "  make clean                   - Clean up and remove temporary files (e.g., .pyc and __pycache__)."
+	@echo "  make install_dependencies    - Install project dependencies and upgrade pip inside the virtual environment."
+	@echo "  make migrate                 - Apply Django migrations in the specified environment."
+	@echo "  make check_venv              - Check if a virtual environment is active, otherwise prompt to activate or create one."
 
 
 
