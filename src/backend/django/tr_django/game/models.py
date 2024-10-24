@@ -24,28 +24,6 @@ from django.contrib.auth.models import User
 # These options are used to manage how related objects behave when their parent object is deleted.
 
 
-class Player(models.Model):
-    # About User model: https://docs.djangoproject.com/en/5.1/ref/contrib/auth/#user-model
-    # OneToOneField - one user has one player profile
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    bio = models.TextField(max_length=500, blank=True)
-    location = models.CharField(max_length=100, blank=True)
-    level = models.IntegerField(default=1)
-    # Have to use pillow for images
-    # player_picture = models.ImageField(upload_to='player_pics/', null=True, blank=True)
-    # ManyToManyField - user can have many games
-    games = models.ManyToManyField("Game", blank=True)
-    friends = models.ManyToManyField("Player", blank=True)
-
-    def __str__(self):
-        return self.user.username
-
-    def add_friend(self, friend):
-        if self == friend:
-            raise ValueError("A user cannot add themselves as a friend.")
-        self.friends.add(friend)
-
-
 class GameMode(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField()
@@ -56,12 +34,12 @@ class GameMode(models.Model):
 
 class Game(models.Model):
     date = models.DateField()
-    players = models.ManyToManyField(Player, blank=True)
+    players = models.ManyToManyField(User)
     duration = models.IntegerField(blank=True, null=True)
     mode = models.ForeignKey(GameMode, on_delete=models.SET_NULL, null=True)
     # won_games = player.games_won.all() - get all games won by player
     winner = models.ForeignKey(
-        Player,
+        User,
         related_name="games_won",
         null=True,
         blank=True,
@@ -69,4 +47,4 @@ class Game(models.Model):
     )
 
     def __str__(self):
-        return self.mode.name + " " + str(self.date)
+        return f"{self.mode.name} on {self.date}"

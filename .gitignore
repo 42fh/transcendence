@@ -7,8 +7,11 @@ myenv/
 bin/
 lib/
 Include/
-Scripts/
 pyvenv.cfg
+
+# Media directory
+src/backend/django/tr_django/media/*
+!src/backend/django/tr_django/media/.gitkeep
 
 # Python bytecode and cache files
 __pycache__/
