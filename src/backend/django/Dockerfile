@@ -11,6 +11,13 @@ WORKDIR /app
 # Copy the requirements.txt from the backend directory
 COPY requirements.txt /app/
 
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    gcc \
+    python3-dev \
+    libffi-dev
+
 # Install dependencies before copying the rest of the project
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
