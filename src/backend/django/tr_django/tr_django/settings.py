@@ -53,7 +53,7 @@ ROOT_URLCONF = "tr_django.urls"
 
 TEMPLATES = [
     {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
         "DIRS": [],
         "APP_DIRS": True,
         "OPTIONS": {
