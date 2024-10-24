@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import World from './World/World.js';
 import Game from './Game/Game.js';
 
-let fin1, fin2, fin3, player1, player2, moveDown, moveUp, gameState, playerId, socket;
+let fin1, fin2, fin3, player1, player2, moveDown, moveUp, gameBall;
 
 let canvas = document.querySelector('.webgl');
 
@@ -137,6 +137,7 @@ window.addEventListener('resourcesLoaded', () => {
     floor.rotation.x = - Math.PI * 0.5;
     floor.position.y = 0.1;
 
+    // Paddles
     player1 = new THREE.Mesh(
     new THREE.BoxGeometry(3, 1, 1),
     new THREE.MeshStandardMaterial({ 
@@ -153,6 +154,13 @@ window.addEventListener('resourcesLoaded', () => {
     player2 = player1.clone();
     player2.name = 'player2';
     player2.position.set(0, 0.63, -12);
+
+    // Ball
+    gameBall = new THREE.Mesh(
+    new THREE.SphereGeometry(0.5, 32, 32),
+    new THREE.MeshStandardMaterial({ color: 0xffffff })
+    );
+    gameBall.position.set(0, 0.5, 0);
 
     // Fins
     const sharkFin1 = game.loader.items['fin'].scene;
@@ -171,7 +179,7 @@ window.addEventListener('resourcesLoaded', () => {
         palmTree, palmTree2, bush, coconut, coconut2, 
         umbrella, ball, chair, chair2, chair3, log, floor,
         log2, duck, glasses, sharkFin1, sharkFin2, sharkFin3,
-        player1, player2
+        player1, player2, gameBall
     ]);
 
     fin1 = game.scene.children[0].getObjectByName('sharkFin1');
@@ -205,17 +213,17 @@ function gameLoop(world, scene) {
 
     // move paddle
     if (moveDown) {
-        socket.send(JSON.stringify({
+        world.game.socket.send(JSON.stringify({
             action: 'move_paddle',
             direction: 'down',
-            user_id: playerId
+            user_id: world.game.playerId
         }));
     }
     if (moveUp) {
-        socket.send(JSON.stringify({
+        world.game.socket.send(JSON.stringify({
             action: 'move_paddle',
             direction: 'up',
-            user_id: playerId
+            user_id: world.game.playerId
         }));
     }
 
@@ -224,37 +232,21 @@ function gameLoop(world, scene) {
 };
 game.addGameLoop(gameLoop);
 
+function updateGame(gameState) 
+{
+    player1.position.x = gameState.paddle_left.y;
+    player2.position.x = gameState.paddle_right.y;
+    gameBall.position.x = gameState.ball.x;
+    gameBall.position.z = gameState.ball.y;
+    // TODO: optimize
+    document.querySelector('.score1').textContent = gameState.score.left;
+    document.querySelector('.score2').textContent = gameState.score.right;
+}
+game.addSocket(updateGame);
+
+// ---------START GAME------------
 world.addGame(game);
 // TODO: add destroy game method(destroys all objects and removes event listeners)
-
-document.querySelector('.joinGame').addEventListener('click', function() {
-    var gameId = document.getElementById('gameId').value;
-    playerId = document.getElementById('playerId').value;
-    socket = new WebSocket(`ws://localhost:8000/ws/game/${gameId}/?player=${playerId}`);
-    
-    socket.onmessage = function(e) {
-        const data = JSON.parse(e.data);
-        if (data.type === 'initial_state') 
-        {
-            alert("Game initialized!");
-            gameState = data.game_state;
-        } 
-        else if (data.type === 'game_state') 
-        {
-            gameState = data.game_state;
-            player1.position.x = gameState.paddle_left.y * 10;
-            player2.position.x = gameState.paddle_right.y * 10;
-        } 
-        else if (data.type === 'game_finished') 
-        {
-            gameState = data.game_state;
-        }
-    };
-
-    socket.onopen = function(e) {
-        console.log("Connected to WebSocket");
-    };
-});
 
 // Move paddle
 document.addEventListener('keydown', (event) => {

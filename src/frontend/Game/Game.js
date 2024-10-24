@@ -98,4 +98,29 @@ export default class Game
     loadResources(sources) {
         this.loader = new Loader(sources);
     }
+
+    addSocket(updateGame) 
+    {
+        this.socket = null;
+        this.playerId = null;
+        document.querySelector('.joinGame').addEventListener('click', () => {
+            let gameId = document.getElementById('gameId').value;
+            this.playerId = document.getElementById('playerId').value;
+            this.socket = new WebSocket(`ws://localhost:8000/ws/game/${gameId}/?player=${this.playerId}`);
+            
+            this.socket.onmessage = function(e) {
+                const data = JSON.parse(e.data);
+                if (data.type === 'initial_state') 
+                    alert("Game initialized!");
+                else if (data.type === 'game_state') 
+                    updateGame(data.game_state)
+                else if (data.type === 'game_finished') 
+                    alert("Game finished!");
+            };
+        
+            this.socket.onopen = function(e) {
+                console.log("Connected to WebSocket");
+            };
+        });
+    }
 };

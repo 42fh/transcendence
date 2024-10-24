@@ -12,3 +12,19 @@
     top: 1%;
     padding: 10px;
 }
+
+.score1
+{
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    padding: 10px;
+}
+
+.score2
+{
+    position: absolute;
+    top: 10%;
+    right: 10%;
+    padding: 10px;
+}
