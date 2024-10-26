@@ -69,6 +69,7 @@ class GameManager:
         await self.redis_conn.set(f"game_state:{self.game_id}", game_state_bytes)
 
     async def initialize(self):
+        # same as self.redis_conn = await redis.Redis(host='localhost', port=6379, db=0)
         self.redis_conn = await redis.Redis()
         self.channel_layer = get_channel_layer()
         await self.initialize_game_state()
