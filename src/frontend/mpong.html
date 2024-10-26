@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer Pong Game</title>
+</head>
+<body>
+    <div id="setup-container" class="setup-container">
+        <div class="input-group">
+            Player ID:
+        </div>
+
+        <div class="input-group">
+            Game ID:
+        </div>
+
+        <div class="input-group">
+            Number of Players (min 3):
+        </div>
+
+        <div class="input-group">
+            Number of Balls:
+        </div>
+
+        <button>Start Game</button>
+    </div>
+
+    <div id="game-container" class="game-container" style="display: none;">
+        <div class="game-wrapper">
+        </div>
+
+        <div class="score-container">
+            <div id="score-list" class="score-list">
+            </div>
+        </div>
+
+        <div class="controls-text">
+            Use Left/Right Arrow keys to move your paddle
+        </div>
+    </div>
+
+    <div id="debug-panel" class="debug-panel" style="display: none;">
+        <div id="debug-info">
+        </div>
+    </div>
+
+    <!-- Load the game script -->
+    <script src="multipong.js"></script>
+</body>
+</html>
