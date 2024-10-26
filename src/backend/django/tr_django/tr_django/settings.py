@@ -53,7 +53,7 @@ ROOT_URLCONF = "tr_django.urls"
 
 TEMPLATES = [
     {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
+        "BACKEND": "django.template.backends.django.DjangoTemplates", 
         "DIRS": [],
         "APP_DIRS": True,
         "OPTIONS": {
@@ -69,11 +69,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "tr_django.wsgi.application"
 
-ASGI_APPLICATION = "pong_game.asgi.application"
+ASGI_APPLICATION = "tr_django.asgi.application"
+
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
-    },
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
 }
 
 # Database
