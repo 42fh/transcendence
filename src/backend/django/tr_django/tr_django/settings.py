@@ -34,17 +34,8 @@ INSTALLED_APPS = [
     "blockchain",
     "channels",
 	# because frontend is hosted on a different origin (domain/port) than Django server
-    'corsheaders',
 ]
 
-
-CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-    "http://127.0.0.1:8080",
-    "http://localhost:8080",
-]
 
 
 SESSION_COOKIE_SAMESITE = 'None'
@@ -62,9 +53,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-
-    'corsheaders.middleware.CorsMiddleware',
-]
+	]
 
 ROOT_URLCONF = "tr_django.urls"
 
