@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Application</title>
+</head>
+<body>
+    <h1>Chat Application</h1>
+    <div>
+        <input type="text" id="other_user" placeholder="Enter username to chat">
+        <button id="startChat">Start Chat</button>
+    </div>
+    <div id="chat_container" style="display:none;">
+        <h2>Chat Room: <span id="room_name"></span></h2>
+        <input type="text" id="id_message_send_input" placeholder="Type your message..."/>
+        <button id="id_message_send_button">Send</button>
+        <div id="id_chat_item_container"></div>
+    </div>
+
+    <script>
+        let chatSocket = null;
+        let currentUser = null;
+
+        // Fetch the current user's username from an API endpoint
+        async function fetchUsername() {
+            try {
+				const response = await fetch("http://localhost:8000/chat/api/get_username/");
+                if (response.ok) {
+                    const data = await response.json();
+                    currentUser = data.username;
+                } else {
+                    console.error("Failed to fetch username");
+                }
+            } catch (error) {
+                console.error("Error fetching username:", error);
+            }
+        }
+
+        // Initialize the chat app once username is retrieved
+        async function initializeChat() {
+            await fetchUsername();
+
+            document.getElementById('startChat').onclick = function() {
+                const otherUser = document.getElementById('other_user').value;
+                if (otherUser && currentUser) {
+                    const roomName = currentUser + "_" + otherUser;
+                    document.getElementById('room_name').textContent = roomName;
+                    document.getElementById('chat_container').style.display = 'block';
+
+                    // Open WebSocket connection
+                    chatSocket = new WebSocket("ws://localhost:8000/ws/chat/" + roomName + "/");
+
+                    chatSocket.onopen = function(e) {
+                        console.log("Connection established");
+                    };
+
+                    chatSocket.onmessage = function(e) {
+                        const data = JSON.parse(e.data);
+                        if (data.type === "chat_message") {
+                            const div = document.createElement("div");
+                            div.innerHTML = data.username + ": " + data.message;
+                            document.getElementById('id_chat_item_container').appendChild(div);
+                        }
+                    };
+
+                    chatSocket.onclose = function(e) {
+                        console.log("Connection closed");
+                    };
+
+                    // Message sending
+                    document.getElementById('id_message_send_button').onclick = function() {
+                        const messageInput = document.getElementById('id_message_send_input').value;
+                        if (chatSocket && messageInput) {
+                            chatSocket.send(JSON.stringify({
+                                message: messageInput,
+                                username: currentUser
+                            }));
+                            document.getElementById('id_message_send_input').value = '';
+                        }
+                    };
+                }
+            };
+        }
+
+        initializeChat();
+    </script>
+</body>
+</html>

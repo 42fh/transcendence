@@ -33,6 +33,14 @@ INSTALLED_APPS = [
     "user",
     "blockchain",
     "channels",
+	# because frontend is hosted on a different origin (domain/port) than Django server
+    'corsheaders',
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "http://localhost:8080",
 ]
 
 
@@ -47,6 +55,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = "tr_django.urls"
@@ -139,5 +149,5 @@ CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
 
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-LOGIN_REDIRECT_URL = "chat-page"
-LOGOUT_REDIRECT_URL = "logout-user"
+# LOGIN_REDIRECT_URL = "chat-page"
+# LOGOUT_REDIRECT_URL = "logout-user"
