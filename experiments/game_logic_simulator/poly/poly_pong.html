@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Polygon Pong</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="controls">
+            <h2>Controls</h2>
+            <div class="controls-grid">
+                <div class="control-item">
+                    <label>Point X:</label>
+                    <input type="range" id="pointX" min="-1.5" max="1.5" step="0.01" value="0">
+                    <span class="value-display">0.00</span>
+                </div>
+                
+                <div class="control-item">
+                    <label>Point Y:</label>
+                    <input type="range" id="pointY" min="-1.5" max="1.5" step="0.01" value="0">
+                    <span class="value-display">0.00</span>
+                </div>
+                
+                <div class="control-item">
+                    <label>Sides:</label>
+                    <input type="number" id="sideCount" min="3" max="12" value="3">
+                    <span class="value-display">3</span>
+                </div>
+                
+                <div class="control-item">
+                    <label>Paddles:</label>
+                    <input type="number" id="paddleCount" min="1" max="12" value="2">
+                    <span class="value-display">2</span>
+                </div>
+                
+                <div class="control-item">
+                    <label>Paddle Size:</label>
+                    <input type="range" id="paddleSize" min="0.1" max="1" step="0.01" value="0.3">
+                    <span class="value-display">0.30</span>
+                </div>
+                
+                <div class="control-item">
+                    <label>Paddle Width:</label>
+                    <input type="range" id="paddleWidth" min="0.05" max="0.5" step="0.01" value="0.2">
+                    <span class="value-display">0.20</span>
+                </div>
+                
+                <div class="control-item">
+                    <label>Ball Size:</label>
+                    <input type="range" id="ballSize" min="0.05" max="0.3" step="0.01" value="0.1">
+                    <span class="value-display">0.10</span>
+                </div>
+            </div>
+            
+            <div id="sideControls" class="control-group">
+                <!-- Paddle position controls will be added here dynamically -->
+            </div>
+        </div>
+        
+        <div class="visualization">
+            <svg id="pongSvg" viewBox="0 0 300 300"></svg>
+            
+            <div class="info-panel">
+                <h3>Game Information</h3>
+                <div id="pointInfo"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="game-logic.js"></script>
+    <script src="renderer-logic.js"></script>
+    <script src="main-game.js"></script>
+
+    <script>
+    // Update value displays for all range inputs
+    document.querySelectorAll('input[type="range"], input[type="number"]').forEach(input => {
+        const display = input.parentElement.querySelector('.value-display');
+        if (display) {
+            input.addEventListener('input', () => {
+                display.textContent = parseFloat(input.value).toFixed(2);
+            });
+        }
+    });
+    </script>
+</body>
+</html>
