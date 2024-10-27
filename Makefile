@@ -103,12 +103,12 @@ stop_docker_redis_clean:
 
 # Development environment
 up-dev:
-	@echo "Starting development environment..."
+	@echo "Starting dockerized development environment..."
 	docker compose up --build
 
 # Stop and remove containers for Development
 down-dev:
-	@echo "Stopping development environment..."
+	@echo "Stopping dockerized development environment..."
 	docker compose down
 
 # Clean up temporary files (extend this based on specific project needs)
