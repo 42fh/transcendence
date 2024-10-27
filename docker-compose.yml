@@ -46,9 +46,11 @@ services:
       dockerfile: nginx/Dockerfile
       args:
         ENVIRONMENT: ${ENVIRONMENT} # Pass the environment as a build argument
-    # volumes:
-    # - /etc/letsencrypt/live/django.sldunit.xyz:/etc/ssl/certs/
-    # - /etc/letsencrypt/archive/django.sldunit.xyz:/etc/letsencrypt/archive/django.sldunit.xyz
+      # volumes:
+      # - /etc/letsencrypt/live/django.sldunit.xyz:/etc/ssl/certs/
+      # - /etc/letsencrypt/archive/django.sldunit.xyz:/etc/letsencrypt/archive/django.sldunit.xyz
+    volumes:
+      - ./src/frontend/:/usr/share/nginx/html
     ports:
       - "80:80"
       - "443:443"
