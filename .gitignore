@@ -41,6 +41,7 @@ htmlcov/
 # pytest cache
 .pytest_cache/
 
+
 # Temporary files
 *.tmp
 *.bak
@@ -50,9 +51,3 @@ htmlcov/
 #db
 db.sqlite3
 
-# IDE settings
-.vscode/
-
-# Docker
-postgres_data/
-/posgtres_data
