@@ -2,12 +2,23 @@
 <html>
 <head>
     <title>Chat Application</title>
+    <style>
+        .user-list-item {
+            cursor: pointer;
+            padding: 5px;
+            margin: 2px;
+            border: 1px solid #ddd;
+        }
+        .user-list-item:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
 </head>
 <body>
     <h1>Chat Application</h1>
     <div>
-        <input type="text" id="other_user" placeholder="Enter username to chat">
-        <button id="startChat">Start Chat</button>
+        <h2>User List</h2>
+        <ul id="user_list"></ul>
     </div>
     <div id="chat_container" style="display:none;">
         <h2>Chat Room: <span id="room_name"></span></h2>
@@ -20,68 +31,124 @@
         let chatSocket = null;
         let currentUser = null;
 
-        // Fetch the current user's username from an API endpoint
-        async function fetchUsername() {
+		async function fetchUsername() {
+    try {
+        const response = await fetch("http://127.0.0.1:8000/chat/api/get_username/", {
+            credentials: "include"
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+			console.log(data);
+            currentUser = data.username;
+            await fetchUserList();
+        } else {
+            const errorText = await response.text();
+            console.error("Fetch username failed:", errorText);
+            window.location.href = "/login.html";
+        }
+    } catch (error) {
+        console.error("Error fetching username:", error);
+    }
+}
+
+
+
+        // Fetch and display user list
+        async function fetchUserList() {
             try {
-				const response = await fetch("http://localhost:8000/chat/api/get_username/");
+                const response = await fetch("http://127.0.0.1:8000/chat/api/get_user_list", {
+                    credentials: 'include'  // for authentication
+                });
                 if (response.ok) {
+					// console.log(response);
                     const data = await response.json();
-                    currentUser = data.username;
+                    const userListElement = document.getElementById('user_list');
+                    userListElement.innerHTML = '';
+
+                    if (data.users.length === 0) {
+                        userListElement.innerHTML = '<li>No other users available</li>';
+                        return;
+                    }
+
+                    data.users.forEach(user => {
+                        const li = document.createElement("li");
+                        li.className = 'user-list-item';
+                        li.textContent = user.username;
+                        li.onclick = () => startChatWith(user.username);
+                        userListElement.appendChild(li);
+                    });
                 } else {
-                    console.error("Failed to fetch username");
+                    console.error("Failed to fetch user list:", response.status);
                 }
             } catch (error) {
-                console.error("Error fetching username:", error);
+                console.error("Error fetching user list:", error);
             }
         }
 
-        // Initialize the chat app once username is retrieved
-        async function initializeChat() {
-            await fetchUsername();
+        function startChatWith(otherUser) {
+            if (otherUser && currentUser) {
+                // sort alphabetically so name is always the same
+                const users = [currentUser, otherUser].sort();
+                const roomName = `${users[0]}_${users[1]}`;
 
-            document.getElementById('startChat').onclick = function() {
-                const otherUser = document.getElementById('other_user').value;
-                if (otherUser && currentUser) {
-                    const roomName = currentUser + "_" + otherUser;
-                    document.getElementById('room_name').textContent = roomName;
-                    document.getElementById('chat_container').style.display = 'block';
+                document.getElementById('room_name').textContent = `Chat with ${otherUser}`;
+                document.getElementById('chat_container').style.display = 'block';
 
-                    // Open WebSocket connection
-                    chatSocket = new WebSocket("ws://localhost:8000/ws/chat/" + roomName + "/");
-
-                    chatSocket.onopen = function(e) {
-                        console.log("Connection established");
-                    };
-
-                    chatSocket.onmessage = function(e) {
-                        const data = JSON.parse(e.data);
-                        if (data.type === "chat_message") {
-                            const div = document.createElement("div");
-                            div.innerHTML = data.username + ": " + data.message;
-                            document.getElementById('id_chat_item_container').appendChild(div);
-                        }
-                    };
-
-                    chatSocket.onclose = function(e) {
-                        console.log("Connection closed");
-                    };
-
-                    // Message sending
-                    document.getElementById('id_message_send_button').onclick = function() {
-                        const messageInput = document.getElementById('id_message_send_input').value;
-                        if (chatSocket && messageInput) {
-                            chatSocket.send(JSON.stringify({
-                                message: messageInput,
-                                username: currentUser
-                            }));
-                            document.getElementById('id_message_send_input').value = '';
-                        }
-                    };
+                if (chatSocket) {
+                    chatSocket.close();
                 }
-            };
+
+                // Open new WebSocket connection
+                chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/${roomName}/`);
+
+                chatSocket.onopen = function(e) {
+                    console.log("WebSocket connection established");
+                };
+
+                chatSocket.onmessage = function(e) {
+                    const data = JSON.parse(e.data);
+                    if (data.type === "chat_message") {
+                        const div = document.createElement("div");
+                        div.innerHTML = `<strong>${data.username}</strong>: ${data.message}`;
+                        document.getElementById('id_chat_item_container').appendChild(div);
+                    }
+                };
+
+                chatSocket.onclose = function(e) {
+                    console.log("WebSocket connection closed");
+                };
+            }
         }
 
-        initializeChat();
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchUsername();
+
+            // Set up message sending
+            document.getElementById('id_message_send_button').onclick = function() {
+                const messageInput = document.getElementById('id_message_send_input');
+                const message = messageInput.value.trim();
+
+                if (chatSocket && message) {
+                    chatSocket.send(JSON.stringify({
+                        message: message,
+                        username: currentUser
+                    }));
+                    messageInput.value = '';
+                }
+            };
+
+            // Allow sending with Enter key
+            document.getElementById('id_message_send_input').onkeypress = function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('id_message_send_button').click();
+                }
+            };
+        });
+
+        // Refresh user list periodically
+        setInterval(fetchUserList, 30000); // Refresh every 30 seconds
     </script>
 </body>
 </html>

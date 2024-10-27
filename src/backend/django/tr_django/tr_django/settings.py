@@ -37,11 +37,18 @@ INSTALLED_APPS = [
     'corsheaders',
 ]
 
+
+CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
+    "http://127.0.0.1:8080",
     "http://localhost:8080",
 ]
+
+
+SESSION_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SECURE = True
 
 
 MEDIA_URL = "/media/"

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+</head>
+<body>
+    <h1>Login to Chat</h1>
+    <form id="loginForm">
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button type="submit">Login</button>
+    </form>
+    <div id="errorMessage" style="color:red;"></div>
+
+    <script>
+        document.getElementById("loginForm").onsubmit = async function (event) {
+            event.preventDefault();
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            try {
+				const response = await fetch("http://127.0.0.1:8000/user/api/login/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ username, password }),
+                    credentials: "include",
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    alert("Login successful!");
+                    window.location.href = "/chat.html";
+                } else {
+                    document.getElementById("errorMessage").textContent = data.error;
+                }
+            } catch (error) {
+                console.error("Login request failed:", error);
+                document.getElementById("errorMessage").textContent = "An error occurred. Please try again.";
+            }
+        };
+
+		async function testSession() {
+    try {
+        const response = await fetch("http://127.0.0.1:8000/chat/api/get_username/", {
+            method: "GET",
+            credentials: "include"
+        });
+        if (response.ok) {
+            const data = await response.json();
+            console.log("Session test successful:", data);
+        } else {
+            console.log("Session test failed, redirecting to login.");
+            window.location.href = "/login.html";
+        }
+    } catch (error) {
+        console.error("Session test error:", error);
+    }
+}
+
+    </script>
+</body>
+</html>
