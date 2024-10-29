@@ -24,6 +24,9 @@ export default class Game
 
         // GUI
         this.gui = new Debug();
+
+        
+        this.socket = null;
     }
 
     addAmbientLight(intensity, color)
@@ -101,7 +104,6 @@ export default class Game
 
     addSocket(updateGame) 
     {
-        this.socket = null;
         this.playerId = null;
         document.querySelector('.joinGame').addEventListener('click', () => {
             let gameId = document.getElementById('gameId').value;

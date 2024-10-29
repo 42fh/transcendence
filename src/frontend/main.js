@@ -7,6 +7,8 @@ let fin1, fin2, fin3, player1, player2, moveDown, moveUp, gameBall;
 let canvas = document.querySelector('.webgl');
 
 const world = new World(canvas);
+const GAME_HEIGHT = 24;
+const GAME_WIDTH = 14;
 
 const game = new Game();
 game.addAmbientLight(1, 0xffffff);
@@ -52,69 +54,69 @@ window.addEventListener('resourcesLoaded', () => {
     
     // Palm trees
     const palmTree = game.loader.items['palmTree'].scene;
-    palmTree.scale.set(6, 6, 6);
-    palmTree.position.set(12, 0, 0);
+    palmTree.scale.set(6, 6, 10);
+    palmTree.position.set(18, 0, 12);
 
     const palmTree2 = palmTree.clone();
-    palmTree2.position.set(-12, 0, 0);
+    palmTree2.position.set(-6, 0, 12);
 
     // Bush
     const bush = game.loader.items['bush'].scene;
     bush.scale.set(3, 3, 3);
-    bush.position.set(11, 0, -2);
+    bush.position.set(17, 0, 10);
 
     // Coconut
     const coconut = game.loader.items['coconut'].scene;
     coconut.scale.set(1, 1, 1);
-    coconut.position.set(11, 0.5, -5);
+    coconut.position.set(17, 0.5, 7);
 
     const coconut2 = coconut.clone();
-    coconut2.position.set(-11.5, 1.3, 4);
+    coconut2.position.set(-5.5, 1.3, 16);
     coconut2.rotation.set(Math.PI, Math.PI * 0.2, 0);
 
     // Umbrella
     const umbrella = game.loader.items['umbrella'].scene;
     umbrella.scale.set(0.01, 0.01, 0.01);
-    umbrella.position.set(12, -0.3, 5);
+    umbrella.position.set(18, -0.3, 17);
     umbrella.rotation.set(0, Math.PI * 0.08, 0);
 
     // Ball
     const ball = game.loader.items['ball'].scene;
     ball.scale.set(0.5, 0.5, 0.5);
-    ball.position.set(11, 0.5, 4);
+    ball.position.set(17, 0.5, 16);
 
     // Chairs
     const chair = game.loader.items['chair'].scene;
     chair.scale.set(2, 2, 2);
-    chair.position.set(-11.5, 0, 6);
+    chair.position.set(-5.5, 0, 18);
     chair.rotation.set(0, Math.PI * 0.5, 0);
 
     const chair2 = chair.clone();
-    chair2.position.set(-11.5, 0, 4);
+    chair2.position.set(-5.5, 0, 16);
 
     const chair3 = chair.clone();
-    chair3.position.set(-11.5, 0, 2);
+    chair3.position.set(-5.5, 0, 14);
 
     // Logs
     const log = game.loader.items['log'].scene;
     log.scale.set(8, 14, 10);
-    log.position.set(-9, 0.5, -15);
+    log.position.set(GAME_WIDTH - GAME_WIDTH - 0.8, 0.5, -3);
     log.rotation.set(Math.PI * 0.5, Math.PI * 0.5, 0);
 
     const log2 = log.clone();
-    log2.position.set(9, 0.5, 13);
+    log2.position.set(GAME_WIDTH + 0.8, 0.5, 25);
     log2.rotation.set(Math.PI * 0.5, 0, Math.PI);
 
     // Rubber Duck
     const duck = game.loader.items['duck'].scene;
     duck.scale.set(4, 4, 4);
-    duck.position.set(-11.5, 0.9, 2);
+    duck.position.set(-5.5, 0.9, 14);
     duck.rotation.set(0, Math.PI * 0.5, 0);
 
     // Glasses
     const glasses = game.loader.items['glasses'].scene;
     glasses.scale.set(0.8, 0.8, 0.8);
-    glasses.position.set(-11.32, 1.4, 4.02);
+    glasses.position.set(-5.32, 1.4, 16.02);
     glasses.rotation.set(0, Math.PI, 0);
 
     // Floor
@@ -136,37 +138,40 @@ window.addEventListener('resourcesLoaded', () => {
     );
     floor.rotation.x = - Math.PI * 0.5;
     floor.position.y = 0.1;
+    floor.position.x = 6;
+    floor.position.z = 12;
 
     // Paddles
+    const geometry = new THREE.BoxGeometry(3, 1, 1);
+    geometry.center();
     player1 = new THREE.Mesh(
-    new THREE.BoxGeometry(3, 1, 1),
-    new THREE.MeshStandardMaterial({ 
-            map: game.loader.items['playerColorTexture'],
-            normalMap: game.loader.items['playerNormalTexture'],
-            roughnessMap: game.loader.items['playerARMTexture'],
-            aoMap: game.loader.items['playerARMTexture'],
-            metalnessMap: game.loader.items['playerARMTexture'],
-        })
+        geometry,
+        new THREE.MeshStandardMaterial({ 
+                map: game.loader.items['playerColorTexture'],
+                normalMap: game.loader.items['playerNormalTexture'],
+                roughnessMap: game.loader.items['playerARMTexture'],
+                aoMap: game.loader.items['playerARMTexture'],
+                metalnessMap: game.loader.items['playerARMTexture'],
+            })
     );
-    player1.position.set(0, 0.63, 12);
+    player1.position.set(GAME_WIDTH / 2, 0.63, GAME_HEIGHT);
     player1.name = 'player1';
-
     player2 = player1.clone();
     player2.name = 'player2';
-    player2.position.set(0, 0.63, -12);
+    player2.position.set(GAME_WIDTH / 2, 0.63, GAME_HEIGHT - GAME_HEIGHT);
 
     // Ball
     gameBall = new THREE.Mesh(
     new THREE.SphereGeometry(0.5, 32, 32),
     new THREE.MeshStandardMaterial({ color: 0xffffff })
     );
-    gameBall.position.set(0, 0.5, 0);
+    gameBall.position.set(GAME_WIDTH / 2, 0.7, GAME_HEIGHT / 2);
 
     // Fins
     const sharkFin1 = game.loader.items['fin'].scene;
     sharkFin1.name = 'sharkFin1';
     sharkFin1.scale.set(2, 2, 2);
-    sharkFin1.position.set(0, 0, 0);
+    sharkFin1.position.set(6, 0, 12);
     sharkFin1.rotation.y = Math.PI;
 
     const sharkFin2 = sharkFin1.clone();
@@ -212,14 +217,14 @@ function gameLoop(world, scene) {
     fin3.rotation.y = sharkAngle;
 
     // move paddle
-    if (moveDown) {
+    if (moveDown && world.game.socket) {
         world.game.socket.send(JSON.stringify({
             action: 'move_paddle',
             direction: 'down',
             user_id: world.game.playerId
         }));
     }
-    if (moveUp) {
+    if (moveUp && world.game.socket) {
         world.game.socket.send(JSON.stringify({
             action: 'move_paddle',
             direction: 'up',
@@ -234,10 +239,12 @@ game.addGameLoop(gameLoop);
 
 function updateGame(gameState) 
 {
-    player1.position.x = gameState.paddle_left.y;
-    player2.position.x = gameState.paddle_right.y;
-    gameBall.position.x = gameState.ball.x;
-    gameBall.position.z = gameState.ball.y;
+    console.log('paddle', gameState.paddle_left.y);
+    console.log('ball', gameState.ball.y);
+    player1.position.x = gameState.paddle_right.y * GAME_WIDTH;
+    player2.position.x = gameState.paddle_left.y * GAME_WIDTH;
+    gameBall.position.z = gameState.ball.x * GAME_HEIGHT;
+    gameBall.position.x = gameState.ball.y * GAME_WIDTH;
     // TODO: optimize
     document.querySelector('.score1').textContent = gameState.score.left;
     document.querySelector('.score2').textContent = gameState.score.right;

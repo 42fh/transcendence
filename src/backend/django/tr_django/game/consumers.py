@@ -90,21 +90,21 @@ class PongConsumer(AsyncWebsocketConsumer):
             print(f"Invalid direction: {direction}")
             return False
 
-        if direction == 'up' and paddle_y <= -6:
+        if direction == 'up' and paddle_y <= 0:
             return False
-        if direction == 'down' and paddle_y >= 6:  # Assuming paddle height is 0.2
+        if direction == 'down' and paddle_y >= 0.8:  # Assuming paddle height is 0.2
             return False
         return True
 
     async def update_paddle_position(self, direction):
         async with self.game_manager.redis_lock:
             game_state = await self.game_manager.load_game_state()
-            move_amount = 0.1  # Adjust this value to change paddle speed
+            move_amount = 0.01  # Adjust this value to change paddle speed
             
             if direction == 'up':
-                game_state[f'paddle_{self.paddle}']['y'] = game_state[f'paddle_{self.paddle}']['y'] - move_amount
+                game_state[f'paddle_{self.paddle}']['y'] = max(0, game_state[f'paddle_{self.paddle}']['y'] - move_amount)
             elif direction == 'down':
-                game_state[f'paddle_{self.paddle}']['y'] = game_state[f'paddle_{self.paddle}']['y'] + move_amount
+                game_state[f'paddle_{self.paddle}']['y'] = min(1, game_state[f'paddle_{self.paddle}']['y'] + move_amount)
             
             await self.game_manager.save_game_state(game_state)
 

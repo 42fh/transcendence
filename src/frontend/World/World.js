@@ -22,7 +22,7 @@ export default class World
 
         // Camera
         this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-        this.camera.position.set(0, 8, 19);
+        this.camera.position.set(4, 12, 37);
         if (this.gui.debug) {
             this.gui.gui.add(this.camera.position, 'x').min(-10).max(100).step(0.001).name('Camera x');
             this.gui.gui.add(this.camera.position, 'y').min(-10).max(100).step(0.001).name('Camera y');
