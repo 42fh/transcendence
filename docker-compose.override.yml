@@ -9,6 +9,13 @@ services:
       - Debug=True
       - ENVIRONMENT=development
   nginx:
+    build:
+      context: ./src
+      dockerfile: ./src/nginx/Dockerfile
+      args:
+        ENVIRONMENT: ${ENVIRONMENT}
+    volumes:
+      - ./src/frontend/:/usr/share/nginx/html
     ports:
       - "8080:80" # Expose Nginx on port 8080 for development
     environment:
