@@ -11,7 +11,7 @@ services:
   nginx:
     build:
       context: ./src
-      dockerfile: ./src/nginx/Dockerfile
+      dockerfile: ./nginx/Dockerfile
       args:
         ENVIRONMENT: ${ENVIRONMENT}
     volumes:
