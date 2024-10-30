@@ -1,0 +1,64 @@
+/* play.css */
+
+#gameArea {
+  width: 800px;
+  height: 600px;
+  background-color: pink;
+  position: relative;
+  overflow: hidden;
+  border: 10px solid white;
+  box-sizing: border-box;
+}
+
+/* Ball styles */
+#ball {
+  width: 20px;
+  height: 20px;
+  background-color: red;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.paddle {
+  position: absolute;
+  width: 20px;
+  height: 100px;
+  background-color: white;
+}
+
+#leftPaddle {
+  left: 20px;
+}
+
+#rightPaddle {
+  right: 20px;
+}
+
+/* Button styles */
+#startButton {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: white;
+  color: black;
+  border: 2px solid black;
+  cursor: pointer;
+  font-family: "Press Start 2P", cursive;
+}
+
+.debug-dot {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color: red;
+  display: none;
+}
+
+#blueDot {
+  background-color: blue;
+}

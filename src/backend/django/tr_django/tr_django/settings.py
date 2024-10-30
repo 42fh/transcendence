@@ -1,6 +1,13 @@
 import os
 from pathlib import Path
-import os
+from dotenv import load_dotenv
+
+load_dotenv(override=False)
+
+print(f"POSTGRES_HOST: {os.getenv('POSTGRES_HOST')}")
+print(f"POSTGRES_PORT: {os.getenv('POSTGRES_PORT')}")
+
+ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -10,12 +17,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-#6kgsx0c8dyb7r0ju!6zksg7@bg57osl97c#k&e6f+$w8x17gw"
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = []
+# SECURITY WARNING: don't run with debug turned on in production!
+if ENVIRONMENT == "production":
+    DEBUG = False
+    ALLOWED_HOSTS = (
+        os.getenv("ALLOWED_HOSTS", "").split(",") if os.getenv("ALLOWED_HOSTS") else []
+    )
+else:
+    DEBUG = True
+    ALLOWED_HOSTS = ["*"]
+    # ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -33,12 +50,11 @@ INSTALLED_APPS = [
     "user",
     "blockchain",
     "channels",
-	# because frontend is hosted on a different origin (domain/port) than Django server
+    # because frontend is hosted on a different origin (domain/port) than Django server
 ]
 
 
-
-SESSION_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SAMESITE = "None"
 SESSION_COOKIE_SECURE = True
 
 
@@ -53,13 +69,13 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-	]
+]
 
 ROOT_URLCONF = "tr_django.urls"
 
 TEMPLATES = [
     {
-        "BACKEND": "django.template.backends.django.DjangoTemplates", 
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [],
         "APP_DIRS": True,
         "OPTIONS": {
@@ -75,24 +91,38 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "tr_django.wsgi.application"
 
-ASGI_APPLICATION = "tr_django.asgi.application"
-
+ASGI_APPLICATION = "pong_game.asgi.application"
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    }
+        # "BACKEND": "channels.layers.InMemoryChannelLayer",
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            # "hosts": [("127.0.0.1", 6379)],
+            "hosts": [("redis", 6379)],
+        },
+    },
 }
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
+
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("POSTGRES_DB", "dev_db"),
+        "USER": os.getenv("POSTGRES_USER", "dev_user"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD", "dev_password"),
+        "HOST": os.getenv("POSTGRES_HOST", "localhost"),
+        "PORT": os.getenv("POSTGRES_PORT", "5432"),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -123,6 +153,27 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 
 USE_TZ = True
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "loggers": {
+        "users": {  # This matches 'users' app logs
+            "handlers": ["console"],
+            "level": "DEBUG",  # or 'INFO'
+            "propagate": True,
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+}
 
 
 # Static files (CSS, JavaScript, Images)
