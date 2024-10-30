@@ -33,7 +33,7 @@
 
 		async function fetchUsername() {
     try {
-        const response = await fetch("http://127.0.0.1:8000/chat/api/get_username/", {
+        const response = await fetch("http://localhost:8080/chat/api/get_username/", {
             credentials: "include"
         });
 
@@ -57,7 +57,7 @@
         // Fetch and display user list
         async function fetchUserList() {
             try {
-                const response = await fetch("http://127.0.0.1:8000/chat/api/get_user_list", {
+                const response = await fetch("http://localhost:8080/chat/api/get_user_list", {
                     credentials: 'include'  // for authentication
                 });
                 if (response.ok) {
