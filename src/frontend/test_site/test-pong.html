@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pong Test Interface</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Pong Test Interface</h1>
+
+        <form id="gameForm">
+            <div class="form-group">
+                <label for="gameType">Game Type:</label>
+                <select id="gameType" name="gameType">
+                    <option value="polygon">Polygon Pong</option>
+                    <option value="circular">Circular Pong</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="gameId">Game ID (optional):</label>
+                <input type="text" id="gameId" name="gameId" placeholder="Leave empty for random ID">
+            </div>
+
+            <div class="form-group">
+                <label for="playerId">Player ID (optional):</label>
+                <input type="text" id="playerId" name="playerId" placeholder="Leave empty for random ID">
+            </div>
+
+            <div class="form-group">
+                <label for="numPlayers">Number of Players:</label>
+                <input type="number" id="numPlayers" name="numPlayers" value="2" min="2" max="8">
+            </div>
+
+            <div class="form-group polygon-only">
+                <label for="numSides">Number of Sides (Polygon only):</label>
+                <input type="number" id="numSides" name="numSides" value="3" min="3" max="8">
+            </div>
+
+            <div class="form-group">
+                <label for="numBalls">Number of Balls:</label>
+                <input type="number" id="numBalls" name="numBalls" value="1" min="1" max="4">
+            </div>
+
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="debugMode" name="debugMode">
+                    Enable Debug Mode
+                </label>
+            </div>
+
+            <button type="submit">Start Game</button>
+        </form>
+
+        <div id="status" class="status" style="display: none;"></div>
+
+        <div id="gameArea" style="display: none;">
+            <h2>Game Running</h2>
+            
+            <!-- SVG Container -->
+            <div id="gameCanvas">
+                <svg id="pongSvg" viewBox="0 0 300 300"></svg>
+            </div>
+
+            <!-- Score Display -->
+            <div id="scoreDisplay"></div>
+
+            <div class="controls-info">
+                <strong>Controls:</strong>
+                <ul>
+                    <li>Left Arrow / A: Move paddle left</li>
+                    <li>Right Arrow / D: Move paddle right</li>
+                </ul>
+            </div>
+
+            <div id="debugPanel" class="debug-panel" style="display: none;">
+                <h3>Debug Information</h3>
+                <pre id="debugInfo"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>
