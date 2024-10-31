@@ -1,18 +1,40 @@
 import uuid
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
+from datetime import timedelta
 
 
 class CustomUser(AbstractUser):
     """
-    The ExtendedUser model extends Django's AbstractUser with additional fields for the user app.
+    The CustomUser model extends Django's AbstractUser with additional fields for the user app.
     """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    # Optional email field for now, but it could be made mandatory later.
+    # When making it mandatory, remove `null=True` and `blank=True`.
+    email = models.EmailField(
+        unique=True,
+        null=True,
+        blank=True,
+        error_messages={
+            "unique": "A user with that email already exists.",
+        },
+    )
+    email_verified = models.BooleanField(default=False)  # Verification status
+
     avatar = models.ImageField(upload_to="avatars/", null=True, blank=True)
     bio = models.TextField(null=True, blank=True)
     telephone_number = models.CharField(max_length=20, null=True, blank=True)
     pronoun = models.CharField(max_length=20, null=True, blank=True)
+
+    # 2FA and JWT fields
+    two_factor_enabled = models.BooleanField(default=False)
+    two_factor_secret = models.CharField(max_length=32, null=True, blank=True)
+    backup_codes = models.JSONField(null=True, blank=True)
+    last_2fa_code = models.CharField(max_length=6, null=True, blank=True)
+    last_token_issued_at = models.DateTimeField(null=True, blank=True)
+    refresh_token_hash = models.CharField(max_length=64, null=True, blank=True)
 
     STATUS_OFFLINE = "offline"
     STATUS_ONLINE = "online"
@@ -144,3 +166,31 @@ class VisibilityGroup(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class EmailVerificationToken(models.Model):
+    user = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, related_name="verification_tokens"
+    )
+    token = models.UUIDField(default=uuid.uuid4, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(
+        default=timezone.now() + timedelta(days=1)
+    )  # 1-day expiry
+
+    def is_expired(self):
+        return timezone.now() > self.expires_at
+
+
+class PasswordResetToken(models.Model):
+    user = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, related_name="password_reset_tokens"
+    )
+    token = models.UUIDField(default=uuid.uuid4, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(
+        default=timezone.now() + timedelta(hours=1)
+    )  # 1-hour expiry
+
+    def is_expired(self):
+        return timezone.now() > self.expires_at
