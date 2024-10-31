@@ -41,17 +41,6 @@ def get_user_list(request):
             other_user = chat.user2 if chat.user1 == request.user else chat.user1
             users_with_chats.add(other_user.username)
 
-        # Get unread message counts
-        unread_messages = (
-            Message.objects.filter(room__in=recent_chats, is_read=False)
-            .exclude(sender=request.user)
-            .values("room__room_id")
-            .annotate(count=models.Count("id"))
-        )
-
-        # Create a dictionary of unread message counts by room
-        unread_counts = {msg["room__room_id"]: msg["count"] for msg in unread_messages}
-
         # Build the user list with chat information
         user_list = []
         for user in users:
@@ -59,13 +48,11 @@ def get_user_list(request):
             user_data = {
                 "username": username,
                 "has_chat": username in users_with_chats,
-                "unread_messages": 0,
             }
 
             # Add unread message count if there's an existing chat
             if username in users_with_chats:
                 room_id = "_".join(sorted([request.user.username, username]))
-                user_data["unread_messages"] = unread_counts.get(room_id, 0)
 
             user_list.append(user_data)
 
