@@ -1,92 +1,227 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.db import database_sync_to_async
+from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
+from django.utils import timezone
+from chat.models import ChatRoom, Message
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
     connected_users = {}
 
     async def connect(self):
-        self.room_name = self.scope["url_route"]["kwargs"].get(
-            "room_name", "group_chat"
-        )
-        self.room_group_name = f"chat_{self.room_name}"
+        try:
+            # Validate and setup room name
+            self.room_name = self.scope["url_route"]["kwargs"].get("room_name")
+            if not self.room_name:
+                print("DEBUG: Room name is missing")
+                await self.close()
+                return
 
-        print(f"Attempting connection to room: {self.room_name}")
+            self.room_group_name = f"chat_{self.room_name}"
 
-        if self.scope["user"].is_anonymous:
-            print("non-logged user tried to connect")
+            # Authenticate user
+            if self.scope["user"].is_anonymous:
+                print("DEBUG: Anonymous user connection rejected")
+                await self.close()
+                return
+
+            self.username = self.scope["user"].username
+            print(f"DEBUG: User {self.username} connecting to room {self.room_name}")
+
+            # Get or create chat room with error handling
+            try:
+                self.chat_room = await self.get_or_create_chat_room()
+                if not self.chat_room:
+                    print("DEBUG: Failed to create or get chat room")
+                    await self.close()
+                    return
+            except ObjectDoesNotExist as e:
+                print(f"DEBUG: User not found error: {str(e)}")
+                await self.close()
+                return
+            except Exception as e:
+                print(f"DEBUG: Chat room error: {str(e)}")
+                await self.close()
+                return
+
+            # Manage connected users
+            if self.room_group_name not in self.connected_users:
+                self.connected_users[self.room_group_name] = set()
+            self.connected_users[self.room_group_name].add(self.username)
+
+            # Join room group
+            await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+            await self.accept()
+
+            # Send connection confirmation
+            await self.send(
+                text_data=json.dumps(
+                    {
+                        "type": "connection_established",
+                        "message": "Connected successfully",
+                        "room": self.room_name,
+                    }
+                )
+            )
+
+            # Fetch and send message history
+            await self.send_message_history()
+
+        except Exception as e:
+            print(f"DEBUG: Connection error: {str(e)}")
             await self.close()
             return
 
-        self.username = self.scope["user"].username
-        print(f"User {self.username} connects to {self.room_group_name}")
+    @database_sync_to_async
+    def get_message_history(self, limit=50):
+        """
+        Fetch recent messages for the chat room.
+        Returns messages in chronological order, limited to the specified number.
+        """
+        messages = (
+            Message.objects.filter(room=self.chat_room)
+            .select_related("sender")
+            .order_by("-timestamp")[:limit]
+            .values("content", "sender__username", "timestamp")
+        )
 
-        if self.room_group_name not in ChatConsumer.connected_users:
-            ChatConsumer.connected_users[self.room_group_name] = set()
+        # Convert to list and reverse to get chronological order
+        messages = list(messages)
+        messages.reverse()
 
-        ChatConsumer.connected_users[self.room_group_name].add(self.username)
-
-        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
-
-        await self.accept()
-        await self.channel_layer.group_send(
-            self.room_group_name,
+        # Format the messages
+        return [
             {
                 "type": "chat_message",
-                "message": f"{self.username} joined the chat",
-                "username": "System",
-            },
-        )
+                "message": msg["content"],
+                "username": msg["sender__username"],
+                "timestamp": msg["timestamp"].isoformat(),
+            }
+            for msg in messages
+        ]
 
-        await self.update_user_list()
-        print(
-            f"Current users in {self.room_group_name}: {ChatConsumer.connected_users[self.room_group_name]}"
-        )
-
-    async def disconnect(self, close_code):
-        if hasattr(self, "username") and hasattr(self, "room_group_name"):
-            print(f"User {self.username} disconnecting from {self.room_group_name}")
-
-            if self.room_group_name in ChatConsumer.connected_users:
-                ChatConsumer.connected_users[self.room_group_name].discard(
-                    self.username
+    async def send_message_history(self):
+        """Fetch and send message history to the newly connected client."""
+        try:
+            messages = await self.get_message_history()
+            print(f"DEBUG: Sending message history: {messages}")
+            if messages:
+                await self.send(
+                    text_data=json.dumps(
+                        {
+                            "type": "message_history",
+                            "messages": messages,
+                        }
+                    )
                 )
-
-                if not ChatConsumer.connected_users[self.room_group_name]:
-                    del ChatConsumer.connected_users[self.room_group_name]
-
-                await self.channel_layer.group_send(
-                    self.room_group_name,
+            else:
+                print("DEBUG: No messages found in history")
+        except Exception as e:
+            print(f"DEBUG: Error sending message history: {str(e)}")
+            await self.send(
+                text_data=json.dumps(
                     {
-                        "type": "chat_message",
-                        "message": f"{self.username} left the chat",
-                        "username": "System",
-                    },
+                        "type": "error",
+                        "message": "Failed to load message history",
+                    }
                 )
-
-            await self.channel_layer.group_discard(
-                self.room_group_name, self.channel_name
             )
 
-            await self.update_user_list()
+    @database_sync_to_async
+    def get_or_create_chat_room(self):
+        try:
+            usernames = self.room_name.split("_")
+            if len(usernames) != 2:
+                raise ValueError("Invalid room name format")
+
+            user1 = User.objects.get(username=usernames[0])
+            user2 = User.objects.get(username=usernames[1])
+
+            chat_room, created = ChatRoom.objects.get_or_create(
+                room_id=self.room_name, defaults={"user1": user1, "user2": user2}
+            )
+
+            if not created:
+                chat_room.last_message_at = timezone.now()
+                chat_room.save(update_fields=["last_message_at"])
+
+            print(
+                f"DEBUG: Chat room {'created' if created else 'retrieved'}: {chat_room}"
+            )
+            return chat_room
+
+        except User.DoesNotExist as e:
+            raise ObjectDoesNotExist(f"User not found: {str(e)}")
+        except Exception as e:
+            print(f"DEBUG: Error in get_or_create_chat_room: {str(e)}")
+            raise
+
+    async def disconnect(self, close_code):
+        try:
+            print(
+                f"DEBUG: User {self.username} disconnected from room {self.room_name}"
+            )
+            if hasattr(self, "room_group_name"):
+                if self.room_group_name in self.connected_users:
+                    self.connected_users[self.room_group_name].discard(self.username)
+                await self.channel_layer.group_discard(
+                    self.room_group_name, self.channel_name
+                )
+        except Exception as e:
+            print(f"DEBUG: Disconnect error: {str(e)}")
 
     async def receive(self, text_data):
         try:
             text_data_json = json.loads(text_data)
-            message = text_data_json["message"]
+            message = text_data_json.get("message", "").strip()
 
-            print(
-                f"Received message from {self.username} in {self.room_group_name}: {message}"
-            )
+            if not message:
+                await self.send(
+                    text_data=json.dumps(
+                        {"type": "error", "message": "Empty messages are not allowed"}
+                    )
+                )
+                return
 
-            # Send message to room group
+            timestamp = await self.save_message(message)
+
             await self.channel_layer.group_send(
                 self.room_group_name,
-                {"type": "chat_message", "message": message, "username": self.username},
+                {
+                    "type": "chat_message",
+                    "message": message,
+                    "username": self.username,
+                    "timestamp": timestamp.isoformat(),
+                },
             )
 
+        except json.JSONDecodeError:
+            await self.send(
+                text_data=json.dumps(
+                    {"type": "error", "message": "Invalid message format"}
+                )
+            )
         except Exception as e:
-            print(f"Error in receive: {str(e)}")
+            print(f"DEBUG: Error in receive: {str(e)}")
+            await self.send(
+                text_data=json.dumps(
+                    {"type": "error", "message": "Failed to process message"}
+                )
+            )
+
+    @database_sync_to_async
+    def save_message(self, content):
+        try:
+            message = Message.objects.create(
+                room=self.chat_room, sender=self.scope["user"], content=content
+            )
+            print(f"DEBUG: Message saved: {message.content} at {message.timestamp}")
+            return message.timestamp
+        except Exception as e:
+            print(f"DEBUG: Error saving message: {str(e)}")
+            raise
 
     async def chat_message(self, event):
         await self.send(
@@ -95,19 +230,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     "type": "chat_message",
                     "message": event["message"],
                     "username": event["username"],
+                    "timestamp": event["timestamp"],
                 }
             )
-        )
-
-    async def update_user_list(self):
-        if self.room_group_name in ChatConsumer.connected_users:
-            users = list(ChatConsumer.connected_users[self.room_group_name])
-
-            await self.channel_layer.group_send(
-                self.room_group_name, {"type": "user_list", "users": users}
-            )
-
-    async def user_list(self, event):
-        await self.send(
-            text_data=json.dumps({"type": "user_list", "users": event["users"]})
         )
