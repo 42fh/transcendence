@@ -11,6 +11,7 @@ function usage() {
     echo "  3  Run CustomUserStatusVisibilityTestCase"
     echo "  4  Run CustomUserRelationshipTestCase for friends and blocked users"
     echo "  5  Run CustomUserRelationshipTestCase for custom visibility group"
+    echo "  6  Run FriendRequestTests"
     echo "  A  Run all tests in the users app"
     exit 1
 }
@@ -42,6 +43,9 @@ case "$1" in
         ;;
     5)
         python ../manage.py test users.tests.CustomUserRelationshipTestCase.test_custom_visibility_group --settings=tr_django.test_settings
+        ;;
+    6)
+        python ../manage.py test users.tests.FriendRequestTests --settings=tr_django.test_settings
         ;;
     A)
         python ../manage.py test users --settings=tr_django.test_settings

@@ -66,13 +66,6 @@ class CustomUser(AbstractUser):
         related_name="users_with_custom_visibility",
     )
 
-    friends = models.ManyToManyField(
-        "self", blank=True, symmetrical=False, related_name="friends_of"
-    )
-    blocked_users = models.ManyToManyField(
-        "self", blank=True, symmetrical=False, related_name="blocked_by"
-    )
-
     groups = models.ManyToManyField(
         "auth.Group",
         related_name="custom_user_set",
@@ -89,6 +82,42 @@ class CustomUser(AbstractUser):
         help_text="Specific permissions for this user.",
     )
 
+    # Friendship and Blocking
+    friends = models.ManyToManyField("self", blank=True, symmetrical=True)
+    blocked_users = models.ManyToManyField(
+        "self", blank=True, symmetrical=False, related_name="blocked_by"
+    )
+
+    # Friend Request System
+    friend_requests_sent = models.ManyToManyField(
+        "self", blank=True, symmetrical=False, related_name="friend_requests_received"
+    )
+
+    def send_friend_request(self, user):
+        """Sends a friend request to another user."""
+        if user != self and not self.is_friend_with(user):
+            if self.is_blocked_by(user) or user in self.blocked_users.all():
+                raise ValueError("Cannot send friend request to/from blocked user")
+            self.friend_requests_sent.add(user)
+
+    def accept_friend_request(self, user):
+        """Accepts a friend request from another user."""
+        if user in self.friend_requests_received.all():
+            self.friend_requests_received.remove(user)
+            self.friends.add(user)
+            if user in self.friend_requests_sent.all():
+                self.friend_requests_sent.remove(user)
+
+    def reject_friend_request(self, user):
+        """Rejects a friend request from another user."""
+        if user in self.friend_requests_received.all():
+            self.friend_requests_received.remove(user)
+
+    def cancel_friend_request(self, user):
+        """Cancels a friend request sent to another user."""
+        if user in self.friend_requests_sent.all():
+            self.friend_requests_sent.remove(user)
+
     def is_friend_with(self, user) -> bool:
         return self.friends.filter(id=user.id).exists()
 
@@ -96,7 +125,7 @@ class CustomUser(AbstractUser):
         return user.blocked_users.filter(id=self.id).exists()
 
     def __str__(self):
-        return self.username
+        return str(self.username)
 
 
 class VisibilityGroup(models.Model):
