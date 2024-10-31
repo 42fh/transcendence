@@ -50,8 +50,12 @@ class CustomUser(AbstractUser):
             VISIBILITY_CUSTOM,
         ]
     ]
-    visibility = models.CharField(
+    visibility_online_status = models.CharField(
         max_length=10, choices=VISIBILITY_CHOICES, default=VISIBILITY_FRIENDS
+    )
+
+    visibility_user_profile = models.CharField(
+        max_length=10, choices=VISIBILITY_CHOICES, default=VISIBILITY_EVERYONE
     )
 
     custom_visibility_group = models.ForeignKey(
