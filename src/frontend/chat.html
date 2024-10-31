@@ -57,7 +57,7 @@
         // First, get the current user's username
         let currentUsername = '';
         
-        fetch('/chat/api/get_username/')
+        fetch('/api/chat/get_username/')
             .then(response => response.json())
             .then(data => {
                 currentUsername = data.username;
@@ -67,7 +67,7 @@
             });
 
         function loadUserList() {
-            fetch('/chat/api/get_user_list/')
+            fetch('/api/chat/get_user_list/')
                 .then(response => response.json())
                 .then(data => {
                     const usersList = document.getElementById('users-list');

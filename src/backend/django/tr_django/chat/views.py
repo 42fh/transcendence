@@ -3,21 +3,21 @@ from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 
-@login_required
-def chatPage(request):
-    return render(request, "index.html")
+# @login_required
+# def chatPage(request):
+#     return render(request, "index.html")
 
-@login_required
-def create_one_to_one_chat(request):
-    if request.method == "POST":
-        other_user = request.POST.get("other_user")
-        chat_room_url = f"/chat/{request.user.username}_{other_user}/"
-        return JsonResponse({"chat_room_url": chat_room_url})
-    return JsonResponse({"error": "Invalid request"}, status=400)
+# @login_required
+# def create_one_to_one_chat(request):
+#     if request.method == "POST":
+#         other_user = request.POST.get("other_user")
+#         chat_room_url = f"/chat/{request.user.username}_{other_user}/"
+#         return JsonResponse({"chat_room_url": chat_room_url})
+#     return JsonResponse({"error": "Invalid request"}, status=400)
 
-@login_required
-def one_to_one_chat(request, room_name):
-    return JsonResponse({"room_name": room_name})
+# @login_required
+# def one_to_one_chat(request, room_name):
+#     return JsonResponse({"room_name": room_name})
 
 
 @login_required
