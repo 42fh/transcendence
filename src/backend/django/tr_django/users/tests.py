@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
 from users.models import CustomUser
+from django.core.exceptions import ValidationError
 
 
 class SignupTestCase(TestCase):
@@ -52,11 +53,6 @@ class SignupTestCase(TestCase):
             content_type="application/json",
         )
         self.assertEqual(response.status_code, 400)
-
-
-from django.test import TestCase
-from users.models import CustomUser
-from uuid import UUID
 
 
 class CustomUserModelTestCase(TestCase):
@@ -136,3 +132,114 @@ class CustomUserModelTestCase(TestCase):
         self.user.avatar = None
         self.user.save()
         self.assertIsNone(self.user.avatar or None)
+
+
+class CustomUserStatusVisibilityTestCase(TestCase):
+    """Test cases for status and visibility fields in CustomUser"""
+
+    def setUp(self):
+        # Set up a user instance to use in tests
+        self.user = CustomUser.objects.create_user(
+            username="testuser", password="password123"
+        )
+
+    # Test default values for status and visibility fields
+    def test_default_status_and_visibility_values(self):
+        """Test that status and visibility fields have expected default values"""
+        self.assertEqual(self.user.online_status, CustomUser.STATUS_OFFLINE)
+        self.assertEqual(self.user.default_status, CustomUser.STATUS_OFFLINE)
+        self.assertEqual(
+            self.user.visibility_online_status, CustomUser.VISIBILITY_FRIENDS
+        )
+        self.assertEqual(
+            self.user.visibility_user_profile, CustomUser.VISIBILITY_EVERYONE
+        )
+
+    # Test valid choices for online_status
+    def test_update_online_status_with_valid_choices(self):
+        """Test that online_status can be updated with valid choices"""
+        valid_status_choices = [
+            CustomUser.STATUS_OFFLINE,
+            CustomUser.STATUS_ONLINE,
+            CustomUser.STATUS_BUSY,
+            CustomUser.STATUS_AWAY,
+        ]
+
+        for status in valid_status_choices:
+            self.user.online_status = status
+            self.user.save()
+            self.assertEqual(self.user.online_status, status)
+
+    # Test invalid choice for online_status
+    def test_invalid_online_status_choice(self):
+        """Test that invalid online_status choice raises an error"""
+        with self.assertRaises(ValidationError):
+            self.user.online_status = "invalid_status"
+            self.user.full_clean()
+
+    # Test valid choices for default_status
+    def test_update_default_status_with_valid_choices(self):
+        """Test that default_status can be updated with valid choices"""
+        valid_default_choices = [CustomUser.STATUS_OFFLINE, CustomUser.STATUS_AWAY]
+
+        for status in valid_default_choices:
+            self.user.default_status = status
+            self.user.save()
+            self.assertEqual(self.user.default_status, status)
+
+    # Test invalid choice for default_status
+    def test_invalid_default_status_choice(self):
+        """Test that invalid default_status choice raises an error"""
+        with self.assertRaises(ValidationError):
+            self.user.default_status = "invalid_default"
+            self.user.full_clean()
+
+    # Test valid choices for visibility_online_status
+    def test_update_visibility_online_status_with_valid_choices(self):
+        """Test that visibility_online_status can be updated with valid choices"""
+        valid_visibility_choices = [
+            CustomUser.VISIBILITY_NONE,
+            CustomUser.VISIBILITY_FRIENDS,
+            CustomUser.VISIBILITY_EVERYONE,
+            CustomUser.VISIBILITY_CUSTOM,
+        ]
+
+        for visibility in valid_visibility_choices:
+            self.user.visibility_online_status = visibility
+            self.user.save()
+            self.assertEqual(self.user.visibility_online_status, visibility)
+
+    # Test invalid choice for visibility_online_status
+    def test_invalid_visibility_online_status_choice(self):
+        """Test that invalid visibility_online_status choice raises an error"""
+        with self.assertRaises(ValidationError):
+            self.user.visibility_online_status = "invalid_visibility"
+            self.user.full_clean()
+
+    # Test valid choices for visibility_user_profile
+    def test_update_visibility_user_profile_with_valid_choices(self):
+        """Test that visibility_user_profile can be updated with valid choices"""
+        valid_visibility_choices = [
+            CustomUser.VISIBILITY_NONE,
+            CustomUser.VISIBILITY_FRIENDS,
+            CustomUser.VISIBILITY_EVERYONE,
+            CustomUser.VISIBILITY_CUSTOM,
+        ]
+
+        for visibility in valid_visibility_choices:
+            self.user.visibility_user_profile = visibility
+            self.user.save()
+            self.assertEqual(self.user.visibility_user_profile, visibility)
+
+    # Test invalid choice for visibility_user_profile
+    def test_invalid_visibility_user_profile_choice(self):
+        """Test that invalid visibility_user_profile choice raises an error"""
+        self.user.visibility_user_profile = "invalid_visibility"
+
+        # Use assertRaises to verify that ValidationError is raised
+        with self.assertRaises(ValidationError) as context:
+            self.user.full_clean()
+
+        # Optionally verify the specific error message
+        self.assertIn("visibility_user_profile", context.exception.message_dict)
+        self.assertIn("is not a valid choice", str(context.exception))
