@@ -13,6 +13,7 @@ from django.contrib.auth.hashers import make_password
 from django.utils.decorators import method_decorator
 from django.views import View
 from .serializers import UserSerializer
+from users.models import CustomUser
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +38,7 @@ class SignupView(View):
         password = data.get("password")
 
         # Check if username is taken
-        if User.objects.filter(username=username).exists():
+        if CustomUser.objects.filter(username=username).exists():
             return JsonResponse(
                 {
                     "success": False,
@@ -47,7 +48,9 @@ class SignupView(View):
                 status=400,
             )
         # Create and save new user
-        user = User.objects.create(username=username, password=make_password(password))
+        user = CustomUser.objects.create(
+            username=username, password=make_password(password)
+        )
 
         user = authenticate(request, username=username, password=password)
         if user is not None:
