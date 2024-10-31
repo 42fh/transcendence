@@ -1,6 +1,6 @@
-from django.db import models
-from django.contrib.auth.models import User
 from decimal import Decimal
+import uuid
+from django.db import models
 from users.models import CustomUser
 
 
@@ -45,6 +45,7 @@ class Player(models.Model):
 
 
 class BaseGame(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     date = models.DateTimeField()
     duration = models.IntegerField(blank=True, null=True)
     mode = models.ForeignKey(GameMode, on_delete=models.SET_NULL, null=True)
