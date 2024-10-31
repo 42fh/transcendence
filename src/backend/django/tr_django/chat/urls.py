@@ -3,7 +3,6 @@ from .views import (
     get_username,
     get_user_list,
 )
-from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     # path("", chatPage, name="chat-page"),

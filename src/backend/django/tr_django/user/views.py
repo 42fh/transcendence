@@ -6,7 +6,6 @@ from django.http import JsonResponse
 import json
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_exempt
 
 
 def user_profile(request, username):
@@ -25,25 +24,25 @@ def user_profile(request, username):
         request, "user_profile.html", {"user": user, "profile": profile, "form": form}
     )
 
-@csrf_exempt
+
 def api_login(request):
     if request.method == "POST":
         data = json.loads(request.body)
         username = data.get("username")
         password = data.get("password")
         user = authenticate(request, username=username, password=password)
-        
+
         if user is not None:
             login(request, user)
-            return JsonResponse({"message": "Login successful", "username": user.username})
+            return JsonResponse(
+                {"message": "Login successful", "username": user.username}
+            )
         else:
             return JsonResponse({"error": "Invalid credentials"}, status=401)
     return JsonResponse({"error": "Only POST method is allowed"}, status=405)
 
 
-@csrf_exempt
 @login_required
 def api_logout(request):
     logout(request)
     return JsonResponse({"message": "Logout successful"})
-
