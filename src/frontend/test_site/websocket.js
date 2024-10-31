@@ -32,7 +32,7 @@ export class GameWebSocket {
 
         this.ws.onclose = () => {
             console.log('WebSocket closed');
-            this.handleReconnect();
+           // this.handleReconnect();
         };
 
         this.ws.onerror = (error) => {

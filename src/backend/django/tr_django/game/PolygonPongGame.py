@@ -147,8 +147,7 @@ class PolygonPongGame(AGameManager):
                     active_count += 1
             return None
 
-        """ def calculate_paddle_collision(side_index, collision_info, ball, paddles, dimensions):
-            # Find the paddle for this side
+        """def calculate_paddle_collision(side_index, collision_info, ball, paddles, dimensions):
             paddle = next((p for p in paddles if p["side_index"] == side_index), None)
             if not paddle or not paddle["active"]:
                 return None
@@ -157,55 +156,100 @@ class PolygonPongGame(AGameManager):
             start = vertices[side_index]
             end = vertices[(side_index + 1) % self.num_sides]
             
+            # Calculate side vector and normal
             dx = end["x"] - start["x"]
             dy = end["y"] - start["y"]
             side_length = math.sqrt(dx**2 + dy**2)
             
+            # Normalize vectors
             normal_x = -dy / side_length
             normal_y = dx / side_length
             
+            # Paddle dimensions with slightly larger collision zone at edges
             paddle_length = side_length * dimensions["paddle_length"]
-            half_paddle_length = paddle_length / 2
-            total_collision_width = dimensions["paddle_width"] + ball["size"]
+            half_paddle_length = paddle_length / 2 * 1.1  # 10% larger collision zone at edges
             
+            # Calculate paddle's actual position in space
             paddle_position = paddle["position"] * side_length
+            paddle_center_x = start["x"] + (dx * paddle["position"])
+            paddle_center_y = start["y"] + (dy * paddle["position"])
             
-            to_point_x = ball["x"] - start["x"]
-            to_point_y = ball["y"] - start["y"]
-            projected_len = (to_point_x * dx + to_point_y * dy) / side_length
+            # Expand paddle thickness near edges for better corner detection
+            base_thickness = dimensions["paddle_width"] + ball["size"]
+            edge_distance = abs(ball["x"] - paddle_center_x) / half_paddle_length
+            paddle_thickness = base_thickness * (1 + 0.2 * edge_distance)  # Up to 20% thicker at edges
             
-            normal_dist = abs(to_point_x * normal_x + to_point_y * normal_y)
+            # Ball to paddle calculations
+            ball_to_paddle_x = ball["x"] - paddle_center_x
+            ball_to_paddle_y = ball["y"] - paddle_center_y
             
-            dist_from_paddle_center = abs(projected_len - paddle_position)
-            is_within_paddle_length = dist_from_paddle_center <= half_paddle_length
-            is_within_collision_width = normal_dist <= total_collision_width
-
-            if is_within_paddle_length and is_within_collision_width:
-                position_diff = projected_len - paddle_position
-                # Include active_paddle_index in collision info
-                active_paddle_index = get_active_paddle_index(side_index, paddles)
+            # Project ball position onto paddle line
+            projected_len = (ball_to_paddle_x * dx + ball_to_paddle_y * dy) / side_length
+            
+            # Calculate distance from ball to paddle surface
+            dist_to_paddle = abs(ball_to_paddle_x * normal_x + ball_to_paddle_y * normal_y)
+            
+            # Check for corner collisions
+            is_near_edge = abs(projected_len) > (half_paddle_length * 0.8)
+            is_corner_collision = False
+            
+            if is_near_edge:
+                # Check both corners
+                for corner_offset in [-half_paddle_length, half_paddle_length]:
+                    corner_x = paddle_center_x + (dx * corner_offset / side_length)
+                    corner_y = paddle_center_y + (dy * corner_offset / side_length)
+                    
+                    # Distance from ball to corner
+                    corner_dx = ball["x"] - corner_x
+                    corner_dy = ball["y"] - corner_y
+                    corner_dist = math.sqrt(corner_dx**2 + corner_dy**2)
+                    
+                    if corner_dist <= (ball["size"] + dimensions["paddle_width"]) * 1.2:  # Slightly larger corner collision zone
+                        is_corner_collision = True
+                        break
+            
+            # Expanded collision checks
+            is_within_paddle_length = abs(projected_len) <= half_paddle_length or is_corner_collision
+            is_within_paddle_thickness = dist_to_paddle <= paddle_thickness
+            
+            active_paddle_index = get_active_paddle_index(side_index, paddles)
+            
+            if is_within_paddle_length and is_within_paddle_thickness:
+                print("\n=== COLLISION DETECTED ===")
+                print(f"Edge Hit: {is_near_edge}")
+                print(f"Corner Hit: {is_corner_collision}")
+                print(f"Distance to Paddle: {dist_to_paddle:.4f}")
+                print(f"Projected Length: {projected_len:.4f}")
+                print("=========================\n")
+                
                 return {
                     "type": "paddle",
                     "side_index": side_index,
-                    "active_paddle_index": active_paddle_index,  # Added this
-                    "offset": position_diff,
-                    "normalized_offset": position_diff / half_paddle_length,
-                    "distance": normal_dist,
-                    "position": projected_len / side_length,
+                    "active_paddle_index": active_paddle_index,
+                    "offset": projected_len,
+                    "normalized_offset": projected_len / (half_paddle_length / 1.1),  # Adjust for the expanded collision zone
+                    "distance": dist_to_paddle,
+                    "position": (paddle_position + projected_len) / side_length,
                     "projection": collision_info["projection"],
-                    "normal": collision_info["normal"]
+                    "normal": {
+                        "x": normal_x,
+                        "y": normal_y
+                    },
+                    "is_edge_hit": is_near_edge,
+                    "is_corner_hit": is_corner_collision
                 }
             
             return {
                 "type": "miss",
                 "side_index": side_index,
-                "active_paddle_index": get_active_paddle_index(side_index, paddles),  # Added this
+                "active_paddle_index": active_paddle_index,
                 "distance": collision_info["distance"],
                 "position": collision_info["position"],
                 "projection": collision_info["projection"],
                 "normal": collision_info["normal"]
-            }"""
+            }
 
+        """""" 
         def calculate_paddle_collision(side_index, collision_info, ball, paddles, dimensions):
             paddle = next((p for p in paddles if p["side_index"] == side_index), None)
             if not paddle or not paddle["active"]:
@@ -245,26 +289,28 @@ class PolygonPongGame(AGameManager):
             # Check if within paddle length
             dist_from_paddle_center = abs(projected_len - paddle_position)
             is_within_paddle_length = dist_from_paddle_center <= half_paddle_length
-            
+
             # Check if within collision width
             is_within_collision_width = normal_dist <= total_collision_width
             
-            # Edge collision check
+            # NEW: Edge collision detection
             if not is_within_paddle_length and normal_dist <= total_collision_width:
-                # Get paddle corner points
+                # Check distance to each corner of the paddle
                 corner_positions = [
                     paddle_position - half_paddle_length,
                     paddle_position + half_paddle_length
                 ]
                 
-                # Check distance to each corner
                 for corner_pos in corner_positions:
+                    # Calculate corner position
                     corner_x = start["x"] + (dx * corner_pos/side_length)
                     corner_y = start["y"] + (dy * corner_pos/side_length)
+                    
+                    # Add paddle width in normal direction
                     corner_normal_x = corner_x + normal_x * dimensions["paddle_width"]
                     corner_normal_y = corner_y + normal_y * dimensions["paddle_width"]
                     
-                    # Distance from ball center to corner
+                    # Calculate distance from ball center to corner
                     delta_x = ball["x"] - corner_normal_x
                     delta_y = ball["y"] - corner_normal_y
                     corner_dist = math.sqrt(delta_x**2 + delta_y**2)
@@ -288,7 +334,101 @@ class PolygonPongGame(AGameManager):
                     "position": projected_len / side_length,
                     "projection": collision_info["projection"],
                     "normal": collision_info["normal"],
-                    "is_edge_hit": abs(position_diff) > half_paddle_length * 0.9
+                    "is_edge_hit": abs(position_diff) > half_paddle_length * 0.9  # Added flag for edge hits
+                }
+            
+            return {
+                "type": "miss",
+                "side_index": side_index,
+                "active_paddle_index": active_paddle_index,
+                "distance": collision_info["distance"],
+                "position": collision_info["position"],
+                "projection": collision_info["projection"],
+                "normal": collision_info["normal"]
+            }"""
+        def calculate_paddle_collision(side_index, collision_info, ball, paddles, dimensions):
+            vertices = get_polygon_vertices()
+            paddle = next((p for p in paddles if p["side_index"] == side_index), None)
+            if not paddle or not paddle["active"]:
+                return None
+
+            start = vertices[side_index]
+            end = vertices[(side_index + 1) % self.num_sides]
+            
+            # Calculate side vector and normal
+            dx = end["x"] - start["x"]
+            dy = end["y"] - start["y"]
+            side_length = math.sqrt(dx**2 + dy**2)
+            
+            # Normalize vectors
+            normal_x = -dy / side_length
+            normal_y = dx / side_length
+            
+            # Paddle dimensions
+            paddle_length = side_length * dimensions["paddle_length"]
+            half_paddle_length = paddle_length / 2
+            
+            # Calculate paddle's actual position in space
+            paddle_position = paddle["position"] * side_length
+            paddle_center_x = start["x"] + (dx * paddle["position"])
+            paddle_center_y = start["y"] + (dy * paddle["position"])
+            
+            # Calculate paddle thickness zone
+            paddle_thickness = dimensions["paddle_width"] + ball["size"]
+            
+            # Create paddle collision zone
+            paddle_min_x = paddle_center_x - (dx * half_paddle_length / side_length)
+            paddle_min_y = paddle_center_y - (dy * half_paddle_length / side_length)
+            paddle_max_x = paddle_center_x + (dx * half_paddle_length / side_length)
+            paddle_max_y = paddle_center_y + (dy * half_paddle_length / side_length)
+            
+            # Check if ball is within paddle's extended collision zone
+            ball_to_paddle_x = ball["x"] - paddle_center_x
+            ball_to_paddle_y = ball["y"] - paddle_center_y
+            
+            # Project ball position onto paddle line
+            projected_len = (ball_to_paddle_x * dx + ball_to_paddle_y * dy) / side_length
+            
+            # Calculate distance from ball to paddle surface
+            dist_to_paddle = abs(ball_to_paddle_x * normal_x + ball_to_paddle_y * normal_y)
+            
+            # Check if ball is within paddle's bounds
+            is_within_paddle_length = abs(projected_len) <= half_paddle_length
+            is_within_paddle_thickness = dist_to_paddle <= paddle_thickness
+            
+            active_paddle_index = get_active_paddle_index(side_index, paddles)
+            
+            if is_within_paddle_length and is_within_paddle_thickness:
+                print("\n=== PADDLE COLLISION DETECTED ===")
+                print(f"Ball Properties:")
+                print(f"  - Position: x={ball['x']:.4f}, y={ball['y']:.4f}")
+                print(f"  - Size: {ball['size']:.4f}")
+                print(f"  - Velocity: vx={ball['velocity_x']:.4f}, vy={ball['velocity_y']:.4f}")
+                
+                print(f"\nPaddle Properties:")
+                print(f"  - Side Index: {side_index}")
+                print(f"  - Active Paddle Index: {active_paddle_index}")
+                print(f"  - Center Position: x={paddle_center_x:.4f}, y={paddle_center_y:.4f}")
+                print(f"  - Length: {paddle_length:.4f} (half={half_paddle_length:.4f})")
+                print(f"  - Thickness Zone: {paddle_thickness:.4f}")
+                
+                print(f"\nCollision Details:")
+                print(f"  - Distance to Paddle: {dist_to_paddle:.4f}")
+                print(f"  - Projected Length: {projected_len:.4f}")
+                print(f"  - Is Edge Hit: {abs(projected_len) > half_paddle_length * 0.9}")
+                print(f"  - Normal Vector: nx={normal_x:.4f}, ny={normal_y:.4f}")
+                print("=============================\n")
+                return {
+                    "type": "paddle",
+                    "side_index": side_index,
+                    "active_paddle_index": active_paddle_index,
+                    "offset": projected_len,
+                    "normalized_offset": projected_len / half_paddle_length,
+                    "distance": dist_to_paddle,
+                    "position": (paddle_position + projected_len) / side_length,
+                    "projection": collision_info["projection"],
+                    "normal": collision_info["normal"],
+                    "is_edge_hit": abs(projected_len) > half_paddle_length * 0.9
                 }
             
             return {
@@ -301,7 +441,8 @@ class PolygonPongGame(AGameManager):
                 "normal": collision_info["normal"]
             }
 
-        def find_nearest_collision(ball, paddles, vertices):
+
+        """def find_nearest_collision(ball, paddles, vertices):
             best_collision = None
             min_distance = float('inf')
 
@@ -325,11 +466,40 @@ class PolygonPongGame(AGameManager):
                                 **collision_info
                             }
 
+            return best_collision"""
+        def find_nearest_collision(ball, paddles, vertices):
+            best_collision = None
+            min_distance = float('inf')
+
+            for i in range(self.num_sides):
+                collision_info = calculate_distance_to_side(ball, i, vertices)
+                paddle = next((p for p in paddles if p["side_index"] == i), None)
+                
+                if paddle and paddle["active"]:
+                    # Check for paddle collision first, regardless of wall distance
+                    paddle_collision = calculate_paddle_collision(i, collision_info, ball, paddles, current_state["dimensions"])
+                    if paddle_collision and paddle_collision["type"] == "paddle" and paddle_collision["distance"] < min_distance:
+                        min_distance = paddle_collision["distance"]
+                        best_collision = paddle_collision
+                    elif paddle_collision["type"] == "miss" and collision_info["distance"] <= ball["size"]:
+                        # Now we properly register misses when the ball is past the wall
+                        min_distance = collision_info["distance"]
+                        best_collision = paddle_collision
+                else:
+                    # Only check wall collision if there's no paddle on this side
+                    if collision_info["distance"] <= ball["size"] and collision_info["distance"] < min_distance:
+                        min_distance = collision_info["distance"]
+                        best_collision = {
+                            "type": "wall",
+                            "side_index": i,
+                            **collision_info
+                        }
+
             return best_collision
-                    
+            """            
         def apply_collision_resolution(ball, collision):
-            """Adjust ball position to prevent paddle/wall penetration"""
-            # Add a small buffer to prevent sticking
+            """"""Adjust ball position to prevent paddle/wall penetration"""
+            """# Add a small buffer to prevent sticking
             BUFFER = 0.001
             
             if collision["type"] in ["paddle", "wall"]:
@@ -348,8 +518,44 @@ class PolygonPongGame(AGameManager):
                         # Additional adjustment to account for edge collision
                         ball["x"] += collision["normal"]["x"] * BUFFER
                         ball["y"] += collision["normal"]["y"] * BUFFER
-
-        # Main game logic
+            """
+        def apply_collision_resolution(ball, collision):
+            """Adjust ball position to prevent paddle/wall penetration"""
+            # Add a small buffer to prevent sticking
+            BUFFER = 0.001
+            
+            if collision["type"] in ["paddle", "wall"]:
+                # Calculate penetration depth
+                penetration = ball["size"] - collision["distance"]
+                
+                if penetration > 0:
+                    if collision["type"] == "paddle":
+                        # For paddle collisions, use the paddle's surface as the reference point
+                        # Get the normal vector pointing away from the paddle
+                        normal_x = collision["normal"]["x"]
+                        normal_y = collision["normal"]["y"]
+                        
+                        # Calculate the point on the paddle's surface closest to the ball
+                        paddle_surface_x = ball["x"] - normal_x * collision["distance"]
+                        paddle_surface_y = ball["y"] - normal_y * collision["distance"]
+                        
+                        # Move ball out to the edge of the paddle's collision zone
+                        ball["x"] = paddle_surface_x + normal_x * (ball["size"] + BUFFER)
+                        ball["y"] = paddle_surface_y + normal_y * (ball["size"] + BUFFER)
+                    else:
+                        # For wall collisions, use the original wall projection
+                        ball["x"] = (collision["projection"]["x"] + 
+                                    collision["normal"]["x"] * (ball["size"] + BUFFER))
+                        ball["y"] = (collision["projection"]["y"] + 
+                                    collision["normal"]["y"] * (ball["size"] + BUFFER))
+                    
+                    # For edge hits, ensure proper positioning
+                    if collision.get("is_edge_hit", False):
+                        # Additional adjustment to account for edge collision
+                        ball["x"] += collision["normal"]["x"] * BUFFER
+                        ball["y"] += collision["normal"]["y"] * BUFFER
+       
+         # Main game logic
         game_over = False
         new_state = current_state.copy()
         vertices = get_polygon_vertices()
@@ -360,11 +566,10 @@ class PolygonPongGame(AGameManager):
             ball["x"] += ball["velocity_x"]
             ball["y"] += ball["velocity_y"]
 
-            # Check for collisions
+        # Check for collisions
             collision = find_nearest_collision(ball, new_state["paddles"], vertices)
             if collision:
                 if collision["type"] in ["paddle", "wall"]:
-                    # Apply bounce effect
                     apply_collision_resolution(ball, collision)
                     new_velocities = self.apply_ball_bounce_effect(
                         ball, 

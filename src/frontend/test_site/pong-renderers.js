@@ -1037,7 +1037,6 @@ export class PolygonRenderer extends BasePongRenderer {
                 const paddleX = start.x + (end.x - start.x) * paddle.position;
                 const paddleY = start.y + (end.y - start.y) * paddle.position;
                 
-console.log(this.state);
                 const paddleLength = this.state.dimensions.paddle_length * sideLength;
                 const paddleWidth = this.state.dimensions.paddle_width * this.config.scale;
                 const hitZoneWidth = (this.state.dimensions.paddle_width + 
@@ -1051,27 +1050,7 @@ console.log(this.state);
                     `${paddleX - (normalizedSideX * paddleLength / 2) + normalX * hitZoneWidth},${paddleY - (normalizedSideY * paddleLength / 2) + normalY * hitZoneWidth}`
                 ].join(' ');
 		// First let's check the basic vectors and lengths
-console.log('Side vector:', {sideX, sideY, sideLength});
-console.log('Normal vectors:', {
-    normalizedSideX, 
-    normalizedSideY, 
-    normalX, 
-    normalY
-});
 
-// Check the paddle position and dimensions
-console.log('Paddle position:', {paddleX, paddleY});
-console.log('Dimensions:', {
-    paddleLength,
-    paddleWidth,
-    hitZoneWidth
-});
-
-// And finally check the actual points being generated
-console.log('Hit zone points:', hitZonePoints);
-console.log('State dimensions:', this.state.dimensions);
-console.log('Config:', this.config);
-console.log(this.state);
 
                 // First draw the green hit zone area
                 this.svg.appendChild(this.createSVGElement('polygon', {

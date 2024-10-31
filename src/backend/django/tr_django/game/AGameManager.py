@@ -444,7 +444,7 @@ class AGameManager(ABC):
                 return False
             
             # Broadcast update
-            winner = self.check_winner(new_state['score']) if game_over else None
+            winner = self.check_winner(new_state['scores']) if game_over else None
             await self.channel_layer.group_send(
                 f"game_{self.game_id}",
                 {
@@ -499,7 +499,7 @@ class AGameManager(ABC):
             
             # Keep game state briefly for end-game display
             for key in [self.state_key, self.players_key, self.settings_key, 
-                       self.paddles_key, self.running_key]:
+                       self.paddles_key, self.running_key, self.type_key]:
                 await self.redis_conn.expire(key, 300)  # 5 minute expiry
             
             print(f"Game {self.game_id} has ended.")
@@ -507,7 +507,7 @@ class AGameManager(ABC):
         except Exception as e:
             print(f"Error ending game: {e}")
     
-    def check_winner(self, scores, win_threshold=11):
+    def check_winner(self, scores, win_threshold=1):
         max_score = max(scores)
         if max_score >= win_threshold:
             # Find all players with max score
@@ -563,11 +563,16 @@ class AGameManager(ABC):
         # Apply speed increase
         current_speed = math.sqrt(ball["velocity_x"]**2 + ball["velocity_y"]**2)
         new_speed = current_speed * speed_multiplier
-        magnitude = math.sqrt(final_x**2 + final_y**2)
-        
+        # Limit speed to 80% of ball size to prevent tunneling
+        MAX_SPEED = ball["size"] * 0.8
+        if new_speed > MAX_SPEED:
+            scale = MAX_SPEED / new_speed
+            final_x *= scale
+            final_y *= scale       
+ 
         return {
-            "velocity_x": (final_x / magnitude) * new_speed,
-            "velocity_y": (final_y / magnitude) * new_speed
+            "velocity_x": (final_x),
+            "velocity_y": (final_y)
         }
 
     def update_scores(self, current_scores, failed_player_index):

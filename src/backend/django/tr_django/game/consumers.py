@@ -187,7 +187,8 @@ class PongConsumer(AsyncWebsocketConsumer):
     async def game_finished(self, event):
         """Handle game finished events"""
         winner_index = event.get("winner")
-        is_winner = winner_index == self.player_index if winner_index is not None else False
+        print(winner_index)
+        is_winner = self.player_index in winner_index if winner_index is not None else False
         sanitized_state = self.sanitize_for_json(event["game_state"]) 
         await self.send(text_data=json.dumps({
             "type": "game_finished",

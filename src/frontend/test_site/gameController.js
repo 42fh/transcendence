@@ -110,7 +110,6 @@ export class GameController {
                     break;
 
                 case 'game_state':
-		    console.log(message);
                     this.gameState.updateState(message.game_state);
                     if (this.renderer) {
                         this.renderer.update(message.game_state);
@@ -118,10 +117,12 @@ export class GameController {
                     break;
 
                 case 'game_finished':
+                    console.log(message);
                     this.handleGameFinished(message);
                     break;
 
                 case 'error':
+                    console.log(message);
                     // Simply pass the error message to the renderer
                     if (this.renderer) {
                         this.renderer.showError({
@@ -173,6 +174,9 @@ export class GameController {
             this.renderer.showGameOver(message.winner === 'you');
         }
         this.websocket.disconnect();
+    this.websocket = null;
+      this.gameId = null;
+        this.playerId = null;
     }
 
     movePaddle(direction) {
