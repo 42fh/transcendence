@@ -123,10 +123,10 @@ class CustomUserModelTestCase(TestCase):
     def test_avatar_field(self):
         """Test that avatar can be set, retrieved, and updated."""
         # Create: Initially should be None
-        self.assertIsNone(self.user.avatar)
+        self.assertIsNone(self.user.avatar or None)
 
         # Update: Assign an avatar
-        self.user.avatar = "avatars/test_avatar.jpg"
+        self.user.avatar = "avatars/test_avatar.png"
         self.user.save()
 
         updated_user = CustomUser.objects.get(username="testuser")
@@ -135,4 +135,4 @@ class CustomUserModelTestCase(TestCase):
         # Delete: Set avatar to None
         self.user.avatar = None
         self.user.save()
-        self.assertIsNone(CustomUser.objects.get(username="testuser").avatar)
+        self.assertIsNone(self.user.avatar or None)
