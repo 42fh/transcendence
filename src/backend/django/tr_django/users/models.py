@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+import uuid
 
 
 class CustomUser(AbstractUser):
@@ -7,6 +8,7 @@ class CustomUser(AbstractUser):
     The ExtendedUser model extends Django's AbstractUser with additional fields for the user app.
     """
 
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     avatar = models.ImageField(upload_to="avatars/", null=True, blank=True)
     bio = models.TextField(null=True, blank=True)
     telephone_number = models.CharField(max_length=20, null=True, blank=True)
