@@ -27,7 +27,10 @@ class CustomUser(AbstractUser):
 
     default_status = models.CharField(
         max_length=10,
-        choices=[STATUS_OFFLINE, STATUS_AWAY],
+        choices=[
+            (STATUS_OFFLINE, STATUS_OFFLINE.capitalize()),
+            (STATUS_AWAY, STATUS_AWAY.capitalize()),
+        ],
         default=STATUS_OFFLINE,
     )
 
@@ -50,16 +53,34 @@ class CustomUser(AbstractUser):
     )
 
     custom_visibility_group = models.ForeignKey(
-        "VisibilityGroup",
+        to="users.VisibilityGroup",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="users_with_custom_visibility",
     )
 
-    friends = models.ManyToManyField("self", blank=True, related_name="friends_of")
+    friends = models.ManyToManyField(
+        "self", blank=True, symmetrical=False, related_name="friends_of"
+    )
     blocked_users = models.ManyToManyField(
-        "self", blank=True, related_name="blocked_by"
+        "self", blank=True, symmetrical=False, related_name="blocked_by"
+    )
+
+    groups = models.ManyToManyField(
+        "auth.Group",
+        related_name="custom_user_set",
+        blank=True,
+        verbose_name="groups",
+        help_text="The groups this user belongs to.",
+    )
+
+    user_permissions = models.ManyToManyField(
+        "auth.Permission",
+        related_name="custom_user_set",
+        blank=True,
+        verbose_name="user permissions",
+        help_text="Specific permissions for this user.",
     )
 
     def is_friend_with(self, user) -> bool:
@@ -70,3 +91,21 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
+
+
+class VisibilityGroup(models.Model):
+    """
+    Model to manage custom visibility groups for users
+    """
+
+    name = models.CharField(max_length=100)
+    description = models.TextField(null=True, blank=True)
+    created_by = models.ForeignKey(
+        "CustomUser", on_delete=models.CASCADE, related_name="created_visibility_groups"
+    )
+    members = models.ManyToManyField(
+        "CustomUser", related_name="visibility_group_memberships", blank=True
+    )
+
+    def __str__(self):
+        return self.name

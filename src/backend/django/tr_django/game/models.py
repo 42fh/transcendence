@@ -1,7 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from decimal import Decimal
-from users.models import CustomUser 
+from users.models import CustomUser
+
 
 class GameMode(models.Model):
     name = models.CharField(max_length=200)
@@ -9,6 +10,7 @@ class GameMode(models.Model):
 
     def __str__(self):
         return str(self.name)
+
 
 class Player(models.Model):
     user = models.OneToOneField(
@@ -46,7 +48,7 @@ class BaseGame(models.Model):
     date = models.DateTimeField()
     duration = models.IntegerField(blank=True, null=True)
     mode = models.ForeignKey(GameMode, on_delete=models.SET_NULL, null=True)
-    players = models.ManyToManyField(Player, through="PlayerGameStats")
+    players = models.ManyToManyField(Player, related_name="%(class)s_games")
     winner = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True)
 
     class Meta:
@@ -64,7 +66,12 @@ class BaseGame(models.Model):
 
 
 class SingleGame(BaseGame):
-    mode = models.ForeignKey(GameMode, on_delete=models.SET_NULL, null=True)
+    players = models.ManyToManyField(
+        Player, through="PlayerGameStats", related_name="single_games"
+    )
+    winner = models.ForeignKey(
+        Player, on_delete=models.SET_NULL, null=True, related_name="won_single_games"
+    )
 
     def __str__(self):
         return f"SingleGame: {self.mode.name} on {self.date}"
@@ -92,7 +99,7 @@ class Tournament(models.Model):
     )
 
     # Tournament type choices with auto-derived labels
-    TYPE_CHOICES = [
+    type_choices = [
         ("round_robin", "Round Robin"),
         ("knockout", "Knockout"),
         ("double_elimination", "Double Elimination"),
@@ -117,7 +124,8 @@ class Tournament(models.Model):
 
     # Relationships and tournament-specific data
     match_schedule = models.ManyToManyField(
-        "Game", blank=True, related_name="tournaments"
+        "DirectEliminationTournamentGame",  # Now referencing a concrete tournament game model
+        related_name="tournaments",
     )
     ranking = models.JSONField(
         blank=True,
@@ -153,48 +161,60 @@ class Tournament(models.Model):
         self.save()
 
 
-class TournamentGame(BaseGame):
-    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
+class TournamentGame(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    date = models.DateTimeField()
+    duration = models.IntegerField(blank=True, null=True)
+    mode = models.ForeignKey(GameMode, on_delete=models.SET_NULL, null=True)
+    players = models.ManyToManyField(Player, related_name="%(class)s_games")
+    winner = models.ForeignKey(
+        Player,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="won_tournament_games",
+    )
 
     class Meta:
         abstract = True
 
-    def __str__(self):
-        return f"Tournament Game ({self.tournament.name}) - {self.mode.name} on {self.date}"
-
 
 class DirectEliminationTournamentGame(TournamentGame):
-    round_number = models.PositiveIntegerField(default=1)
+    players = models.ManyToManyField(
+        Player, through="PlayerGameStats", related_name="direct_elimination_games"
+    )
     source_game1 = models.ForeignKey(
-        TournamentGame,
+        "self",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name="next_game_as_player1",
+        related_name="next_game1",
     )
     source_game2 = models.ForeignKey(
-        TournamentGame,
+        "self",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name="next_game_as_player2",
+        related_name="next_game2",
     )
-
-    def __str__(self):
-        return f"Direct Elimination Game - Round {self.round_number} ({self.date})"tTo
 
 
 # The most straightforward way to store player stats for a game is to create an intermediate model
 # that links a player to a game and stores individual stats like score and rank. SQL doesn’t support
 # storing complex objects directly.
 class PlayerGameStats(models.Model):
-    game = models.ForeignKey(Game, on_delete=models.CASCADE)
+    single_game = models.ForeignKey(
+        SingleGame, on_delete=models.CASCADE, null=True, blank=True
+    )
+    tournament_game = models.ForeignKey(
+        DirectEliminationTournamentGame, on_delete=models.CASCADE, null=True, blank=True
+    )
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
     score = models.IntegerField(default=0)
     rank = models.PositiveIntegerField(default=0)
 
     def __str__(self):
-        return f"{self.player.display_name} - Game on {self.game.date} - Score: {self.score}, Rank: {self.rank}"
+        game = self.single_game or self.tournament_game
+        return f"{self.player.display_name} - Game on {game.date} - Score: {self.score}, Rank: {self.rank}"
 
 
 class Ranking(models.Model):
