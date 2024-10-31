@@ -93,7 +93,7 @@ class CustomUser(AbstractUser):
         return self.friends.filter(id=user.id).exists()
 
     def is_blocked_by(self, user) -> bool:
-        return self.blocked_users.filter(id=user.id).exists()
+        return user.blocked_users.filter(id=self.id).exists()
 
     def __str__(self):
         return self.username

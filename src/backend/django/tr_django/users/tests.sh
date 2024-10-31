@@ -4,11 +4,13 @@
 
 # Function to display usage instructions
 function usage() {
-    echo "Usage: $0 {1|2|3|A}"
+    echo "Usage: $0 {1|2|3|4|5|A}"
     echo "Options:"
     echo "  1  Run SignupTestCase"
     echo "  2  Run CustomUserModelTestCase"
     echo "  3  Run CustomUserStatusVisibilityTestCase"
+    echo "  4  Run CustomUserRelationshipTestCase for friends and blocked users"
+    echo "  5  Run CustomUserRelationshipTestCase for custom visibility group"
     echo "  A  Run all tests in the users app"
     exit 1
 }
@@ -34,6 +36,12 @@ case "$1" in
         ;;
     3)
         python ../manage.py test users.tests.CustomUserStatusVisibilityTestCase --settings=tr_django.test_settings
+        ;;
+    4)
+        python ../manage.py test users.tests.CustomUserRelationshipTestCase.test_friends_and_blocked_users --settings=tr_django.test_settings
+        ;;
+    5)
+        python ../manage.py test users.tests.CustomUserRelationshipTestCase.test_custom_visibility_group --settings=tr_django.test_settings
         ;;
     A)
         python ../manage.py test users --settings=tr_django.test_settings

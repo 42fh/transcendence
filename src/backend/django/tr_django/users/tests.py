@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
-from users.models import CustomUser
+from users.models import CustomUser, VisibilityGroup
 from django.core.exceptions import ValidationError
 
 
@@ -243,3 +243,64 @@ class CustomUserStatusVisibilityTestCase(TestCase):
         # Optionally verify the specific error message
         self.assertIn("visibility_user_profile", context.exception.message_dict)
         self.assertIn("is not a valid choice", str(context.exception))
+
+
+class CustomUserRelationshipTestCase(TestCase):
+    """Test cases for friends, blocked users, and custom visibility group relationships."""
+
+    def setUp(self):
+        # Create test users
+        self.user1 = CustomUser.objects.create_user(
+            username="user1", password="password123"
+        )
+        self.user2 = CustomUser.objects.create_user(
+            username="user2", password="password123"
+        )
+        self.user3 = CustomUser.objects.create_user(
+            username="user3", password="password123"
+        )
+
+    # Test Friends and Blocked Users
+    def test_friends_and_blocked_users(self):
+        """Test adding, removing, and checking friends and blocked users."""
+
+        # Add a friend
+        self.user1.friends.add(self.user2)
+        # Test is_friend_with method
+        self.assertTrue(self.user1.is_friend_with(self.user2))
+
+        # Remove friend and confirm they are no longer friends
+        self.user1.friends.remove(self.user2)
+        self.assertFalse(self.user1.is_friend_with(self.user2))
+
+        # Add a blocked user
+        self.user1.blocked_users.add(self.user3)
+        # Test is_blocked_by method
+        self.assertTrue(self.user3.is_blocked_by(self.user1))
+
+        # Unblock user and confirm they are no longer blocked
+        self.user1.blocked_users.remove(self.user3)
+        self.assertFalse(self.user3.is_blocked_by(self.user1))
+
+    # Test Custom Visibility Group
+    def test_custom_visibility_group(self):
+        """Test adding a user to a custom visibility group and deletion behavior."""
+
+        # Create a visibility group
+        visibility_group = VisibilityGroup.objects.create(
+            name="Close Friends",
+            description="Group for close friends only",
+            created_by=self.user1,
+        )
+
+        # Assign user to the visibility group
+        self.user1.custom_visibility_group = visibility_group
+        self.user1.save()
+
+        # Check that the custom_visibility_group is set correctly
+        self.assertEqual(self.user1.custom_visibility_group, visibility_group)
+
+        # Delete the visibility group and confirm custom_visibility_group is set to None
+        visibility_group.delete()
+        self.user1.refresh_from_db()
+        self.assertIsNone(self.user1.custom_visibility_group)
