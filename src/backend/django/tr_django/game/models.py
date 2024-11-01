@@ -42,11 +42,182 @@ class Player(models.Model):
 
 
 class GameMode(models.Model):
+    # Basic fields
     name = models.CharField(max_length=200)
     description = models.TextField()
 
+    # Player count configuration
+    SINGLE_PLAYER = 1
+    TWO_PLAYER = 2
+    MULTIPLAYER = 3
+
+    PLAYER_COUNT_CHOICES = [
+        (SINGLE_PLAYER, "Single Player"),
+        (TWO_PLAYER, "Two Player"),
+        (MULTIPLAYER, "Multiplayer"),
+    ]
+    player_count = models.PositiveSmallIntegerField(
+        choices=PLAYER_COUNT_CHOICES, default=TWO_PLAYER
+    )
+    exact_player_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Exact number of players for multiplayer games"
+    )
+
+    # Game configuration
+    ball_speed = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=1.0,
+        help_text="Default ball speed multiplier",
+    )
+    paddle_size = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=1.0,
+        help_text="Default paddle size multiplier",
+    )
+    number_of_balls = models.IntegerField(
+        default=1, help_text="Number of balls in play"
+    )
+    ball_size = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=1.0,
+        help_text="Size multiplier for balls",
+    )
+
+    # Game type configuration
+    PERSPECTIVE_CHOICES = [
+        ("2D", "2D"),
+        ("3D", "3D"),
+    ]
+    perspective = models.CharField(
+        max_length=2, choices=PERSPECTIVE_CHOICES, default="2D"
+    )
+
+    LOCATION_CHOICES = [
+        ("local", "Local"),
+        ("remote", "Remote"),
+    ]
+    location = models.CharField(
+        max_length=10,
+        choices=LOCATION_CHOICES,
+        default="remote",
+    )
+
+    # Power-ups configuration
+    power_up_choices = [
+        ("none", "None"),
+        ("speed_boost", "Ball Speed Boost"),
+        ("paddle_size", "Paddle Size Change"),
+        ("multi_ball", "Multi-Ball"),
+        ("reverse_controls", "Reverse Controls"),
+        ("all", "All Power-Ups"),
+    ]
+    power_ups_enabled = models.CharField(
+        max_length=50,
+        choices=power_up_choices,
+        default="none",
+        help_text="Type of power-ups enabled in this game mode",
+    )
+
+    # Win conditions
+    WIN_CONDITION_CHOICES = [
+        ("points", "Play to Points"),
+        ("time", "Play by Time"),
+    ]
+    win_condition = models.CharField(
+        max_length=6, choices=WIN_CONDITION_CHOICES, default="points"
+    )
+    winning_score = models.PositiveIntegerField(
+        default=11,
+        blank=True,
+        help_text="Target score to win (only relevant for 'Play to Points' mode).",
+    )
+    time_limit_seconds = models.PositiveIntegerField(
+        default=60,
+        blank=True,
+        help_text="Time limit in seconds (only relevant for 'Play by Time' mode).",
+    )
+    allow_both_conditions = models.BooleanField(
+        default=False,
+        help_text="Allow the game to end if either the score or time condition is met.",
+    )
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+
+        # Validate exact_player_count
+        if self.player_count == self.MULTIPLAYER:
+            if not self.exact_player_count:
+                raise ValidationError(
+                    "Exact player count is required for multiplayer games"
+                )
+            if self.exact_player_count < 3:
+                raise ValidationError("Multiplayer games must have at least 3 players")
+        elif self.exact_player_count:
+            raise ValidationError(
+                "Exact player count should only be set for multiplayer games"
+            )
+
     def __str__(self):
-        return str(self.name)
+        return f"{self.name} ({self.get_player_count_display()}, {self.get_perspective_display()}) - {self.get_win_condition_display()}"
+
+    def describe_mode(self):
+        """Return a human-readable description of the game mode with all selected options."""
+        description = f"{self.name}: {self.description}\n"
+        description += f"Perspective: {self.get_perspective_display()}\n"
+        description += f"Player Count: {self.get_player_count_display()}"
+        if self.player_count == self.MULTIPLAYER:
+            description += f" (Exact: {self.exact_player_count})\n"
+        else:
+            description += "\n"
+        description += f"Location: {self.get_location_display()}\n"
+
+        # Game configuration details
+        description += f"Ball Speed: {self.ball_speed}x\n"
+        description += f"Paddle Size: {self.paddle_size}x\n"
+        description += f"Ball Size: {self.ball_size}x\n"
+        description += f"Number of Balls: {self.number_of_balls}\n"
+
+        # Power-ups
+        description += f"Power-ups: {self.get_power_ups_enabled_display()}\n"
+
+        # Win conditions
+        description += f"Win Condition: {self.get_win_condition_display()}\n"
+        if self.win_condition == "points" or self.allow_both_conditions:
+            description += f"Winning Score: {self.winning_score}\n"
+        if self.win_condition == "time" or self.allow_both_conditions:
+            description += f"Time Limit: {self.time_limit_seconds} seconds\n"
+        if self.allow_both_conditions:
+            description += "Note: Game ends when either condition is met\n"
+
+        return description.strip()  # Remove trailing newline
+
+    def get_game_config(self):
+        """Returns a dictionary with all game configuration parameters for game initialization."""
+        return {
+            "ball_speed": float(self.ball_speed),
+            "paddle_size": float(self.paddle_size),
+            "number_of_balls": self.number_of_balls,
+            "ball_size": float(self.ball_size),
+            "perspective": self.perspective,
+            "power_ups": self.power_ups_enabled,
+            "win_condition": {
+                "type": self.win_condition,
+                "points": (
+                    self.winning_score
+                    if self.win_condition == "points" or self.allow_both_conditions
+                    else None
+                ),
+                "time": (
+                    self.time_limit_seconds
+                    if self.win_condition == "time" or self.allow_both_conditions
+                    else None
+                ),
+                "allow_both": self.allow_both_conditions,
+            },
+        }
 
 
 class BaseGame(models.Model):
