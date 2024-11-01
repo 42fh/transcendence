@@ -86,3 +86,56 @@ class LegacyGameAppTestsRefactored(TestCase):
         self.assertEqual(players.count(), 2)
         self.assertIn(self.player1, players)
         self.assertIn(self.player2, players)
+
+
+from django.test import TestCase
+from users.models import CustomUser
+from game.models import Player
+
+
+class PlayerModelTest(TestCase):
+    def setUp(self):
+        # Create a CustomUser instance, which should automatically create a Player instance
+        self.user = CustomUser.objects.create_user(
+            username="testuser", password="password123"
+        )
+        self.player = Player.objects.get(
+            user=self.user
+        )  # Retrieve the associated Player instance
+
+    def test_player_creation(self):
+        """Test that a Player instance is created automatically when a CustomUser is created."""
+        # Check that the player instance exists and is associated with the user
+        self.assertIsNotNone(self.player)
+        self.assertEqual(self.player.user, self.user)
+
+    def test_initial_field_values(self):
+        """Test that the Player instance has correct initial values for wins, losses, and display name."""
+        self.assertEqual(self.player.wins, 0)
+        self.assertEqual(self.player.losses, 0)
+        self.assertIsNone(
+            self.player.display_name
+        )  # Assuming display name starts as None
+
+    def test_update_wins_losses_display_name(self):
+        """Test updating the wins, losses, and display name fields."""
+        # Update wins, losses, and display_name
+        self.player.wins = 5
+        self.player.losses = 2
+        self.player.display_name = "Champion123"
+        self.player.save()
+
+        # Retrieve the updated player and check values
+        updated_player = Player.objects.get(user=self.user)
+        self.assertEqual(updated_player.wins, 5)
+        self.assertEqual(updated_player.losses, 2)
+        self.assertEqual(updated_player.display_name, "Champion123")
+
+    def test_delete_player(self):
+        """Test that the Player instance can be deleted without affecting the associated CustomUser."""
+        self.player.delete()
+        # Check that player instance no longer exists
+        with self.assertRaises(Player.DoesNotExist):
+            Player.objects.get(user=self.user)
+        # Ensure the CustomUser still exists
+        self.assertTrue(CustomUser.objects.filter(username="testuser").exists())
