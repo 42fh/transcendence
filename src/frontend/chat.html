@@ -4,6 +4,7 @@
     <title>Chat Room</title>
 </head>
 <body>
+    <h1>Hello, <span id="current-username"></span>!</h1>
     <input type="hidden" id="current-username" />
     <div class="chat-container">
         <div class="user-list">
@@ -22,9 +23,10 @@
     </div>
 
     <script>
+
         let currentUsername = '';
         let currentChatPartner = '';
-        let messageHistoryLoaded = false; // Flag to track if message history has been loaded
+        let messageHistoryLoaded = false;
 
         // Error handling function
         function showError(message) {
@@ -73,64 +75,81 @@
             }
         }
 
-        function startChatWith(otherUser) {
-            currentChatPartner = otherUser;
-            const currentUser = document.getElementById('current-username').value;
-            if (!currentUser) {
-                showError('Current user not found');
-                return;
+       let isSwitchingRoom = false;  // prevent early room switching
+
+function startChatWith(otherUser) {
+    if (currentChatPartner === otherUser || isSwitchingRoom) {
+        return;
+    }
+
+    isSwitchingRoom = true;
+    currentChatPartner = otherUser;
+    const currentUser = document.getElementById('current-username').value;
+    if (!currentUser) {
+        showError('Current user not found');
+        isSwitchingRoom = false;
+        return;
+    }
+
+    const roomName = [currentUser, otherUser].sort().join('_');
+
+    // Close the existing connection, if any, and reset currentChatPartner
+    if (window.chatSocket && window.chatSocket.readyState === WebSocket.OPEN) {
+        currentChatPartner = '';
+        window.chatSocket.close(1000, 'Switching rooms');
+    }
+
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = window.location.hostname || 'localhost';
+    const port = '8000';
+    const wsUrl = `${wsProtocol}//${host}:${port}/ws/chat/${roomName}/`;
+
+    try {
+        window.chatSocket = new WebSocket(wsUrl);
+
+        window.chatSocket.onopen = function (e) {
+            document.getElementById('chat-messages').innerHTML = '';
+            addMessageToChat('System', `Connected to chat with ${otherUser}`, 'system');
+            messageHistoryLoaded = false;
+            isSwitchingRoom = false;
+                };
+
+        window.chatSocket.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+            if (data.type === 'chat_message') {
+                const messageType = data.username === 'System' ? 'system' :
+                                    data.username === currentUsername ? 'self' : 'other';
+                addMessageToChat(data.username, data.message, messageType);
+            } else if (data.type === 'message_history' && !messageHistoryLoaded) {
+                data.messages.forEach(msg => {
+                    const messageType = msg.username === currentUsername ? 'self' : 'other';
+                    addMessageToChat(msg.username, msg.message, messageType);
+                });
+                messageHistoryLoaded = true; // Set flag to true after loading
+            } else if (data.type === 'user_list') {
+                updateUserList(data.users);
             }
+        };
 
-            const roomName = [currentUser, otherUser].sort().join('_');
-            
-            if (window.chatSocket && window.chatSocket.readyState === WebSocket.OPEN) {
-                window.chatSocket.close();
+        window.chatSocket.onclose = function (e) {
+            if (currentChatPartner === otherUser) {  // Check if this is the current chat
+                addMessageToChat('System', 'Connection closed. Attempting to reconnect...', 'system');
+                setTimeout(() => startChatWith(otherUser), 3000);
             }
+            isSwitchingRoom = false;  // Reset flag when connection closes
+        };
 
-            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const host = window.location.hostname || 'localhost';
-            const port = '8000';
-            const wsUrl = `${wsProtocol}//${host}:${port}/ws/chat/${roomName}/`;
-            
-            try {
-                window.chatSocket = new WebSocket(wsUrl);
-                
-                window.chatSocket.onopen = function(e) {
-                    document.getElementById('chat-messages').innerHTML = '';
-                    addMessageToChat('System', `Connected to chat with ${otherUser}`, 'system');
-                    messageHistoryLoaded = false; // Reset flag on new chat
-                };
+        window.chatSocket.onerror = function (e) {
+            showError('WebSocket connection error');
+            isSwitchingRoom = false;  // Reset flag in case of error
+        };
 
-                window.chatSocket.onmessage = function(e) {
-                    const data = JSON.parse(e.data);
-                    if (data.type === 'chat_message') {
-                        const messageType = data.username === 'System' ? 'system' : 
-                                         data.username === currentUsername ? 'self' : 'other';
-                        addMessageToChat(data.username, data.message, messageType);
-                    } else if (data.type === 'message_history' && !messageHistoryLoaded) {
-                        data.messages.forEach(msg => {
-                            const messageType = msg.username === currentUsername ? 'self' : 'other';
-                            addMessageToChat(msg.username, msg.message, messageType);
-                        });
-                        messageHistoryLoaded = true; // Set flag to true after loading
-                    } else if (data.type === 'user_list') {
-                        updateUserList(data.users);
-                    }
-                };
+    } catch (error) {
+        showError('Failed to create connection: ' + error.message);
+        isSwitchingRoom = false;  // Reset flag in case of exception
+    }
+}
 
-                window.chatSocket.onclose = function(e) {
-                    addMessageToChat('System', 'Connection closed. Attempting to reconnect...', 'system');
-                    setTimeout(() => startChatWith(otherUser), 3000);
-                };
-
-                window.chatSocket.onerror = function(e) {
-                    showError('WebSocket connection error');
-                };
-
-            } catch (error) {
-                showError('Failed to create connection: ' + error.message);
-            }
-        }
 
         function addMessageToChat(username, message, type = 'other') {
             const chatBox = document.getElementById('chat-messages');
@@ -165,7 +184,6 @@
             });
         }
 
-        // Message sending setup
         document.getElementById('chat-message-submit').onclick = function() {
             sendMessage();
         };

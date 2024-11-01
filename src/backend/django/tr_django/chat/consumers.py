@@ -67,6 +67,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
 
             # Fetch and send message history
+            print("calling send_message_history")
             await self.send_message_history()
 
         except Exception as e:
@@ -106,7 +107,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         """Fetch and send message history to the newly connected client."""
         try:
             messages = await self.get_message_history()
-            print(f"DEBUG: Sending message history: {messages}")
+            print(f"Sending message history: {messages}")
             if messages:
                 await self.send(
                     text_data=json.dumps(
