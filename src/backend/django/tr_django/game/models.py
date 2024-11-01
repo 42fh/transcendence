@@ -12,38 +12,6 @@ class GameMode(models.Model):
         return str(self.name)
 
 
-class Player(models.Model):
-    user = models.OneToOneField(
-        CustomUser, on_delete=models.CASCADE, related_name="player"
-    )
-    display_name = models.CharField(max_length=50, unique=True)
-
-    wins = models.PositiveIntegerField(default=0)
-    losses = models.PositiveIntegerField(default=0)
-
-    @property
-    def avatar(self):
-        # Return the avatar from the linked CustomUser model
-        return self.user.avatar.url if self.user.avatar else None
-
-    @property
-    def username(self):
-        # Access the username of the associated CustomUser
-        return self.user.username
-
-    def update_stats(self, won: bool):
-        if won:
-            self.wins += 1
-        else:
-            self.losses += 1
-        self.save()
-
-    def win_ratio(self):
-        return (
-            self.wins / (self.wins + self.losses) if self.wins + self.losses > 0 else 0
-        )
-
-
 class BaseGame(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     date = models.DateTimeField()
@@ -216,6 +184,38 @@ class PlayerGameStats(models.Model):
     def __str__(self):
         game = self.single_game or self.tournament_game
         return f"{self.player.display_name} - Game on {game.date} - Score: {self.score}, Rank: {self.rank}"
+
+
+class Player(models.Model):
+    user = models.OneToOneField(
+        CustomUser, on_delete=models.CASCADE, related_name="player"
+    )
+    display_name = models.CharField(max_length=50, unique=True)
+
+    wins = models.PositiveIntegerField(default=0)
+    losses = models.PositiveIntegerField(default=0)
+
+    @property
+    def avatar(self):
+        # Return the avatar from the linked CustomUser model
+        return self.user.avatar.url if self.user.avatar else None
+
+    @property
+    def username(self):
+        # Access the username of the associated CustomUser
+        return self.user.username
+
+    def update_stats(self, won: bool):
+        if won:
+            self.wins += 1
+        else:
+            self.losses += 1
+        self.save()
+
+    def win_ratio(self):
+        return (
+            self.wins / (self.wins + self.losses) if self.wins + self.losses > 0 else 0
+        )
 
 
 class Ranking(models.Model):
