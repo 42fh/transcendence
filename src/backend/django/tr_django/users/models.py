@@ -88,6 +88,7 @@ class CustomUser(AbstractUser):
         (status, status.capitalize())
         for status in [STATUS_OFFLINE, STATUS_ONLINE, STATUS_BUSY, STATUS_AWAY]
     ]
+    # TODO: Remove this, cause it's transitient. It's not something that needs to be stored in the database.
     online_status = models.CharField(
         max_length=10, choices=ONLINE_STATUS_CHOICES, default=STATUS_OFFLINE
     )
@@ -123,6 +124,7 @@ class CustomUser(AbstractUser):
         max_length=10, choices=VISIBILITY_CHOICES, default=VISIBILITY_EVERYONE
     )
 
+    # This will not be implemented first: we can just stick with the friends list for the beginning.
     custom_visibility_group = models.ForeignKey(
         to="users.VisibilityGroup",
         on_delete=models.SET_NULL,
@@ -133,7 +135,7 @@ class CustomUser(AbstractUser):
 
     groups = models.ManyToManyField(
         "auth.Group",
-        related_name="custom_user_set",
+        related_name="members",  # Changed from classic `custom_user_set` to `members` for readability
         blank=True,
         verbose_name="groups",
         help_text="The groups this user belongs to.",
@@ -141,7 +143,7 @@ class CustomUser(AbstractUser):
 
     user_permissions = models.ManyToManyField(
         "auth.Permission",
-        related_name="custom_user_set",
+        related_name="permitted_users",  # Changed from `custom_user_set` to `permitted_users` for readability
         blank=True,
         verbose_name="user permissions",
         help_text="Specific permissions for this user.",
