@@ -29,11 +29,25 @@ class CustomUser(AbstractUser):
     pronoun = models.CharField(max_length=20, null=True, blank=True)
 
     # 2FA and JWT Fields for CustomUser Model // TODO: check this with Jonathan
-    # Note: The fields will not be necessary if using libraries such as SimpleJWT for JWT authentication and django-two-factor-auth for 2FA.
-    # These libraries handle token management, refresh tokens, and 2FA data storage internally,
+    # Note: Most of the fields will not be necessary if using libraries such as SimpleJWT for JWT authentication and django-two-factor-auth for 2FA.
+    # The only two needed is the two_factor_enabled field and eventually the one to choose the 2FA method.
 
     # Field to enable or disable 2FA for the user.
     two_factor_enabled = models.BooleanField(default=False)
+
+    two_factor_method = models.CharField(
+        max_length=20,
+        choices=[
+            ("TOTP", "TOTP (Authenticator App)"),
+            ("SMS", "SMS"),
+            ("Email", "Email"),
+            ("Push", "Push Notification"),
+            ("Backup Codes", "Backup Codes"),
+            ("Hardware Token", "Hardware Token"),
+            ("Biometric", "Biometric Authentication"),
+        ],
+        default="TOTP",
+    )
 
     # Stores the user's secret key for generating 2FA codes,
     # typically used in TOTP (Time-based One-Time Password) algorithms.
