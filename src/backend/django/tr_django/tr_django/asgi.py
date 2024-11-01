@@ -28,6 +28,7 @@ application = ProtocolTypeRouter(
             URLRouter(
                 [
                     path("ws/game/<int:game_id>/", PongConsumer.as_asgi()),
+                    path("ws/pong/<int:game_id>/", PongConsumer.as_asgi()),
                 ]
             )
         ),
