@@ -379,7 +379,52 @@ class BaseGame(models.Model):
 
 
 class SingleGame(BaseGame):
-    pass  # Inherits everything from BaseGame
+    def start_game(self):
+        """Start the game if all conditions are met."""
+        if not self.mode:
+            raise ValueError("Game mode must be set before starting")
+
+        # Validate player count before starting
+        self.validate_player_count()
+
+        # Check if any players are already in an active game
+        for stats in self.playergamestats_set.all():
+            active_games = PlayerGameStats.objects.filter(
+                player=stats.player, single_game__status=self.ACTIVE
+            ).exists()
+            if active_games:
+                raise ValueError(f"Player {stats.player} is already in an active game")
+
+        # Call parent's start_game method instead of duplicating logic
+        super().start_game()
+
+    def cancel_game(self, reason: str):
+        """Cancel an active game."""
+        if self.status not in [self.ACTIVE, self.READY]:
+            raise ValueError(f"Cannot cancel game in {self.status} status")
+
+        self.status = self.FINISHED
+        self.finished_at = timezone.now()
+        self.save()
+
+        # Update player stats if needed
+        for stats in self.playergamestats_set.all():
+            stats.player.update_stats(won=False)
+
+    def determine_winner(self):
+        """Determine the winner based on game scores."""
+        if self.status != self.FINISHED:
+            raise ValueError(f"Cannot determine winner in {self.status} status")
+
+        # Get player stats
+        player_stats = list(self.playergamestats_set.all())
+        if len(player_stats) != 2:
+            raise ValueError("Can only determine winner for two-player games")
+
+        # Find player with highest score and set as winner
+        highest_score = max(player_stats, key=lambda x: x.score)
+        self.set_winner(highest_score.player)
+        return True
 
 
 class Tournament(models.Model):
@@ -513,7 +558,7 @@ class PlayerGameStats(models.Model):
     # Initial state - with default value
     joined_at = models.DateTimeField(default=timezone.now)
     # Game stats (updated during/after game)
-    score = models.IntegerField(null=True, blank=True)
+    score = models.IntegerField(default=0)
     rank = models.PositiveIntegerField(null=True, blank=True)
 
     def __str__(self):

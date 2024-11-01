@@ -357,7 +357,7 @@ class PlayerStatsTest(TestCase):
         self.assertEqual(self.player.win_ratio(), 1)
 
 
-class GameModelTest(TestCase):
+class SingleGameTest(TestCase):
     def setUp(self):
         # Create test users and players
         self.user1 = CustomUser.objects.create_user(
@@ -366,7 +366,7 @@ class GameModelTest(TestCase):
         self.user2 = CustomUser.objects.create_user(
             username="player2", email="p2@test.com", password="test123"
         )
-        # Get the automatically created Player instances instead of creating new ones
+        # Get the automatically created Player instances
         self.player1 = Player.objects.get(user=self.user1)
         self.player2 = Player.objects.get(user=self.user2)
 
@@ -378,6 +378,13 @@ class GameModelTest(TestCase):
             perspective="2D",
             location="remote",
         )
+
+        # Create a SingleGame instance in DRAFT status
+        self.game = SingleGame.objects.create(
+            mode=self.game_mode, status=SingleGame.DRAFT  # Start in DRAFT status
+        )
+        # Add players to the game
+        self.game.players.set([self.player1, self.player2])
 
     def test_game_lifecycle(self):
         """Test the complete lifecycle of a game from draft to finish"""
@@ -457,3 +464,77 @@ class GameModelTest(TestCase):
         game.finish_game()
         self.assertIsNotNone(game.duration)
         self.assertIsInstance(game.duration, float)
+
+    def test_player_count_validation(self):
+        """Test that games cannot be started with incorrect number of players"""
+        game = SingleGame.objects.create(mode=self.game_mode, status=SingleGame.DRAFT)
+
+        # Add just one player
+        PlayerGameStats.objects.create(single_game=game, player=self.player1)
+
+        # Should not be able to start with only one player
+        with self.assertRaises(ValueError):
+            game.start_game()
+
+    def test_game_status_transitions(self):
+        """Test that game status transitions follow the correct flow"""
+        game = SingleGame.objects.create(mode=self.game_mode, status=SingleGame.DRAFT)
+
+        # Cannot finish a draft game
+        with self.assertRaises(ValueError):
+            game.finish_game()
+
+        # Cannot transition from FINISHED back to ACTIVE
+        game.status = SingleGame.FINISHED
+        game.save()
+        with self.assertRaises(ValueError):
+            game.start_game()
+
+    def test_player_stats_creation(self):
+        """Test that player statistics are properly tracked"""
+        game = SingleGame.objects.create(mode=self.game_mode, status=SingleGame.DRAFT)
+
+        # Add players and start game
+        stats1 = PlayerGameStats.objects.create(single_game=game, player=self.player1)
+        stats2 = PlayerGameStats.objects.create(single_game=game, player=self.player2)
+
+        # Test initial stats
+        self.assertEqual(stats1.score, 0)
+        self.assertEqual(stats2.score, 0)
+
+    def test_concurrent_games(self):
+        """Test that a player cannot be in multiple active games"""
+        game1 = SingleGame.objects.create(mode=self.game_mode, status=SingleGame.DRAFT)
+        game2 = SingleGame.objects.create(mode=self.game_mode, status=SingleGame.DRAFT)
+
+        # Add player1 to both games
+        PlayerGameStats.objects.create(single_game=game1, player=self.player1)
+        PlayerGameStats.objects.create(single_game=game2, player=self.player1)
+
+        # Start first game
+        PlayerGameStats.objects.create(single_game=game1, player=self.player2)
+        game1.start_game()
+
+        # Should not be able to start second game with same player
+        PlayerGameStats.objects.create(single_game=game2, player=self.player2)
+        with self.assertRaises(ValueError):
+            game2.start_game()
+
+    def test_game_scoring(self):
+        """Test score tracking and winner determination"""
+        game = SingleGame.objects.create(mode=self.game_mode, status=SingleGame.DRAFT)
+        stats1 = PlayerGameStats.objects.create(single_game=game, player=self.player1)
+        stats2 = PlayerGameStats.objects.create(single_game=game, player=self.player2)
+
+        game.start_game()
+
+        # Simulate scoring
+        stats1.score = 11
+        stats1.save()
+        stats2.score = 5
+        stats2.save()
+
+        game.finish_game()
+        game.determine_winner()  # You might need to implement this method
+
+        self.assertEqual(game.winner, self.player1)
