@@ -8,7 +8,7 @@ class Player(models.Model):
     user = models.OneToOneField(
         CustomUser, on_delete=models.CASCADE, related_name="player"
     )
-    display_name = models.CharField(max_length=50, unique=True)
+    display_name = models.CharField(max_length=50, unique=True, null=True, blank=True)
 
     wins = models.PositiveIntegerField(default=0)
     losses = models.PositiveIntegerField(default=0)
@@ -22,6 +22,11 @@ class Player(models.Model):
     def username(self):
         # Access the username of the associated CustomUser
         return self.user.username
+
+    @property
+    def get_display_name(self):
+        # Return display_name if set, otherwise return username
+        return self.display_name or self.username
 
     def update_stats(self, won: bool):
         if won:
