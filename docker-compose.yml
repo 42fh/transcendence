@@ -1,0 +1,67 @@
+services:
+  redis:
+    image: "redis:7"
+    ports:
+      - "6379:6379"
+    networks:
+      - transcendence_network
+  postgres:
+    image: "postgres:16"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - ${POSTGRES_DATA}:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - transcendence_network
+  django:
+    build: ./src/backend/django
+    # mind that manage.py is in the tr_django folder
+    command: sh -c "python tr_django/manage.py migrate && python tr_django/manage.py collectstatic --noinput && daphne -b 127.0.0.1 -p 8000 websocket_demo.asgi:application"
+    volumes:
+      # Probably we don't want to have a volume for the django app in production but just copy the files
+      - ./src/backend/django:/app
+    ports:
+      - "8000"
+    depends_on:
+      - redis
+      - postgres
+    environment:
+      # Being this the deploymnent docker compose file, it could make sense to set Debug hardcoded to False
+      - Debug=False
+      - REDIS_URL=${REDIS_URL}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - SECRET_KEY=${SECRET_KEY}
+      - ENVIRONMENT=production
+      - DATABASE_URL=${DATABASE_URL}
+    networks:
+      - transcendence_network
+  nginx:
+    build:
+      # we need the context to be ./src instad of ./src/nginx to so that it can see easily the frontend folder
+      context: ./src/
+      dockerfile: nginx/Dockerfile
+      args:
+        ENVIRONMENT: ${ENVIRONMENT} # Pass the environment as a build argument
+      # volumes:
+      # - /etc/letsencrypt/live/django.sldunit.xyz:/etc/ssl/certs/
+      # - /etc/letsencrypt/archive/django.sldunit.xyz:/etc/letsencrypt/archive/django.sldunit.xyz
+    volumes:
+      - ./src/frontend/:/usr/share/nginx/html
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - ENVIRONMENT=production
+    depends_on:
+      - django
+    networks:
+      - transcendence_network
+    command: ["nginx", "-g", "daemon off;"]
+
+networks:
+  transcendence_network:
+    driver: bridge

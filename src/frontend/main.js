@@ -16,24 +16,24 @@ game.addDirectionalLight(1, 0xffffff, new THREE.Vector3(3, 7.5, 3));
 game.addSky(1000, 10, 1.3, 0.001, 0.7, new THREE.Vector3(0.3, 0.001, -0.95));
 game.addSea(1000, 1000, 0x001e0f, 0xffffff, 3.7);
 game.loadResources([
-    {name: 'floorAplhaTexture', type: 'texture', url: 'static/textures/floor/alpha.webp'},
-    {name: 'floorColorTexture', type: 'texture', url: 'static/textures/floor/color.jpg'},
-    {name: 'floorNormalTexture', type: 'texture', url: 'static/textures/floor/normal.jpg'},
-    {name: 'floorDisplacementTexture', type: 'texture', url: 'static/textures/floor/displacement.jpg'},
-    {name: 'floorARMTexture', type: 'texture', url: 'static/textures/floor/arm.jpg'},
-    {name: 'playerColorTexture', type: 'texture', url: 'static/textures/player/color.jpg'},
-    {name: 'playerNormalTexture', type: 'texture', url: 'static/textures/player/normal.jpg'},
-    {name: 'playerARMTexture', type: 'texture', url: 'static/textures/player/arm.jpg'},
-    {name: 'palmTree', type: 'gltf', url: 'static/models/palm/quiver_tree_02_1k.gltf'},
-    {name: 'bush', type: 'gltf', url: 'static/models/bush/fern_02_1k.gltf'},
-    {name: 'coconut', type: 'gltf', url: 'static/models/coconut/scene.gltf'},
-    {name: 'umbrella', type: 'gltf', url: 'static/models/umbrella/scene.gltf'},
-    {name: 'ball', type: 'gltf', url: 'static/models/ball/scene.gltf'},
-    {name: 'chair', type: 'gltf', url: 'static/models/chair/plastic_monobloc_chair_01_1k.gltf'},
-    {name: 'log', type: 'gltf', url: 'static/models/log/dead_quiver_trunk_1k.gltf'},
-    {name: 'duck', type: 'gltf', url: 'static/models/duck/rubber_duck_toy_1k.gltf'},
-    {name: 'glasses', type: 'gltf', url: 'static/models/glasses/scene.gltf'},
-    {name: 'fin', type: 'gltf', url: 'static/models/fin/scene.gltf'},
+    { name: 'floorAplhaTexture', type: 'texture', url: 'static/textures/floor/alpha.webp' },
+    { name: 'floorColorTexture', type: 'texture', url: 'static/textures/floor/color.jpg' },
+    { name: 'floorNormalTexture', type: 'texture', url: 'static/textures/floor/normal.jpg' },
+    { name: 'floorDisplacementTexture', type: 'texture', url: 'static/textures/floor/displacement.jpg' },
+    { name: 'floorARMTexture', type: 'texture', url: 'static/textures/floor/arm.jpg' },
+    { name: 'playerColorTexture', type: 'texture', url: 'static/textures/player/color.jpg' },
+    { name: 'playerNormalTexture', type: 'texture', url: 'static/textures/player/normal.jpg' },
+    { name: 'playerARMTexture', type: 'texture', url: 'static/textures/player/arm.jpg' },
+    { name: 'palmTree', type: 'gltf', url: 'static/models/palm/quiver_tree_02_1k.gltf' },
+    { name: 'bush', type: 'gltf', url: 'static/models/bush/fern_02_1k.gltf' },
+    { name: 'coconut', type: 'gltf', url: 'static/models/coconut/scene.gltf' },
+    { name: 'umbrella', type: 'gltf', url: 'static/models/umbrella/scene.gltf' },
+    { name: 'ball', type: 'gltf', url: 'static/models/ball/scene.gltf' },
+    { name: 'chair', type: 'gltf', url: 'static/models/chair/plastic_monobloc_chair_01_1k.gltf' },
+    { name: 'log', type: 'gltf', url: 'static/models/log/dead_quiver_trunk_1k.gltf' },
+    { name: 'duck', type: 'gltf', url: 'static/models/duck/rubber_duck_toy_1k.gltf' },
+    { name: 'glasses', type: 'gltf', url: 'static/models/glasses/scene.gltf' },
+    { name: 'fin', type: 'gltf', url: 'static/models/fin/scene.gltf' },
 ]);
 
 window.addEventListener('resourcesLoaded', () => {
@@ -51,7 +51,7 @@ window.addEventListener('resourcesLoaded', () => {
     game.loader.items['floorDisplacementTexture'].wrapT = THREE.RepeatWrapping;
     game.loader.items['floorARMTexture'].wrapS = THREE.RepeatWrapping;
     game.loader.items['floorARMTexture'].wrapT = THREE.RepeatWrapping;
-    
+
     // Palm trees
     const palmTree = game.loader.items['palmTree'].scene;
     palmTree.scale.set(6, 6, 10);
@@ -121,8 +121,8 @@ window.addEventListener('resourcesLoaded', () => {
 
     // Floor
     const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(45, 42, 100, 100),
-    new THREE.MeshStandardMaterial({ 
+        new THREE.PlaneGeometry(45, 42, 100, 100),
+        new THREE.MeshStandardMaterial({
             color: '#fffdff',
             alphaMap: game.loader.items['floorAplhaTexture'],
             transparent: true,
@@ -146,13 +146,13 @@ window.addEventListener('resourcesLoaded', () => {
     geometry.center();
     player1 = new THREE.Mesh(
         geometry,
-        new THREE.MeshStandardMaterial({ 
-                map: game.loader.items['playerColorTexture'],
-                normalMap: game.loader.items['playerNormalTexture'],
-                roughnessMap: game.loader.items['playerARMTexture'],
-                aoMap: game.loader.items['playerARMTexture'],
-                metalnessMap: game.loader.items['playerARMTexture'],
-            })
+        new THREE.MeshStandardMaterial({
+            map: game.loader.items['playerColorTexture'],
+            normalMap: game.loader.items['playerNormalTexture'],
+            roughnessMap: game.loader.items['playerARMTexture'],
+            aoMap: game.loader.items['playerARMTexture'],
+            metalnessMap: game.loader.items['playerARMTexture'],
+        })
     );
     player1.position.set(GAME_WIDTH / 2, 0.63, GAME_HEIGHT);
     player1.name = 'player1';
@@ -162,8 +162,8 @@ window.addEventListener('resourcesLoaded', () => {
 
     // Ball
     gameBall = new THREE.Mesh(
-    new THREE.SphereGeometry(0.5, 32, 32),
-    new THREE.MeshStandardMaterial({ color: 0xffffff })
+        new THREE.SphereGeometry(0.5, 32, 32),
+        new THREE.MeshStandardMaterial({ color: 0xffffff })
     );
     gameBall.position.set(GAME_WIDTH / 2, 0.7, GAME_HEIGHT / 2);
 
@@ -181,7 +181,7 @@ window.addEventListener('resourcesLoaded', () => {
     sharkFin3.name = 'sharkFin3';
 
     game.addObjects([
-        palmTree, palmTree2, bush, coconut, coconut2, 
+        palmTree, palmTree2, bush, coconut, coconut2,
         umbrella, ball, chair, chair2, chair3, log, floor,
         log2, duck, glasses, sharkFin1, sharkFin2, sharkFin3,
         player1, player2, gameBall
@@ -198,22 +198,22 @@ let time = Date.now();
 function gameLoop(world, scene) {
 
     const deltaTime = time - Date.now();
-    
+
     // water animation
-    world.game.water.material.uniforms[ 'time' ].value += 1.0 / 60.0;
-    
+    world.game.water.material.uniforms['time'].value += 1.0 / 60.0;
+
     // shark animation
     const sharkAngle = 0.0003 * deltaTime;
-    fin1.position.x = Math.cos(sharkAngle) * 25;
-    fin1.position.z = Math.sin(sharkAngle) * 25;
+    fin1.position.x = (Math.cos(sharkAngle) * 25) + 6;
+    fin1.position.z = (Math.sin(sharkAngle) * 25) + 6;
     fin1.rotation.y = Math.PI - sharkAngle;
 
-    fin2.position.x = Math.cos(-sharkAngle) * 30;
-    fin2.position.z = Math.sin(-sharkAngle) * 30;
+    fin2.position.x = (Math.cos(-sharkAngle) * 30) + 6;
+    fin2.position.z = (Math.sin(-sharkAngle) * 30) + 6;
     fin2.rotation.y = Math.PI - sharkAngle;
 
-    fin3.position.x = Math.cos(sharkAngle) * 45;
-    fin3.position.z = Math.sin(sharkAngle) * 45;
+    fin3.position.x = (Math.cos(sharkAngle) * 45) + 6;
+    fin3.position.z = (Math.sin(sharkAngle) * 45) + 6;
     fin3.rotation.y = sharkAngle;
 
     // move paddle
@@ -233,12 +233,11 @@ function gameLoop(world, scene) {
     }
 
     world.controls.update();
-	world.renderer.render( scene, world.camera );
+    world.renderer.render(scene, world.camera);
 };
 game.addGameLoop(gameLoop);
 
-function updateGame(gameState) 
-{
+function updateGame(gameState) {
     console.log('paddle', gameState.paddle_left.y);
     console.log('ball', gameState.ball.y);
     player1.position.x = gameState.paddle_right.y * GAME_WIDTH;
