@@ -1,5 +1,8 @@
 from django.test import TestCase
-from game.models import GameMode
+from django.utils import timezone
+from .models import SingleGame, GameMode, Player
+from users.models import CustomUser
+import time
 
 
 class GameModeTestCase(TestCase):
@@ -39,3 +42,47 @@ class GameModeTestCase(TestCase):
         # Check that the mode no longer exists in the database
         with self.assertRaises(GameMode.DoesNotExist):
             GameMode.objects.get(id=mode_id)
+
+
+class LegacyGameAppTestsRefactored(TestCase):
+    def setUp(self):
+        # Create users for testing
+        self.user = CustomUser.objects.create_user(
+            username="testuser1", password="12345"
+        )
+        self.user_profile = CustomUser.objects.create_user(
+            username="testuser2",
+            password="testpass123",
+        )
+
+        # Create Player profiles linked to each CustomUser
+        self.player1 = Player.objects.create(user=self.user, display_name="Player1")
+        self.player2 = Player.objects.create(
+            user=self.user_profile, display_name="Player2"
+        )
+
+        # Create a GameMode instance
+        self.game_mode = GameMode.objects.create(
+            name="Test mode", description="Test description"
+        )
+
+        # Create a SingleGame instance with a date and mode
+        self.game = SingleGame.objects.create(
+            date=timezone.now(),
+            mode=self.game_mode,
+            winner=self.player2,  # Set an initial winner
+        )
+        # Add players to the game
+        self.game.players.set([self.player1, self.player2])
+
+    def test_game_attributes(self):
+        """Verify that game attributes are set correctly."""
+        self.assertEqual(self.game.mode, self.game_mode)
+        self.assertEqual(self.game.winner, self.player2)
+
+    def test_game_players(self):
+        """Verify players are correctly associated with the game."""
+        players = self.game.players.all()
+        self.assertEqual(players.count(), 2)
+        self.assertIn(self.player1, players)
+        self.assertIn(self.player2, players)

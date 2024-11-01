@@ -13,14 +13,18 @@ class CustomUser(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     # Optional email field for now, but it could be made mandatory later.
     # When making it mandatory, remove `null=True` and `blank=True`.
+    # Email field is currently not enforcing uniqueness.
+    # TODO: When implementing email verification system, change unique=False to True
+    # and consider adding a conditional unique constraint to allow multiple NULL values.
     email = models.EmailField(
-        unique=True,
+        unique=False,  # Explicitly not enforcing uniqueness for now
         null=True,
         blank=True,
         error_messages={
-            "unique": "A user with that email already exists.",
+            "unique": "A user with that email already exists.",  # Can be removed until unique=True
         },
     )
+
     email_verified = models.BooleanField(default=False)  # Verification status
 
     avatar = models.ImageField(upload_to="avatars/", null=True, blank=True)

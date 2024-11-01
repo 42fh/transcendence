@@ -7,6 +7,7 @@ function usage() {
     echo "Usage: $0 {1|A}"
     echo "Options:"
     echo "  1  Run GameModeTestCase"
+    echo "  2  Run LegacyGameAppTestsRefactored"
     echo "  A  Run all tests in the game app"
     exit 1
 }
@@ -16,8 +17,8 @@ if [ -z "$1" ]; then
     usage
 fi
 
-# Make migrations for the game app
-python ../manage.py makemigrations game --settings=tr_django.test_settings
+# Make migrations for both users and game apps
+python ../manage.py makemigrations users game --settings=tr_django.test_settings
 
 # Apply migrations
 python ../manage.py migrate --settings=tr_django.test_settings
@@ -26,6 +27,9 @@ python ../manage.py migrate --settings=tr_django.test_settings
 case "$1" in
     1)
         python ../manage.py test game.tests.GameModeTestCase --settings=tr_django.test_settings
+        ;;
+    2)
+        python ../manage.py test game.tests.LegacyGameAppTestsRefactored --settings=tr_django.test_settings
         ;;
     A)
         python ../manage.py test game --settings=tr_django.test_settings
