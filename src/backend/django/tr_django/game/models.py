@@ -2,6 +2,7 @@ from decimal import Decimal
 import uuid
 from django.db import models
 from users.models import CustomUser
+from django.utils import timezone
 
 
 class Player(models.Model):
@@ -221,37 +222,164 @@ class GameMode(models.Model):
 
 
 class BaseGame(models.Model):
+    """
+    Abstract base class for all game types. Provides common fields and relationships.
+
+    Related name patterns for accessing games from a Player instance:
+    1. All games a player participated in:
+       - SingleGame: player.single_games.all()
+       - TournamentGame: player.directeliminationtournament_games.all()
+
+    2. Games a player won:
+       - SingleGame: player.won_single_games.all()
+       - TournamentGame: player.won_directeliminationtournament_games.all()
+
+    These related names are automatically generated using Django's %(class)s placeholder,
+    which gets replaced with the lowercase name of the child class.
+
+    Game Status Flow:
+    DRAFT -> READY -> ACTIVE -> FINISHED
+    - DRAFT: Initial setup, fully modifiable
+    - READY: Configuration complete, waiting for start
+    - ACTIVE: Game in progress, configuration locked
+    - FINISHED: Game completed
+    """
+
+    DRAFT = "draft"
+    READY = "ready"
+    ACTIVE = "active"
+    FINISHED = "finished"
+
+    GAME_STATUS_CHOICES = [
+        (DRAFT, "Draft"),
+        (READY, "Ready"),
+        (ACTIVE, "Active"),
+        (FINISHED, "Finished"),
+    ]
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    date = models.DateTimeField()
-    duration = models.IntegerField(blank=True, null=True)
-    mode = models.ForeignKey(GameMode, on_delete=models.SET_NULL, null=True)
-    players = models.ManyToManyField(Player, related_name="%(class)s_games")
-    winner = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True)
+    status = models.CharField(max_length=10, choices=GAME_STATUS_CHOICES, default=DRAFT)
+    mode = models.ForeignKey(
+        GameMode,
+        on_delete=models.SET_NULL,
+        null=True,
+        help_text="Defines game rules and player requirements",
+    )
+    players = models.ManyToManyField(
+        Player, through="PlayerGameStats", related_name="%(class)s_games"
+    )
+    winner = models.ForeignKey(
+        Player,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="won_%(class)s_games",
+    )
+
+    # Timestamps
+    created_at = models.DateTimeField(null=True, blank=True)
+    start_date = models.DateTimeField(null=True, blank=True)
+    finished_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         abstract = True
 
     def __str__(self):
-        return f"{self.mode.name} on {self.date}"
+        status_str = f"[{self.status.upper()}]"
+        date_str = f"on {self.start_date}" if self.start_date else "(not started)"
+        return f"{status_str} {self.mode.name} {date_str}"
+
+    def validate_player_count(self):
+        """Validate that player count matches game mode requirements"""
+        if not self.mode:
+            raise ValueError("Cannot validate player count without a game mode")
+
+        current_count = self.players.count()
+
+        if self.mode.player_count == GameMode.MULTIPLAYER:
+            if current_count != self.mode.exact_player_count:
+                raise ValueError(
+                    f"Multiplayer game requires exactly {self.mode.exact_player_count} players, "
+                    f"got {current_count}"
+                )
+        elif self.mode.player_count == GameMode.TWO_PLAYER:
+            if current_count != 2:
+                raise ValueError(
+                    f"Two-player game requires exactly 2 players, got {current_count}"
+                )
+        elif self.mode.player_count == GameMode.SINGLE_PLAYER:
+            if current_count != 1:
+                raise ValueError(
+                    f"Single-player game requires exactly 1 player, got {current_count}"
+                )
+
+    def mark_as_ready(self):
+        """Mark game as ready to start after validating configuration"""
+        if self.status != self.DRAFT:
+            raise ValueError(f"Cannot mark game as ready from {self.status} status")
+
+        # Validate game configuration
+        if not self.mode:
+            raise ValueError("Cannot start game without a game mode")
+
+        self.validate_player_count()
+
+        self.status = self.READY
+        self.save()
+
+    def start_game(self):
+        """Start the game, setting start_date and moving to ACTIVE status"""
+        if self.status not in [self.DRAFT, self.READY]:
+            raise ValueError(f"Cannot start game in {self.status} status")
+
+        # If coming directly from DRAFT, validate configuration
+        if self.status == self.DRAFT:
+            self.mark_as_ready()
+
+        # Set created_at if not already set
+        if not self.created_at:
+            self.created_at = timezone.now()
+
+        self.start_date = timezone.now()
+        self.status = self.ACTIVE
+        self.save()
+
+    def finish_game(self):
+        """Mark game as finished"""
+        if self.status != self.ACTIVE:
+            raise ValueError(f"Cannot finish game in {self.status} status")
+
+        self.status = self.FINISHED
+        self.finished_at = timezone.now()
+        self.save()
 
     def set_winner(self, player: Player):
+        """Set the winner of the game"""
+        if self.status != self.FINISHED:
+            raise ValueError("Cannot set winner before game is finished")
         try:
             self.winner = self.playergamestats_set.get(player=player).player
             self.save()
         except PlayerGameStats.DoesNotExist:
             raise ValueError(f"Player {player} not found in game {self}")
 
+    @property
+    def duration(self):
+        """Calculate actual game duration in seconds"""
+        if self.status == self.FINISHED and self.start_date and self.finished_at:
+            return (self.finished_at - self.start_date).total_seconds()
+        return None
+
+    def save_as_template(self, template_name: str):
+        """Save current game configuration as a template"""
+        if self.status != self.DRAFT:
+            raise ValueError("Can only save drafts as templates")
+        # Implementation for saving as template
+        pass
+
 
 class SingleGame(BaseGame):
-    players = models.ManyToManyField(
-        Player, through="PlayerGameStats", related_name="single_games"
-    )
-    winner = models.ForeignKey(
-        Player, on_delete=models.SET_NULL, null=True, related_name="won_single_games"
-    )
-
-    def __str__(self):
-        return f"SingleGame: {self.mode.name} on {self.date}"
+    pass  # Inherits everything from BaseGame
 
 
 class Tournament(models.Model):
@@ -338,27 +466,14 @@ class Tournament(models.Model):
         self.save()
 
 
-class TournamentGame(models.Model):
+class TournamentGame(BaseGame):
     created_at = models.DateTimeField(auto_now_add=True)
-    date = models.DateTimeField()
-    duration = models.IntegerField(blank=True, null=True)
-    mode = models.ForeignKey(GameMode, on_delete=models.SET_NULL, null=True)
-    players = models.ManyToManyField(Player, related_name="%(class)s_games")
-    winner = models.ForeignKey(
-        Player,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name="won_tournament_games",
-    )
 
     class Meta:
         abstract = True
 
 
 class DirectEliminationTournamentGame(TournamentGame):
-    players = models.ManyToManyField(
-        Player, through="PlayerGameStats", related_name="direct_elimination_games"
-    )
     source_game1 = models.ForeignKey(
         "self",
         null=True,
@@ -379,19 +494,39 @@ class DirectEliminationTournamentGame(TournamentGame):
 # that links a player to a game and stores individual stats like score and rank. SQL doesn’t support
 # storing complex objects directly.
 class PlayerGameStats(models.Model):
+    """
+    Tracks player-specific statistics for a game.
+    Initially created when a player joins a game, updated throughout gameplay.
+    """
+
+    # Instead of referencing BaseGame, use a generic foreign key
     single_game = models.ForeignKey(
-        SingleGame, on_delete=models.CASCADE, null=True, blank=True
+        "SingleGame", on_delete=models.CASCADE, null=True, blank=True
     )
     tournament_game = models.ForeignKey(
-        DirectEliminationTournamentGame, on_delete=models.CASCADE, null=True, blank=True
+        "DirectEliminationTournamentGame",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
-    score = models.IntegerField(default=0)
-    rank = models.PositiveIntegerField(default=0)
+    # Initial state - with default value
+    joined_at = models.DateTimeField(default=timezone.now)
+    # Game stats (updated during/after game)
+    score = models.IntegerField(null=True, blank=True)
+    rank = models.PositiveIntegerField(null=True, blank=True)
 
     def __str__(self):
-        game = self.single_game or self.tournament_game
-        return f"{self.player.display_name} - Game on {game.date} - Score: {self.score}, Rank: {self.rank}"
+        score_display = (
+            f"Score: {self.score}" if self.score is not None else "No score yet"
+        )
+        rank_display = f"Rank: {self.rank}" if self.rank is not None else "No rank yet"
+        return f"{self.player.display_name} - {score_display}, {rank_display}"
+
+    @property
+    def game(self):
+        """Returns the associated game, whether single or tournament"""
+        return self.single_game or self.tournament_game
 
 
 class Ranking(models.Model):

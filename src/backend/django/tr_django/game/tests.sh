@@ -10,6 +10,7 @@ function usage() {
     echo "  2  Run LegacyGameAppTestsRefactored"
     echo "  3  Run PlayerModelTest"
     echo "  4  Run PlayerStatsTest"
+    echo "  5  Run GameModelTest"
     echo "  A  Run all tests in the game app"
     exit 1
 }
@@ -38,6 +39,9 @@ case "$1" in
         ;;
     4)
         python ../manage.py test game.tests.PlayerStatsTest --settings=tr_django.test_settings
+        ;;
+    5)
+        python ../manage.py test game.tests.GameModelTest --settings=tr_django.test_settings
         ;;
     A)
         python ../manage.py test game --settings=tr_django.test_settings

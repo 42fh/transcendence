@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.utils import timezone
-from .models import SingleGame, GameMode, Player
+from .models import SingleGame, GameMode, Player, PlayerGameStats
 from users.models import CustomUser
 from django.core.exceptions import ValidationError
 
@@ -355,3 +355,105 @@ class PlayerStatsTest(TestCase):
         self.player.update_stats(won=True)
 
         self.assertEqual(self.player.win_ratio(), 1)
+
+
+class GameModelTest(TestCase):
+    def setUp(self):
+        # Create test users and players
+        self.user1 = CustomUser.objects.create_user(
+            username="player1", email="p1@test.com", password="test123"
+        )
+        self.user2 = CustomUser.objects.create_user(
+            username="player2", email="p2@test.com", password="test123"
+        )
+        # Get the automatically created Player instances instead of creating new ones
+        self.player1 = Player.objects.get(user=self.user1)
+        self.player2 = Player.objects.get(user=self.user2)
+
+        # Create a basic game mode
+        self.game_mode = GameMode.objects.create(
+            name="Classic 1v1",
+            description="Classic two-player game",
+            player_count=2,
+            perspective="2D",
+            location="remote",
+        )
+
+    def test_game_lifecycle(self):
+        """Test the complete lifecycle of a game from draft to finish"""
+        # 1. Create game in draft
+        game = SingleGame.objects.create(mode=self.game_mode, status=SingleGame.DRAFT)
+        self.assertEqual(game.status, SingleGame.DRAFT)
+        self.assertIsNone(game.start_date)
+
+        # 2. Add players
+        PlayerGameStats.objects.create(single_game=game, player=self.player1)
+        PlayerGameStats.objects.create(single_game=game, player=self.player2)
+
+        # 3. Start game
+        game.start_game()
+        self.assertEqual(game.status, SingleGame.ACTIVE)
+        self.assertIsNotNone(game.start_date)
+
+        # 4. Finish game
+        game.finish_game()
+        self.assertEqual(game.status, SingleGame.FINISHED)
+        self.assertIsNotNone(game.finished_at)
+
+        # 5. Set winner
+        game.set_winner(self.player1)
+        self.assertEqual(game.winner, self.player1)
+
+    def test_game_validation(self):
+        """Test various validation scenarios"""
+        game = SingleGame.objects.create(status=SingleGame.DRAFT)
+
+        # Cannot start without mode
+        with self.assertRaises(ValueError):
+            game.start_game()
+
+        game.mode = self.game_mode
+
+        # Cannot start without players
+        with self.assertRaises(ValueError):
+            game.start_game()
+
+        # Cannot set winner before finish
+        with self.assertRaises(ValueError):
+            game.set_winner(self.player1)
+
+    def test_save_and_load_template(self):
+        """Test saving game configuration as template"""
+        # Create a game with specific configuration
+        template_game = SingleGame.objects.create(
+            mode=self.game_mode, status=SingleGame.DRAFT
+        )
+
+        # Save as template
+        template_name = "My Favorite Setup"
+        template_game.save_as_template(template_name)
+
+        # Create new game from template (implementation needed)
+        # new_game = SingleGame.create_from_template(template_name)
+        # self.assertEqual(new_game.mode, template_game.mode)
+        # etc...
+
+    def test_game_duration(self):
+        """Test game duration calculation"""
+        game = SingleGame.objects.create(mode=self.game_mode, status=SingleGame.DRAFT)
+
+        # Add players
+        PlayerGameStats.objects.create(single_game=game, player=self.player1)
+        PlayerGameStats.objects.create(single_game=game, player=self.player2)
+
+        # Duration should be None before game starts
+        self.assertIsNone(game.duration)
+
+        # Start game
+        game.start_game()
+        self.assertIsNone(game.duration)  # Still None during play
+
+        # Finish game
+        game.finish_game()
+        self.assertIsNotNone(game.duration)
+        self.assertIsInstance(game.duration, float)
