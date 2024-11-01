@@ -3,6 +3,7 @@ import uuid
 from django.db import models
 from users.models import CustomUser
 from django.utils import timezone
+from datetime import timedelta, datetime
 
 
 class Player(models.Model):
@@ -427,6 +428,54 @@ class SingleGame(BaseGame):
         return True
 
 
+class TournamentGame(BaseGame):
+    GAME_TYPE_DIRECT_ELIMINATION = "direct_elimination"
+    GAME_TYPE_ROUND_ROBIN = "round_robin"
+    GAME_TYPE_SWISS = "swiss"
+
+    GAME_TYPE_CHOICES = [
+        (GAME_TYPE_DIRECT_ELIMINATION, "Direct Elimination"),
+        (GAME_TYPE_ROUND_ROBIN, "Round Robin"),
+        (GAME_TYPE_SWISS, "Swiss System"),
+    ]
+
+    game_type = models.CharField(max_length=20, choices=GAME_TYPE_CHOICES)
+
+    # Fields from DirectEliminationTournamentGame
+    source_game1 = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="next_game1",
+    )
+    source_game2 = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="next_game2",
+    )
+
+    # Fields from RoundRobinTournamentGame
+    group_number = models.PositiveIntegerField(null=True, blank=True)
+
+    # Fields from SwissTournamentGame
+    swiss_round = models.PositiveIntegerField(null=True, blank=True)
+
+    def get_game_logic(self):
+        """Factory method to get the appropriate game logic handler"""
+        if self.game_type == self.GAME_TYPE_DIRECT_ELIMINATION:
+            return DirectEliminationLogic(self)
+        elif self.game_type == self.GAME_TYPE_ROUND_ROBIN:
+            return RoundRobinLogic(self)
+        elif self.game_type == self.GAME_TYPE_SWISS:
+            return SwissSystemLogic(self)
+
+    class Meta:
+        abstract = False
+
+
 class Tournament(models.Model):
     # Basic tournament details
     name = models.CharField(max_length=100)
@@ -438,25 +487,51 @@ class Tournament(models.Model):
         "Player", blank=True, related_name="tournaments_waiting_list"
     )
 
-    # Registration and start dates
+    # Registration dates
     start_registration = models.DateTimeField()
     end_registration = models.DateTimeField()
-    start_date = models.DateTimeField()
 
-    # Optional auto-start time after min participants reached
-    auto_start_warning_time = models.DurationField(
-        blank=True, null=True, help_text="Time delay after min participants reached"
-    )
+    # Tournament type choices
+    TYPE_ROUND_ROBIN = "round_robin"
+    TYPE_KNOCKOUT = "knockout"
+    TYPE_DOUBLE_ELIMINATION = "double_elimination"
+    TYPE_SINGLE_ELIMINATION = "single_elimination"
 
-    # Tournament type choices with auto-derived labels
-    type_choices = [
-        ("round_robin", "Round Robin"),
-        ("knockout", "Knockout"),
-        ("double_elimination", "Double Elimination"),
-        ("single_elimination", "Single Elimination"),
+    TYPE_CHOICES = [
+        (TYPE_ROUND_ROBIN, "Round Robin"),
+        (TYPE_KNOCKOUT, "Knockout"),
+        (TYPE_DOUBLE_ELIMINATION, "Double Elimination"),
+        (TYPE_SINGLE_ELIMINATION, "Single Elimination"),
     ]
 
-    type = models.CharField(max_length=20, choices=type_choices)
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES)
+
+    # Start mode configuration
+    START_MODE_FIXED = "fixed"
+    START_MODE_AUTO = "auto"
+
+    START_MODE_CHOICES = [
+        (START_MODE_FIXED, "Fixed Start Time"),
+        (START_MODE_AUTO, "Start When Ready"),
+    ]
+
+    start_mode = models.CharField(
+        max_length=10,
+        choices=START_MODE_CHOICES,
+        default=START_MODE_FIXED,
+        help_text="Whether to start at fixed time or when minimum participants is reached",
+    )
+
+    # For fixed start mode
+    start_date = models.DateTimeField(
+        null=True, blank=True, help_text="Required for fixed start mode"
+    )
+
+    # For auto start mode
+    auto_start_delay = models.DurationField(
+        default=timedelta(minutes=5),
+        help_text="How long to wait after minimum participants reached before starting",
+    )
 
     # Visibility and participant settings
     is_public = models.BooleanField(default=True)
@@ -472,28 +547,71 @@ class Tournament(models.Model):
     min_participants = models.PositiveIntegerField(default=2)
     max_participants = models.PositiveIntegerField(blank=True, null=True)
 
-    # Relationships and tournament-specific data
-    match_schedule = models.ManyToManyField(
-        "DirectEliminationTournamentGame",  # Now referencing a concrete tournament game model
+    games = models.ManyToManyField(
+        TournamentGame,  # Now works because TournamentGame is defined above
         related_name="tournaments",
-    )
-    ranking = models.JSONField(
-        blank=True,
-        null=True,
-        help_text="Stores ranking details, e.g., [{'player_id': 1, 'rank': 1, 'points': 100}]",
+        through="TournamentGameSchedule",
     )
 
-    PRIZE_CHOICES = [
-        ("no_prize", "No Prize"),
-        ("crypto_coin", "Crypto Coin"),
-        ("real_money", "Real Money"),
-        ("in_game_points", "In Game Points"),
-        ("fun_item", "Fun Item"),
-    ]
-    prize_type = models.CharField(max_length=20, choices=PRIZE_CHOICES)
+    def clean(self):
+        from django.core.exceptions import ValidationError
+
+        # Validate start mode configuration
+        if self.start_mode == self.START_MODE_FIXED and not self.start_date:
+            raise ValidationError("Fixed start mode requires a start date")
+
+        # Validate registration dates
+        if self.start_registration >= self.end_registration:
+            raise ValidationError("Registration end must be after registration start")
+
+        if self.start_mode == self.START_MODE_FIXED:
+            if self.end_registration >= self.start_date:
+                raise ValidationError("Tournament start must be after registration end")
+
+        if self.end_registration and self.start_registration:
+            if self.end_registration < self.start_registration:
+                raise ValidationError(
+                    {
+                        "end_registration": "Registration end date cannot be before registration start date"
+                    }
+                )
+            if self.start_date < self.end_registration:
+                raise ValidationError(
+                    {
+                        "start_date": "Tournament start date must be after registration end date"
+                    }
+                )
+
+    def can_start(self) -> bool:
+        """Check if tournament can start based on its configuration"""
+        if self.participants.count() < self.min_participants:
+            return False
+
+        now = timezone.now()
+
+        if self.start_mode == self.START_MODE_FIXED:
+            return now >= self.start_date
+        else:  # AUTO mode
+            return now >= (self.last_min_participant_joined_at + self.auto_start_delay)
+
+    @property
+    def estimated_start_time(self) -> datetime:
+        """Get the estimated start time based on current configuration"""
+        if self.start_mode == self.START_MODE_FIXED:
+            return self.start_date
+        else:
+            if self.participants.count() >= self.min_participants:
+                return self.last_min_participant_joined_at + self.auto_start_delay
+            return None
+
+    def __str__(self):
+        return f"{self.name} ({self.get_type_display()}) - Starts on {self.start_date}"
+
+
+class PrizeConfig(models.Model):
+    tournament = models.OneToOneField(Tournament, on_delete=models.CASCADE)
+    prize_type = models.CharField(max_length=20)  # Define choices in migration
     prize_details = models.TextField(blank=True, null=True)
-
-    # Entry fee details
     has_entry_fee = models.BooleanField(default=False)
     entry_fee = models.DecimalField(
         max_digits=10, decimal_places=2, default=Decimal("0.00")
@@ -502,37 +620,27 @@ class Tournament(models.Model):
         max_digits=10, decimal_places=2, default=Decimal("0.00")
     )
 
-    def __str__(self):
-        return f"{self.name} ({self.get_type_display()}) - Starts on {self.start_date}"
 
-    def add_to_pot(self, amount):
-        """Adds entry fees or other contributions to the tournament's prize pot."""
-        self.prize_pot += amount
-        self.save()
-
-
-class TournamentGame(BaseGame):
-    created_at = models.DateTimeField(auto_now_add=True)
+class TournamentRanking(models.Model):
+    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
+    player = models.ForeignKey("Player", on_delete=models.CASCADE)
+    rank = models.PositiveIntegerField()
+    points = models.IntegerField()
 
     class Meta:
-        abstract = True
+        unique_together = ["tournament", "player"]
+        ordering = ["rank"]
 
 
-class DirectEliminationTournamentGame(TournamentGame):
-    source_game1 = models.ForeignKey(
-        "self",
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="next_game1",
-    )
-    source_game2 = models.ForeignKey(
-        "self",
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="next_game2",
-    )
+class TournamentGameSchedule(models.Model):
+    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
+    game = models.ForeignKey(TournamentGame, on_delete=models.CASCADE)
+    round_number = models.PositiveIntegerField()
+    match_number = models.PositiveIntegerField()
+    scheduled_time = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["round_number", "match_number"]
 
 
 # The most straightforward way to store player stats for a game is to create an intermediate model
@@ -549,10 +657,7 @@ class PlayerGameStats(models.Model):
         "SingleGame", on_delete=models.CASCADE, null=True, blank=True
     )
     tournament_game = models.ForeignKey(
-        "DirectEliminationTournamentGame",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
+        "TournamentGame", on_delete=models.CASCADE, null=True, blank=True
     )
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
     # Initial state - with default value

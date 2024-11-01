@@ -1,8 +1,18 @@
 from django.test import TestCase
 from django.utils import timezone
-from .models import SingleGame, GameMode, Player, PlayerGameStats
+from datetime import timedelta
+from .models import (
+    SingleGame,
+    GameMode,
+    Player,
+    PlayerGameStats,
+    Tournament,
+    TournamentGame,
+    TournamentGameSchedule,
+)
 from users.models import CustomUser
 from django.core.exceptions import ValidationError
+import uuid
 
 
 class GameModeTestCase(TestCase):
@@ -222,22 +232,31 @@ class LegacyGameAppTestsRefactored(TestCase):
             password="testpass123",
         )
 
-        # Create Player profiles linked to each CustomUser
-        self.player1 = Player.objects.create(user=self.user, display_name="Player1")
-        self.player2 = Player.objects.create(
-            user=self.user_profile, display_name="Player2"
-        )
+        # Get the automatically created Player instances
+        self.player1 = Player.objects.get(user=self.user)
+        self.player2 = Player.objects.get(user=self.user_profile)
+
+        # Update display names if needed
+        self.player1.display_name = "Player1"
+        self.player1.save()
+        self.player2.display_name = "Player2"
+        self.player2.save()
 
         # Create a GameMode instance
         self.game_mode = GameMode.objects.create(
-            name="Test mode", description="Test description"
+            name="Test mode",
+            description="Test description",
+            player_count=GameMode.TWO_PLAYER,
+            perspective="2D",
+            location="remote",
+            win_condition="points",
         )
 
-        # Create a SingleGame instance with a date and mode
+        # Create a SingleGame instance
         self.game = SingleGame.objects.create(
-            date=timezone.now(),
             mode=self.game_mode,
-            winner=self.player2,  # Set an initial winner
+            status=SingleGame.DRAFT,
+            winner=self.player2,
         )
         # Add players to the game
         self.game.players.set([self.player1, self.player2])
@@ -538,3 +557,351 @@ class SingleGameTest(TestCase):
         game.determine_winner()  # You might need to implement this method
 
         self.assertEqual(game.winner, self.player1)
+
+
+class TournamentTest(TestCase):
+    def setUp(self):
+        # Create a user for testing
+        self.user = CustomUser.objects.create_user(
+            username="testuser", email="test@example.com", password="testpass123"
+        )
+        # Get the automatically created player instead of creating a new one
+        self.player = Player.objects.get(user=self.user)
+        # Update display name if needed
+        self.player.display_name = "TestPlayer"
+        self.player.save()
+
+        # Set up common dates for tournaments
+        self.now = timezone.now()
+        self.tomorrow = self.now + timedelta(days=1)
+        self.day_after = self.now + timedelta(days=2)
+
+    def test_create_tournament(self):
+        """Test basic tournament creation"""
+        tournament = Tournament.objects.create(
+            name="Test Tournament",
+            description="A test tournament",
+            start_registration=self.now,
+            end_registration=self.tomorrow,
+            start_date=self.day_after,
+            type=Tournament.TYPE_SINGLE_ELIMINATION,
+            creator=self.player,
+            min_participants=2,
+            max_participants=8,
+        )
+
+        self.assertEqual(tournament.name, "Test Tournament")
+        self.assertEqual(tournament.type, Tournament.TYPE_SINGLE_ELIMINATION)
+        self.assertEqual(tournament.creator, self.player)
+
+    def test_tournament_dates_validation(self):
+        """Test that tournament dates are properly validated"""
+        # Create a tournament with invalid dates
+        tournament = Tournament.objects.create(
+            name="Invalid Tournament",
+            type=Tournament.TYPE_SINGLE_ELIMINATION,
+            start_registration=self.tomorrow,  # Later date
+            end_registration=self.now,  # Earlier date
+            start_date=self.day_after,
+            start_mode=Tournament.START_MODE_FIXED,
+            creator=self.player,
+            min_participants=2,
+            max_participants=8,
+        )
+
+        # The validation should happen when we call full_clean()
+        with self.assertRaises(ValidationError):
+            tournament.full_clean()
+
+    def test_tournament_participants(self):
+        """Test adding and removing participants"""
+        tournament = Tournament.objects.create(
+            name="Test Tournament",
+            start_registration=self.now,
+            end_registration=self.tomorrow,
+            start_date=self.day_after,
+            type=Tournament.TYPE_SINGLE_ELIMINATION,
+            creator=self.player,
+            min_participants=2,
+            max_participants=4,
+        )
+
+        # Create a new user and get its automatically created player
+        user2 = CustomUser.objects.create_user(
+            username="testuser2", email="test2@example.com", password="testpass123"
+        )
+        player2 = Player.objects.get(user=user2)
+        player2.display_name = "TestPlayer2"
+        player2.save()
+
+        # Add participants
+        tournament.participants.add(self.player, player2)
+        self.assertEqual(tournament.participants.count(), 2)
+        self.assertIn(self.player, tournament.participants.all())
+        self.assertIn(player2, tournament.participants.all())
+
+
+class TournamentCreationTest(TestCase):
+    def setUp(self):
+        # Create a user and get its automatically created player
+        self.user = CustomUser.objects.create_user(
+            username=f"testuser_{uuid.uuid4()}",
+            email="test@example.com",
+            password="testpass123",
+        )
+        # Instead of creating a new player, get the existing one
+        self.player = Player.objects.get(user=self.user)
+        # Optionally update the display name if needed
+        self.player.display_name = "TestPlayer"
+        self.player.save()
+
+        # Set up common dates for tournaments
+        self.now = timezone.now()
+        self.tomorrow = self.now + timedelta(days=1)
+        self.day_after = self.now + timedelta(days=2)
+
+    def test_create_public_tournament_fixed_start(self):
+        """Test creation of a public tournament with fixed start time"""
+        tournament = Tournament.objects.create(
+            name="Weekend Tournament",
+            description="A fun weekend tournament",
+            type=Tournament.TYPE_SINGLE_ELIMINATION,
+            creator=self.player,
+            start_mode=Tournament.START_MODE_FIXED,
+            start_registration=self.now,
+            end_registration=self.tomorrow,
+            start_date=self.day_after,
+            is_public=True,
+            min_participants=4,
+            max_participants=8,
+        )
+
+        # Verify basic tournament setup
+        self.assertEqual(tournament.name, "Weekend Tournament")
+        self.assertEqual(tournament.type, Tournament.TYPE_SINGLE_ELIMINATION)
+        self.assertEqual(tournament.creator, self.player)
+        self.assertTrue(tournament.is_public)
+
+        # Verify timing setup
+        self.assertEqual(tournament.start_mode, Tournament.START_MODE_FIXED)
+        self.assertEqual(tournament.start_date, self.day_after)
+
+        # Verify initial state
+        self.assertEqual(tournament.participants.count(), 0)
+        self.assertFalse(tournament.can_start())
+
+    def test_create_private_tournament_auto_start(self):
+        """Test creation of a private tournament with auto start"""
+        # Create a user and get its automatically created player
+        allowed_user = CustomUser.objects.create_user(
+            username="allowed_user",
+            email="allowed@example.com",
+            password="testpass123",
+        )
+        # Instead of creating a new player, get the existing one
+        allowed_player = Player.objects.get(user=allowed_user)
+        # Optionally update the display name if needed
+        allowed_player.display_name = "AllowedPlayer"
+        allowed_player.save()
+
+        tournament = Tournament.objects.create(
+            # Basic info
+            name="Private Tournament",
+            description="Invitation only tournament",
+            type=Tournament.TYPE_ROUND_ROBIN,
+            creator=self.player,
+            # Timing
+            start_mode=Tournament.START_MODE_AUTO,
+            start_registration=self.now,
+            end_registration=self.tomorrow,
+            auto_start_delay=timedelta(minutes=10),
+            # Participant settings
+            is_public=False,
+            min_participants=2,
+            max_participants=4,
+        )
+
+        # Add allowed players
+        tournament.allowed_players.add(allowed_player)
+
+        # Verify basic tournament setup
+        self.assertEqual(tournament.name, "Private Tournament")
+        self.assertEqual(tournament.type, Tournament.TYPE_ROUND_ROBIN)
+        self.assertFalse(tournament.is_public)
+
+        # Verify timing setup
+        self.assertEqual(tournament.start_mode, Tournament.START_MODE_AUTO)
+        self.assertEqual(tournament.auto_start_delay, timedelta(minutes=10))
+
+        # Verify access control
+        self.assertEqual(tournament.allowed_players.count(), 1)
+        self.assertIn(allowed_player, tournament.allowed_players.all())
+
+    def test_invalid_tournament_creation(self):
+        """Test validation of tournament creation parameters"""
+        # Test invalid dates (registration end before start)
+        with self.assertRaises(ValidationError):
+            Tournament.objects.create(
+                name="Invalid Tournament",
+                type=Tournament.TYPE_SINGLE_ELIMINATION,
+                start_registration=self.tomorrow,  # Invalid: starts after end
+                end_registration=self.now,
+                start_date=self.day_after,
+                start_mode=Tournament.START_MODE_FIXED,
+                creator=self.player,
+            ).clean()
+
+        # Test fixed mode without start date
+        with self.assertRaises(ValidationError):
+            Tournament.objects.create(
+                name="Invalid Tournament",
+                type=Tournament.TYPE_SINGLE_ELIMINATION,
+                start_registration=self.now,
+                end_registration=self.tomorrow,
+                start_mode=Tournament.START_MODE_FIXED,  # Invalid: no start_date
+                creator=self.player,
+            ).clean()
+
+    def test_direct_elimination_tournament_structure(self):
+        """Test that a direct elimination tournament with 8 players is structured correctly"""
+        tournament = Tournament.objects.create(
+            name="Test Direct Elimination",
+            type=Tournament.TYPE_SINGLE_ELIMINATION,
+            start_mode=Tournament.START_MODE_FIXED,
+            start_registration=timezone.now() - timedelta(days=1),
+            end_registration=timezone.now() - timedelta(hours=1),
+            start_date=timezone.now(),
+            min_participants=8,
+            max_participants=8,
+            is_public=True,
+            creator=self.player,
+        )
+
+        # Create and register 8 players
+        players = []
+        for i in range(8):
+            user = CustomUser.objects.create_user(
+                username=f"player{i}",
+                email=f"player{i}@example.com",
+                password="testpass123",
+            )
+            player = Player.objects.get(user=user)
+            players.append(player)
+            tournament.participants.add(player)
+
+        # Create all tournament games and schedules
+        # Quarter-finals (Round 1)
+        quarter_finals = []
+        for i in range(0, 8, 2):
+            game = TournamentGame.objects.create(
+                game_type=TournamentGame.GAME_TYPE_DIRECT_ELIMINATION
+            )
+            PlayerGameStats.objects.create(tournament_game=game, player=players[i])
+            PlayerGameStats.objects.create(tournament_game=game, player=players[i + 1])
+            TournamentGameSchedule.objects.create(
+                tournament=tournament,
+                game=game,
+                round_number=1,
+                match_number=i // 2 + 1,
+            )
+            quarter_finals.append(game)
+
+        # Semi-finals (Round 2)
+        semi_finals = []
+        for i in range(0, 4, 2):
+            game = TournamentGame.objects.create(
+                game_type=TournamentGame.GAME_TYPE_DIRECT_ELIMINATION,
+                source_game1=quarter_finals[i],
+                source_game2=quarter_finals[i + 1],
+            )
+            TournamentGameSchedule.objects.create(
+                tournament=tournament,
+                game=game,
+                round_number=2,
+                match_number=i // 2 + 1,
+            )
+            semi_finals.append(game)
+
+        # Finals (Round 3)
+        finals = TournamentGame.objects.create(
+            game_type=TournamentGame.GAME_TYPE_DIRECT_ELIMINATION,
+            source_game1=semi_finals[0],
+            source_game2=semi_finals[1],
+        )
+        TournamentGameSchedule.objects.create(
+            tournament=tournament,
+            game=finals,
+            round_number=3,
+            match_number=1,
+        )
+
+        # Verify tournament structure
+        # 1. Check total number of games
+        self.assertEqual(
+            TournamentGameSchedule.objects.filter(tournament=tournament).count(),
+            7,  # 4 quarter-finals + 2 semi-finals + 1 final
+        )
+
+        # 2. Verify round progression
+        for round_num in range(1, 4):
+            games_in_round = TournamentGameSchedule.objects.filter(
+                tournament=tournament, round_number=round_num
+            )
+            expected_games = 2 ** (
+                3 - round_num
+            )  # 4 games in round 1, 2 in round 2, 1 in round 3
+            self.assertEqual(games_in_round.count(), expected_games)
+
+        # 3. Verify game relationships
+        # Check semi-finals
+        for semi_final in semi_finals:
+            self.assertIsNotNone(semi_final.source_game1)
+            self.assertIsNotNone(semi_final.source_game2)
+            self.assertEqual(
+                TournamentGameSchedule.objects.get(
+                    game=semi_final.source_game1
+                ).round_number,
+                1,
+            )
+            self.assertEqual(
+                TournamentGameSchedule.objects.get(
+                    game=semi_final.source_game2
+                ).round_number,
+                1,
+            )
+
+        # Check finals
+        self.assertIsNotNone(finals.source_game1)
+        self.assertIsNotNone(finals.source_game2)
+        self.assertEqual(
+            TournamentGameSchedule.objects.get(game=finals.source_game1).round_number,
+            2,
+        )
+        self.assertEqual(
+            TournamentGameSchedule.objects.get(game=finals.source_game2).round_number,
+            2,
+        )
+
+        # 4. Verify that we can traverse the entire bracket
+        def verify_game_tree(game):
+            """Recursively verify game relationships"""
+            if not game:
+                return True
+            if game.source_game1:
+                self.assertLess(
+                    TournamentGameSchedule.objects.get(
+                        game=game.source_game1
+                    ).round_number,
+                    TournamentGameSchedule.objects.get(game=game).round_number,
+                )
+                verify_game_tree(game.source_game1)
+            if game.source_game2:
+                self.assertLess(
+                    TournamentGameSchedule.objects.get(
+                        game=game.source_game2
+                    ).round_number,
+                    TournamentGameSchedule.objects.get(game=game).round_number,
+                )
+                verify_game_tree(game.source_game2)
+
+        verify_game_tree(finals)
