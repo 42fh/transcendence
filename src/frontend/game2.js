@@ -83,7 +83,7 @@ function gameLoop(world, scene) {
     }
 
     world.controls.update();
-    world.composer.render();
+    world.composer.render(scene, world.camera);
 };
 game.addGameLoop(gameLoop);
 
@@ -101,7 +101,7 @@ function updateGame(gameState) {
 game.addSocket(updateGame);
 
 // start game
-world.addGame(game);
+world.addGame(game, false);
 
 
 // ----------Event Listeners----------
