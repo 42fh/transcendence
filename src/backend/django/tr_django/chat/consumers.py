@@ -12,25 +12,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
         try:
-            # Validate and setup room name
             self.room_name = self.scope["url_route"]["kwargs"].get("room_name")
             if not self.room_name:
-                print("DEBUG: Room name is missing")
+                # print("DEBUG: Room name is missing")
                 await self.close()
                 return
 
             self.room_group_name = f"chat_{self.room_name}"
 
-            # Authenticate user
             if self.scope["user"].is_anonymous:
-                print("DEBUG: Anonymous user connection rejected")
+                # print("DEBUG: Anonymous user connection rejected")
                 await self.close()
                 return
 
             self.username = self.scope["user"].username
-            print(f"DEBUG: User {self.username} connecting to room {self.room_name}")
+            # print(f"DEBUG: User {self.username} connecting to room {self.room_name}")
 
-            # Get or create chat room with error handling
             try:
                 self.chat_room = await self.get_or_create_chat_room()
                 if not self.chat_room:
@@ -46,16 +43,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 await self.close()
                 return
 
-            # Manage connected users
             if self.room_group_name not in self.connected_users:
                 self.connected_users[self.room_group_name] = set()
             self.connected_users[self.room_group_name].add(self.username)
 
-            # Join room group
             await self.channel_layer.group_add(self.room_group_name, self.channel_name)
             await self.accept()
 
-            # Send connection confirmation
             await self.send(
                 text_data=json.dumps(
                     {
@@ -66,7 +60,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 )
             )
 
-            # Fetch and send message history
             print("calling send_message_history")
             await self.send_message_history()
 
@@ -77,10 +70,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_message_history(self, limit=50):
-        """
-        Fetch recent messages for the chat room.
-        Returns messages in chronological order, limited to the specified number.
-        """
         messages = (
             Message.objects.filter(room=self.chat_room)
             .select_related("sender")
@@ -88,11 +77,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             .values("content", "sender__username", "timestamp")
         )
 
-        # Convert to list and reverse to get chronological order
         messages = list(messages)
         messages.reverse()
 
-        # Format the messages
         return [
             {
                 "type": "chat_message",

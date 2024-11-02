@@ -4,11 +4,6 @@ from django.utils import timezone
 
 
 class ChatRoom(models.Model):
-    """
-    Represents a chat room between two users.
-    The room_id is created by concatenating usernames in alphabetical order.
-    """
-
     room_id = models.CharField(max_length=255, unique=True)
     user1 = models.ForeignKey(User, on_delete=models.CASCADE, related_name="chat_user1")
     user2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name="chat_user2")
@@ -23,7 +18,7 @@ class ChatRoom(models.Model):
         ]
 
     def save(self, *args, **kwargs):
-        # Ensure room_id is created from sorted usernames
+        # sorted usernames to avoid duplicate chat rooms with different names
         if not self.room_id:
             usernames = sorted([self.user1.username, self.user2.username])
             self.room_id = f"{usernames[0]}_{usernames[1]}"
@@ -34,10 +29,6 @@ class ChatRoom(models.Model):
 
 
 class Message(models.Model):
-    """
-    Represents a single message in a chat room.
-    """
-
     room = models.ForeignKey(
         ChatRoom, on_delete=models.CASCADE, related_name="messages"
     )
@@ -57,7 +48,6 @@ class Message(models.Model):
         ordering = ["timestamp"]
 
     def save(self, *args, **kwargs):
-        # Update the last_message_at timestamp of the chat room
         self.room.last_message_at = timezone.now()
         self.room.save(update_fields=["last_message_at"])
         super().save(*args, **kwargs)
