@@ -47,6 +47,7 @@
                 const data = await response.json();
                 currentUsername = data.username;
                 document.getElementById('current-username').value = currentUsername;
+                document.querySelector('span#current-username').textContent = currentUsername;
                 await loadUserList();
             } catch (error) {
                 showError('Failed to initialize chat: ' + error.message);
