@@ -24,7 +24,8 @@ def get_user_list(request):
         # Get all active users except the current user
         users = (
             User.objects.exclude(username=request.user.username)
-            .filter(is_active=True)
+            # TODO: perhaps precise which is online/active
+            # .filter(is_active=True)
             .values("username")
         )
 
