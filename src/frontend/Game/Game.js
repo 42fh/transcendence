@@ -5,16 +5,14 @@ import Loader from '../Utils/Loader.js';
 import World from '../World/World.js';
 import Debug from '../Utils/Debug.js';
 
-export default class Game 
-{
-    constructor()
-    {
+export default class Game {
+    constructor() {
         // Does not create a new instance of World because it is a singleton
         this.world = new World(document.querySelector('.webgl'));
 
         // Objects group
         this.gameGroup = new THREE.Group();
-        
+
         // Scene
         this.scene = new THREE.Scene();
         this.scene.add(this.gameGroup);
@@ -25,18 +23,15 @@ export default class Game
         // GUI
         this.gui = new Debug();
 
-        
         this.socket = null;
     }
 
-    addAmbientLight(intensity, color)
-    {
+    addAmbientLight(intensity, color) {
         const ambientLight = new THREE.AmbientLight(color, intensity)
         this.scene.add(ambientLight)
     }
 
-    addDirectionalLight(intensity, color, Vector3)
-    {
+    addDirectionalLight(intensity, color, Vector3) {
         const directionalLight = new THREE.DirectionalLight(color, intensity)
         directionalLight.position.set(Vector3.x, Vector3.y, Vector3.z);
         if (this.gui.debug) {
@@ -47,8 +42,7 @@ export default class Game
         this.scene.add(directionalLight)
     }
 
-    addSky(size, turbidity, rayleigh, mieCoefficient, mieDirectionalG, sunPosition)
-    {
+    addSky(size, turbidity, rayleigh, mieCoefficient, mieDirectionalG, sunPosition) {
         const sky = new Sky();
         sky.scale.setScalar(size);
         sky.material.uniforms['turbidity'].value = turbidity;
@@ -59,19 +53,18 @@ export default class Game
         this.scene.add(sky);
     }
 
-    addSea(width, height, waterColor, sunColor, distortionScale) 
-    {
-        const waterGeometry = new THREE.PlaneGeometry( width, height );
+    addSea(width, height, waterColor, sunColor, distortionScale) {
+        const waterGeometry = new THREE.PlaneGeometry(width, height);
 
         this.water = new Water(
             waterGeometry,
             {
                 textureWidth: 512,
                 textureHeight: 512,
-                waterNormals: new THREE.TextureLoader().load( 'static/textures/waternormals.jpg', 
-                    function ( texture ) {
+                waterNormals: new THREE.TextureLoader().load('static/textures/waternormals.jpg',
+                    function (texture) {
                         texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-                    } 
+                    }
                 ),
                 sunDirection: new THREE.Vector3(),
                 sunColor,
@@ -83,18 +76,16 @@ export default class Game
 
         this.water.rotation.x = - Math.PI / 2;
         this.water.material.uniforms['size'].value = 10;
-        this.scene.add( this.water );
+        this.scene.add(this.water);
     }
 
-    addObjects(objects)
-    {
+    addObjects(objects) {
         for (const object of objects) {
             this.gameGroup.add(object);
         }
     }
 
-    addGameLoop(loop)
-    {
+    addGameLoop(loop) {
         this.gameLoop = loop;
     }
 
@@ -102,25 +93,24 @@ export default class Game
         this.loader = new Loader(sources);
     }
 
-    addSocket(updateGame) 
-    {
+    addSocket(updateGame) {
         this.playerId = null;
         document.querySelector('.joinGame').addEventListener('click', () => {
             let gameId = document.getElementById('gameId').value;
             this.playerId = document.getElementById('playerId').value;
             this.socket = new WebSocket(`ws://localhost:8000/ws/game/${gameId}/?player=${this.playerId}`);
-            
-            this.socket.onmessage = function(e) {
+
+            this.socket.onmessage = function (e) {
                 const data = JSON.parse(e.data);
-                if (data.type === 'initial_state') 
+                if (data.type === 'initial_state')
                     alert("Game initialized!");
-                else if (data.type === 'game_state') 
+                else if (data.type === 'game_state')
                     updateGame(data.game_state)
-                else if (data.type === 'game_finished') 
+                else if (data.type === 'game_finished')
                     alert("Game finished!");
             };
-        
-            this.socket.onopen = function(e) {
+
+            this.socket.onopen = function (e) {
                 console.log("Connected to WebSocket");
             };
         });
