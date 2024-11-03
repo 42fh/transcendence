@@ -10,79 +10,16 @@ class PolygonPongGame(AGameManager):
         self.num_sides = 4  # Default number of sides
         self.num_paddles = 2  # Default number of paddles
 
-    def init_game_state(self):
-        """Initialize the game state with unified structure for polygon pong"""
-        try:
-            # Initialize ball with random direction in the unified ball array format
-            angle = random.uniform(0, 2 * math.pi)
-            speed = 0.006
-            
-            balls = [{
-                "x": float(0),
-                "y": float(0),
-                "velocity_x": float(speed * math.cos(angle)),
-                "velocity_y": float(speed * math.sin(angle)),
-                "size": float(0.1)
-            }]
 
-            # Initialize paddles array with structured objects
-            paddles = []
-            spacing = math.floor(self.num_sides / self.num_paddles)
-            active_paddle_count = 0  # Keep track of active paddles
-            
-            # Create all potential paddle positions
-            for side_index in range(self.num_sides):
-                # Calculate if this side should have an active paddle
-                is_active = False
-                for i in range(min(self.num_paddles, self.num_sides)):
-                    if side_index == (i * spacing) % self.num_sides:
-                        is_active = True
-                        active_paddle_count += 1
-                        break
-                
-                # Add paddle object for this side
-                paddles.append({
-                    "position": float(0.5),  # Center position
-                    "active": is_active,     # Whether this side has an active paddle
-                    "side_index": side_index # Which polygon side this paddle is on
-                })
+    # TODO: check whateach mode needs and what thy have in common (balls.. )
+    def apply_game_settings(self):
+        """Apply game-specific values from settings"""
+        self.num_sides = self.settings['sides']
+        self.num_paddles = self.settings['num_players']
 
-            state = {
-                "balls": balls,
-                "paddles": paddles,
-                "scores": [int(0)] * active_paddle_count,  # Only create scores for active paddles
-                "dimensions": {
-                    "paddle_length": float(0.3),
-                    "paddle_width": float(0.2)
-                },
-                "game_type": "polygon"
-            }
-            
-            return state
+    def get_game_type(self):
+        return "polygon"
 
-        except Exception as e:
-            print(f"Error in init_game_state: {e}")
-            # Return minimal valid state as fallback
-            return {
-                "balls": [{
-                    "x": float(0),
-                    "y": float(0),
-                    "velocity_x": float(0),
-                    "velocity_y": float(0),
-                    "size": float(0.05)
-                }],
-                "paddles": [{
-                    "position": float(0.5),
-                    "active": True,
-                    "side_index": 0
-                }],
-                "scores": [0],  # Single score for single active paddle
-                "dimensions": {
-                    "paddle_length": float(0.3),
-                    "paddle_width": float(0.2)
-                },
-                "game_type": "polygon"
-            }
 
     async def game_logic(self, current_state):
         def get_polygon_vertices():

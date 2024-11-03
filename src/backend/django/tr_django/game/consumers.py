@@ -27,14 +27,20 @@ class PongConsumer(AsyncWebsocketConsumer):
         query_params = dict(param.split("=") for param in query_string.split("&"))
         self.player_id = query_params.get("player")
         game_type = query_params.get("type", "polygon")  # Default to polygon_pong
-        
+        print(query_params)        
         self.game_group = f"game_{self.game_id}"
         await self.channel_layer.group_add(self.game_group, self.channel_name)
         try:
             # Try to get existing game or create new one with specified type
             self.game_manager = await AGameManager.get_instance(
                 self.game_id, 
-                game_type=query_params.get("type", "polygon")
+                game_type=query_params.get("type", "polygon"),
+                settings = {
+                    'num_players': int(query_params.get("players", "2")),
+                    'num_balls': int(query_params.get("balls", "1")),
+                    'min_players': int(query_params.get("players", "2")),
+                    'sides': int(query_params.get("sides", "4")) if query_params.get("type") == "polygon" else None
+                }
             )
 
             # Check Redis for existing players
@@ -42,13 +48,6 @@ class PongConsumer(AsyncWebsocketConsumer):
             
             # Initialize game if no players exist with provided settings -> notworking
             if player_count == 0:
-                settings = {
-                    'num_players': int(query_params.get("players", "2")),
-                    'num_balls': int(query_params.get("balls", "1")),
-                    'min_players': int(query_params.get("players", "2")),
-                    'sides': int(query_params.get("sides", "4")) if query_params.get("type") == "polygon" else None
-                }
-                await self.game_manager.setup_game(settings)
                 asyncio.create_task(self.game_manager.start_game())
 
             self.player_index = await self.game_manager.add_player(self.player_id)

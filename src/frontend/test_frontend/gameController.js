@@ -85,13 +85,7 @@ export class GameController {
                 gameId,
                 this.playerId,
                 this.handleMessage.bind(this),
-                {
-                    type: config.type || 'polygon',
-                    players: config.players || 2,
-                    balls: config.balls || 1,
-                    debug: config.debug ? '1' : '0',
-                    ...config.additionalParams
-                }
+		config
             );
             this.websocket.connect();
 

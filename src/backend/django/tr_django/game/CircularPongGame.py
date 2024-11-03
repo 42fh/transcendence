@@ -10,67 +10,14 @@ class CircularPongGame(AGameManager):
         self.num_players = 3  # Default number of players
         self.num_balls = 1    # Default number of balls
 
-    def init_game_state(self):
-        """Initialize the game state with unified structure for circular pong"""
-        try:
-            # Initialize balls in the center moving in random directions
-            balls = []
-            for i in range(self.num_balls):
-                angle = random.uniform(0, 2 * math.pi)
-                speed = 0.006
-                balls.append({
-                    "x": float(0),
-                    "y": float(0),
-                    "velocity_x": float(speed * math.cos(angle)),
-                    "velocity_y": float(speed * math.sin(angle)),
-                    "size": float(0.05),
-                })
+    def apply_game_settings(self):
+        """Apply game-specific values from settings"""
+        self.num_players = self.settings['num_players']
+        self.num_balls = self.settings['num_balls']
 
-            # Initialize paddles evenly spaced around the circle
-            # Now including active and side_index for unified structure
-            paddles = []
-            for i in range(self.num_players):
-                paddles.append({
-                    "position": float(0.5),
-                    "active": True,          # All paddles are always active in circular
-                    "side_index": i          # In circular, side_index represents the player's position around the circle
-                })
+    def get_game_type(self):
+        return "circular"
 
-            state = {
-                "balls": balls,
-                "paddles": paddles,
-                "scores": [int(0)] * self.num_players,
-                "dimensions": {
-                    "paddle_length": float(0.4),
-                    "paddle_width": float(0.2),
-                },
-                "game_type": "circular"
-            }
-            return state
-
-        except Exception as e:
-            print(f"Error in init_game_state: {e}")
-            # Return a minimal valid state as fallback
-            return {
-                "balls": [{
-                    "x": float(0.0),
-                    "y": float(0.0),
-                    "velocity_x": float(0.0),
-                    "velocity_y": float(0.0),
-                    "size": float(0.02)
-                }],
-                "paddles": [{
-                    "position": float(0.0),
-                    "active": True,
-                    "side_index": 0
-                }],
-                "scores": [0] * self.num_players,
-                "dimensions": {
-                    "paddle_length": float(0.2),
-                    "paddle_width": float(0.02)
-                },
-                "game_type": "circular"
-            }
     
     def game_logic(self, current_state):
         def calculate_distance(point):

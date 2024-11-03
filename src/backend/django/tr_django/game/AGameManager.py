@@ -45,15 +45,17 @@ class AGameManager(ABC):
             raise ValueError(f"Unknown game type: {game_type}")
         return cls._game_types[game_type]
 
+     
     @classmethod
-    async def get_instance(cls, game_id, game_type=None):
-        """Process-safe get_instance with game type support"""
+    async def get_instance(cls, game_id, game_type=None, settings=None):
+        """Process-safe get_instance with game type and settings support"""
         try:
             redis_conn = await redis.Redis(decode_responses=True)  # Use string decoding for type retrieval
             
             # Try to get existing game type from Redis
             stored_type = await redis_conn.get(f"game_type:{game_id}")
-            
+
+
             # If no stored type and no provided type, raise error
             if not stored_type and not game_type:
                 raise ValueError("Game type must be provided for new games")
@@ -67,12 +69,48 @@ class AGameManager(ABC):
             # Create instance
             instance = game_class(game_id)
             exists = await redis_conn.exists(f"game_state:{game_id}")
+            if exists:
+                # Load existing settings from Redis
+                redis_bin = await redis.Redis(decode_responses=False)
+                stored_settings = await redis_bin.get(f"game_settings:{game_id}")
+                await redis_bin.close()
+                if stored_settings:
+                    game_settings = msgpack.unpackb(stored_settings)
+                    instance.settings = game_settings
+                else:
+                    raise ValueError("Existing game found but no settings available")
+            else:
+                # New game - prepare and store settings first
+                if not settings:
+                    # Use default settings if none provided
+                    settings = {
+                        'num_players': 2,
+                        'num_balls': 1,
+                        'min_players': 2,
+                        'sides': 4 if final_game_type == "polygon" else None,
+                        'paddle_length': 0.3,
+                        'paddle_width': 0.2,
+                        'ball_size': 0.1,
+                        'initial_ball_speed': 0.006
+                    }
+                    print("set default game settings.") # debug
+                
+                # Store settings in Redis before initialization
+                redis_bin = await redis.Redis(decode_responses=False)
+                await redis_bin.set(
+                    f"game_settings:{game_id}",
+                    msgpack.packb(settings)
+                )
+                await redis_bin.close()
+                # Store game type if this is a new game
+                await redis_conn.set(f"game_type:{game_id}", game_type)
+                
+                # Store settings in instance
+                instance.settings = settings
             
+            # Now initialize with settings in place
             await instance.initialize(create_new=not exists)
             
-            # Store game type if this is a new game
-            if not exists and game_type:
-                await redis_conn.set(f"game_type:{game_id}", game_type)
             
             await redis_conn.close()
             return instance
@@ -81,52 +119,140 @@ class AGameManager(ABC):
             print(f"Error in get_instance: {e}")
             raise
 
+    async def _setup_connections(self):
+        """Set up Redis and channel layer connections"""
+        self.redis_conn = await redis.Redis(decode_responses=False)
+        self.channel_layer = get_channel_layer()
+
+
+
+
     async def initialize(self, create_new=False):
         """Initialize game resources"""
         try:
-            self.redis_conn = await redis.Redis(decode_responses=False)  # Back to binary for msgpack
-            self.channel_layer = get_channel_layer()
-            
+            await self._setup_connections()
+            self.apply_game_settings() # with this line each instance has the values from states in the instance. 
             if create_new:
-                initial_state = self.init_game_state()
-                await self.redis_conn.set(
-                    self.state_key, 
-                    msgpack.packb(initial_state)
-                )
-                
-                # Clear existing players
-                await self.redis_conn.delete(self.players_key)
-                
-                # Set game as not running
-                await self.redis_conn.set(self.running_key, b"0")
-                
-                # Initialize paddles state
-                await self.redis_conn.delete(self.paddles_key)
-                
+               await self._initialize_new_game()
         except Exception as e:
             print(f"Error in initialize: {e}")
             raise
 
-
-    async def setup_game(self, settings):
-        """Setup game with initial settings"""
+    async def _initialize_new_game(self):
+        """Initialize a new game with settings"""
         try:
+            # Verify settings exist
+            if not hasattr(self, 'settings'):
+                raise ValueError("Settings must be set before initialization")
+            
+            # Create and store initial game state
+            initial_state = self.create_initial_state()
             await self.redis_conn.set(
-                self.settings_key,
-                msgpack.packb(settings)
+                self.state_key,
+                msgpack.packb(initial_state)
             )
             
-            # Initialize paddle positions
+            # Set game as not running
+            await self.redis_conn.set(self.running_key, b"0")
+            
+            # Setup paddle positions
             paddle_positions = {
                 str(i): msgpack.packb({"position": 0.5})
-                for i in range(settings.get('num_players', 2))
+                for i in range(self.settings['num_players'])
             }
             await self.redis_conn.hset(self.paddles_key, mapping=paddle_positions)
             
-            return True
         except Exception as e:
-            print(f"Error in setup_game: {e}")
-            return False
+            print(f"Error initializing new game: {e}")
+            raise
+
+    def create_initial_state(self):
+        """Create initial game state based on settings"""
+        try:
+            # Initialize ball(s) with random direction
+            balls = []
+            num_balls = self.settings.get('num_balls', 1)
+            ball_size = self.settings.get('ball_size', 0.1)
+            initial_speed = self.settings.get('initial_ball_speed', 0.006)
+            
+            for _ in range(num_balls):
+                angle = random.uniform(0, 2 * math.pi)
+                balls.append({
+                    "x": float(0),
+                    "y": float(0),
+                    "velocity_x": float(initial_speed * math.cos(angle)),
+                    "velocity_y": float(initial_speed * math.sin(angle)),
+                    "size": float(ball_size)
+                })
+
+            # Initialize paddles based on game type
+            paddles = []
+            if self.get_game_type() == "polygon":
+                spacing = math.floor(self.num_sides / self.num_paddles)
+                active_paddle_count = 0
+                
+                for side_index in range(self.num_sides):
+                    is_active = False
+                    for i in range(min(self.num_paddles, self.num_sides)):
+                        if side_index == (i * spacing) % self.num_sides:
+                            is_active = True
+                            active_paddle_count += 1
+                            break
+                    
+                    paddles.append({
+                        "position": float(0.5),
+                        "active": is_active,
+                        "side_index": side_index
+                    })
+                score_count = active_paddle_count
+                
+            elif self.get_game_type() == "circular":
+                for i in range(self.num_players):
+                    paddles.append({
+                        "position": float(0.5),
+                        "active": True,
+                        "side_index": i
+                    })
+                score_count = self.num_players
+
+            state = {
+                "balls": balls,
+                "paddles": paddles,
+                "scores": [int(0)] * score_count,
+                "dimensions": {
+                    "paddle_length": float(self.settings.get('paddle_length', 0.3)),
+                    "paddle_width": float(self.settings.get('paddle_width', 0.2))
+                },
+                "game_type": self.get_game_type()
+            }
+            
+            return state
+
+        except Exception as e:
+            print(f"Error in create_initial_state: {e}")
+            # Return minimal valid state as fallback
+            return {
+                "balls": [{
+                    "x": float(0),
+                    "y": float(0),
+                    "velocity_x": float(0),
+                    "velocity_y": float(0),
+                    "size": float(0.05)
+                }],
+                "paddles": [{
+                    "position": float(0.5),
+                    "active": True,
+                    "side_index": 0
+                }],
+                "scores": [0],
+                "dimensions": {
+                    "paddle_length": float(0.3),
+                    "paddle_width": float(0.2)
+                },
+                "game_type": self.get_game_type()
+            }
+
+
 
     async def acquire_lock(self, timeout=1.0):
         """Acquire distributed lock"""
@@ -599,11 +725,13 @@ class AGameManager(ABC):
             print(f"Error checking running state: {e}")
             return False
 
-    # Abstract methods to be implemented by child classes
-    @abstractmethod
-    def init_game_state(self): pass
 
 
     @abstractmethod
     async def game_logic(self, current_state): pass
 
+    @abstractmethod
+    def get_game_type(self): pass
+
+    @abstractmethod 
+    def apply_game_settings(self): pass
