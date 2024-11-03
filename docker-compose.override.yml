@@ -1,6 +1,6 @@
 services:
   django:
-    command: sh -c "python tr_django/manage.py migrate && python tr_django/manage.py runserver 127.0.0.1:8000"
+    command: sh -c "python tr_django/manage.py migrate && python tr_django/manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./src/backend/django:/app
     ports:
@@ -9,6 +9,13 @@ services:
       - Debug=True
       - ENVIRONMENT=development
   nginx:
+    build:
+      context: ./src
+      dockerfile: ./nginx/Dockerfile
+      args:
+        ENVIRONMENT: ${ENVIRONMENT}
+    volumes:
+      - ./src/frontend/:/usr/share/nginx/html
     ports:
       - "8080:80" # Expose Nginx on port 8080 for development
     environment:
