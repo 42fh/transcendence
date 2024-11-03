@@ -51,7 +51,7 @@ htmlcov/
 db.sqlite3
 
 # IDE settings
-.vscode/
+# .vscode/
 
 # Docker
 postgres_data/

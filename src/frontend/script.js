@@ -37,7 +37,7 @@ async function handleFormSubmit(event, endpoint) {
 
   console.log("window.location.origin", window.location.origin);
   console.log("endpoint: ", endpoint);
-  const baseUrl = "http://localhost:8080"; // Change to the backend’s correct address and port
+  const baseUrl = ""; // This is empty which implies fetch will use the relative path
   const fullEndpoint = `${baseUrl}${endpoint}`;
   const form = event.target;
   const formData = new FormData(form);

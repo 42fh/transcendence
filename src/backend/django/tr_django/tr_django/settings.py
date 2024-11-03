@@ -27,9 +27,7 @@ DEBUG = True
 # SECURITY WARNING: don't run with debug turned on in production!
 if ENVIRONMENT == "production":
     DEBUG = False
-    ALLOWED_HOSTS = (
-        os.getenv("ALLOWED_HOSTS", "").split(",") if os.getenv("ALLOWED_HOSTS") else []
-    )
+    ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",") if os.getenv("ALLOWED_HOSTS") else []
 else:
     DEBUG = True
     ALLOWED_HOSTS = ["*"]
@@ -90,13 +88,12 @@ WSGI_APPLICATION = "tr_django.wsgi.application"
 ASGI_APPLICATION = "pong_game.asgi.application"
 CHANNEL_LAYERS = {
     "default": {
-        # "BACKEND": "channels.layers.InMemoryChannelLayer",
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             # "hosts": [("127.0.0.1", 6379)],
             "hosts": [("redis", 6379)],
         },
-    },
+    }
 }
 
 # Database

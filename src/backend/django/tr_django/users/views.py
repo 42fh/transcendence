@@ -2,9 +2,6 @@
 
 import json
 import logging
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
 from django.contrib.auth import authenticate, login, logout, get_user
 from django.contrib.auth.models import User
 from django.http import JsonResponse
@@ -12,15 +9,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password
 from django.utils.decorators import method_decorator
 from django.views import View
-from .serializers import UserSerializer
-from users.models import CustomUser
 
 logger = logging.getLogger(__name__)
-
-
-# Helper function to return JSON responses with errors or success messages
-def json_response(success, message):
-    return JsonResponse({"success": success, "message": message})
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -33,7 +23,11 @@ class SignupView(View):
         """
         Handle POST request to create a new user.
         """
-        data = json.loads(request.body)
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "error": "Invalid JSON format", "action": "signup"}, status=400)
+
         username = data.get("username")
         password = data.get("password")
 
@@ -48,9 +42,7 @@ class SignupView(View):
                 status=400,
             )
         # Create and save new user
-        user = CustomUser.objects.create(
-            username=username, password=make_password(password)
-        )
+        user = CustomUser.objects.create(username=username, password=make_password(password))
 
         user = authenticate(request, username=username, password=password)
         if user is not None:
@@ -75,22 +67,14 @@ class SignupView(View):
         )
 
 
-class DRFSignupView(APIView):
-    def post(self, request):
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            # Create a new user instance
-            serializer.save(password=make_password(request.data["password"]))
-            return Response(
-                {"message": "User created successfully"}, status=status.HTTP_201_CREATED
-            )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 @method_decorator(csrf_exempt, name="dispatch")
 class LoginView(View):
     def post(self, request):
-        data = json.loads(request.body)
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "error": "Invalid JSON format", "action": "login"}, status=400)
+
         username = data.get("username")
         password = data.get("password")
 
@@ -116,29 +100,6 @@ class LoginView(View):
         )
 
 
-class DRFLoginView(APIView):
-    """
-    DRF view to handle user login.
-    """
-
-    def post(self, request):
-        username = request.data.get("username")
-        password = request.data.get("password")
-        user = authenticate(request, username=username, password=password)
-
-        if user is not None:
-            login(request, user)
-            return Response(
-                {"success": True, "message": "Login successful."},
-                status=status.HTTP_200_OK,
-            )
-        else:
-            return Response(
-                {"success": False, "message": "Invalid credentials."},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
-
-
 @method_decorator(csrf_exempt, name="dispatch")
 class LogoutView(View):
     """
@@ -152,44 +113,23 @@ class LogoutView(View):
             try:
                 logout(request)
                 logger.info("User '%s' logged out successfully.", user.username)
-                return JsonResponse(
-                    {"success": True, "message": "User logged out successfully."}
-                )
+                return JsonResponse({"success": True, "message": "User logged out successfully."})
             except Exception as e:
                 logger.error("Logout failed for user '%s': %s", user.username, e)
-                return JsonResponse(
-                    {"success": False, "error": f"Logout failed: {str(e)}"}, status=500
-                )
+                return JsonResponse({"success": False, "error": f"Logout failed: {str(e)}"}, status=500)
         else:
             logger.warning("Unauthorized logout attempt detected.")
-            return JsonResponse(
-                {"success": False, "error": "User is not logged in."}, status=401
-            )
-
-
-class DRFLogoutView(APIView):
-    """
-    DRF view to handle user logout.
-    """
-
-    def post(self, request):
-        logout(request)
-        return Response(
-            {"success": True, "message": "Logout successful."},
-            status=status.HTTP_200_OK,
-        )
+            return JsonResponse({"success": False, "error": "User is not logged in."}, status=401)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
 class DeleteUserView(View):
     def post(self, request):
         if not request.user.is_authenticated:
-            return json_response(False, "User not authenticated.")
+            return JsonResponse({"success": False, "message": "User not authenticated."}, status=401)
 
-        # Set user's account as inactive
         request.user.is_active = False
         request.user.save()
-        logout(request)  # End session after deactivation
+        logout(request)
 
-        # Optionally, you could anonymize data here instead of setting is_active
-        return json_response(True, "User account deactivated.")
+        return JsonResponse({"success": True, "message": "User account deactivated."})
