@@ -153,12 +153,6 @@ function moveBall() {
   // Check for collisions with paddles
   checkCollisionWithPaddles();
 
-  // Check if the ball hits the left or right boundary
-  //   if (ballX <= borderLeft || ballX + ballSize >= gameAreaWidth + borderLeft) {
-  //     directionX *= -1; // Reverse direction
-  //     ballX = ballX <= borderLeft ? borderLeft : gameAreaWidth + borderLeft - ballSize; // Prevent the ball from "sticking" into the wall
-  //   }
-
   // Check if the ball goes out of bounds (left or right)
   if (ballX <= 0 || ballX + ballSize >= gameAreaWidth) {
     resetBall(); // Reset the ball to the center
