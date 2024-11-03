@@ -51,13 +51,7 @@ function movePaddle(paddle, yPos) {
   // The bottom boundary is the game area height minus the paddle height and the bottom border
   const maxPaddleY = gameAreaRect.height - paddle.offsetHeight - borderBottom - borderTop;
 
-  console.log("Game Area Height:", gameAreaRect.height);
-  console.log("Paddle Offset Height:", paddle.offsetHeight);
-  console.log("Max Paddle Y (bottom boundary):", maxPaddleY);
-
   yPos = Math.max(topBoundary, Math.min(yPos, maxPaddleY)); // Clamp the Y position to the game areaA
-
-  console.log("yPos after clamp:", yPos);
 
   paddle.style.top = yPos + "px";
 
@@ -81,8 +75,6 @@ function checkCollisionWithPaddles() {
       directionX *= -1;
       // Move the ball outside of the paddle to avoid repeated collisions
       ballX = leftPaddleRect.right;
-
-      console.log("Collision with left paddle!");
     }
   }
 
@@ -94,7 +86,6 @@ function checkCollisionWithPaddles() {
       directionX *= -1;
       // Move the ball outside of the paddle to avoid repeated collisions
       ballX = rightPaddleRect.left - ballSize;
-      console.log("Collision with right paddle!");
     }
   }
 }
@@ -196,8 +187,6 @@ function resetBall() {
   // Optionally randomize the direction of the ball after reset
   directionX = Math.random() > 0.5 ? 1 : -1; // Randomize horizontal direction
   directionY = Math.random() > 0.5 ? 1 : -1; // Randomize vertical direction
-
-  console.log("Ball reset to the center!");
 }
 
 // Toggle the ball's movement when the start button is clicked
@@ -227,9 +216,6 @@ function positionDebugDots() {
   blueDot.style.top = gameAreaRect.bottom - borderBottom - 20 + "px";
   blueDot.style.left = gameAreaRect.left + gameAreaRect.width / 2 - 10 + "px";
   blueDot.style.display = "block";
-
-  console.log("Red dot top:", redDot.style.top);
-  console.log("Blue dot top:", blueDot.style.top);
 }
 
 // positionDebugDots();
