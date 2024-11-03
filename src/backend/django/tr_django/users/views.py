@@ -13,11 +13,6 @@ from django.views import View
 logger = logging.getLogger(__name__)
 
 
-# Helper function to return JSON responses with errors or success messages
-def json_response(success, message):
-    return JsonResponse({"success": success, "message": message})
-
-
 @method_decorator(csrf_exempt, name="dispatch")
 class SignupView(View):
     """
@@ -123,12 +118,10 @@ class LogoutView(View):
 class DeleteUserView(View):
     def post(self, request):
         if not request.user.is_authenticated:
-            return json_response(False, "User not authenticated.")
+            return JsonResponse({"success": False, "message": "User not authenticated."}, status=401)
 
-        # Set user's account as inactive
         request.user.is_active = False
         request.user.save()
-        logout(request)  # End session after deactivation
+        logout(request)
 
-        # Optionally, you could anonymize data here instead of setting is_active
-        return json_response(True, "User account deactivated.")
+        return JsonResponse({"success": True, "message": "User account deactivated."})
