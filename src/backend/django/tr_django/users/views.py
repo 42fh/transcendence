@@ -23,7 +23,11 @@ class SignupView(View):
         """
         Handle POST request to create a new user.
         """
-        data = json.loads(request.body)
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "error": "Invalid JSON format", "action": "signup"}, status=400)
+
         username = data.get("username")
         password = data.get("password")
 
@@ -66,7 +70,11 @@ class SignupView(View):
 @method_decorator(csrf_exempt, name="dispatch")
 class LoginView(View):
     def post(self, request):
-        data = json.loads(request.body)
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "error": "Invalid JSON format", "action": "login"}, status=400)
+
         username = data.get("username")
         password = data.get("password")
 
