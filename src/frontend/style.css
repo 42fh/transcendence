@@ -289,6 +289,23 @@ button:hover {
   white-space: nowrap;
 }
 
+.tournament-card.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: default;
+  pointer-events: none;
+}
+
+.tournament-card.empty-state .tournament-card-date,
+.tournament-card.empty-state .tournament-card-status {
+  display: none;
+}
+
+.tournament-card.empty-state .tournament-card-name {
+  text-align: center;
+  width: 100%;
+}
 .tournament-button {
   width: 100%;
   padding: 15px;

@@ -1,5 +1,30 @@
+/*
+ * Tournament Data Structure
+ *
+ * This is a JavaScript array containing tournament objects, structured to mimic JSON format
+ * but it's actually a native JS data structure. While in JSON all keys must be double-quoted
+ * strings, in JavaScript object literals:
+ *
+ * 1. Keys can be unquoted if they're valid identifiers (e.g., name, startingDate)
+ * 2. Keys must be quoted if they:
+ *    - Contain special characters (e.g., "start-date")
+ *    - Start with numbers (e.g., "42-network")
+ *    - Contain spaces (e.g., "tournament name")
+ *    - Are JavaScript reserved words (e.g., "class", "function")
+ *
+ * We're keeping the JSON-like format with quoted keys for consistency with our future
+ * API responses and to make it easier to copy/paste between .js and .json files.
+ *
+ * prettier-ignore is used to:
+ * 1. Preserve the readable formatting of our data structure
+ * 2. Prevent prettier from removing the double quotes from keys
+ * 3. Keep the array items aligned for better readability
+ */
+
 // prettier-ignore
-const tournamentsData = [
+
+// prettier-ignore
+const tournaments = [
 	{
 	  "name": "WIMBLEDON",
 	  "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
@@ -13,8 +38,8 @@ const tournamentsData = [
 	{
 	  "name": "US OPEN",
 	  "description": "Lorem ipsum dolor sit amet...",
-	  "startingDate": "2024-01-89T09:30:00Z",
-	  "closingRegistrationDate": "2024-01-82T23:59:00Z",
+	  "startingDate": "2024-01-29T09:30:00Z",
+	  "closingRegistrationDate": "2024-01-22T23:59:00Z",
 	  "isTimetableAvailable": false,
 	  "participants": ["User 1", "User 2", "User 3"],
 	  "type": "single elimination",
@@ -42,14 +67,35 @@ const tournamentsData = [
 	}
   ]
 
+// Modify tournament dates to be relative to current time for demo purposes
+const now = new Date();
+tournaments[0].startingDate = new Date(now.getTime() + 6 * 24 * 60 * 60 * 1000).toISOString(); // Wimbledon: 6 days from now
+tournaments[1].startingDate = new Date(now.getTime() + 3 * 60 * 60 * 1000).toISOString(); // US Open: 3 hours from now
+tournaments[2].startingDate = new Date(now.getTime() + 40 * 60 * 1000).toISOString(); // 42 Network: 40 minutes from now
+tournaments[3].startingDate = new Date(now.getTime() - 30 * 60 * 1000).toISOString(); // 42 Berlin: started 30 minutes ago
+
+// Also update closing registration dates to be consistent
+tournaments[0].closingRegistrationDate = new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString(); // 1 day before start
+tournaments[1].closingRegistrationDate = new Date(now.getTime() + 2 * 60 * 60 * 1000).toISOString(); // 1 hour before start
+tournaments[2].closingRegistrationDate = new Date(now.getTime() + 30 * 60 * 1000).toISOString(); // 10 minutes before start
+tournaments[3].closingRegistrationDate = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString(); // closed yesterday
+
+// Add current user to specific tournaments for demo purposes
+// If you want to test the enrollment functionality, uncomment the following lines or comment all of them out
+// I mean like testing the empty state in the UI
+const username = localStorage.getItem("username");
+if (username) {
+  //   tournaments[0].participants.push(username); // Add to Wimbledon
+  //   tournaments[1].participants.push(username); // Add to US Open
+  tournaments[2].participants.push(username); // Add to 42 Network
+  tournaments[3].participants.push(username); // Add to 42 Berlin
+}
+
 // Configuration for data source and state management
 const CONFIG = {
   DATA_SOURCE: "JS", // 'API' | 'JSON' | 'JS'
-  API_BASE_URL: "/api/tournaments", // For future use
+  API_BASE_URL: "/api/game/tournaments", // For future use
 };
-
-// Keep original data immutable and work with a copy
-const tournaments = [...tournamentsData];
 
 function displayErrorMessage(message) {
   // This is only for the modal
@@ -373,12 +419,49 @@ function enhanceTournament(tournament) {
   };
 }
 
+// Helper functions for date formatting
+function formatDate(dateString, options = {}) {
+  const { showYear = false, monthFirst = false, showTime = true } = options;
+
+  const date = new Date(dateString);
+
+  // Handle invalid dates
+  if (isNaN(date)) {
+    return "Invalid Date";
+  }
+
+  const day = date.getDate().toString().padStart(2, "0");
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const year = date.getFullYear();
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+
+  // Build date part
+  let formattedDate;
+  if (monthFirst) {
+    formattedDate = showYear ? `${month}-${day}-${year}` : `${month}-${day}`;
+  } else {
+    formattedDate = showYear ? `${day}-${month}-${year}` : `${day}-${month}`;
+  }
+
+  // Add time if requested
+  if (showTime) {
+    formattedDate += ` ${hours}:${minutes}`;
+  }
+
+  return formattedDate;
+}
+
 function renderTournamentCard(tournament) {
   const template = document.getElementById("tournament-card-template");
   const card = document.importNode(template.content, true);
 
   const cardElement = card.querySelector(".tournament-card");
-  cardElement.querySelector(".tournament-card-date").textContent = tournament.startingDate;
+  cardElement.querySelector(".tournament-card-date").textContent = formatDate(tournament.startingDate, {
+    showYear: false,
+    monthFirst: false,
+    showTime: false,
+  });
   cardElement.querySelector(".tournament-card-name").textContent = tournament.name;
   cardElement.querySelector(".tournament-card-status").textContent = tournament.timeLeftToRegistration;
 
@@ -389,7 +472,6 @@ function renderTournamentCard(tournament) {
   return card;
 }
 
-// Helper functions remain the same
 function checkRegistrationOpen(closingDate) {
   return new Date(closingDate) > new Date();
 }
@@ -403,8 +485,11 @@ function calculateTimeLeft(closingDate) {
 
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
-  return days > 0 ? `${days} d` : `${hours} h`;
+  if (days > 0) return `${days} d`;
+  if (hours > 0) return `${hours} h`;
+  return `${minutes} m`;
 }
 
 function checkUserEnrollment(participants, username) {
@@ -418,10 +503,8 @@ function handleTournamentClick(tournament) {
 
 function loadTournamentDetailsPage(tournament) {
   try {
-    // Check if the tournament status is "enrolled"
     const isEnrolled = tournament.isUserEnrolled;
 
-    // Get the template and create a copy
     const template = document.getElementById("tournament-detail-template");
     if (!template) {
       throw new Error("Tournament detail template not found");
@@ -550,7 +633,7 @@ async function handleTournamentAction(tournamentName, isEnrolled) {
 
 async function loadTournamentsPage() {
   try {
-    const enhancedTournaments = await fetchTournaments("local");
+    const enhancedTournaments = await fetchTournaments(CONFIG.DATA_SOURCE);
 
     // Filter tournaments based on enrollment
     const openTournaments = enhancedTournaments.filter((t) => !t.isUserEnrolled);
@@ -562,16 +645,39 @@ async function loadTournamentsPage() {
     mainContent.innerHTML = "";
     mainContent.appendChild(document.importNode(template.content, true));
 
-    // Fill containers
+    // Fill open tournaments container
     const openContainer = document.getElementById("open-tournaments");
-    openTournaments.forEach((tournament) => {
-      openContainer.appendChild(renderTournamentCard(tournament));
-    });
+    if (openTournaments.length > 0) {
+      openTournaments.forEach((tournament) => {
+        openContainer.appendChild(renderTournamentCard(tournament));
+      });
+    } else {
+      const emptyTournament = {
+        name: "No open tournaments available",
+        startingDate: new Date(),
+        timeLeftToRegistration: "",
+      };
+      const card = renderTournamentCard(emptyTournament);
+      card.querySelector(".tournament-card").classList.add("empty-state");
+      openContainer.appendChild(card);
+    }
 
+    // Fill enrolled tournaments container
     const enrolledContainer = document.getElementById("enrolled-tournaments");
-    enrolledTournaments.forEach((tournament) => {
-      enrolledContainer.appendChild(renderTournamentCard(tournament));
-    });
+    if (enrolledTournaments.length > 0) {
+      enrolledTournaments.forEach((tournament) => {
+        enrolledContainer.appendChild(renderTournamentCard(tournament));
+      });
+    } else {
+      const emptyTournament = {
+        name: "You're not enrolled in any tournaments",
+        startingDate: new Date(), // doesn't matter as it won't be shown
+        timeLeftToRegistration: "",
+      };
+      const card = renderTournamentCard(emptyTournament);
+      card.querySelector(".tournament-card").classList.add("empty-state");
+      enrolledContainer.appendChild(card);
+    }
   } catch (error) {
     console.error("Error loading tournaments:", error);
     showToast("Failed to load tournaments. Please try again later.", true);
