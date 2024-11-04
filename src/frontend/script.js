@@ -165,7 +165,8 @@ async function handleFormSubmitSignupLogin(event, endpoint) {
       form.style.display = "none";
       setTimeout(() => {
         closeModal();
-        loadHomeView();
+        history.pushState({ view: "home" }, "");
+        loadHomePage();
       }, 2000);
     } else {
       const errorResult = await response.json();
@@ -222,7 +223,8 @@ async function handleLogout() {
 
     if (response.ok) {
       localStorage.removeItem("username");
-      loadSignupLoginView();
+      history.pushState({ view: "auth" }, "");
+      loadAuthPage();
     } else {
       const result = await response.json();
       console.warn("Logout failed:", result);
@@ -234,70 +236,93 @@ async function handleLogout() {
   }
 }
 
-async function loadSignupLoginView() {
+async function loadAuthPage(addToHistory = true) {
   try {
+    if (addToHistory) {
+      history.pushState(
+        {
+          view: "auth",
+        },
+        ""
+      );
+    }
+
     const response = await fetch("/index.html");
     const html = await response.text();
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
     document.body.innerHTML = doc.body.innerHTML;
   } catch (error) {
-    console.error("Error loading signup/login view:", error);
+    console.error("Error loading auth page:", error);
     displayLogoutError("An error occurred while loading the login page.");
   }
 }
 
-function loadHomeView() {
-  // Hide the initial container
-  document.getElementById("container").style.display = "none";
-
-  // Show main-content and load the home template
-  const mainContent = document.getElementById("main-content");
-  mainContent.style.display = "block";
-  mainContent.innerHTML = ""; // Clear any existing content
-
-  const template = document.getElementById("home-template");
-  if (template) {
-    const homeContent = document.importNode(template.content, true);
-    mainContent.appendChild(homeContent);
-
-    // Get the username from localStorage and set the greeting message
-    const username = localStorage.getItem("username");
-    if (username) {
-      const greetingElement = document.getElementById("greeting");
-      greetingElement.innerHTML = `Hello ${username}! 👋`;
+function loadHomePage(addToHistory = true) {
+  try {
+    if (addToHistory) {
+      history.pushState(
+        {
+          view: "home",
+        },
+        ""
+      );
     }
 
-    // Event listener for the logout button
-    document.getElementById("logout-button").addEventListener("click", handleLogout);
+    // Hide the initial container
+    document.getElementById("container").style.display = "none";
 
-    // Add event listener for the "Play" button
-    document.getElementById("play").addEventListener("click", function () {
-      const baseUrl = window.location.origin;
-      fetch(`${baseUrl}/play.html`)
-        .then((response) => response.text())
-        .then((html) => {
-          mainContent.innerHTML = html;
-          const script = document.createElement("script");
-          script.src = "play.js";
-          document.body.appendChild(script);
-        })
-        .catch((err) => console.warn("Failed to load play.html", err));
-    });
+    // Show main-content and load the home template
+    const mainContent = document.getElementById("main-content");
+    mainContent.style.display = "block";
+    mainContent.innerHTML = ""; // Clear any existing content
 
-    // Add event listener for the "Three.js" button
-    document.getElementById("threejs").addEventListener("click", function () {
-      const baseUrl = window.location.origin;
-      fetch(`${baseUrl}/threejs_11.html`)
-        .then((response) => response.text())
-        .then((html) => {
-          mainContent.innerHTML = html;
-        })
-        .catch((err) => console.warn("Failed to load threejs_11.html", err));
-    });
+    const template = document.getElementById("home-template");
+    if (template) {
+      const homeContent = document.importNode(template.content, true);
+      mainContent.appendChild(homeContent);
 
-    // Add tournaments button listener
-    document.getElementById("tournaments").addEventListener("click", loadTournamentsPage);
+      // Get the username from localStorage and set the greeting message
+      const username = localStorage.getItem("username");
+      if (username) {
+        const greetingElement = document.getElementById("greeting");
+        greetingElement.innerHTML = `Hello ${username}! 👋`;
+      }
+
+      // Event listener for the logout button
+      document.getElementById("logout-button").addEventListener("click", handleLogout);
+
+      // Add event listener for the "Play" button
+      document.getElementById("play").addEventListener("click", function () {
+        const baseUrl = window.location.origin;
+        fetch(`${baseUrl}/play.html`)
+          .then((response) => response.text())
+          .then((html) => {
+            mainContent.innerHTML = html;
+            const script = document.createElement("script");
+            script.src = "play.js";
+            document.body.appendChild(script);
+          })
+          .catch((err) => console.warn("Failed to load play.html", err));
+      });
+
+      // Add event listener for the "Three.js" button
+      document.getElementById("threejs").addEventListener("click", function () {
+        const baseUrl = window.location.origin;
+        fetch(`${baseUrl}/threejs_11.html`)
+          .then((response) => response.text())
+          .then((html) => {
+            mainContent.innerHTML = html;
+          })
+          .catch((err) => console.warn("Failed to load threejs_11.html", err));
+      });
+
+      // Add tournaments button listener
+      document.getElementById("tournaments").addEventListener("click", loadTournamentsPage);
+    }
+  } catch (error) {
+    console.error("Error loading home page:", error);
+    displayLogoutError("An error occurred while loading the home page.");
   }
 }
 
@@ -486,8 +511,18 @@ function handleTournamentClick(tournament) {
   loadTournamentDetailsPage(tournament);
 }
 
-function loadTournamentDetailsPage(tournament) {
+function loadTournamentDetailsPage(tournament, addToHistory = true) {
   try {
+    if (addToHistory) {
+      history.pushState(
+        {
+          view: "tournament-detail",
+          tournament: tournament,
+        },
+        ""
+      );
+    }
+
     const template = document.getElementById("tournament-detail-template");
     if (!template) {
       throw new Error("Tournament detail template not found");
@@ -671,8 +706,17 @@ async function handleTournamentAction(tournamentName, isEnrolled) {
   }
 }
 
-async function loadTournamentsPage() {
+async function loadTournamentsPage(addToHistory = true) {
   try {
+    if (addToHistory) {
+      history.pushState(
+        {
+          view: "tournaments",
+        },
+        ""
+      );
+    }
+
     const enhancedTournaments = await fetchTournaments(CONFIG.DATA_SOURCE);
 
     // Filter tournaments based on enrollment
@@ -749,3 +793,75 @@ function updateTournamentDetail(tournament) {
 
   // Rest of the function remains the same but with updated class names...
 }
+
+// Initial state on load
+window.addEventListener("load", () => {
+  const username = localStorage.getItem("username");
+  const initialView = username ? "home" : "auth";
+  history.replaceState({ view: initialView }, "");
+
+  // Load initial view
+  if (username) {
+    loadHomePage();
+  } else {
+    loadAuthPage();
+  }
+});
+
+// Handle browser back/forward
+window.addEventListener("popstate", async (event) => {
+  event.preventDefault();
+
+  if (event.state) {
+    switch (event.state.view) {
+      case "auth":
+        await loadAuthPage(false);
+        break;
+      case "home":
+        await loadHomePage(false);
+        break;
+      case "tournaments":
+        await loadTournamentsPage(false);
+        break;
+      case "tournament-detail":
+        if (event.state.tournament) {
+          await loadTournamentDetailsPage(event.state.tournament, false);
+        } else {
+          console.error("No tournament data in state");
+          await loadTournamentsPage(false);
+        }
+        break;
+      default:
+        await loadHomePage(false);
+    }
+  } else {
+    const username = localStorage.getItem("username");
+    if (username) {
+      await loadHomePage(false);
+    } else {
+      await loadAuthPage(false);
+    }
+  }
+});
+
+// Prevent default link behavior for navigation
+document.addEventListener("click", (event) => {
+  // Check if the clicked element is a navigation link
+  if (event.target.matches("[data-nav]")) {
+    event.preventDefault();
+    const view = event.target.getAttribute("data-nav");
+    switch (view) {
+      case "home":
+        loadHomePage();
+        break;
+      case "tournaments":
+        loadTournamentsPage();
+        break;
+      case "tournament-detail":
+        loadTournamentDetailsPage(event.target.dataset.tournament);
+        break;
+      default:
+        loadHomePage();
+    }
+  }
+});
