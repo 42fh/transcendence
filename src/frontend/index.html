@@ -139,18 +139,31 @@
     <!-- Tournament Detail Page Template -->
     <template id="tournament-detail-template">
       <div class="tournament-detail-container">
-        <h1 class="tournament-detail-title"></h1>
+        <h1 class="tournament-detail-name"></h1>
 
         <div class="tournament-detail-description"></div>
 
         <div class="tournament-detail-section">
-          <h2>Participants</h2>
+          <h2>PARTICIPANTS</h2>
           <div class="tournament-detail-participants"></div>
         </div>
 
         <div class="tournament-detail-info">
-          <div class="tournament-detail-start-date"></div>
+          <div class="tournament-detail-dates">
+            <div>Registration End: <span class="tournament-detail-closing-date"></span></div>
+            <div>Start: <span class="tournament-detail-starting-date"></span></div>
+          </div>
           <div class="tournament-detail-type"></div>
+
+          <div class="tournament-detail-timetable-status">
+            <!-- Will be filled dynamically based on timetable status -->
+          </div>
+
+          <!-- Only shown when timetable is available and user is enrolled -->
+          <div class="tournament-detail-next-match" style="display: none">
+            <h2>YOUR NEXT MATCH</h2>
+            <div class="tournament-detail-next-match-info"></div>
+          </div>
         </div>
 
         <button class="tournament-detail-action-btn"></button>
