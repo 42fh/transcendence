@@ -108,6 +108,63 @@
       </div>
     </template>
 
+    <!-- Tournament List Page Template -->
+    <template id="tournament-template">
+      <div id="container" class="tournament-container">
+        <h2>OPEN TOURNAMENTS</h2>
+        <div id="open-tournaments" class="tournament-list">
+          <!-- Tournament cards will be inserted here dynamically -->
+        </div>
+
+        <h2>ENROLLED</h2>
+        <div id="enrolled-tournaments" class="tournament-list">
+          <!-- Enrolled tournament cards will be inserted here -->
+        </div>
+
+        <div class="button-wrapper">
+          <button id="create-tournament" class="tournament-button">CREATE NEW TOURNAMENT</button>
+        </div>
+      </div>
+    </template>
+
+    <!-- Tournament Card Template -->
+    <template id="tournament-card-template">
+      <div class="tournament-card">
+        <div class="tournament-card-date"></div>
+        <div class="tournament-card-name"></div>
+        <div class="tournament-card-status"></div>
+      </div>
+    </template>
+
+    <!-- Tournament Detail Page Template -->
+    <template id="tournament-detail-template">
+      <div class="tournament-detail-container">
+        <h1 class="tournament-detail-title"></h1>
+
+        <div class="tournament-detail-description"></div>
+
+        <div class="tournament-detail-section">
+          <h2>Participants</h2>
+          <div class="tournament-detail-participants"></div>
+        </div>
+
+        <div class="tournament-detail-info">
+          <div class="tournament-detail-start-date"></div>
+          <div class="tournament-detail-type"></div>
+        </div>
+
+        <button class="tournament-detail-action-btn"></button>
+      </div>
+    </template>
+
+    <!-- Toast Template -->
+    <!-- https://ux.stackexchange.com/questions/103783/success-toast-vs-modal -->
+    <template id="toast-template">
+      <div class="toast-container">
+        <div class="toast-message"></div>
+      </div>
+    </template>
+
     <script src="script.js"></script>
   </body>
 </html>

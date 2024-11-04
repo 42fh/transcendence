@@ -207,6 +207,9 @@ function loadHomeView() {
         })
         .catch((err) => console.warn("Failed to load threejs_11.html", err));
     });
+
+    // Add tournaments button listener
+    document.getElementById("tournaments").addEventListener("click", loadTournamentsPage);
   }
 }
 
@@ -275,4 +278,195 @@ function createAndShowModal() {
 
   // Show the modal
   openModal();
+}
+
+// Restructure fake data to be a single array with a status property
+const fakeTournaments = [
+  {
+    date: "7/25 14:00",
+    name: "WIMBLEDON",
+    timeLeft: "6 d",
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+    type: "single elimination",
+    participants: ["User 1", "User 2", "User 3", "and so on"],
+    startDate: "1.11.24",
+    status: "open",
+  },
+  {
+    date: "1/89 09:30",
+    name: "US OPEN",
+    timeLeft: "2 d",
+    description: "Lorem ipsum dolor sit amet...",
+    type: "single elimination",
+    participants: ["User 1", "User 2", "User 3"],
+    startDate: "1.11.24",
+    status: "open",
+  },
+  {
+    date: "9/9 15:00",
+    name: "42 NETWORK",
+    timeLeft: "3 h",
+    description: "Lorem ipsum dolor sit amet...",
+    type: "single elimination",
+    participants: ["User 1", "User 2", "User 3"],
+    startDate: "1.11.24",
+    status: "enrolled",
+  },
+  {
+    date: "1/89 09:30",
+    name: "42 BERLIN",
+    timeLeft: "Now",
+    description: "Lorem ipsum dolor sit amet...",
+    type: "single elimination",
+    participants: ["User 1", "User 2", "User 3"],
+    startDate: "1.11.24",
+    status: "enrolled",
+  },
+];
+
+function renderTournamentCard(tournament) {
+  const template = document.getElementById("tournament-card-template");
+  const card = document.importNode(template.content, true);
+
+  const cardElement = card.querySelector(".tournament-card");
+
+  cardElement.addEventListener("click", () => {
+    handleTournamentClick(tournament);
+  });
+
+  cardElement.querySelector(".tournament-card-date").textContent = tournament.date;
+  cardElement.querySelector(".tournament-card-name").textContent = tournament.name;
+  cardElement.querySelector(".tournament-card-status").textContent = tournament.timeLeft;
+
+  return card;
+}
+
+function handleTournamentClick(tournament) {
+  console.log(`Tournament clicked:`, tournament);
+  loadTournamentDetailsPage(tournament);
+}
+
+function loadTournamentDetailsPage(tournament) {
+  // Check if the tournament status is "enrolled"
+  const isEnrolled = tournament.status === "enrolled";
+
+  // Get the template and create a copy
+  const template = document.getElementById("tournament-detail-template");
+  const mainContent = document.getElementById("main-content");
+  mainContent.innerHTML = "";
+  const content = document.importNode(template.content, true);
+
+  // Fill in the template
+  content.querySelector(".tournament-detail-title").textContent = tournament.name;
+  content.querySelector(".tournament-detail-description").textContent = tournament.description;
+
+  const participantsList = content.querySelector(".tournament-detail-participants");
+  tournament.participants.forEach((participant) => {
+    const div = document.createElement("div");
+    div.textContent = participant;
+    participantsList.appendChild(div);
+  });
+
+  content.querySelector(".tournament-detail-start-date").textContent = `Start: ${tournament.startDate}`;
+  content.querySelector(".tournament-detail-type").textContent = `Type: ${tournament.type}`;
+
+  const actionButton = content.querySelector(".tournament-detail-action-btn");
+  actionButton.textContent = isEnrolled ? "LEAVE TOURNAMENT" : "JOIN TOURNAMENT";
+  actionButton.addEventListener("click", () => {
+    handleTournamentAction(tournament.name, isEnrolled);
+  });
+
+  mainContent.appendChild(content);
+}
+
+function showToast(message, isError = false) {
+  const template = document.getElementById("toast-template");
+  const toast = document.importNode(template.content, true);
+
+  const messageElement = toast.querySelector(".toast-message");
+  messageElement.textContent = message;
+
+  if (isError) {
+    messageElement.style.color = "red";
+  }
+
+  document.body.appendChild(toast);
+
+  // Remove toast after animation
+  setTimeout(() => {
+    document.querySelector(".toast-container").remove();
+  }, 2000);
+}
+
+async function handleTournamentAction(tournamentName, isEnrolled) {
+  try {
+    // Real API call (commented out for now)
+    /*
+        const response = await fetch('/api/tournaments/enroll/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                tournament_name: tournamentName,
+                action: isEnrolled ? 'leave' : 'join'
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        */
+
+    // For now, just update the local state
+    const tournament = fakeTournaments.find((t) => t.name === tournamentName);
+    if (tournament) {
+      tournament.status = isEnrolled ? "open" : "enrolled";
+      showToast(`Successfully ${isEnrolled ? "left" : "joined"} ${tournamentName}!`);
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await loadTournamentsPage(); // Reload the page to show changes
+    }
+  } catch (error) {
+    console.error("Error updating tournament enrollment:", error);
+    showToast("Failed to update tournament. Please try again.", true);
+  }
+}
+
+async function loadTournamentsPage() {
+  try {
+    // Real API call (commented out for now)
+    /*
+        const response = await fetch('/api/tournaments/');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const tournaments = await response.json();
+        */
+
+    // Using fake data for now
+    const openTournaments = fakeTournaments.filter((t) => t.status === "open");
+    const enrolledTournaments = fakeTournaments.filter((t) => t.status === "enrolled");
+
+    // Get the template and create a copy
+    const template = document.getElementById("tournament-template");
+    const mainContent = document.getElementById("main-content");
+    mainContent.innerHTML = "";
+    mainContent.appendChild(document.importNode(template.content, true));
+
+    // Fill the open tournaments
+    const openContainer = document.getElementById("open-tournaments");
+    openTournaments.forEach((tournament) => {
+      openContainer.appendChild(renderTournamentCard(tournament));
+    });
+
+    // Fill the enrolled tournaments
+    const enrolledContainer = document.getElementById("enrolled-tournaments");
+    enrolledTournaments.forEach((tournament) => {
+      enrolledContainer.appendChild(renderTournamentCard(tournament));
+    });
+  } catch (error) {
+    console.error("Error loading tournaments:", error);
+    const mainContent = document.getElementById("main-content");
+    mainContent.innerHTML = `<p class="error-message">Failed to load tournaments. Please try again later.</p>`;
+  }
 }
