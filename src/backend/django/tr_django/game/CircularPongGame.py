@@ -19,7 +19,7 @@ class CircularPongGame(AGameManager):
         return "circular"
 
     
-    def game_logic(self, current_state):
+    async def game_logic(self, current_state):
         def calculate_distance(point):
             return math.sqrt(point["x"] ** 2 + point["y"] ** 2)
 
@@ -167,8 +167,8 @@ class CircularPongGame(AGameManager):
                 ]
                 
                 # Reset ball position
-                ball["x"] = 0
-                ball["y"] = 0
+                ball["x"] = 0.0
+                ball["y"] = 0.0
                 
                 # Set new random direction
                 new_angle = random.uniform(0, 2 * math.pi)

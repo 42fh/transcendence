@@ -104,6 +104,7 @@ export class GameController {
                     break;
 
                 case 'game_state':
+			console.log(message);
                     this.gameState.updateState(message.game_state);
                     if (this.renderer) {
                         this.renderer.update(message.game_state);
@@ -120,9 +121,10 @@ export class GameController {
                     // Simply pass the error message to the renderer
                     if (this.renderer) {
                         this.renderer.showError({
-                            message: message.message,
-                            type: 'backend',
-                            severity: 'error'
+                            	type: 'backend',
+			 	error: message.error || 'Unknown error',
+            			details: message.details || '',
+            			timestamp: new Date().toISOString()
                         });
                     }
                     break;

@@ -614,7 +614,7 @@ class AGameManager(ABC):
         while await self.redis_conn.get(self.running_key) == b"1":
             game_over = await self.update_game()
             if game_over:
-                await self.end_game()
+                await self.end_game() # can be sync not async !
                 break
             await asyncio.sleep(0.016)  # ~60 FPS
 
@@ -633,7 +633,7 @@ class AGameManager(ABC):
         except Exception as e:
             print(f"Error ending game: {e}")
     
-    def check_winner(self, scores, win_threshold=1):
+    def check_winner(self, scores, win_threshold=11):
         max_score = max(scores)
         if max_score >= win_threshold:
             # Find all players with max score
