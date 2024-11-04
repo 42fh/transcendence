@@ -32,9 +32,11 @@ if ENVIRONMENT == "production":
 else:
     DEBUG = True
     ALLOWED_HOSTS = ["*"]
+    # ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1']
 
 
 # Application definition
+
 INSTALLED_APPS = [
     "daphne",
     "django.contrib.admin",
@@ -49,10 +51,6 @@ INSTALLED_APPS = [
     "blockchain",
     "channels",
 ]
-
-
-SESSION_COOKIE_SAMESITE = "None"
-SESSION_COOKIE_SECURE = True
 
 
 MEDIA_URL = "/media/"
@@ -89,16 +87,25 @@ TEMPLATES = [
 WSGI_APPLICATION = "tr_django.wsgi.application"
 
 ASGI_APPLICATION = "pong_game.asgi.application"
-ASGI_APPLICATION = "pong_game.asgi.application"
 CHANNEL_LAYERS = {
     "default": {
-        # "BACKEND": "channels.layers.InMemoryChannelLayer",
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
+            # "hosts": [("127.0.0.1", 6379)],
             "hosts": [("redis", 6379)],
         },
-    },
+    }
 }
+
+# Database
+# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
 
 DATABASES = {
     "default": {
@@ -173,7 +180,5 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-ASGI_APPLICATION = "tr_django.asgi.application"
 
-STATIC_URL = "/static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+ASGI_APPLICATION = "tr_django.asgi.application"

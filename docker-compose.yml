@@ -34,7 +34,6 @@ services:
       - redis
       - postgres
     environment:
-      - Debug=False
       - REDIS_URL=${REDIS_URL}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS}
       - SECRET_KEY=${SECRET_KEY}
