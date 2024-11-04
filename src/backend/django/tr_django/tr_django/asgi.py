@@ -32,7 +32,6 @@ application = ProtocolTypeRouter(
         ),
     }
 )
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tr_django.settings")
 
 django_asgi_app = get_asgi_application()
 
