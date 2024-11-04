@@ -26,10 +26,7 @@ class SignupView(View):
         try:
             data = json.loads(request.body)
         except json.JSONDecodeError:
-            return JsonResponse(
-                {"success": False, "error": "Invalid JSON format", "action": "signup"},
-                status=400,
-            )
+            return JsonResponse({"success": False, "error": "Invalid JSON format", "action": "signup"}, status=400)
 
         username = data.get("username")
         password = data.get("password")
@@ -119,28 +116,20 @@ class LogoutView(View):
             try:
                 logout(request)
                 logger.info("User '%s' logged out successfully.", user.username)
-                return JsonResponse(
-                    {"success": True, "message": "User logged out successfully."}
-                )
+                return JsonResponse({"success": True, "message": "User logged out successfully."})
             except Exception as e:
                 logger.error("Logout failed for user '%s': %s", user.username, e)
-                return JsonResponse(
-                    {"success": False, "error": f"Logout failed: {str(e)}"}, status=500
-                )
+                return JsonResponse({"success": False, "error": f"Logout failed: {str(e)}"}, status=500)
         else:
             logger.warning("Unauthorized logout attempt detected.")
-            return JsonResponse(
-                {"success": False, "error": "User is not logged in."}, status=401
-            )
+            return JsonResponse({"success": False, "error": "User is not logged in."}, status=401)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
 class DeleteUserView(View):
     def post(self, request):
         if not request.user.is_authenticated:
-            return JsonResponse(
-                {"success": False, "message": "User not authenticated."}, status=401
-            )
+            return JsonResponse({"success": False, "message": "User not authenticated."}, status=401)
 
         request.user.is_active = False
         request.user.save()
