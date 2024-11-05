@@ -281,6 +281,44 @@
       </div>
     </template>
 
+    <!-- Tournament Timetable Template -->
+    <template id="tournament-timetable-template">
+      <div class="tournament-timetable-container">
+        <h1 class="tournament-timetable-tournament-name"></h1>
+        <h2 class="tournament-timetable-title">TOURNAMENT TIMETABLE</h2>
+        <div id="tournament-timetable-rounds">
+          <!-- Rounds will be added dynamically -->
+        </div>
+      </div>
+    </template>
+
+    <!-- Tournament Timetable Round Template -->
+    <template id="tournament-timetable-round-template">
+      <div class="tournament-timetable-round">
+        <h3 class="tournament-timetable-round-title">ROUND</h3>
+        <div class="tournament-timetable-games">
+          <!-- Games will be added dynamically -->
+        </div>
+      </div>
+    </template>
+
+    <!-- Tournament Timetable Game Template -->
+    <template id="tournament-timetable-game-template">
+      <div class="tournament-timetable-game">
+        <div class="tournament-timetable-game-datetime">
+          <div class="tournament-timetable-game-date"></div>
+          <div class="tournament-timetable-game-time"></div>
+        </div>
+        <div class="tournament-timetable-game-players">
+          <div class="tournament-timetable-game-player"></div>
+          <div class="tournament-timetable-game-vs">VS</div>
+          <div class="tournament-timetable-game-player"></div>
+        </div>
+        <div class="tournament-timetable-game-result"></div>
+        <div class="tournament-timetable-game-status"></div>
+      </div>
+    </template>
+
     <script src="script.js"></script>
   </body>
 </html>

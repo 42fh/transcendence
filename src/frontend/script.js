@@ -65,7 +65,97 @@ const tournaments = [
 	  "type": "single elimination",
 	  "timetable": null
 	}
-  ]
+]
+
+const timetableExample42erlin = {
+  tournamentName: "42Berlin",
+  type: "single_elimination",
+  rounds: [
+    {
+      round: 1,
+      games: [
+        {
+          uuid: "game1_1",
+          date: "2024-03-20T14:00:00Z",
+          player1: "User1",
+          player2: "User2",
+          nextGameUuid: "game2_1",
+          score: null,
+          winner: null,
+        },
+        {
+          uuid: "game1_2",
+          date: "2024-03-20T14:30:00Z",
+          player1: "User3",
+          player2: "User4",
+          nextGameUuid: "game2_1",
+          score: null,
+          winner: null,
+        },
+        {
+          uuid: "game1_3",
+          date: "2024-03-20T15:00:00Z",
+          player1: "User5",
+          player2: "User6",
+          nextGameUuid: "game2_2",
+          score: null,
+          winner: null,
+        },
+        {
+          uuid: "game1_4",
+          date: "2024-03-20T15:30:00Z",
+          player1: "User7",
+          player2: localStorage.getItem("username"), // Current user
+          nextGameUuid: "game2_2",
+          score: null,
+          winner: null,
+        },
+      ],
+    },
+    {
+      round: 2,
+      games: [
+        {
+          uuid: "game2_1",
+          date: "2024-03-21T14:00:00Z",
+          player1: null, // Winner of game1_1
+          player2: null, // Winner of game1_2
+          sourceGames: ["game1_1", "game1_2"],
+          nextGameUuid: "game3_1",
+          score: null,
+          winner: null,
+        },
+        {
+          uuid: "game2_2",
+          date: "2024-03-21T14:30:00Z",
+          player1: null, // Winner of game1_3
+          player2: null, // Winner of game1_4
+          sourceGames: ["game1_3", "game1_4"],
+          nextGameUuid: "game3_1",
+          score: null,
+          winner: null,
+        },
+      ],
+    },
+    {
+      round: 3,
+      games: [
+        {
+          uuid: "game3_1",
+          date: "2024-03-22T14:00:00Z",
+          player1: null, // Winner of game2_1
+          player2: null, // Winner of game2_2
+          sourceGames: ["game2_1", "game2_2"],
+          nextGameUuid: null, // Final game
+          score: null,
+          winner: null,
+        },
+      ],
+    },
+  ],
+};
+
+tournaments[3].timetable = timetableExample42erlin;
 
 // Modify tournament dates to be relative to current time for demo purposes
 const now = new Date();
@@ -588,8 +678,7 @@ function loadTournamentDetailsPage(tournament, addToHistory = true) {
       timetableStatus.textContent = tournament.isUserEnrolled ? "You're in! 🎮" : "Watch the matches! 🎯";
       actionButton.textContent = "TIMETABLE";
       actionButton.addEventListener("click", () => {
-        // TODO: Handle timetable view
-        console.log("Show timetable for:", tournament.name);
+        loadTimetablePage(tournament.name);
       });
 
       // Show next match info only if user is enrolled
@@ -1014,8 +1103,113 @@ document.addEventListener("click", (event) => {
       case "tournament-detail":
         loadTournamentDetailsPage(event.target.dataset.tournament);
         break;
+      case "timetable":
+        if (event.state.tournamentName) {
+          loadTimetablePage(event.state.tournamentName, false);
+        } else {
+          console.error("No tournament name in state");
+          loadTournamentsPage(false);
+        }
+        break;
       default:
         loadHomePage();
     }
   }
 });
+
+async function loadTimetablePage(tournamentName, addToHistory = true) {
+  try {
+    if (addToHistory) {
+      history.pushState(
+        {
+          view: "timetable",
+          tournamentName: tournamentName,
+        },
+        ""
+      );
+    }
+
+    // Find tournament with timetable
+    const tournament = tournaments.find((t) => t.name === tournamentName);
+    if (!tournament || !tournament.timetable) {
+      throw new Error("Timetable not found");
+    }
+
+    // Get and clone the template
+    const template = document.getElementById("tournament-timetable-template");
+    if (!template) {
+      throw new Error("Timetable template not found");
+    }
+
+    const mainContent = document.getElementById("main-content");
+    mainContent.innerHTML = "";
+    const content = document.importNode(template.content, true);
+
+    // Set tournament name and title
+    const tournamentNameElement = content.querySelector(".tournament-timetable-tournament-name");
+    tournamentNameElement.textContent = tournament.name; // Changed this line
+
+    mainContent.appendChild(content);
+
+    const roundsContainer = document.getElementById("tournament-timetable-rounds");
+    const roundTemplate = document.getElementById("tournament-timetable-round-template");
+    const gameTemplate = document.getElementById("tournament-timetable-game-template");
+
+    // Populate rounds and games
+    tournament.timetable.rounds.forEach((round) => {
+      // Clone and populate round template
+      const roundElement = document.importNode(roundTemplate.content, true);
+      roundElement.querySelector(".tournament-timetable-round-title").textContent = `ROUND ${round.round}`;
+
+      const gamesContainer = roundElement.querySelector(".tournament-timetable-games");
+
+      // Add games to round
+      round.games.forEach((game) => {
+        const gameElement = document.importNode(gameTemplate.content, true);
+
+        // Format and set date/time
+        const gameDate = new Date(game.date);
+        gameElement.querySelector(".tournament-timetable-game-date").textContent = gameDate.toLocaleDateString();
+        gameElement.querySelector(".tournament-timetable-game-time").textContent = gameDate.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
+        // Set players
+        const players = gameElement.querySelectorAll(".tournament-timetable-game-player");
+        players[0].textContent = game.player1 || "TBD";
+        players[1].textContent = game.player2 || "TBD";
+
+        // Set result if exists
+        if (game.score) {
+          gameElement.querySelector(".tournament-timetable-game-result").textContent = game.score;
+        }
+
+        // Set status
+        const statusElement = gameElement.querySelector(".tournament-timetable-game-status");
+        if (game.winner) {
+          statusElement.textContent = "Completed";
+          // Highlight winner
+          const winnerIndex = game.winner === game.player1 ? 0 : 1;
+          players[winnerIndex].classList.add("tournament-timetable-game-player--winner");
+        } else {
+          const now = new Date();
+          statusElement.textContent = now > gameDate ? "In Progress" : "Scheduled";
+        }
+
+        // Highlight current user's games
+        const currentUser = localStorage.getItem("username");
+        if (game.player1 === currentUser || game.player2 === currentUser) {
+          gameElement.querySelector(".tournament-timetable-game").classList.add("tournament-timetable-game--user-game");
+        }
+
+        gamesContainer.appendChild(gameElement);
+      });
+
+      roundsContainer.appendChild(roundElement);
+    });
+  } catch (error) {
+    console.error("Error loading timetable:", error);
+    showToast("Failed to load timetable", true);
+  }
+}
