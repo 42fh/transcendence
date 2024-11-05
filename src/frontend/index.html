@@ -178,6 +178,109 @@
       </div>
     </template>
 
+    <!-- Create Tournament Page Template -->
+    <template id="create-tournament-template">
+      <div class="create-tournament-container">
+        <h1 class="create-tournament-title">CREATE TOURNAMENT</h1>
+
+        <form class="create-tournament-form">
+          <!-- Basic Info -->
+          <div class="create-tournament-form-group">
+            <label class="create-tournament-label" for="tournament-name">NAME</label>
+            <input class="create-tournament-input" type="text" id="tournament-name" name="name" required />
+          </div>
+
+          <div class="create-tournament-form-group">
+            <label class="create-tournament-label" for="tournament-description">DESCRIPTION</label>
+            <textarea
+              class="create-tournament-textarea"
+              id="tournament-description"
+              name="description"
+              required
+            ></textarea>
+          </div>
+
+          <!-- Tournament Type -->
+          <div class="create-tournament-form-group">
+            <label class="create-tournament-label" for="tournament-type">TYPE</label>
+            <select class="create-tournament-select" id="tournament-type" name="type" required>
+              <option value="single_elimination">Single Elimination</option>
+              <option value="double_elimination">Double Elimination</option>
+              <option value="round_robin">Round Robin</option>
+            </select>
+          </div>
+
+          <!-- Dates -->
+          <div class="create-tournament-form-group">
+            <label class="create-tournament-label" for="tournament-start">START DATE</label>
+            <input
+              class="create-tournament-input"
+              type="datetime-local"
+              id="tournament-start"
+              name="startingDate"
+              required
+            />
+          </div>
+
+          <div class="create-tournament-form-group">
+            <label class="create-tournament-label" for="registration-start">REGISTRATION START</label>
+            <input
+              class="create-tournament-input"
+              type="datetime-local"
+              id="registration-start"
+              name="registrationStart"
+              required
+            />
+          </div>
+
+          <div class="create-tournament-form-group">
+            <label class="create-tournament-label" for="registration-close">REGISTRATION CLOSE</label>
+            <input
+              class="create-tournament-input"
+              type="datetime-local"
+              id="registration-close"
+              name="registrationClose"
+              required
+            />
+          </div>
+
+          <!-- Visibility -->
+          <div class="create-tournament-form-group">
+            <label class="create-tournament-label" for="tournament-visibility">VISIBILITY</label>
+            <select class="create-tournament-select" id="tournament-visibility" name="visibility" required>
+              <option value="public">Public</option>
+              <option value="private">Private</option>
+            </select>
+          </div>
+
+          <!-- Allowed Users (only shown when private is selected) -->
+          <div class="create-tournament-form-group" id="allowed-users-group" style="display: none">
+            <label class="create-tournament-label" for="allowed-users-input">ALLOWED USERS</label>
+            <div class="create-tournament-users-input-container">
+              <input type="text" class="create-tournament-input" id="allowed-users-input" placeholder="Type username" />
+              <button type="button" class="create-tournament-button-secondary" id="add-user-btn">ADD</button>
+            </div>
+            <div id="allowed-users-list" class="create-tournament-users-list"></div>
+          </div>
+
+          <!-- Game Mode -->
+          <div class="create-tournament-form-group">
+            <label class="create-tournament-label" for="game-mode">GAME MODE</label>
+            <select class="create-tournament-select" id="game-mode" name="gameMode" required>
+              <option value="1v1">1 vs 1</option>
+              <option value="multiplayer">Multiplayer</option>
+            </select>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="create-tournament-actions">
+            <button type="button" class="create-tournament-button-secondary" id="cancel-tournament">CANCEL</button>
+            <button type="submit" class="create-tournament-button-primary">CREATE TOURNAMENT</button>
+          </div>
+        </form>
+      </div>
+    </template>
+
     <script src="script.js"></script>
   </body>
 </html>

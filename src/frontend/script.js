@@ -270,30 +270,44 @@ function loadHomePage(addToHistory = true) {
     }
 
     // Hide the initial container
-    document.getElementById("container").style.display = "none";
+    const container = document.getElementById("container");
+    if (container) {
+      container.style.display = "none";
+    }
 
     // Show main-content and load the home template
     const mainContent = document.getElementById("main-content");
+    if (!mainContent) {
+      throw new Error("Main content element not found");
+    }
+
     mainContent.style.display = "block";
     mainContent.innerHTML = ""; // Clear any existing content
 
     const template = document.getElementById("home-template");
-    if (template) {
-      const homeContent = document.importNode(template.content, true);
-      mainContent.appendChild(homeContent);
+    if (!template) {
+      throw new Error("Home template not found");
+    }
 
-      // Get the username from localStorage and set the greeting message
-      const username = localStorage.getItem("username");
-      if (username) {
-        const greetingElement = document.getElementById("greeting");
-        greetingElement.innerHTML = `Hello ${username}! 👋`;
-      }
+    const homeContent = document.importNode(template.content, true);
+    mainContent.appendChild(homeContent);
 
-      // Event listener for the logout button
-      document.getElementById("logout-button").addEventListener("click", handleLogout);
+    // Get the username from localStorage and set the greeting message
+    const username = localStorage.getItem("username");
+    const greetingElement = document.getElementById("greeting");
+    if (greetingElement && username) {
+      greetingElement.innerHTML = `Hello ${username}! 👋`;
+    }
 
-      // Add event listener for the "Play" button
-      document.getElementById("play").addEventListener("click", function () {
+    // Add event listeners only if elements exist
+    const logoutButton = document.getElementById("logout-button");
+    if (logoutButton) {
+      logoutButton.addEventListener("click", handleLogout);
+    }
+
+    const playButton = document.getElementById("play");
+    if (playButton) {
+      playButton.addEventListener("click", function () {
         const baseUrl = window.location.origin;
         fetch(`${baseUrl}/play.html`)
           .then((response) => response.text())
@@ -305,9 +319,11 @@ function loadHomePage(addToHistory = true) {
           })
           .catch((err) => console.warn("Failed to load play.html", err));
       });
+    }
 
-      // Add event listener for the "Three.js" button
-      document.getElementById("threejs").addEventListener("click", function () {
+    const threejsButton = document.getElementById("threejs");
+    if (threejsButton) {
+      threejsButton.addEventListener("click", function () {
         const baseUrl = window.location.origin;
         fetch(`${baseUrl}/threejs_11.html`)
           .then((response) => response.text())
@@ -316,9 +332,11 @@ function loadHomePage(addToHistory = true) {
           })
           .catch((err) => console.warn("Failed to load threejs_11.html", err));
       });
+    }
 
-      // Add tournaments button listener
-      document.getElementById("tournaments").addEventListener("click", loadTournamentsPage);
+    const tournamentsButton = document.getElementById("tournaments");
+    if (tournamentsButton) {
+      tournamentsButton.addEventListener("click", loadTournamentsPage);
     }
   } catch (error) {
     console.error("Error loading home page:", error);
@@ -717,17 +735,29 @@ async function loadTournamentsPage(addToHistory = true) {
       );
     }
 
+    const template = document.getElementById("tournament-template");
+    const mainContent = document.getElementById("main-content");
+    mainContent.innerHTML = "";
+    mainContent.appendChild(document.importNode(template.content, true));
+
+    // Add event listener to the existing create tournament button
+    const createTournamentButton = document.getElementById("create-tournament");
+    if (createTournamentButton) {
+      createTournamentButton.addEventListener("click", () => {
+        loadCreateTournamentPage();
+      });
+    }
+
     const enhancedTournaments = await fetchTournaments(CONFIG.DATA_SOURCE);
 
     // Filter tournaments based on enrollment
     const openTournaments = enhancedTournaments.filter((t) => !t.isUserEnrolled);
     const enrolledTournaments = enhancedTournaments.filter((t) => t.isUserEnrolled);
 
-    // Render page
-    const template = document.getElementById("tournament-template");
-    const mainContent = document.getElementById("main-content");
-    mainContent.innerHTML = "";
-    mainContent.appendChild(document.importNode(template.content, true));
+    // Add event listener for create tournament button
+    createTournamentButton.addEventListener("click", () => {
+      loadCreateTournamentPage();
+    });
 
     // Fill open tournaments container
     const openContainer = document.getElementById("open-tournaments");
@@ -765,6 +795,127 @@ async function loadTournamentsPage(addToHistory = true) {
   } catch (error) {
     console.error("Error loading tournaments:", error);
     showToast("Failed to load tournaments. Please try again later.", true);
+  }
+}
+
+async function handleCreateTournamentSubmit(tournamentData) {
+  try {
+    switch (CONFIG.DATA_SOURCE) {
+      case "API":
+        // Future API call
+        /*
+				  const response = await fetch(`${CONFIG.API_BASE_URL}/tournaments`, {
+					  method: 'POST',
+					  headers: {
+						  'Content-Type': 'application/json',
+						  // Add any auth headers if needed
+					  },
+					  body: JSON.stringify(tournamentData)
+				  });
+  
+				  if (!response.ok) {
+					  throw new Error('Failed to create tournament');
+				  }
+				  */
+        throw new Error("API not implemented yet");
+
+      case "JS":
+        // Add to our mutable JavaScript array
+        const newTournament = {
+          name: tournamentData.name,
+          description: tournamentData.description,
+          startingDate: tournamentData.startingDate,
+          closingRegistrationDate: tournamentData.registrationClose,
+          registrationStartDate: tournamentData.registrationStart,
+          isTimetableAvailable: false,
+          participants: [],
+          type: tournamentData.type,
+          visibility: tournamentData.visibility,
+          gameMode: tournamentData.gameMode,
+          timetable: null,
+        };
+
+        tournaments.push(newTournament);
+        break;
+
+      case "JSON":
+        throw new Error("Cannot modify read-only JSON data");
+
+      default:
+        throw new Error(`Invalid data source: ${CONFIG.DATA_SOURCE}`);
+    }
+
+    showToast("Tournament created successfully!");
+    await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for toast
+    loadTournamentsPage(); // Go back to tournaments list
+  } catch (error) {
+    console.error("Error creating tournament:", error);
+    showToast("Failed to create tournament. Please try again.", true);
+  }
+}
+
+function loadCreateTournamentPage(addToHistory = true) {
+  try {
+    if (addToHistory) {
+      history.pushState(
+        {
+          view: "create-tournament",
+        },
+        ""
+      );
+    }
+
+    const template = document.getElementById("create-tournament-template");
+    if (!template) {
+      throw new Error("Create tournament template not found");
+    }
+
+    const mainContent = document.getElementById("main-content");
+    mainContent.innerHTML = "";
+    mainContent.appendChild(document.importNode(template.content, true));
+
+    // Add event listeners for form interactions
+    const form = mainContent.querySelector(".create-tournament-form");
+    const cancelButton = mainContent.querySelector("#cancel-tournament");
+
+    // Handle cancel button - go back in history
+    cancelButton.addEventListener("click", () => {
+      history.back(); // This is equivalent to clicking browser's back button
+    });
+
+    // Handle form submission
+    form.addEventListener("submit", async (event) => {
+      // We need to prevent the dafatul behaviour cuase it wourl make a POST request to the form's action UR
+      // Breaking the SPA flow
+      event.preventDefault(); // Prevent default form submission
+      // Without preventDefault():
+      // 1. Form would submit traditionally
+      // 2. Page would reload
+      // 3. Our SPA state would be lost
+      // 4. User would see a new page load
+
+      // Create FormData object from the form
+      const formData = new FormData(event.target);
+
+      // Convert FormData to a regular object
+      const tournamentData = {
+        name: formData.get("name"),
+        description: formData.get("description"),
+        type: formData.get("type"),
+        startingDate: formData.get("startingDate"),
+        registrationStart: formData.get("registrationStart"),
+        registrationClose: formData.get("registrationClose"),
+        visibility: formData.get("visibility"),
+        gameMode: formData.get("gameMode"),
+        // Add allowed users if private
+        allowedUsers: formData.get("visibility") === "private" ? Array.from(allowedUsers) : [],
+      };
+
+      await handleCreateTournamentSubmit(tournamentData);
+    });
+  } catch (error) {
+    console.error("Error loading create tournament page:", error);
+    showToast("Failed to load create tournament page", true);
   }
 }
 
@@ -830,6 +981,9 @@ window.addEventListener("popstate", async (event) => {
           console.error("No tournament data in state");
           await loadTournamentsPage(false);
         }
+        break;
+      case "create-tournament":
+        loadCreateTournamentPage(false);
         break;
       default:
         await loadHomePage(false);
