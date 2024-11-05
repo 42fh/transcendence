@@ -26,9 +26,7 @@ DEBUG = True
 # SECURITY WARNING: don't run with debug turned on in production!
 if ENVIRONMENT == "production":
     DEBUG = False
-    ALLOWED_HOSTS = (
-        os.getenv("ALLOWED_HOSTS", "").split(",") if os.getenv("ALLOWED_HOSTS") else []
-    )
+    ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",") if os.getenv("ALLOWED_HOSTS") else []
 else:
     DEBUG = True
     ALLOWED_HOSTS = ["*"]
@@ -47,7 +45,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "game",
     "chat",
-    "user",
     "blockchain",
     "channels",
 ]
@@ -67,6 +64,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "tr_django.urls"
+
+AUTH_USER_MODEL = "auth.User"
 
 TEMPLATES = [
     {
