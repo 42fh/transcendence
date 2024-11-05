@@ -72,14 +72,14 @@ function setupTimetableAndActions(container, tournament) {
   const closingDate = new Date(tournament.closingRegistrationDate);
 
   if (tournament.isTimetableAvailable) {
-    handleTimetableAvailable(timetableStatus, actionButton, tournament);
+    handleTimetableAvailable(container, timetableStatus, actionButton, tournament);
   } else {
-    handleTimetableUnavailable(timetableStatus, actionButton, tournament, now, closingDate, container);
+    handleTimetableUnavailable(container, timetableStatus, actionButton, tournament, now, closingDate);
   }
 }
 
 // Private helper function - not exported
-function handleTimetableAvailable(timetableStatus, actionButton, tournament) {
+function handleTimetableAvailable(container, timetableStatus, actionButton, tournament) {
   timetableStatus.textContent = tournament.isUserEnrolled ? "You're in! 🎮" : "Watch the matches! 🎯";
   actionButton.textContent = "TIMETABLE";
   actionButton.addEventListener("click", () => {
@@ -87,12 +87,12 @@ function handleTimetableAvailable(timetableStatus, actionButton, tournament) {
   });
 
   if (tournament.isUserEnrolled) {
-    setupNextMatchInfo(tournament);
+    setupNextMatchInfo(container, tournament);
   }
 }
 
 // Private helper function - not exported
-function handleTimetableUnavailable(timetableStatus, actionButton, tournament, now, closingDate, container) {
+function handleTimetableUnavailable(container, timetableStatus, actionButton, tournament, now, closingDate) {
   if (now < closingDate) {
     if (tournament.isUserEnrolled) {
       setupEnrolledState(timetableStatus, actionButton, tournament);
@@ -130,10 +130,9 @@ function addTimetableMessage(container) {
   container.querySelector(".tournament-detail-info").appendChild(timetableMsg);
 }
 
-function setupNextMatchInfo(tournament) {
+function setupNextMatchInfo(container, tournament) {
   const nextMatchDiv = container.querySelector(".tournament-detail-next-match");
   nextMatchDiv.style.display = "block";
   const nextMatchInfo = container.querySelector(".tournament-detail-next-match-info");
-  // TODO: Add next match information when available
   nextMatchInfo.textContent = "Next match details coming soon...";
 }

@@ -1,4 +1,4 @@
-function displayLogoutError(message) {
+export function displayLogoutError(message) {
   const logoutButton = document.getElementById("logout-button");
 
   // Remove any existing error message

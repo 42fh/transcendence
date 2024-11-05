@@ -1,4 +1,4 @@
-function showToast(message, isError = false) {
+export function showToast(message, isError = false) {
   try {
     const template = document.getElementById("toast-template");
     if (!template) {

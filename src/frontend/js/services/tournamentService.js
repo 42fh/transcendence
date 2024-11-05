@@ -120,3 +120,59 @@ export async function handleTournamentAction(tournamentName, isEnrolled) {
     showToast("Failed to update tournament. Please try again.", true);
   }
 }
+
+export async function handleCreateTournamentSubmit(tournamentData) {
+  try {
+    switch (CONFIG.DATA_SOURCE) {
+      case "API":
+        // Future API call
+        /*
+					const response = await fetch(`${CONFIG.API_BASE_URL}/tournaments`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							// Add any auth headers if needed
+						},
+						body: JSON.stringify(tournamentData)
+					});
+	
+					if (!response.ok) {
+						throw new Error('Failed to create tournament');
+					}
+					*/
+        throw new Error("API not implemented yet");
+
+      case "JS":
+        // Add to our mutable JavaScript array
+        const newTournament = {
+          name: tournamentData.name,
+          description: tournamentData.description,
+          startingDate: tournamentData.startingDate,
+          closingRegistrationDate: tournamentData.registrationClose,
+          registrationStartDate: tournamentData.registrationStart,
+          isTimetableAvailable: false,
+          participants: [],
+          type: tournamentData.type,
+          visibility: tournamentData.visibility,
+          gameMode: tournamentData.gameMode,
+          timetable: null,
+        };
+
+        tournaments.push(newTournament);
+        break;
+
+      case "JSON":
+        throw new Error("Cannot modify read-only JSON data");
+
+      default:
+        throw new Error(`Invalid data source: ${CONFIG.DATA_SOURCE}`);
+    }
+
+    showToast("Tournament created successfully!");
+    await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for toast
+    loadTournamentsPage(); // Go back to tournaments list
+  } catch (error) {
+    console.error("Error creating tournament:", error);
+    showToast("Failed to create tournament. Please try again.", true);
+  }
+}

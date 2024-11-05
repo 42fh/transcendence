@@ -1,4 +1,7 @@
-function loadCreateTournamentPage(addToHistory = true) {
+import { showToast } from "../utils/toast.js";
+import { handleCreateTournamentSubmit } from "../services/tournamentService.js";
+
+export function loadCreateTournamentPage(addToHistory = true) {
   try {
     if (addToHistory) {
       history.pushState(

@@ -45,7 +45,7 @@ export function fillModalContent(templateId, options = {}) {
   }
 }
 
-function openModal() {
+export function openModal() {
   const modalOverlay = document.getElementById("modal-overlay");
   if (modalOverlay) {
     modalOverlay.style.visibility = "visible";
@@ -53,7 +53,7 @@ function openModal() {
   }
 }
 
-function closeModal() {
+export function closeModal() {
   const modalOverlay = document.getElementById("modal-overlay");
   if (modalOverlay) {
     modalOverlay.style.visibility = "hidden";

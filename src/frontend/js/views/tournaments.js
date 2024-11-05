@@ -1,7 +1,9 @@
+import { CONFIG } from "../config/constants.js";
 import { fetchTournaments } from "../services/tournamentService.js";
 import { formatDate } from "../utils/date.js";
 import { showToast } from "../utils/toast.js";
 import { loadTournamentDetailsPage } from "./tournament-detail.js";
+import { loadCreateTournamentPage } from "./tournament-create.js";
 
 function renderTournamentCard(tournament) {
   const template = document.getElementById("tournament-card-template");
