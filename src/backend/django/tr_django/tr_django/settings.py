@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "game",
     "chat",
-    "user",
     "blockchain",
     "channels",
 ]
@@ -65,6 +64,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "tr_django.urls"
+
+AUTH_USER_MODEL = "auth.User"
 
 TEMPLATES = [
     {

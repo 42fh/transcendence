@@ -73,7 +73,10 @@ class LoginView(View):
         try:
             data = json.loads(request.body)
         except json.JSONDecodeError:
-            return JsonResponse({"success": False, "error": "Invalid JSON format", "action": "login"}, status=400)
+            return JsonResponse(
+                {"success": False, "error": "Invalid JSON format", "action": "login"},
+                status=400,
+            )
 
         username = data.get("username")
         password = data.get("password")
