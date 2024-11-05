@@ -50,7 +50,7 @@ class AGameManager(ABC):
     async def get_instance(cls, game_id, game_type=None, settings=None):
         """Process-safe get_instance with game type and settings support"""
         try:
-            redis_conn = await redis.Redis(decode_responses=True)  # Use string decoding for type retrieval
+            redis_conn =await redis.Redis.from_url( 'redis://redis:6379/1', decode_responses=True)  # Use string decoding for type retrieval
             
             # Try to get existing game type from Redis
             stored_type = await redis_conn.get(f"game_type:{game_id}")
@@ -64,14 +64,14 @@ class AGameManager(ABC):
             final_game_type = game_type if not stored_type else stored_type
             
             # Get the appropriate game class
+            final_game_type = str(final_game_type)            
             game_class = cls.get_game_class(final_game_type)
-            
             # Create instance
             instance = game_class(game_id)
             exists = await redis_conn.exists(f"game_state:{game_id}")
             if exists:
                 # Load existing settings from Redis
-                redis_bin = await redis.Redis(decode_responses=False)
+                redis_bin = await redis.Redis.from_url( 'redis://redis:6379/1', decode_responses=False)
                 stored_settings = await redis_bin.get(f"game_settings:{game_id}")
                 await redis_bin.close()
                 if stored_settings:
@@ -96,7 +96,7 @@ class AGameManager(ABC):
                     print("set default game settings.") # debug
                 
                 # Store settings in Redis before initialization
-                redis_bin = await redis.Redis(decode_responses=False)
+                redis_bin = await redis.Redis.from_url( 'redis://redis:6379/1', decode_responses=False)
                 await redis_bin.set(
                     f"game_settings:{game_id}",
                     msgpack.packb(settings)
@@ -121,7 +121,7 @@ class AGameManager(ABC):
 
     async def _setup_connections(self):
         """Set up Redis and channel layer connections"""
-        self.redis_conn = await redis.Redis(decode_responses=False)
+        self.redis_conn = redis.Redis.from_url('redis://redis:6379/1',decode_responses=False )
         self.channel_layer = get_channel_layer()
 
 
@@ -625,8 +625,9 @@ class AGameManager(ABC):
             
             # Keep game state briefly for end-game display
             for key in [self.state_key, self.players_key, self.settings_key, 
-                       self.paddles_key, self.running_key, self.type_key]:
-                await self.redis_conn.expire(key, 300)  # 5 minute expiry
+                       self.paddles_key, self.running_key,self.settings_key, self.lock_key, self.type_key]:
+                # await self.redis_conn.expire(key, 300)  # 5 minute expiry
+                await self.redis_conn.expire(key, 1)  # 1 sec expiry
             
             print(f"Game {self.game_id} has ended.")
             
