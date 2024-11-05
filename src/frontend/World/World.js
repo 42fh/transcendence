@@ -32,7 +32,10 @@ export default class World {
 
     // Audio
     this.audio = new Audio(this.camera);
-    this.audio.addBackgroundMusic("/static/music/song1.mp3", this.gui);
+    this.audio.addBackgroundMusic(
+      ["/static/music/song1.mp3", "/static/music/song2.mp3"],
+      this.gui
+    );
 
     // Renderer
     this.addRenderer(canvas);
