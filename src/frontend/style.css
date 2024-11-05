@@ -667,3 +667,61 @@ button:hover {
 #tournament-timetable-rounds {
   margin-top: 2rem;
 }
+
+.myform {
+  position: absolute;
+  top: 0%;
+}
+
+.stopMusic {
+  position: absolute;
+  top: 0%;
+  left: 10%;
+}
+
+.startMusic {
+  position: absolute;
+  top: 0%;
+  right: 10%;
+}
+
+.previousSong {
+  position: absolute;
+  top: 0%;
+  left: 40%;
+}
+
+.nextSong {
+  position: absolute;
+  top: 0%;
+  left: 50%;
+}
+
+.myform {
+  position: absolute;
+  top: 0%;
+}
+
+.stopMusic {
+  position: absolute;
+  top: 0%;
+  left: 10%;
+}
+
+.startMusic {
+  position: absolute;
+  top: 0%;
+  right: 10%;
+}
+
+.previousSong {
+  position: absolute;
+  top: 0%;
+  left: 40%;
+}
+
+.nextSong {
+  position: absolute;
+  top: 0%;
+  left: 50%;
+}

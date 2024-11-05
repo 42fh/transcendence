@@ -96,7 +96,7 @@ class GameManager:
             if game_over:
                 await self.end_game()
                 break
-            await asyncio.sleep(0.05)
+            await asyncio.sleep(0.01)
         # load gamestate to datatbase
 
     async def update_game(self):
@@ -176,7 +176,7 @@ class GameManager:
                 self.reset_ball(ball)
 
         # Cap ball speed
-        max_speed = 0.006
+        max_speed = 0.003
         speed = (ball["velocity_x"] ** 2 + ball["velocity_y"] ** 2) ** 0.5
         if speed > max_speed:
             factor = max_speed / speed
