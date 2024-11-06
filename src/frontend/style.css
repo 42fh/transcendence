@@ -244,3 +244,32 @@ button:hover {
   color: white;
   border: 2px solid white;
 }
+
+.myform {
+  position: absolute;
+  top: 0%;
+}
+
+.stopMusic {
+  position: absolute;
+  top: 0%;
+  left: 10%;
+}
+
+.startMusic {
+  position: absolute;
+  top: 0%;
+  right: 10%;
+}
+
+.previousSong {
+  position: absolute;
+  top: 0%;
+  left: 40%;
+}
+
+.nextSong {
+  position: absolute;
+  top: 0%;
+  left: 50%;
+}

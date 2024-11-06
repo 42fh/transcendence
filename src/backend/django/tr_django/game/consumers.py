@@ -9,7 +9,7 @@ class PongConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.last_move_time = 0
-        self.move_cooldown = 0.3  # cooldown of paddle moves
+        self.move_cooldown = 0.01  # cooldown of paddle moves
 
     async def connect(self):
         self.game_id = self.scope["url_route"]["kwargs"]["game_id"]
@@ -97,16 +97,12 @@ class PongConsumer(AsyncWebsocketConsumer):
         async with self.game_manager.redis_lock:
             game_state = await self.game_manager.load_game_state()
             move_amount = 0.05  # Adjust this value to change paddle speed
-
-            if direction == "up":
-                game_state[f"paddle_{self.paddle}"]["y"] = max(
-                    0, game_state[f"paddle_{self.paddle}"]["y"] - move_amount
-                )
-            elif direction == "down":
-                game_state[f"paddle_{self.paddle}"]["y"] = min(
-                    0.8, game_state[f"paddle_{self.paddle}"]["y"] + move_amount
-                )
-
+            
+            if direction == 'up':
+                game_state[f'paddle_{self.paddle}']['y'] = max(0, game_state[f'paddle_{self.paddle}']['y'] - move_amount)
+            elif direction == 'down':
+                game_state[f'paddle_{self.paddle}']['y'] = min(0.8, game_state[f'paddle_{self.paddle}']['y'] + move_amount)
+            
             await self.game_manager.save_game_state(game_state)
 
     async def game_finished(self, event):
