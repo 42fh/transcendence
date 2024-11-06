@@ -1,10 +1,10 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
-from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from chat.models import ChatRoom, Message
+from users.models import CustomUser
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -123,9 +123,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             usernames = self.room_name.split("_")
             if len(usernames) != 2:
                 raise ValueError("Invalid room name format")
-
-            user1 = User.objects.get(username=usernames[0])
-            user2 = User.objects.get(username=usernames[1])
+            user1 = CustomUser.objects.get(username=usernames[0])
+            user2 = CustomUser.objects.get(username=usernames[1])
 
             chat_room, created = ChatRoom.objects.get_or_create(
                 room_id=self.room_name, defaults={"user1": user1, "user2": user2}
@@ -135,9 +134,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 chat_room.last_message_at = timezone.now()
                 chat_room.save(update_fields=["last_message_at"])
 
-            print(
-                f"DEBUG: Chat room {'created' if created else 'retrieved'}: {chat_room}"
-            )
+            print(f"DEBUG: Chat room {'created' if created else 'retrieved'}: {chat_room}")
             return chat_room
 
         except User.DoesNotExist as e:
@@ -148,15 +145,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         try:
-            print(
-                f"DEBUG: User {self.username} disconnected from room {self.room_name}"
-            )
+            print(f"DEBUG: User {self.username} disconnected from room {self.room_name}")
             if hasattr(self, "room_group_name"):
                 if self.room_group_name in self.connected_users:
                     self.connected_users[self.room_group_name].discard(self.username)
-                await self.channel_layer.group_discard(
-                    self.room_group_name, self.channel_name
-                )
+                await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
         except Exception as e:
             print(f"DEBUG: Disconnect error: {str(e)}")
 
@@ -166,11 +159,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             message = text_data_json.get("message", "").strip()
 
             if not message:
-                await self.send(
-                    text_data=json.dumps(
-                        {"type": "error", "message": "Empty messages are not allowed"}
-                    )
-                )
+                await self.send(text_data=json.dumps({"type": "error", "message": "Empty messages are not allowed"}))
                 return
 
             timestamp = await self.save_message(message)
@@ -186,25 +175,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
 
         except json.JSONDecodeError:
-            await self.send(
-                text_data=json.dumps(
-                    {"type": "error", "message": "Invalid message format"}
-                )
-            )
+            await self.send(text_data=json.dumps({"type": "error", "message": "Invalid message format"}))
         except Exception as e:
             print(f"DEBUG: Error in receive: {str(e)}")
-            await self.send(
-                text_data=json.dumps(
-                    {"type": "error", "message": "Failed to process message"}
-                )
-            )
+            await self.send(text_data=json.dumps({"type": "error", "message": "Failed to process message"}))
 
     @database_sync_to_async
     def save_message(self, content):
         try:
-            message = Message.objects.create(
-                room=self.chat_room, sender=self.scope["user"], content=content
-            )
+            message = Message.objects.create(room=self.chat_room, sender=self.scope["user"], content=content)
             print(f"DEBUG: Message saved: {message.content} at {message.timestamp}")
             return message.timestamp
         except Exception as e:
