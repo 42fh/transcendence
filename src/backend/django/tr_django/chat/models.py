@@ -1,12 +1,12 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.utils import timezone
 
 
 class ChatRoom(models.Model):
     room_id = models.CharField(max_length=255, unique=True)
-    user1 = models.ForeignKey(User, on_delete=models.CASCADE, related_name="chat_user1")
-    user2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name="chat_user2")
+    user1 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="chat_user1")
+    user2 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="chat_user2")
     created_at = models.DateTimeField(auto_now_add=True)
     last_message_at = models.DateTimeField(default=timezone.now)
 
@@ -29,12 +29,8 @@ class ChatRoom(models.Model):
 
 
 class Message(models.Model):
-    room = models.ForeignKey(
-        ChatRoom, on_delete=models.CASCADE, related_name="messages"
-    )
-    sender = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="sent_messages"
-    )
+    room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name="messages")
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sent_messages")
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
