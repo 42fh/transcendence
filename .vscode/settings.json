@@ -30,5 +30,10 @@
   "black-formatter.args": ["--line-length", "120"],
   "python.languageServer": "Pylance",
   "editor.rulers": [120],
-  "makefile.configureOnOpen": false
+"makefile.configureOnOpen": false,
+"workbench.colorCustomizations": {
+	"activityBar.background": "#073609",
+	"titleBar.activeBackground": "#0A4B0D",
+	"titleBar.activeForeground": "#F0FDF0"
+}
 }
