@@ -120,24 +120,23 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_or_create_chat_room(self):
         try:
-            usernames = self.room_name.split("_")
+            # Sort usernames to ensure consistent room_id regardless of order
+            usernames = sorted(self.room_name.split("_"))
             if len(usernames) != 2:
                 raise ValueError("Invalid room name format")
+
             user1 = CustomUser.objects.get(username=usernames[0])
             user2 = CustomUser.objects.get(username=usernames[1])
 
-            chat_room, created = ChatRoom.objects.get_or_create(
-                room_id=self.room_name, defaults={"user1": user1, "user2": user2}
-            )
+            chat_room = ChatRoom.objects.create_room(user1, user2)[0]
 
-            if not created:
+            if chat_room:
                 chat_room.last_message_at = timezone.now()
                 chat_room.save(update_fields=["last_message_at"])
 
-            print(f"DEBUG: Chat room {'created' if created else 'retrieved'}: {chat_room}")
             return chat_room
 
-        except User.DoesNotExist as e:
+        except CustomUser.DoesNotExist as e:
             raise ObjectDoesNotExist(f"User not found: {str(e)}")
         except Exception as e:
             print(f"DEBUG: Error in get_or_create_chat_room: {str(e)}")

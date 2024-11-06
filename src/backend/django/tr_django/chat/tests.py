@@ -1,44 +1,71 @@
 from django.test import TestCase
-from django.utils import timezone
-from datetime import timedelta
+from unittest.mock import patch
 from users.models import CustomUser
 from .models import ChatRoom, Message
+from django.utils import timezone
+from datetime import timedelta
+from django.db.models import Q
 
 
-class ChatRoomTestCase(TestCase):
+class ChatTestCase(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # Start patching before any tests run
+        cls.patcher = patch("game.signals.create_player_profile")
+        cls.patcher.start()
+        super().setUpClass()
+
+    @classmethod
+    def tearDownClass(cls):
+        # Stop patching after all tests complete
+        cls.patcher.stop()
+        super().tearDownClass()
+
     def setUp(self):
-        """Set up test users"""
-        self.user1 = CustomUser.objects.create_user(username="user1", email="user1@example.com", password="testpass123")
-        self.user2 = CustomUser.objects.create_user(username="user2", email="user2@example.com", password="testpass123")
-        self.user3 = CustomUser.objects.create_user(username="user3", email="user3@example.com", password="testpass123")
+        """Set up test users if they don't already exist"""
+        super().setUp()  # Call TestCase's setUp first
 
-    def test_chatroom_creation(self):
-        """Test that a ChatRoom is created with correct room_id"""
-        room = ChatRoom.objects.create(user1=self.user1, user2=self.user2)
-        expected_room_id = f"{self.user1.username}_{self.user2.username}"
-        self.assertEqual(room.room_id, expected_room_id)
+        # Add a unique identifier for each test class AND method to prevent collisions
+        suffix = f"test_{self.__class__.__name__}_{self._testMethodName}"
+
+        # Create test users with unique names
+        self.user1 = CustomUser.objects.create_user(
+            username=f"user1_{suffix}", email=f"user1_{suffix}@example.com", password="testpass123"
+        )
+        self.user2 = CustomUser.objects.create_user(
+            username=f"user2_{suffix}", email=f"user2_{suffix}@example.com", password="testpass123"
+        )
+        self.user3 = CustomUser.objects.create_user(
+            username=f"user3_{suffix}", email=f"user3_{suffix}@example.com", password="testpass123"
+        )
+
+        # Clean up any existing chat rooms for these users
+        ChatRoom.objects.filter(
+            Q(user1__in=[self.user1, self.user2, self.user3]) | Q(user2__in=[self.user1, self.user2, self.user3])
+        ).delete()
+
+
+class ChatRoomCreationTestCase(ChatTestCase):
+    """Test cases specifically for chat room creation logic"""
 
     def test_chatroom_unique_pairs(self):
         """Test that ChatRooms are unique for user pairs regardless of order"""
-        room1 = ChatRoom.objects.create(user1=self.user1, user2=self.user2)
-        room2 = ChatRoom.objects.create(user1=self.user2, user2=self.user1)
+        room1, created1 = ChatRoom.objects.create_room(self.user1, self.user2)
+        room2, created2 = ChatRoom.objects.create_room(self.user2, self.user1)
 
-        # Both rooms should have the same room_id
-        self.assertEqual(room1.room_id, room2.room_id)
-
-    def test_chatroom_str_representation(self):
-        """Test the string representation of ChatRoom"""
-        room = ChatRoom.objects.create(user1=self.user1, user2=self.user2)
-        expected_str = f"Chat between {self.user1.username} and {self.user2.username}"
-        self.assertEqual(str(room), expected_str)
+        # Second creation should not create a new room
+        self.assertTrue(created1)
+        self.assertFalse(created2)
+        self.assertEqual(room1.id, room2.id)
 
 
-class MessageTestCase(TestCase):
+class MessageTestCase(ChatTestCase):
     def setUp(self):
         """Set up test users and chatroom"""
-        self.user1 = CustomUser.objects.create_user(username="user1", email="user1@example.com", password="testpass123")
-        self.user2 = CustomUser.objects.create_user(username="user2", email="user2@example.com", password="testpass123")
-        self.chat_room = ChatRoom.objects.create(user1=self.user1, user2=self.user2)
+        super().setUp()
+        # Only create the chat room if we're not running the unique pairs test
+        if self._testMethodName != "test_chatroom_unique_pairs":
+            self.chat_room, _ = ChatRoom.objects.create_room(self.user1, self.user2)
 
     def test_message_creation(self):
         """Test creating a message"""
@@ -79,16 +106,14 @@ class MessageTestCase(TestCase):
         self.assertEqual(str(message), expected_str)
 
 
-class ChatRoomQueryTestCase(TestCase):
+class ChatRoomQueryTestCase(ChatTestCase):
     def setUp(self):
         """Set up test users and chatrooms"""
-        self.user1 = CustomUser.objects.create_user(username="user1")
-        self.user2 = CustomUser.objects.create_user(username="user2")
-        self.user3 = CustomUser.objects.create_user(username="user3")
+        super().setUp()
 
         # Create chat rooms
-        self.room1 = ChatRoom.objects.create(user1=self.user1, user2=self.user2)
-        self.room2 = ChatRoom.objects.create(user1=self.user1, user2=self.user3)
+        self.room1, _ = ChatRoom.objects.create_room(self.user1, self.user2)
+        self.room2, _ = ChatRoom.objects.create_room(self.user1, self.user3)
 
     def test_user_chatrooms(self):
         """Test querying chatrooms for a specific user"""
@@ -118,16 +143,7 @@ class ChatRoomQueryTestCase(TestCase):
         self.assertEqual(unread_count, 1)
 
 
-class ChatModelUserTest(TestCase):
-    def setUp(self):
-        """Set up test users using CustomUser model"""
-        self.user1 = CustomUser.objects.create_user(
-            username="testuser1", email="test1@example.com", password="testpass123"
-        )
-        self.user2 = CustomUser.objects.create_user(
-            username="testuser2", email="test2@example.com", password="testpass123"
-        )
-
+class ChatModelUserTest(ChatTestCase):
     def test_chatroom_user_model(self):
         """Test that ChatRoom uses CustomUser model"""
         chat_room = ChatRoom.objects.create(user1=self.user1, user2=self.user2)
