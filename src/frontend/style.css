@@ -1,3 +1,36 @@
+:root {
+  /* Colors */
+  --color-primary: white;
+  --color-background: black;
+  --color-error: red;
+  --color-overlay: rgba(255, 255, 255, 0.9);
+
+  /* Typography */
+  --font-family-primary: "Press Start 2P", cursive;
+  --font-size-base: 16px;
+  --font-size-small: 0.8em;
+  --font-size-large: 1.2em;
+  --font-size-title: 8em;
+
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+
+  /* Borders */
+  --border-width: 2px;
+  --border-radius: 10px;
+
+  /* Transitions */
+  --transition-duration: 0.3s;
+  --transition-timing: ease;
+
+  /* Layout */
+  --container-width: 80vw;
+  --container-height: 80vh;
+}
+
 * {
   margin: 0;
   padding: 0;
