@@ -4,8 +4,10 @@ import { Water } from "three/addons/objects/Water.js";
 import Loader from "../Utils/Loader.js";
 import World from "../World/World.js";
 import Debug from "../Utils/Debug.js";
+import GameWebSocket from "../Utils/Websocket.js";
+import Drawer from "../Utils/Drawer.js";
 
-export default class Game {
+export default class GameConstructor {
   constructor() {
     // Does not create a new instance of World because it is a singleton
     this.world = new World(document.querySelector(".webgl"));
@@ -20,10 +22,17 @@ export default class Game {
     // Loader
     this.loader = null;
 
+    this.websocket = null;
+
+    // Game Config
+    this.config = {};
+
+    this.balls = [];
+
+    this.paddles = [];
+
     // GUI
     this.gui = new Debug();
-
-    this.socket = null;
   }
 
   addAmbientLight(intensity, color) {
@@ -115,27 +124,84 @@ export default class Game {
 
   loadResources(sources) {
     this.loader = new Loader(sources);
+
+    window.addEventListener("resourcesLoaded", () => {
+      this.loader.items["floorChecker"].colorSpace = THREE.SRGBColorSpace;
+      this.loader.items["floorChecker"].generateMipmaps = false;
+      this.loader.items["floorChecker"].wrapS = THREE.RepeatWrapping;
+      this.loader.items["floorChecker"].wrapT = THREE.RepeatWrapping;
+      this.loader.items["floorChecker"].minFilter = THREE.NearestFilter;
+      this.loader.items["floorChecker"].magFilter = THREE.NearestFilter;
+      this.loader.items["floorChecker"].repeat.set(3, 3);
+    });
   }
 
-  addSocket(updateGame) {
-    this.playerId = null;
-    document.querySelector(".joinGame").addEventListener("click", () => {
-      let gameId = document.getElementById("gameId").value;
-      this.playerId = document.getElementById("playerId").value;
-      this.socket = new WebSocket(
-        `ws://localhost:8000/ws/game/${gameId}/?player=${this.playerId}`
-      );
+  connectToWebsockets() {
+    document.querySelector(".joinGame").addEventListener("click", async () => {
+      const gameId = document.getElementById("gameId").value;
+      const playerId = this.generateRandomId();
+      const gameType = "circular";
+      const numPlayers = 2;
+      // const numSides = 2; // only polygon
+      const numBalls = 1;
+      const debug = true;
 
-      this.socket.onmessage = function (e) {
-        const data = JSON.parse(e.data);
-        if (data.type === "initial_state") alert("Game initialized!");
-        else if (data.type === "game_state") updateGame(data.game_state);
-        else if (data.type === "game_finished") alert("Game finished!");
-      };
+      try {
+        this.config = {
+          playerId,
+          type: gameType,
+          players: numPlayers,
+          balls: numBalls,
+          debug,
+        };
 
-      this.socket.onopen = function (e) {
-        console.log("Connected to WebSocket");
-      };
+        this.websocket = new GameWebSocket(
+          gameId,
+          playerId,
+          this.handleMessage.bind(this),
+          this.config
+        );
+        this.websocket.connect();
+
+        console.log(`Connected to game ${gameId} as player ${playerId}`);
+      } catch (error) {
+        console.error("Game initialization error:", error);
+      }
     });
+  }
+
+  createGame(initialState) {
+    this.drawer = new Drawer(initialState, this);
+  }
+
+  generateRandomId() {
+    return Math.random().toString(36).substring(2, 15);
+  }
+
+  handleMessage(message) {
+    try {
+      switch (message.type) {
+        case "initial_state":
+          console.log("initial_state: ", message);
+          this.playerId = message.player_index;
+          this.createGame(message.game_state);
+          break;
+
+        case "game_state":
+          console.log("paddles: ", message.game_state.paddles[0]);
+          this.drawer.updateGame(message.game_state);
+          break;
+
+        case "game_finished":
+          console.log("game_finished: ", message);
+          break;
+
+        case "error":
+          console.error("Error:", message);
+          break;
+      }
+    } catch (error) {
+      console.error("Error handling message:", error);
+    }
   }
 }

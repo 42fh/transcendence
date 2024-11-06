@@ -41,6 +41,9 @@ export default class World {
     this.addRenderer(canvas);
 
     this.game = null;
+
+    this.moveUp = false;
+    this.moveDown = false;
   }
 
   addOrthographicCamera() {
@@ -57,26 +60,26 @@ export default class World {
     this.camera.position.z = 2;
     this.camera.position.x = 2;
 
-    if (this.gui.debug) {
-      this.gui.gui
-        .add(this.camera.position, "y")
-        .min(-5)
-        .max(10)
-        .step(0.01)
-        .name("Camera y");
-      this.gui.gui
-        .add(this.camera.position, "z")
-        .min(-5)
-        .max(10)
-        .step(0.01)
-        .name("Camera z");
-      this.gui.gui
-        .add(this.camera.position, "x")
-        .min(-5)
-        .max(10)
-        .step(0.01)
-        .name("Camera x");
-    }
+    // if (this.gui.debug) {
+    //   this.gui.gui
+    //     .add(this.camera.position, "y")
+    //     .min(-5)
+    //     .max(10)
+    //     .step(0.01)
+    //     .name("Camera y");
+    //   this.gui.gui
+    //     .add(this.camera.position, "z")
+    //     .min(-5)
+    //     .max(10)
+    //     .step(0.01)
+    //     .name("Camera z");
+    //   this.gui.gui
+    //     .add(this.camera.position, "x")
+    //     .min(-5)
+    //     .max(10)
+    //     .step(0.01)
+    //     .name("Camera x");
+    // }
   }
 
   addPerspectiveCamera() {
@@ -86,7 +89,28 @@ export default class World {
       0.1,
       1000
     );
-    this.camera.position.set(4, 12, 37);
+    this.camera.position.set(3.22, 1.75, 0.2);
+
+    if (this.gui.debug) {
+      this.gui.gui
+        .add(this.camera.position, "y")
+        .min(-115)
+        .max(20)
+        .step(0.01)
+        .name("Camera y");
+      this.gui.gui
+        .add(this.camera.position, "z")
+        .min(-15)
+        .max(20)
+        .step(0.01)
+        .name("Camera z");
+      this.gui.gui
+        .add(this.camera.position, "x")
+        .min(-15)
+        .max(20)
+        .step(0.01)
+        .name("Camera x");
+    }
   }
 
   addRenderer(canvas) {
@@ -168,18 +192,61 @@ export default class World {
     }
 
     // Game loop
-    if (this.game.loader != null) {
-      window.addEventListener("resourcesLoaded", () => {
-        this.renderer.setAnimationLoop(() => {
-          this.game.gameLoop(this, this.game.scene);
-        });
-      });
-    } else {
-      this.renderer.setAnimationLoop(() => {
-        this.game.gameLoop(this, this.game.scene);
-      });
-    }
+    this.renderer.setAnimationLoop(() => {
+      this.gameLoop();
+    });
 
+    // Event listeners
+    this.addEventListeners();
+  }
+
+  gameLoop() {
+    // move paddle
+    if (this.moveDown && this.game.websocket) {
+      this.game.drawer.movePaddle("left");
+    }
+    if (this.moveUp && this.game.websocket) {
+      this.game.drawer.movePaddle("right");
+    }
+    this.controls.update();
+    this.composer.render(this.scene, this.camera);
+  }
+
+  addEventListeners() {
+    // Move paddle
+    document.addEventListener("keydown", (event) => {
+      switch (event.code) {
+        case "ArrowLeft":
+        case "KeyA":
+          this.moveUp = true;
+          break;
+        case "ArrowRight":
+        case "KeyD":
+          this.moveDown = true;
+          break;
+      }
+    });
+    // Stop moving paddle
+    document.addEventListener("keyup", (event) => {
+      switch (event.code) {
+        case "ArrowLeft":
+        case "KeyA":
+          this.moveUp = false;
+          break;
+        case "ArrowRight":
+        case "KeyD":
+          this.moveDown = false;
+          break;
+      }
+    });
+    // Fullscreen
+    document.addEventListener("dblclick", () => {
+      if (!document.fullscreenElement) {
+        canvas.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    });
     // Resize
     window.addEventListener("resize", () => {
       this.camera.aspect = window.innerWidth / window.innerHeight;
