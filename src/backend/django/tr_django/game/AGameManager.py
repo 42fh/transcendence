@@ -29,6 +29,7 @@ class AGameManager(ABC):
         self.paddles_key = f"game_paddles:{game_id}"
         self.lock_key = f"game_lock:{game_id}"
         self.type_key = f"game_type:{game_id}"
+        self.vertices_key = f"game_vertices:{game_id}"  # New key for vertices
 
     @classmethod
     def register_game_type(cls, game_type_name):
@@ -73,12 +74,15 @@ class AGameManager(ABC):
                 # Load existing settings from Redis
                 redis_bin = await redis.Redis.from_url( 'redis://redis:6379/1', decode_responses=False)
                 stored_settings = await redis_bin.get(f"game_settings:{game_id}")
+                stored_vertices = await redis_bin.get(f"game_vertices:{game_id}")
                 await redis_bin.close()
                 if stored_settings:
                     game_settings = msgpack.unpackb(stored_settings)
                     instance.settings = game_settings
                 else:
                     raise ValueError("Existing game found but no settings available")
+                if stored_vertices:
+                    instance.vertices = msgpack.unpackb(stored_vertices)
             else:
                 # New game - prepare and store settings first
                 if not settings:
@@ -91,7 +95,8 @@ class AGameManager(ABC):
                         'paddle_length': 0.3,
                         'paddle_width': 0.2,
                         'ball_size': 0.1,
-                        'initial_ball_speed': 0.006
+                        'initial_ball_speed': 0.006,
+                        'mode': 'regular'
                     }
                     print("set default game settings.") # debug
                 
@@ -119,6 +124,32 @@ class AGameManager(ABC):
             print(f"Error in get_instance: {e}")
             raise
 
+    async def store_vertices(self, vertices):
+        """Store vertices in Redis"""
+        if self.redis_conn:
+            try:
+                await self.redis_conn.set(
+                    self.vertices_key,
+                    msgpack.packb(vertices)
+                )
+                return True
+            except Exception as e:
+                print(f"Error storing vertices: {e}")
+                return False
+        return False
+
+    async def get_vertices(self):
+        """Retrieve vertices from Redis"""
+        if self.redis_conn:
+            try:
+                vertices_data = await self.redis_conn.get(self.vertices_key)
+                if vertices_data:
+                    return msgpack.unpackb(vertices_data)
+            except Exception as e:
+                print(f"Error retrieving vertices: {e}")
+        return None
+
+
     async def _setup_connections(self):
         """Set up Redis and channel layer connections"""
         self.redis_conn = redis.Redis.from_url('redis://redis:6379/1',decode_responses=False )
@@ -131,7 +162,7 @@ class AGameManager(ABC):
         """Initialize game resources"""
         try:
             await self._setup_connections()
-            self.apply_game_settings() # with this line each instance has the values from states in the instance. 
+            await self.apply_game_settings() # with this line each instance has the values from states in the instance. 
             if create_new:
                await self._initialize_new_game()
         except Exception as e:
@@ -735,4 +766,4 @@ class AGameManager(ABC):
     def get_game_type(self): pass
 
     @abstractmethod 
-    def apply_game_settings(self): pass
+    async  def apply_game_settings(self): pass

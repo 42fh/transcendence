@@ -100,7 +100,11 @@ export class GameController {
         try {
             switch (message.type) {
                 case 'initial_state':
-                    this.handleInitialState(message);
+                    console.log('Initial State received:', {
+                    vertices: message.vertices,
+                    gameStateVertices: message.game_state?.vertices
+                });
+			this.handleInitialState(message);
                     break;
 
                 case 'game_state':
@@ -146,6 +150,13 @@ export class GameController {
         
         if (this.renderer) {
             this.renderer.playerIndex = message?.player_index;
+		const vertices = message.game_setup.vertices || message.game_state?.vertices;
+        console.log('Setting initial vertices:', vertices);
+		 if (vertices) {
+            this.renderer.vertices = vertices;
+        } else {
+            console.warn('No vertices found in initial state message');
+        }	
 	    this.renderer.initialize(message.game_state);
         }
     }

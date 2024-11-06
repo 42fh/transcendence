@@ -802,7 +802,9 @@ i
         this.renderScores();
     }*/
 }
-export class PolygonRenderer extends BasePongRenderer {
+
+
+/*export class PolygonRenderer extends BasePongRenderer {
     render() {
         if (!this.state || !this.svg) return;
         
@@ -891,6 +893,324 @@ export class PolygonRenderer extends BasePongRenderer {
 
         // Draw balls
         this.renderBalls();
+        this.renderScores();
+    }
+}
+*/
+/*export class PolygonRenderer extends BasePongRenderer {
+    constructor(config) {
+        super(config);
+        this.vertices = [];
+        this.initialized = false;
+    }
+
+    initialize(gameState) {
+        super.initialize(gameState);
+        this.updateVertices();
+        this.initialized = true;
+    }
+
+    updateVertices() {
+        if (!this.state) return;
+        
+        // Calculate vertices based on number of sides
+        const numSides = this.state.paddles.length;
+        const angleStep = (2 * Math.PI) / numSides;
+        
+        this.vertices = Array.from({ length: numSides }, (_, i) => {
+            const angle = i * angleStep - Math.PI / 2; // Start from top
+            return {
+                x: this.config.center + this.config.scale * Math.cos(angle),
+                y: this.config.center + this.config.scale * Math.sin(angle)
+            };
+        });
+    }
+
+    update(gameState) {
+        this.state = gameState;
+        if (!this.initialized) {
+            this.updateVertices();
+            this.initialized = true;
+        }
+        this.render();
+    }
+
+    renderPolygonOutline() {
+        // Create polygon outline path
+        const pathData = this.vertices
+            .map((vertex, i) => `${i === 0 ? 'M' : 'L'} ${vertex.x} ${vertex.y}`)
+            .join(' ');
+
+        this.svg.appendChild(this.createSVGElement('path', {
+            d: `${pathData} Z`,
+            fill: 'none',
+            stroke: '#808080',
+            'stroke-width': '2'
+        }));
+    }
+
+    renderPaddle(paddle, startVertex, endVertex) {
+        if (!paddle.active) return;
+
+        const sideX = endVertex.x - startVertex.x;
+        const sideY = endVertex.y - startVertex.y;
+        const sideLength = Math.sqrt(sideX * sideX + sideY * sideY);
+        
+        // Normalize vectors
+        const normalizedSideX = sideX / sideLength;
+        const normalizedSideY = sideY / sideLength;
+        const normalX = -sideY / sideLength;
+        const normalY = sideX / sideLength;
+        
+        // Calculate paddle center position
+        const paddleX = startVertex.x + sideX * paddle.position;
+        const paddleY = startVertex.y + sideY * paddle.position;
+        
+        // Calculate dimensions
+        const paddleLength = this.state.dimensions.paddle_length * sideLength;
+        const paddleWidth = this.state.dimensions.paddle_width * this.config.scale;
+        const hitZoneWidth = (this.state.dimensions.paddle_width + 
+            (this.state.dimensions.ball_size || 0.1) * 2) * this.config.scale;
+
+        // Draw hit zone
+        const isCurrentPlayer = this.state.paddles.indexOf(paddle) === this.playerIndex;
+        const isColliding = this.state.collision?.side_index === paddle.side_index;
+
+        const hitZonePoints = [
+            `${paddleX - (normalizedSideX * paddleLength / 2)},${paddleY - (normalizedSideY * paddleLength / 2)}`,
+            `${paddleX + (normalizedSideX * paddleLength / 2)},${paddleY + (normalizedSideY * paddleLength / 2)}`,
+            `${paddleX + (normalizedSideX * paddleLength / 2) + normalX * hitZoneWidth},${paddleY + (normalizedSideY * paddleLength / 2) + normalY * hitZoneWidth}`,
+            `${paddleX - (normalizedSideX * paddleLength / 2) + normalX * hitZoneWidth},${paddleY - (normalizedSideY * paddleLength / 2) + normalY * hitZoneWidth}`
+        ].join(' ');
+
+        // Draw hit zone with appropriate color
+        this.svg.appendChild(this.createSVGElement('polygon', {
+            points: hitZonePoints,
+            fill: isColliding ? 'rgba(255,0,0,0.1)' : 'rgba(0,255,0,0.1)',
+            stroke: isColliding ? 'red' : 'green',
+            'stroke-width': '1',
+            'stroke-dasharray': '4'
+        }));
+
+        // Draw paddle
+        const paddlePoints = [
+            `${paddleX - (normalizedSideX * paddleLength / 2)},${paddleY - (normalizedSideY * paddleLength / 2)}`,
+            `${paddleX + (normalizedSideX * paddleLength / 2)},${paddleY + (normalizedSideY * paddleLength / 2)}`,
+            `${paddleX + (normalizedSideX * paddleLength / 2) + normalX * paddleWidth},${paddleY + (normalizedSideY * paddleLength / 2) + normalY * paddleWidth}`,
+            `${paddleX - (normalizedSideX * paddleLength / 2) + normalX * paddleWidth},${paddleY - (normalizedSideY * paddleLength / 2) + normalY * paddleWidth}`
+        ].join(' ');
+
+        // Draw paddle with appropriate color
+        this.svg.appendChild(this.createSVGElement('polygon', {
+            points: paddlePoints,
+            fill: isCurrentPlayer ? 'rgba(255,165,0,0.6)' : 'rgba(0,0,255,0.6)',
+            stroke: isCurrentPlayer ? 'orange' : 'blue',
+            'stroke-width': '1'
+        }));
+
+        // Add paddle label
+        const labelX = paddleX + normalX * (hitZoneWidth + 20);
+        const labelY = paddleY + normalY * (hitZoneWidth + 20);
+        const playerIndex = this.state.paddles.indexOf(paddle);
+
+        this.svg.appendChild(this.createSVGElement('text', {
+            x: labelX,
+            y: labelY,
+            'text-anchor': 'middle',
+            'dominant-baseline': 'middle',
+            fill: isCurrentPlayer ? 'orange' : 'blue',
+            'font-size': '12px'
+        })).textContent = `P${playerIndex + 1}`;
+    }
+
+    render() {
+        if (!this.state || !this.svg) return;
+        this.svg.innerHTML = '';
+
+        // Draw polygon outline
+        this.renderPolygonOutline();
+
+        // Render each paddle
+        this.state.paddles.forEach((paddle, index) => {
+            const startVertex = this.vertices[paddle.side_index];
+            const endVertex = this.vertices[(paddle.side_index + 1) % this.vertices.length];
+            this.renderPaddle(paddle, startVertex, endVertex);
+        });
+
+        // Draw balls
+        this.renderBalls();
+        
+        // Update scores
+        this.renderScores();
+    }
+}*/
+export class PolygonRenderer extends BasePongRenderer {
+    constructor(config) {
+        super(config);
+        this.vertices = [];
+        this.playerIndex = null;
+        this.initialized = false;
+    }
+
+    initialize(gameState) {
+        super.initialize(gameState);
+        this.initialized = true;
+    }
+
+    transformVertices(vertices) {
+        // Transform backend coordinates to screen coordinates
+        return vertices.map(vertex => ({
+            x: this.config.center + vertex.x * this.config.scale,
+            y: this.config.center + vertex.y * this.config.scale
+        }));
+    }
+
+    update(gameState) {
+        this.state = gameState;
+        this.render();
+    }
+
+    renderPolygonOutline() {
+        if (!this.vertices || this.vertices.length === 0) return;
+
+        const transformedVertices = this.transformVertices(this.vertices);
+        const pathData = transformedVertices
+            .map((vertex, i) => `${i === 0 ? 'M' : 'L'} ${vertex.x} ${vertex.y}`)
+            .join(' ');
+
+        this.svg.appendChild(this.createSVGElement('path', {
+            d: `${pathData} Z`,
+            fill: 'none',
+            stroke: '#808080',
+            'stroke-width': '2'
+        }));
+    }
+
+    renderPaddle(paddle, sideIndex) {
+        if (!paddle.active || !this.vertices) return;
+
+        const transformedVertices = this.transformVertices(this.vertices);
+        const startVertex = transformedVertices[sideIndex];
+        const endVertex = transformedVertices[(sideIndex + 1) % transformedVertices.length];
+
+        const sideX = endVertex.x - startVertex.x;
+        const sideY = endVertex.y - startVertex.y;
+        const sideLength = Math.sqrt(sideX * sideX + sideY * sideY);
+        
+        // Normalize vectors
+        const normalizedSideX = sideX / sideLength;
+        const normalizedSideY = sideY / sideLength;
+        const normalX = -sideY / sideLength;
+        const normalY = sideX / sideLength;
+        
+        // Calculate paddle center position
+        const paddleX = startVertex.x + sideX * paddle.position;
+        const paddleY = startVertex.y + sideY * paddle.position;
+        
+        // Calculate dimensions
+        const paddleLength = this.state.dimensions.paddle_length * sideLength;
+        const paddleWidth = this.state.dimensions.paddle_width * this.config.scale;
+        const hitZoneWidth = (this.state.dimensions.paddle_width + 
+            (this.state.dimensions.ball_size || 0.1) * 2) * this.config.scale;
+
+        // Check if this is current player's paddle or if there's a collision
+        const isCurrentPlayer = this.state.paddles.indexOf(paddle) === this.playerIndex;
+        const isColliding = this.state.collision?.side_index === paddle.side_index;
+
+        // Draw hit zone
+        const hitZonePoints = [
+            `${paddleX - (normalizedSideX * paddleLength / 2)},${paddleY - (normalizedSideY * paddleLength / 2)}`,
+            `${paddleX + (normalizedSideX * paddleLength / 2)},${paddleY + (normalizedSideY * paddleLength / 2)}`,
+            `${paddleX + (normalizedSideX * paddleLength / 2) + normalX * hitZoneWidth},${paddleY + (normalizedSideY * paddleLength / 2) + normalY * hitZoneWidth}`,
+            `${paddleX - (normalizedSideX * paddleLength / 2) + normalX * hitZoneWidth},${paddleY - (normalizedSideY * paddleLength / 2) + normalY * hitZoneWidth}`
+        ].join(' ');
+
+        this.svg.appendChild(this.createSVGElement('polygon', {
+            points: hitZonePoints,
+            fill: isColliding ? 'rgba(255,0,0,0.1)' : 'rgba(0,255,0,0.1)',
+            stroke: isColliding ? 'red' : 'green',
+            'stroke-width': '1',
+            'stroke-dasharray': '4'
+        }));
+
+        // Draw paddle
+        const paddlePoints = [
+            `${paddleX - (normalizedSideX * paddleLength / 2)},${paddleY - (normalizedSideY * paddleLength / 2)}`,
+            `${paddleX + (normalizedSideX * paddleLength / 2)},${paddleY + (normalizedSideY * paddleLength / 2)}`,
+            `${paddleX + (normalizedSideX * paddleLength / 2) + normalX * paddleWidth},${paddleY + (normalizedSideY * paddleLength / 2) + normalY * paddleWidth}`,
+            `${paddleX - (normalizedSideX * paddleLength / 2) + normalX * paddleWidth},${paddleY - (normalizedSideY * paddleLength / 2) + normalY * paddleWidth}`
+        ].join(' ');
+
+        this.svg.appendChild(this.createSVGElement('polygon', {
+            points: paddlePoints,
+            fill: isCurrentPlayer ? 'rgba(255,165,0,0.6)' : 'rgba(0,0,255,0.6)',
+            stroke: isCurrentPlayer ? 'orange' : 'blue',
+            'stroke-width': '1'
+        }));
+
+        // Add paddle label
+        const labelX = paddleX + normalX * (hitZoneWidth + 20);
+        const labelY = paddleY + normalY * (hitZoneWidth + 20);
+        const playerIndex = this.state.paddles.indexOf(paddle);
+
+        this.svg.appendChild(this.createSVGElement('text', {
+            x: labelX,
+            y: labelY,
+            'text-anchor': 'middle',
+            'dominant-baseline': 'middle',
+            fill: isCurrentPlayer ? 'orange' : 'blue',
+            'font-size': '12px'
+        })).textContent = `P${playerIndex + 1}`;
+    }
+
+    render() {
+	 if (!this.state) {
+        console.warn('Rendering failed: No game state available');
+        return;
+    }
+    
+    if (!this.svg) {
+        console.warn('Rendering failed: No SVG element found');
+        return;
+    }
+    
+    if (!this.vertices) {
+        console.warn('Rendering failed: Vertices are undefined');
+        console.log('Current vertices:', this.vertices);
+        return;
+    }
+    
+    if (this.vertices.length === 0) {
+        console.warn('Rendering failed: Vertices array is empty');
+        console.log('Current vertices:', this.vertices);
+        return;
+    }
+
+    // If we get here, all checks passed
+    console.log('Rendering with:', {
+        verticesCount: this.vertices.length,
+        paddlesCount: this.state.paddles.length,
+        svgElement: this.svg.id
+    });
+        if (!this.state || !this.svg || !this.vertices || this.vertices.length === 0) {
+            console.warn('Missing required data for rendering');
+            return;
+        }
+
+        this.svg.innerHTML = '';
+
+        // Draw polygon outline
+        this.renderPolygonOutline();
+
+        // Render each paddle
+        this.state.paddles.forEach((paddle) => {
+            this.renderPaddle(paddle, paddle.side_index);
+        });
+
+        // Draw balls
+        this.renderBalls();
+        
+        // Update scores
         this.renderScores();
     }
 }

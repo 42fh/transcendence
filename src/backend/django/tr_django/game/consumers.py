@@ -65,6 +65,10 @@ class PongConsumer(AsyncWebsocketConsumer):
                 if state_data:
                     current_state = msgpack.unpackb(state_data)
                     sanitized_state = self.sanitize_for_json(current_state)
+                    vertices_data = await self.game_manager.redis_conn.get(self.game_manager.vertices_key)
+                    print("hallo: " + str(vertices_data))
+                    vertices = msgpack.unpackb(vertices_data) if vertices_data else None
+                    sanitized_vertices = self.sanitize_for_json(vertices) 
                     await self.send(text_data=json.dumps({
                         'type': 'initial_state',
                         'game_state': sanitized_state,
@@ -72,6 +76,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                         'player_values': self.player_values,
                         'game_setup': {
                             'type': game_type,
+                            'vertices': sanitized_vertices,
                             #'settings': await self.game_manager.redis_conn.get(self.game_manager.settings_key)
                         }
                     }))
