@@ -32,6 +32,43 @@ export default class Drawer {
       this.game.paddles.push(paddle);
     }
 
+    const sectorColors = [
+      0xff0000, // Red
+      0x00ff00, // Green
+      0x0000ff, // Blue
+      0xffff00, // Yellow
+      0xff00ff, // Magenta
+      0x00ffff, // Cyan
+      0xff8000, // Orange
+      0x8000ff, // Purple
+      0x0080ff, // Light Blue
+      0xff0080, // Pink
+      0x80ff00, // Lime
+    ];
+
+    for (let i = 0; i < player_count; i++) {
+      const startAngle = (i / player_count) * Math.PI * 2 + Math.PI / 2;
+      const ringGeometry = new THREE.RingGeometry(
+        radius - 0.05,
+        radius,
+        32,
+        1,
+        startAngle,
+        (2 * Math.PI) / player_count
+      );
+      const ringMaterial = new THREE.MeshBasicMaterial({
+        color: sectorColors[i],
+        transparent: true,
+        opacity: 0.5,
+        side: THREE.DoubleSide,
+      });
+      const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
+      ringMesh.rotation.x = -Math.PI / 2;
+      ringMesh.position.y = 0.01;
+
+      this.game.addObjects([ringMesh]);
+    }
+
     this.game.addObjects(this.game.paddles);
   }
 
@@ -44,20 +81,7 @@ export default class Drawer {
     field.rotation.x = -Math.PI / 2;
     field.receiveShadow = true;
 
-    const boundaryGeometry = new THREE.RingGeometry(radius - 0.05, radius, 64); // Thin ring
-    const boundaryMaterial = new THREE.MeshBasicMaterial({
-      color: 0xffffff,
-      side: THREE.DoubleSide,
-    });
-    const boundary = new THREE.Mesh(boundaryGeometry, boundaryMaterial);
-    boundary.rotation.x = -Math.PI / 2;
-    boundary.position.y = 0.01; // z-fighting fix
-
-    const gameField = new THREE.Group();
-    gameField.add(field);
-    gameField.add(boundary);
-
-    this.game.addObjects([gameField]);
+    this.game.addObjects([field]);
   }
 
   createBalls(ballsConfig) {
@@ -78,9 +102,9 @@ export default class Drawer {
     // update balls
     for (let i = 0; i < gameState.balls.length; i++) {
       this.game.balls[i].position.set(
-        gameState.balls[i].y,
+        gameState.balls[i].x,
         0.08,
-        gameState.balls[i].x
+        gameState.balls[i].y
       );
     }
 
@@ -93,7 +117,8 @@ export default class Drawer {
 
       const angle =
         baseAngle +
-        gameState.paddles[i].position * ((Math.PI * 2) / totalSides);
+        gameState.paddles[i].position * ((Math.PI * 2) / totalSides) +
+        Math.PI / 2;
 
       const x = radius * Math.cos(angle);
       const z = radius * Math.sin(angle);

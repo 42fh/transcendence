@@ -141,7 +141,8 @@ export default class GameConstructor {
       const gameId = document.getElementById("gameId").value;
       const playerId = this.generateRandomId();
       const gameType = "circular";
-      const numPlayers = 2;
+      const numPlayers = document.getElementById("playerCount").value;
+      console.log("numPlayers: ", numPlayers);
       // const numSides = 2; // only polygon
       const numBalls = 1;
       const debug = true;
@@ -188,7 +189,11 @@ export default class GameConstructor {
           break;
 
         case "game_state":
-          console.log("paddles: ", message.game_state.paddles[0]);
+          console.log(
+            "paddles: ",
+            message.game_state.paddles[0],
+            message.game_state.paddles[1]
+          );
           this.drawer.updateGame(message.game_state);
           break;
 
