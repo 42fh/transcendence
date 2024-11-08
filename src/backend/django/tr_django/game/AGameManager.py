@@ -4,8 +4,11 @@ import asyncio
 import msgpack
 import redis.asyncio as redis
 import math
+import time
 import random
 from channels.layers import get_channel_layer
+
+
 
 class GameStateError(Exception):
     """Custom exception for game state validation errors"""
@@ -203,7 +206,7 @@ class AGameManager(ABC):
             # Initialize ball(s) with random direction
             balls = []
             num_balls = self.settings.get('num_balls', 1)
-            ball_size = self.settings.get('ball_size', 0.1)
+            ball_size = self.settings.get('ball_size', 0.08)
             initial_speed = self.settings.get('initial_ball_speed', 0.006)
             
             for _ in range(num_balls):
@@ -252,7 +255,7 @@ class AGameManager(ABC):
                 "scores": [int(0)] * score_count,
                 "dimensions": {
                     "paddle_length": float(self.settings.get('paddle_length', 0.3)),
-                    "paddle_width": float(self.settings.get('paddle_width', 0.2))
+                    "paddle_width": float(self.settings.get('paddle_width', 0.1))
                 },
                 "game_type": self.get_game_type()
             }
@@ -690,48 +693,89 @@ class AGameManager(ABC):
         })
         return ball
 
-
-    
-    def apply_ball_bounce_effect(self, ball, normal, offset=0, speed_multiplier=1.05):
+    def apply_ball_bounce_effect(self, ball, normal, offset=0, speed_multiplier=1.08):
         """
-        Apply bounce effect to ball including reflection and speed increase
+        Apply enhanced bounce effect with no speed limit for maximum chaos
         Args:
             ball (dict): Ball object
             normal (dict): Normal vector of collision
             offset (float): Normalized offset from center (-1 to 1)
-            speed_multiplier (float): Speed increase factor
+            speed_multiplier (float): Speed increase factor (increased from default)
         Returns:
             dict: Updated ball velocities
         """
-        # Calculate reflection
+        # Calculate base reflection
         dot_product = (ball["velocity_x"] * normal["x"] + 
                       ball["velocity_y"] * normal["y"])
         
         reflected_x = ball["velocity_x"] - 2 * dot_product * normal["x"]
         reflected_y = ball["velocity_y"] - 2 * dot_product * normal["y"]
         
-        # Apply angle modification based on offset
-        angle_mod = offset * math.pi * 0.25
+        # Calculate current speed
+        current_speed = math.sqrt(ball["velocity_x"]**2 + ball["velocity_y"]**2)
+        
+        # Enhanced angle modification based on hit location
+        # More extreme angle changes near the edges
+        edge_factor = abs(offset) ** 0.5  # More aggressive non-linear scaling
+        angle_mod = offset * math.pi * 0.4 * (1 + edge_factor)
+        
+        # Add speed-based randomness - more chaos at higher speeds
+        speed_randomness = min(0.2, current_speed * 0.01)  # Caps random effect
+        random_angle = random.uniform(-speed_randomness, speed_randomness) * (1 - abs(offset))
+        angle_mod += random_angle
+        
+        # Apply rotation
         cos_mod = math.cos(angle_mod)
         sin_mod = math.sin(angle_mod)
         
         final_x = reflected_x * cos_mod - reflected_y * sin_mod
         final_y = reflected_x * sin_mod + reflected_y * cos_mod
         
-        # Apply speed increase
-        current_speed = math.sqrt(ball["velocity_x"]**2 + ball["velocity_y"]**2)
-        new_speed = current_speed * speed_multiplier
-        # Limit speed to 80% of ball size to prevent tunneling
-        MAX_SPEED = ball["size"] * 0.8
-        if new_speed > MAX_SPEED:
-            scale = MAX_SPEED / new_speed
-            final_x *= scale
-            final_y *= scale       
- 
+        # Dynamic speed modification with combo system
+        edge_boost = 1.0 + (abs(offset) * 0.2)  # Edges now give speed boost
+        combo_multiplier = 1.0 + (self.hit_combo * 0.08)  # Stronger combo effect
+        
+        # Speed boost based on current velocity
+        velocity_boost = 1.0 + (math.log(current_speed + 1) * 0.1)
+        
+        # Calculate new speed with all modifiers
+        new_speed = (current_speed * 
+                     speed_multiplier * 
+                     edge_boost * 
+                     combo_multiplier * 
+                     velocity_boost)
+        
+        # Add a minimum speed to prevent very slow balls
+        MIN_SPEED = 0.004
+        if new_speed < MIN_SPEED:
+            new_speed = MIN_SPEED
+        
+        # Normalize and apply final speed
+        speed_scale = new_speed / math.sqrt(final_x**2 + final_y**2)
+        final_x *= speed_scale
+        final_y *= speed_scale
+        
+        # Add increasing curve effect based on speed
+        curve_intensity = min(0.001, current_speed * 0.0001)
+        curve_factor = offset * curve_intensity
+        final_x += curve_factor * normal["y"]
+        final_y -= curve_factor * normal["x"]
+        
         return {
-            "velocity_x": (final_x),
-            "velocity_y": (final_y)
+            "velocity_x": float(final_x),
+            "velocity_y": float(final_y)
         }
+
+    def initialize_combo_system(self):
+        """Initialize enhanced combo tracking system"""
+        self.hit_combo = 0
+        self.last_hit_time = 0
+        self.combo_timeout = 1.5  # Longer combo window for more speed potential
+        self.max_combo_hits = float('inf')  # No combo limit!
+
+    def update_hit_combo(self, current_time, ball):
+            pass
+        # Could trigger special effects or announcements here
 
     def update_scores(self, current_scores, failed_player_index):
         """
@@ -742,10 +786,9 @@ class AGameManager(ABC):
         Returns:
             list: Updated scores
         """
-        return [
-            score + (1 if i != failed_player_index else 0)
-            for i, score in enumerate(current_scores)
-            ]
+        return [score + (1 if i != failed_player_index else 0) for i, score in enumerate(current_scores)]
+
+
 
     @property
     async def running(self):

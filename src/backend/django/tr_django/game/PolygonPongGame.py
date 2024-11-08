@@ -2,6 +2,9 @@ from .AGameManager import AGameManager
 import math
 import random
 import msgpack
+import time
+
+
 
 @AGameManager.register_game_type("polygon")
 class PolygonPongGame(AGameManager):
@@ -10,21 +13,70 @@ class PolygonPongGame(AGameManager):
         self.num_sides = 4  # Default number of sides
         self.num_paddles = 2  # Default number of paddles
         self.vertices = None  # Will store calculated vertices
-        self.side_lengths = None  # Will store lengths of each side
         self.active_sides = None  # Will store which sides have paddles
+        self.side_normals = None  # Will store normal vectors for each side
+        self.previous_movements = []   # Will be initialized after num_sides is set from settings
         self.game_mode = 'regular'  # Default mode
-        self.sectors = None  # For optimized collision detection
+        # Initialize combo system
+        self.hit_combo = 0
+        self.last_hit_time = 0
+        self.combo_timeout = 1.5  # seconds
+        self.highest_recorded_speed = 0
+
+
+
 
     async def apply_game_settings(self):
         """Apply game-specific values from settings"""
         self.num_sides = self.settings['sides']
         self.num_paddles = self.settings['num_players']
-        self.game_mode = self.settings.get('mode', 'star')  # Get mode from settings
+        self.game_mode = self.settings.get('mode', 'irregular')  # Get mode from settings
         self.active_sides = self._get_player_side_indices()
+        self.initialize_ball_movements(self.settings.get('num_balls', 1))
         self.calculate_polygon_vertices()
-        self._initialize_sectors()  # Initialize sectors after vertices are calculated
-        
+        self.calculate_side_normals()
         await self.store_vertices(self.vertices)
+
+
+    def initialize_ball_movements(self, num_balls):
+        """Initialize the nested array structure for ball movement tracking"""
+        self.previous_movements = [
+        [
+            {'distance': float(0.0), 'dot_product': float(0.0)}
+            for _ in range(self.num_sides)
+        ]
+        for _ in range(num_balls)
+        ]
+
+
+
+
+    def update_ball_movement(self, ball_index, side_index, distance, dot_product):
+        """Update movement data for a specific ball and side"""
+        if ball_index >= len(self.previous_movements):
+            # Expand array if needed (e.g., when new balls are added)
+            additional_balls = ball_index - len(self.previous_movements) + 1
+            self.previous_movements.extend([
+                [
+                    {'distance': float(0.0), 'dot_product': float(0.0)}
+                    for _ in range(self.num_sides)
+                ]
+                for _ in range(additional_balls)
+            ])
+        
+        self.previous_movements[ball_index][side_index] = {
+            'distance': float(distance),
+            'dot_product': float(dot_product)
+        }
+
+    def reset_ball_movement(self, ball_index):
+        """Reset movement tracking for a specific ball"""
+        if ball_index < len(self.previous_movements):
+            self.previous_movements[ball_index] = [
+                {'distance': float(0.0), 'dot_product': float(0.0)}
+                for _ in range(self.num_sides)
+            ]
+
 
 
     def get_game_type(self):
@@ -95,10 +147,11 @@ class PolygonPongGame(AGameManager):
         if self.game_mode == 'regular':
             # Perfect regular polygon: all sides equal, evenly spaced
             angle_step = (2 * math.pi) / self.num_sides
-            start_angle = -math.pi / 2  # Start from top
+            #start_angle = -math.pi / 2  # Start from top
             
             for i in range(self.num_sides):
-                angle = start_angle + (i * angle_step)
+                # angle = start_angle + (i * angle_step)
+                angle = (i * angle_step)
                 vertices.append({
                     "x": base_radius * math.cos(angle),
                     "y": base_radius * math.sin(angle)
@@ -108,11 +161,12 @@ class PolygonPongGame(AGameManager):
             # Get ratios and adjustments based on specific irregular mode
             ratios, angle_adjustments = self._calculate_side_ratios()
             
-            start_angle = -math.pi / 2
+            #start_angle = -math.pi / 2
             angle_step = (2 * math.pi) / self.num_sides
             
             for i in range(self.num_sides):
-                angle = start_angle + (i * angle_step) + angle_adjustments[i]
+                # angle = start_angle + (i * angle_step) + angle_adjustments[i]
+                angle = (i * angle_step) + angle_adjustments[i]
                 radius = base_radius * ratios[i]
                 vertices.append({
                     "x": radius * math.cos(angle),
@@ -129,7 +183,6 @@ class PolygonPongGame(AGameManager):
             vertex["y"] *= scale
             
         self.vertices = vertices
-        self._calculate_side_lengths()
 
     def _calculate_base_deformation(self):
         """Calculate deformation based on game mode"""
@@ -232,198 +285,78 @@ class PolygonPongGame(AGameManager):
             
         return ratios, angle_adjustments
 
-    def _calculate_side_lengths(self):
-        """Calculate length of each side"""
-        self.side_lengths = []
-        for i in range(self.num_sides):
-            start = self.vertices[i]
-            end = self.vertices[(i + 1) % self.num_sides]
-            length = math.sqrt(
-                (end["x"] - start["x"])**2 + 
-                (end["y"] - start["y"])**2
-            )
-            self.side_lengths.append(length)
-            print(f"Side {i}: Length = {length:.3f}" + 
-                  (" (Player Side)" if i in self.active_sides else ""))
-
-    def _initialize_sectors(self):
-        """Initialize sector data for optimized collision detection"""
-        self.sectors = []
-        for i in range(self.num_sides):
-            start = self.vertices[i]
-            end = self.vertices[(i + 1) % self.num_sides]
-            center = {"x": 0, "y": 0}  # Polygon center
-            
-            self.sectors.append({
-                "index": i,
-                "start": start,
-                "end": end,
-                "center": center,
-                "is_player": i in self.active_sides,
-                "length": self.side_lengths[i],
-                # Cache normalized vectors for sector checks
-                "to_start": self._normalize_vector(
-                    start["x"] - center["x"],
-                    start["y"] - center["y"]
-                ),
-                "to_end": self._normalize_vector(
-                    end["x"] - center["x"],
-                    end["y"] - center["y"]
-                )
-            })
-
-    def _calculate_distance_to_side(self, point, side_index):
+    # 
+    def calculate_side_normals(self):
         """
-        Calculate the distance from a point to a polygon side and related info.
-        
-        Args:
-            point (dict): Point with x, y coordinates
-            side_index (int): Index of the side to check
-            
-        Returns:
-            dict: Distance info including distance, position along side,
-                 projection point, and normal vector
+        Calculate normal vectors for each side of the polygon.
+        Normal vectors point inward.
+        All values are stored as floats.
+        Uses epsilon for float comparisons.
         """
         if not self.vertices:
-            raise ValueError("Vertices not initialized")
-        
-        start = self.vertices[side_index]
-        end = self.vertices[(side_index + 1) % self.num_sides]
-        
-        # Vector from start to end of side
-        side_vector_x = end["x"] - start["x"]
-        side_vector_y = end["y"] - start["y"]
-        
-        # Vector from start to point
-        point_vector_x = point["x"] - start["x"]
-        point_vector_y = point["y"] - start["y"]
-        
-        # Calculate squared length of side
-        side_length_sq = side_vector_x**2 + side_vector_y**2
-        
-        # Calculate normalized position along the side (t parameter)
-        if side_length_sq < 1e-10:  # Protect against degenerate sides
-            t = 0
-        else:
-            t = max(0, min(1, (point_vector_x * side_vector_x + point_vector_y * side_vector_y) / side_length_sq))
-        
-        # Calculate projection point
-        projection_x = start["x"] + t * side_vector_x
-        projection_y = start["y"] + t * side_vector_y
-        
-        # Calculate vector from projection to point
-        to_point_x = point["x"] - projection_x
-        to_point_y = point["y"] - projection_y
-        
-        # Calculate distance
-        distance = math.sqrt(to_point_x**2 + to_point_y**2)
-        
-        # Calculate normal vector
-        def get_normal(dx, dy, dist):
-            if dist < 1e-10:
-                # If distance is effectively zero, use perpendicular to side
-                side_length = math.sqrt(side_length_sq)
-                if side_length < 1e-10:
-                    return {"x": 1, "y": 0}  # Arbitrary normal for degenerate side
-                return {
-                    "x": -side_vector_y / side_length,
-                    "y": side_vector_x / side_length
-                }
-            return {
-                "x": dx / dist,
-                "y": dy / dist
-            }
-        
-        normal = get_normal(to_point_x, to_point_y, distance)
-        
-        # Ensure normal points inward for collision handling
-        # Use cross product to determine if we need to flip the normal
-        cross_product = (side_vector_x * normal["y"] - side_vector_y * normal["x"])
-        if cross_product < 0:
-            normal["x"] = -normal["x"]
-            normal["y"] = -normal["y"]
-        
-        return {
-            "distance": float(distance),
-            "position": float(t),
-            "projection": {
-                "x": float(projection_x),
-                "y": float(projection_y)
-            },
-            "normal": normal
-        }
+            raise ValueError("Vertices must be calculated before normals")
 
-    def _calculate_paddle_collision(self, side_index, collision_info, ball, paddles, dimensions):
-        """
-        Calculate paddle collision including edge hits and offset effects.
+        EPSILON = 1e-10  # Small value for float comparisons
+        self.side_normals = []
         
-        Args:
-            side_index (int): Index of the side to check
-            collision_info (dict): Basic collision information from _calculate_distance_to_side
-            ball (dict): Ball object with position and size
-            paddles (list): List of all paddles
-            dimensions (dict): Contains paddle dimensions (paddle_length, paddle_width)
+        for i in range(self.num_sides):
+            # Get current side vertices
+            start = self.vertices[i]
+            end = self.vertices[(i + 1) % self.num_sides]
             
-        Returns:
-            dict: Complete collision information including paddle-specific data
-        """
-        if not self.vertices or not self.side_lengths:
-            raise ValueError("Vertices or side lengths not initialized")
-        
-        paddle = next((p for p in paddles if p["side_index"] == side_index), None)
-        if not paddle or not paddle["active"]:
-            return None
+            # Calculate side vector (explicitly convert to float)
+            side_vector_x = float(end["x"] - start["x"])
+            side_vector_y = float(end["y"] - start["y"])
             
-        start = self.vertices[side_index]
-        end = self.vertices[(side_index + 1) % self.num_sides]
-        side_length = self.side_lengths[side_index]
-        
-        # Calculate paddle dimensions using passed dimensions parameter
-        paddle_length = side_length * dimensions["paddle_length"]
-        paddle_width = dimensions["paddle_width"]
-        half_paddle_length = paddle_length / 2
-        
-        # Calculate paddle center position
-        paddle_center_t = paddle["position"]
-        paddle_center_x = start["x"] + paddle_center_t * (end["x"] - start["x"])
-        paddle_center_y = start["y"] + paddle_center_t * (end["y"] - start["y"])
-        
-        # Extend collision zone by ball size
-        extended_width = paddle_width + ball["size"]
-        
-        # Calculate relative position along paddle
-        relative_pos = collision_info["position"] - paddle_center_t
-        normalized_offset = relative_pos * side_length / half_paddle_length
-        
-        # Check if within paddle bounds
-        is_within_length = abs(relative_pos * side_length) <= half_paddle_length
-        is_within_width = collision_info["distance"] <= extended_width
-        
-        # Get active paddle index for scoring
-        active_paddle_index = self._get_active_paddle_index(side_index, paddles)
-        
-        if is_within_length and is_within_width:
-            return {
-                "type": "paddle",
-                "side_index": side_index,
-                "active_paddle_index": active_paddle_index,
-                "normalized_offset": float(normalized_offset),
-                "distance": float(collision_info["distance"]),
-                "position": float(collision_info["position"]),
-                "projection": collision_info["projection"],
-                "normal": collision_info["normal"],
-                "is_edge_hit": abs(normalized_offset) > 0.9
-            }
-        else:
-            return {
-                "type": "miss",
-                "side_index": side_index,
-                "active_paddle_index": active_paddle_index,
-                "distance": float(collision_info["distance"]),
-                "position": float(collision_info["position"]),
-                "projection": collision_info["projection"],
-                "normal": collision_info["normal"]
-            }
+            # Calculate normal (perpendicular) vector
+            # For a vector (x,y), the perpendicular vector is (-y,x) or (y,-x)
+            normal_x = float(-side_vector_y)
+            normal_y = float(side_vector_x)
+            
+            # Normalize the normal vector
+            length = float(math.sqrt(normal_x * normal_x + normal_y * normal_y))
+            if length > EPSILON:  # Compare with epsilon instead of 0
+                normal_x = float(normal_x / length)
+                normal_y = float(normal_y / length)
+            else:
+                # Handle degenerate case (zero-length side)
+                normal_x = float(1.0)  # Default to unit vector pointing right
+                normal_y = float(0.0)
+                print(f"Warning: Near-zero length side detected at index {i}")
+            
+            # Check if normal points inward
+            # Take the midpoint of the side
+            mid_x = float((start["x"] + end["x"]) / 2)
+            mid_y = float((start["y"] + end["y"]) / 2)
+            
+            # Vector from midpoint to center (0,0)
+            to_center_x = float(-mid_x)
+            to_center_y = float(-mid_y)
+            
+            # Dot product with normal
+            dot_product = float(normal_x * to_center_x + normal_y * to_center_y)
+            
+            # If dot product is negative or very close to zero, normal points outward, so flip it
+            if dot_product < EPSILON:  # Also using epsilon here for consistency
+                normal_x = float(-normal_x)
+                normal_y = float(-normal_y)
+                dot_product = float(-dot_product)  # Update dot product after flip
+            
+            self.side_normals.append({
+                "x": float(normal_x),
+                "y": float(normal_y),
+                "side_index": int(i),
+                "is_player": bool(i in self.active_sides),
+                "dot_product": float(dot_product)
+            })
+            
+            # Debug print with explicit float formatting
+            print(f"Side {i} normal: ({normal_x:.6f}, {normal_y:.6f})" +
+                  (" (Player Side)" if i in self.active_sides else "") +
+                  f" length: {length:.6f}, dot: {dot_product:.6f}")
+
+
+
 
     def _get_active_paddle_index(self, side_index, paddles):
         """Convert side_index to active paddle index"""
@@ -444,135 +377,874 @@ class PolygonPongGame(AGameManager):
             return {"x": 0, "y": 0}
         return {"x": x / length, "y": y / length}
 
-    def _get_ball_sector(self, ball):
-        """Determine which sector the ball is in using dot products"""
-        if not self.sectors:
-            self._initialize_sectors()
-            
-        ball_vector = self._normalize_vector(ball["x"], ball["y"])
+    def handle_tunneling(self, ball, current_sector, new_state):
+        """
+        Handle case where ball has tunneled through a side.
         
-        for sector in self.sectors:
-            # Check if ball_vector is between sector boundaries using dot product
-            dot1 = (ball_vector["x"] * sector["to_start"]["x"] + 
-                   ball_vector["y"] * sector["to_start"]["y"])
-            dot2 = (ball_vector["x"] * sector["to_end"]["x"] + 
-                   ball_vector["y"] * sector["to_end"]["y"])
+        Args:
+            ball (dict): Current ball state
+            current_sector (dict): Information about the current sector and collision
+            new_state (dict): Current game state
             
-            # Cross product to determine if ball is on correct side
-            cross = (sector["to_end"]["x"] * sector["to_start"]["y"] - 
-                    sector["to_end"]["y"] * sector["to_start"]["x"])
+        Returns:
+            dict: Collision information or None if no valid collision
+        """
+        side_index = current_sector['side_index']
+        
+        # Calculate basic collision info using previous frame's position
+        collision_info = {
+            "distance": current_sector['movement']['current_distance'],
+            "normal": self.side_normals[side_index],
+            "projection": self._calculate_projection(ball, side_index)
+        }
+        
+        if side_index in self.active_sides:
+            # Check for paddle collision
+            paddle_collision = self._calculate_paddle_collision(
+                side_index,
+                collision_info,
+                ball,
+                new_state["paddles"],
+                new_state["dimensions"]
+            )
             
-            if cross > 0:
-                if dot1 >= 0 and dot2 <= 0:
-                    return sector["index"]
+            if paddle_collision and paddle_collision["type"] == "paddle":
+                # Reset ball position to paddle surface
+                self.apply_collision_resolution(ball, paddle_collision)
+                return paddle_collision
             else:
-                if dot1 <= 0 and dot2 >= 0:
-                    return sector["index"]
-                    
-        # Fallback - find closest side
-        return self._find_closest_side(ball)
+                # Reset ball position to wall and return miss
+                self.apply_collision_resolution(ball, {
+                    "type": "miss",
+                    "side_index": side_index,
+                    **collision_info
+                })
+                return {
+                    "type": "miss",
+                    "side_index": side_index,
+                    "active_paddle_index": self._get_active_paddle_index(side_index, new_state["paddles"]),
+                    **collision_info
+                }
+        else:
+            # Reset ball position to wall
+            self.apply_collision_resolution(ball, {
+                "type": "wall",
+                "side_index": side_index,
+                **collision_info
+            })
+            return {
+                "type": "wall",
+                "side_index": side_index,
+                **collision_info
+            }
 
-    def _find_closest_side(self, ball):
-        """Fallback method to find closest side if sector check fails"""
-        min_distance = float('inf')
-        closest_side = 0
+    def handle_parallel(self, ball, current_sector, new_state):
+        """
+        Handle case where ball is moving parallel to a side.
         
-        for i in range(self.num_sides):
-            distance = self._calculate_distance_to_side(ball, i)
-            if distance["distance"] < min_distance:
-                min_distance = distance["distance"]
-                closest_side = i
-                
-        return closest_side
+        Args:
+            ball (dict): Current ball state
+            current_sector (dict): Information about the current sector and collision
+            new_state (dict): Current game state
+            
+        Returns:
+            dict: Collision information or None if no valid collision
+        """
+        side_index = current_sector['side_index']
+        movement = current_sector['movement']
+        
+        # If ball is far from side, no collision needed
+        if movement['current_distance'] > ball["size"]:
+            return None
+            
+        collision_info = {
+            "distance": movement['current_distance'],
+            "normal": self.side_normals[side_index],
+            "projection": self._calculate_projection(ball, side_index)
+        }
+        
+        if side_index in self.active_sides:
+            # Check for paddle collision
+            paddle_collision = self._calculate_paddle_collision(
+                side_index,
+                collision_info,
+                ball,
+                new_state["paddles"],
+                new_state["dimensions"]
+            )
+            
+            if paddle_collision and paddle_collision["type"] == "paddle":
+                self.apply_collision_resolution(ball, paddle_collision)
+                return paddle_collision
+            else:
+                self.apply_collision_resolution(ball, {
+                    "type": "miss",
+                    "side_index": side_index,
+                    **collision_info
+                })
+                return {
+                    "type": "miss",
+                    "side_index": side_index,
+                    "active_paddle_index": self._get_active_paddle_index(side_index, new_state["paddles"]),
+                    **collision_info
+                }
+        else:
+            # Handle as wall collision
+            self.apply_collision_resolution(ball, {
+                "type": "wall",
+                "side_index": side_index,
+                **collision_info
+            })
+            return {
+                "type": "wall",
+                "side_index": side_index,
+                **collision_info
+            }
+
+    def handle_paddle(self, ball, current_sector, new_state):
+        """
+        Handle potential paddle collision.
+        
+        Args:
+            ball (dict): Current ball state
+            current_sector (dict): Information about the current sector and collision
+            new_state (dict): Current game state
+            
+        Returns:
+            dict: Paddle collision information or None if no collision
+        """
+        side_index = current_sector['side_index']
+        movement = current_sector['movement']
+        
+        collision_info = {
+            "distance": movement['current_distance'],
+            "normal": self.side_normals[side_index],
+            "projection": self._calculate_projection(ball, side_index),
+        }
+        
+        paddle_collision = self._calculate_paddle_collision(
+            side_index,
+            collision_info,
+            ball,
+            new_state["paddles"],
+            new_state["dimensions"]
+        )
+        
+        if paddle_collision and paddle_collision["type"] == "paddle":
+            self.apply_collision_resolution(ball, paddle_collision)
+            return paddle_collision
+            
+        return None
+
+    def handle_wall(self, ball, current_sector, new_state):
+        """
+        Handle wall collision.
+        
+        Args:
+            ball (dict): Current ball state
+            current_sector (dict): Information about the current sector and collision
+            new_state (dict): Current game state
+            
+        Returns:
+            dict: Wall collision information or None if no collision
+        """
+        side_index = current_sector['side_index']
+        movement = current_sector['movement']
+        
+        # Only process if ball is close enough to wall
+        if movement['current_distance'] > ball["size"]:
+            return None
+            
+        collision_info = {
+            "distance": movement['current_distance'],
+            "normal": self.side_normals[side_index],
+            "projection": self._calculate_projection(ball, side_index),
+        }
+        
+        wall_collision = {
+            "type": "wall",
+            "side_index": side_index,
+            **collision_info
+        }
+        
+        self.apply_collision_resolution(ball, wall_collision)
+        return wall_collision
+
+    def _calculate_relative_position(self, ball, side_index):
+        """
+        Calculate relative position of ball along a side.
+        
+        Args:
+            ball (dict): Ball object with position
+            side_index (int): Index of the side
+            
+        Returns:
+            float: Relative position along the side (0 to 1)
+        """
+        start = self.vertices[side_index]
+        end = self.vertices[(side_index + 1) % self.num_sides]
+        
+        # Vector from start to end of side
+        side_vector_x = end["x"] - start["x"]
+        side_vector_y = end["y"] - start["y"]
+        
+        # Vector from start to ball
+        ball_vector_x = ball["x"] - start["x"]
+        ball_vector_y = ball["y"] - start["y"]
+        
+        # Calculate dot product and side length
+        dot_product = side_vector_x * ball_vector_x + side_vector_y * ball_vector_y
+        side_length_squared = side_vector_x * side_vector_x + side_vector_y * side_vector_y
+        
+        # Return relative position clamped between 0 and 1
+        return max(0.0, min(1.0, dot_product / side_length_squared))
+
+
+
+
+    def _find_nearest_collision(self, ball, paddles, vertices, current_sector, current_state):
+        """Find nearest collision but only check current sector"""
+        if not current_sector:  # No approaching sides
+            return None
+            
+        # Get collision info for this sector
+        side_index = current_sector['side_index']
+        movement = current_sector['movement']
+            
+        # Get basic collision info
+        collision_info = {
+            "distance": movement['current_distance'],
+            "normal": self.side_normals[side_index],
+            "projection": self._calculate_projection(ball, side_index)  # You'll need this helper method
+        }
+        
+        # If it has an active paddle, check for paddle collision
+        if side_index in self.active_sides:
+            paddle_collision = self._calculate_paddle_collision(
+                side_index,
+                collision_info,
+                ball,
+                paddles,
+                current_state["dimensions"]
+            )
+            return paddle_collision if paddle_collision else None
+            
+        # Otherwise, if close enough for wall collision
+        elif movement['current_distance'] <= ball['size']:
+            return {
+                "type": "wall",
+                "side_index": side_index,
+                **collision_info
+            }
+            
+        return None
+    def _calculate_projection(self, ball, side_index):
+        """
+        Calculate the closest point (projection) of the ball onto a side of the polygon.
+        
+        Args:
+            ball (dict): Ball object with position
+            side_index (int): Index of the side to project onto
+            
+        Returns:
+            dict: Projected point coordinates {x, y}
+        """
+        # Get vertices of the side
+        start = self.vertices[side_index]
+        end = self.vertices[(side_index + 1) % self.num_sides]
+        
+        # Calculate vector from start to end of side
+        side_vector_x = end["x"] - start["x"]
+        side_vector_y = end["y"] - start["y"]
+        
+        # Calculate vector from start to ball
+        ball_vector_x = ball["x"] - start["x"]
+        ball_vector_y = ball["y"] - start["y"]
+        
+        # Calculate squared length of side
+        side_length_squared = side_vector_x * side_vector_x + side_vector_y * side_vector_y
+        
+        if side_length_squared == 0:
+            return {"x": start["x"], "y": start["y"]}
+        
+        # Calculate dot product
+        dot_product = (ball_vector_x * side_vector_x + ball_vector_y * side_vector_y)
+        
+        # Calculate relative position along side (clamped between 0 and 1)
+        t = max(0, min(1, dot_product / side_length_squared))
+        
+        # Calculate projection point
+        projection_x = start["x"] + t * side_vector_x
+        projection_y = start["y"] + t * side_vector_y
+        
+        return {
+            "x": float(projection_x),
+            "y": float(projection_y)
+        }
+
+
+    def reset_ball(self, ball, ball_index, speed=0.006):
+        """
+        Extends parent reset_ball method by also resetting movement tracking.
+        
+        Args:
+            ball (dict): Ball object to reset
+            speed (float): Initial ball speed
+        Returns:
+            dict: Updated ball object
+        """
+        # Call parent method first
+        ball = super().reset_ball(ball, speed)
+        
+        # Add our polygon-specific reset
+        self.reset_movement_tracking()
+        
+        return ball
+
+    def update_movement(self, side_index, current_distance, current_dot_product):
+        """Update the movement data for a given side index."""
+        self.previous_movements[side_index] = {
+            'distance': float(current_distance),
+            'dot_product': float(current_dot_product)
+        }
+
+
+    def check_paddle(self, current_distance, new_state, side_index, ball):
+        """Helper function to check paddle collision and adjust distance"""
+        if side_index not in self.active_sides:
+            return current_distance
+            
+        # Calculate paddle width plus ball size for collision zone
+        total_width = new_state['dimensions']['paddle_width'] + ball['size']
+        return current_distance - total_width
+
 
     async def game_logic(self, current_state):
-        """Updated game logic using sector-based collision detection"""
+        """
+        Main game logic loop processing ball movement and collisions.
+        """
         game_over = False
         new_state = current_state.copy()
+        current_time = time.time()  # Get current time for combo system
 
-        for ball in new_state["balls"]:
+        # Process each ball
+        for ball_index, ball in enumerate(new_state["balls"]):
             # Move ball
             ball["x"] += ball["velocity_x"]
             ball["y"] += ball["velocity_y"]
-            
-            # Get current sector
-            current_sector = self._get_ball_sector(ball)
-            
-            # Only check collision with current sector
-            collision = self._check_sector_collision(
-                ball, 
-                current_sector, 
-                new_state["paddles"],
-                new_state["dimensions"]  # Pass dimensions to collision check
-            )
-            
+
+            # Get current sector for optimization
+            current_sector = self.get_ball_sector(ball, ball_index, new_state)
+            if not current_sector:
+                continue
+
+            # Initialize collision as None
+            collision = None
+                
+            # Handle different movement cases
+            if current_sector['type'] == 'tunneling':
+                collision = self.handle_tunneling(ball, current_sector, new_state)
+            elif current_sector['movement']['current_distance'] <= ball['size']:
+                if current_sector['type'] == 'parallel':
+                    collision = self.handle_parallel(ball, current_sector, new_state)
+                elif current_sector['side_index'] in self.active_sides:
+                    collision = self.handle_paddle(ball, current_sector, new_state)
+                else:
+                    collision = self.handle_wall(ball, current_sector, new_state)
+
+            # Process collision results
             if collision:
-                if collision["type"] in ["paddle", "wall"]:
-                    self._apply_collision_resolution(ball, collision)
+                if collision["type"] == "paddle":
+                    # Update combo for paddle hits
+                    self.update_hit_combo(current_time, ball)
+                    # Apply bounce effect
                     new_velocities = self.apply_ball_bounce_effect(
                         ball, 
                         collision["normal"],
                         collision.get("normalized_offset", 0)
                     )
                     ball.update(new_velocities)
-                    
-                    # Double-check no stuck condition
-                    post_collision = self._check_sector_collision(
+
+                elif collision["type"] == "wall":
+                    # Apply bounce effect without updating combo
+                    new_velocities = self.apply_ball_bounce_effect(
                         ball, 
-                        self._get_ball_sector(ball), 
-                        new_state["paddles"],
-                        new_state["dimensions"]  # Pass dimensions here too
+                        collision["normal"],
+                        0  # No offset for wall bounces
                     )
-                    if post_collision and post_collision["distance"] < ball["size"]:
-                        self._apply_collision_resolution(ball, post_collision)
-                        
+                    ball.update(new_velocities)
+
+                # Check for stuck condition after bounce
+                if collision["type"] in ["paddle", "wall"]:
+                    post_sector = self.get_ball_sector(ball, ball_index, new_state)
+                    if post_sector:
+                        post_collision = self._find_nearest_collision(
+                            ball, 
+                            new_state["paddles"], 
+                            self.vertices,
+                            post_sector,
+                            new_state
+                        )
+                        if post_collision and post_collision["distance"] < ball["size"]:
+                            self.apply_collision_resolution(ball, post_collision)
+
                 elif collision["type"] == "miss":
-                    # Handle scoring
+                    # Reset combo on miss
+                    self.hit_combo = 0
                     active_paddle_index = collision.get("active_paddle_index")
                     if active_paddle_index is not None:
-                        new_state["scores"] = self.update_scores(
-                            new_state["scores"], 
-                            active_paddle_index
-                        )
-                        self.reset_ball(ball)
+                        new_state["scores"] = [
+                            score + (1 if i != active_paddle_index else 0)
+                            for i, score in enumerate(new_state["scores"])
+                        ]
+                    
+                        self.reset_ball(ball, ball_index)
                         
                         if self.check_winner(new_state["scores"]):
                             game_over = True
 
         return new_state, game_over
 
-    def _check_sector_collision(self, ball, sector_index, paddles, dimensions):
+    def check_ball_movement_relative_to_side(self, ball, side_index, ball_index, new_state): 
         """
-        Check collision only for the current sector
+        Movement tracking with clear case distinctions
+        """
+        # Get normal from class's side_normals
+        normal = self.side_normals[side_index]
+        start = self.vertices[side_index]
+        
+        # Calculate current state
+        current_distance = float(
+            (ball['x'] - start['x']) * normal['x'] + 
+            (ball['y'] - start['y']) * normal['y']
+        )
+        
+        current_dot_product = float(
+            ball['velocity_x'] * normal['x'] + 
+            ball['velocity_y'] * normal['y']
+        )
+        
+        # Get previous state
+        previous_movement = self.previous_movements[ball_index][side_index]
+        previous_distance = float(previous_movement['distance'])
+        previous_dot_product = float(previous_movement['dot_product'])
+        was_approaching = previous_dot_product < 0
+        
+        # Case 1: Ball is parallel to side
+        PARALLEL_THRESHOLD = float(1e-10) # can be global or const , in c it would stand in a h file
+        if abs(current_dot_product) < PARALLEL_THRESHOLD:
+            current_distance = self.check_paddle(current_distance, new_state, side_index, ball)# this should reduze the distance to side with the paddle width plus radius 
+            self.update_ball_movement(ball_index, side_index, current_distance, current_dot_product)
+            return {
+                'is_approaching': True,
+                'current_distance': float(current_distance),
+                'approach_speed': float(0.0),
+                'type': 'parallel'
+            }
+        
+        # Case 2: Ball is moving towards side
+        if current_dot_product < 0:
+            current_distance = self.check_paddle(current_distance, new_state, side_index, ball)# this should reduze the distance to side with the paddle width plus radius  
+            self.update_ball_movement(ball_index, side_index, current_distance, current_dot_product)
+            return {
+                'is_approaching': True,
+                'current_distance': float(current_distance),
+                'approach_speed': float(abs(current_dot_product)),
+                'type': 'approaching'
+            }
+        
+        # Case 3: Ball is moving away from side
+        else:
+            # Case 3a: Was already moving away
+            if not was_approaching:
+                self.update_ball_movement(ball_index, side_index, current_distance, current_dot_product)
+                return {
+                    'is_approaching': False,
+                    'current_distance': float(current_distance),
+                    'approach_speed': float(abs(current_dot_product)),
+                    'type': 'moving_away'
+                }
+            
+            # Case 3b: Was moving towards last frame
+            else:
+                # Check for tunneling using position and velocity signs
+                position_sign_changed = (current_distance * previous_distance < 0)
+                
+                # Case 3ba: Tunneling detected
+                if position_sign_changed:
+                    # Don't update previous_movements for tunneling case
+                    # This preserves the state before tunneling for proper bounce handling
+                    return {
+                        'is_approaching': True,  # Consider approaching for collision handling
+                        'current_distance': float(min(current_distance, previous_distance)),
+                        'approach_speed': float(abs(current_dot_product)),
+                        'type': 'tunneling'
+                    }
+                
+                # Case 3bb: Regular moving away (including post-bounce)
+                else:
+                    self.update_ball_movement(ball_index, side_index, current_distance, current_dot_product)
+                    return {
+                        'is_approaching': False,
+                        'current_distance': float(current_distance),
+                        'approach_speed': float(abs(current_dot_product)),
+                        'type': 'moving_away'
+                    }
+
+
+    def get_ball_sector(self, ball, ball_index, new_state):
+        """
+        Check for collisions with list-based movement tracking.
+        """
+        
+        collisions = []
+        
+        for side_index in range(self.num_sides) :
+            movement = self.check_ball_movement_relative_to_side(ball, side_index, ball_index, new_state)           
+            if movement['is_approaching']:
+                if movement['type'] == 'tunneling':
+                    # Tunneling detected - return immediately
+                    return {
+                        'side_index': side_index,
+                        'movement' : movement,
+                        'type': 'tunneling'
+                    }
+                else:
+                    # Add collision candidate
+                    collisions.append({
+                        'side_index': side_index,
+                        'movement' : movement,
+                        'type': movement['type']
+                    })
+        if collisions:
+            return min(collisions, key=lambda x: x['movement']['current_distance'])
+        
+        # No collisions found
+        return None
+
+     
+    def apply_collision_resolution(self, ball, collision):
+        """Adjust ball position to prevent paddle/wall penetration"""
+        # Add a small buffer to prevent sticking
+        BUFFER = 0.001
+        
+        if collision["type"] in ["paddle", "wall"]:
+            # Calculate penetration depth
+            penetration = ball["size"] - collision["distance"]
+            
+            if penetration > 0:
+                if collision["type"] == "paddle":
+                    # For paddle collisions, use the paddle's surface as the reference point
+                    # Get the normal vector pointing away from the paddle
+                    normal_x = collision["normal"]["x"]
+                    normal_y = collision["normal"]["y"]
+                    
+                    # Calculate the point on the paddle's surface closest to the ball
+                    paddle_surface_x = ball["x"] - normal_x * collision["distance"]
+                    paddle_surface_y = ball["y"] - normal_y * collision["distance"]
+                    
+                    # Move ball out to the edge of the paddle's collision zone
+                    ball["x"] = paddle_surface_x + normal_x * (ball["size"] + BUFFER)
+                    ball["y"] = paddle_surface_y + normal_y * (ball["size"] + BUFFER)
+                else:
+                    # For wall collisions, use the original wall projection
+                    ball["x"] = (collision["projection"]["x"] + 
+                                collision["normal"]["x"] * (ball["size"] + BUFFER))
+                    ball["y"] = (collision["projection"]["y"] + 
+                                collision["normal"]["y"] * (ball["size"] + BUFFER))
+                
+                # For edge hits, ensure proper positioning
+                if collision.get("is_edge_hit", False):
+                    # Additional adjustment to account for edge collision
+                    ball["x"] += collision["normal"]["x"] * BUFFER
+                    ball["y"] += collision["normal"]["y"] * BUFFER
+
+    def _calculate_paddle_collision(self, side_index, collision_info, ball, paddles, dimensions):
+        """
+        Calculate if ball is colliding with a paddle on the given side.
         
         Args:
+            side_index (int): Index of the side to check
+            collision_info (dict): Basic collision information including distance and projection
             ball (dict): Ball object with position and size
-            sector_index (int): Index of the sector to check
-            paddles (list): List of all paddles
-            dimensions (dict): Contains paddle dimensions
+            paddles (list): List of paddle objects
+            dimensions (dict): Game dimensions including paddle sizes
+            
+        Returns:
+            dict: Collision information if paddle hit, None if no collision
         """
-        collision_info = self._calculate_distance_to_side(ball, sector_index)
-        paddle = next((p for p in paddles if p["side_index"] == sector_index), None)
+        # Find the paddle for this side
+        paddle = None
+        for p in paddles:
+            if p["side_index"] == side_index and p["active"]:
+                paddle = p
+                break
+                
+        if not paddle:
+            return None
+            
+        # Calculate relative position along the side (0 to 1)
+        relative_position = self._calculate_relative_position(ball, side_index)
         
-        if paddle and paddle["active"]:
-            return self._calculate_paddle_collision(sector_index, collision_info, ball, paddles, dimensions)
-        elif collision_info["distance"] <= ball["size"]:
+        # Calculate paddle position and width in relative coordinates
+        paddle_width = dimensions["paddle_width"]
+        paddle_half_width = paddle_width / 2.0
+        paddle_pos = paddle["position"]
+        
+        # Calculate distances from paddle center
+        distance_from_center = abs(relative_position - paddle_pos)
+        
+        # Check if ball is within paddle width plus ball size
+        if distance_from_center <= (paddle_half_width + ball["size"]):
+            # Calculate normalized offset from paddle center (-1 to 1)
+            normalized_offset = (relative_position - paddle_pos) / paddle_half_width
+            normalized_offset = max(-1.0, min(1.0, normalized_offset))
+            
+            # Calculate if this is an edge hit
+            is_edge_hit = abs(abs(normalized_offset) - 1.0) < 0.1
+            
+            # Calculate actual position of collision point
+            start = self.vertices[side_index]
+            end = self.vertices[(side_index + 1) % self.num_sides]
+            
+            # Interpolate position along the side
+            collision_x = start["x"] + (end["x"] - start["x"]) * relative_position
+            collision_y = start["y"] + (end["y"] - start["y"]) * relative_position
+            
             return {
-                "type": "wall",
-                "side_index": sector_index,
-                **collision_info
+                "type": "paddle",
+                "side_index": side_index,
+                "distance": collision_info["distance"],
+                "normal": collision_info["normal"],
+                "projection": collision_info["projection"],
+                "position": {"x": collision_x, "y": collision_y},  # Add calculated position
+                "normalized_offset": normalized_offset,
+                "is_edge_hit": is_edge_hit,
+                "paddle_index": paddle.get("paddle_index", 0)
             }
             
         return None
 
-    def _apply_collision_resolution(self, ball, collision):
-        """Resolve collision by adjusting ball position"""
-        BUFFER = 0.001
+    def _calculate_relative_position(self, ball, side_index):
+        """
+        Calculate relative position of ball along a side (0 to 1).
         
-        if collision["type"] in ["paddle", "wall"]:
-            penetration = ball["size"] - collision["distance"]
+        Args:
+            ball (dict): Ball object with position
+            side_index (int): Index of the side
             
-            if penetration > 0:
-                normal = collision["normal"]
-                ball["x"] += normal["x"] * (penetration + BUFFER)
-                ball["y"] += normal["y"] * (penetration + BUFFER)
+        Returns:
+            float: Relative position along the side (0 = start, 1 = end)
+        """
+        start = self.vertices[side_index]
+        end = self.vertices[(side_index + 1) % self.num_sides]
+        
+        # Vector from start to end of side
+        side_vector_x = end["x"] - start["x"]
+        side_vector_y = end["y"] - start["y"]
+        
+        # Vector from start to ball
+        ball_vector_x = ball["x"] - start["x"]
+        ball_vector_y = ball["y"] - start["y"]
+        
+        # Calculate dot product and side length
+        dot_product = side_vector_x * ball_vector_x + side_vector_y * ball_vector_y
+        side_length_squared = side_vector_x * side_vector_x + side_vector_y * side_vector_y
+        
+        if side_length_squared == 0:
+            return 0.0
+            
+        # Return relative position clamped between 0 and 1
+        t = dot_product / side_length_squared
+        return max(0.0, min(1.0, t))
+
+
+""" 
+
+
+    def handle_tunneling(self, ball, current_sector, new_state):
+        if current['side_index'] in self.active_sides:
+            # check if paddle is at position 
+            # if True
+            #   reste ball to padle
+            #   give back paddle type
+            # else
+            #   give back miss
+        else
+            #reset ball to wall 
+            #  give back wall type
+
+
+    def handle_parallel(self, ball, current_sector, new_state):
+        if current['side_index'] in self.active_sides:
+        #    check if paddle hit
+        #    if True
+        #       reset ball to paddle
+        #       return paddle
+        #   else       
+        #       reset Ball to Wall
+        #       return(missed)
+
+
+    def handle_paddle()
+        # check if paddle hit 
+        # return collion
+        # else return None
+    
+    def handle_wall()
+        # chech if wall hit 
+        # return collision wall
+
+
+    async def game_logic(self, current_state):
+        game_over = False
+        new_state = current_state.copy()
+
+        # Process each ball
+        for ball_index, ball in new_state["balls"]:
+            # Move ball
+            ball["x"] += ball["velocity_x"]
+            ball["y"] += ball["velocity_y"]
+
+            # Get current sector for optimization
+            current_sector = self._get_ball_sector(ball, ball_index, new_state)
+            if not current_sector:
+                continue
+            if current_sector['type'] == 'tunneling':
+                collison = self.handle_tunneling() #  implemation nedded 
+            elif current_sector['movement']['distance'] <=  :# ? -> should a number befor we do not check. 
+                    if current_sector['type'] == 'parallel':
+                        collison = self.handle_parallel() # implemanbtion needed
+                    elif current_sector['side_index'] in self.active_sides:
+                        colliosn = self.handle_paddle() # implemantion needed
+                    else :
+                       collison = self.handle_wall() 
+            else:   
+                continue 
+
+
+            if collision:
+                if collision["type"] in ["paddle", "wall"]:
+                    self.apply_collision_resolution(ball, collision)
+                    new_velocities = self.apply_ball_bounce_effect(
+                        ball, 
+                        collision["normal"],
+                        collision.get("normalized_offset", 0)
+                    )
+                    ball.update(new_velocities)
+
+                    # Double-check no stuck condition
+                    post_sector = self._get_ball_sector(ball)
+                    post_collision = self._find_nearest_collision(
+                        ball, 
+                        new_state["paddles"], 
+                        self.vertices,
+                        post_sector,
+                        new_state
+                        
+                    )
+                    if post_collision and post_collision["distance"] < ball["size"]:
+                        self.apply_collision_resolution(ball, post_collision)
+
+                elif collision["type"] == "miss":
+                    active_paddle_index = collision.get("active_paddle_index")
+                    if active_paddle_index is not None:
+                        # Update scores only for active paddles
+                        new_state["scores"] = [
+                            score + (1 if i != active_paddle_index else 0)
+                            for i, score in enumerate(new_state["scores"])
+                        ]
+                    
+                        # Reset this ball
+                        self.reset_ball(ball)
+                        # Check win condition
+                        if self.check_winner(new_state["scores"]):
+                            game_over = True
+        return new_state, game_over
+
+
+    async def game_logic(self, current_state):
+    """"""" 
+    Main game logic loop processing ball movement and collisions.
+    
+    Args:
+        current_state (dict): Current game state
+        
+    Returns:
+        tuple: (new_state, game_over)
+    """"""
+    game_over = False
+    new_state = current_state.copy()
+
+    # Process each ball
+    for ball_index, ball in enumerate(new_state["balls"]):
+        # Move ball
+        ball["x"] += ball["velocity_x"]
+        ball["y"] += ball["velocity_y"]
+
+        # Get current sector for optimization
+        current_sector = self._get_ball_sector(ball, ball_index, new_state)
+        if not current_sector:
+            continue
+
+        # Initialize collision as None
+        collision = None
+            
+        # Handle different movement cases
+        if current_sector['type'] == 'tunneling':
+            collision = self.handle_tunneling(ball, current_sector, new_state)
+        elif current_sector['movement']['current_distance'] <= ball['size']:
+            if current_sector['type'] == 'parallel':
+                collision = self.handle_parallel(ball, current_sector, new_state)
+            elif current_sector['side_index'] in self.active_sides:
+                collision = self.handle_paddle(ball, current_sector, new_state)
+            else:
+                collision = self.handle_wall(ball, current_sector, new_state)
+
+        # Process collision results
+        if collision:
+            if collision["type"] in ["paddle", "wall"]:
+                # Apply bounce effect
+                new_velocities = self.apply_ball_bounce_effect(
+                    ball, 
+                    collision["normal"],
+                    collision.get("normalized_offset", 0)
+                )
+                ball.update(new_velocities)
+
+                # Double-check no stuck condition
+                post_sector = self._get_ball_sector(ball, ball_index, new_state)
+                if post_sector:
+                    post_collision = self._find_nearest_collision(
+                        ball, 
+                        new_state["paddles"], 
+                        self.vertices,
+                        post_sector,
+                        new_state
+                    )
+                    if post_collision and post_collision["distance"] < ball["size"]:
+                        self.apply_collision_resolution(ball, post_collision)
+
+            elif collision["type"] == "miss":
+                active_paddle_index = collision.get("active_paddle_index")
+                if active_paddle_index is not None:
+                    # Update scores only for active paddles
+                    new_state["scores"] = [
+                        score + (1 if i != active_paddle_index else 0)
+                        for i, score in enumerate(new_state["scores"])
+                    ]
+                
+                    # Reset this ball
+                    self.reset_ball(ball, ball_index)
+                    
+                    # Check win condition
+                    if self.check_winner(new_state["scores"]):
+                        game_over = True
+
+    return new_state, game_over
+
+
+
+"""
+
+
