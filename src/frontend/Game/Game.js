@@ -6,6 +6,7 @@ import World from "../World/World.js";
 import Debug from "../Utils/Debug.js";
 import GameWebSocket from "../Utils/Websocket.js";
 import Drawer from "../Utils/Drawer.js";
+import GameUI from "../Utils/GameUI.js";
 
 export default class GameConstructor {
   constructor() {
@@ -22,17 +23,24 @@ export default class GameConstructor {
     // Loader
     this.loader = null;
 
+    // Websocket
     this.websocket = null;
+
+    // Skins
+    this.skins = [];
 
     // Game Config
     this.config = {};
 
     this.balls = [];
 
-    this.paddles = [];
+    this.paddles = new Map();
 
     // GUI
     this.gui = new Debug();
+
+    // UI
+    this.ui = new GameUI(this);
   }
 
   addAmbientLight(intensity, color) {
@@ -123,7 +131,7 @@ export default class GameConstructor {
   }
 
   loadResources(sources) {
-    this.loader = new Loader(sources);
+    this.loader = new Loader(sources, this);
 
     window.addEventListener("resourcesLoaded", () => {
       this.loader.items["floorChecker"].colorSpace = THREE.SRGBColorSpace;
@@ -173,6 +181,7 @@ export default class GameConstructor {
 
   createGame(initialState) {
     this.drawer = new Drawer(initialState, this);
+    this.ui.createSelector();
   }
 
   generateRandomId() {

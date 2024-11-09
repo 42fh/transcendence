@@ -2,7 +2,9 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 export default class Loader {
-  constructor(sources) {
+  constructor(sources, game) {
+    this.game = game;
+
     this.sources = sources;
 
     // this.loader = new THREE.LoadingManager();
@@ -32,6 +34,11 @@ export default class Loader {
   resourseLoaded(source, file) {
     // save the loaded file
     this.items[source.name] = file;
+
+    if (source.isSkin) {
+      file.name = source.name;
+      this.game.skins.push(file);
+    }
 
     // check if all files are loaded
     this.length--;

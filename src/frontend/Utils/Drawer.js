@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import GameUI from "./GameUI.js";
 
 export default class Drawer {
   constructor(initialConfig, game) {
@@ -17,9 +18,11 @@ export default class Drawer {
       this.config.dimensions.paddle_width,
       this.config.dimensions.paddle_length / 2
     );
-    const playerMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000 });
 
     for (let i = 0; i < player_count; i++) {
+      const playerMaterial = new THREE.MeshMatcapMaterial({
+        map: this.game.skins[0],
+      });
       const paddle = new THREE.Mesh(playerGeometry, playerMaterial);
       const angle = (i / player_count) * Math.PI * 2;
       const x = 0.9 * Math.cos(angle);
@@ -29,7 +32,8 @@ export default class Drawer {
       paddle.castShadow = true;
       paddle.receiveShadow = true;
 
-      this.game.paddles.push(paddle);
+      this.game.paddles.set(i, paddle);
+      this.game.addObjects([this.game.paddles.get(i)]);
     }
 
     const sectorColors = [
@@ -56,7 +60,7 @@ export default class Drawer {
         startAngle,
         (2 * Math.PI) / player_count
       );
-      const ringMaterial = new THREE.MeshBasicMaterial({
+      const ringMaterial = new THREE.MeshMatcapMaterial({
         color: sectorColors[i],
         transparent: true,
         opacity: 0.5,
@@ -68,13 +72,11 @@ export default class Drawer {
 
       this.game.addObjects([ringMesh]);
     }
-
-    this.game.addObjects(this.game.paddles);
   }
 
   createGameField(radius) {
     const fieldGeometry = new THREE.CircleGeometry(radius, 64);
-    const fieldMaterial = new THREE.MeshPhongMaterial({
+    const fieldMaterial = new THREE.MeshMatcapMaterial({
       map: this.game.loader.items["floorChecker"],
     });
     const field = new THREE.Mesh(fieldGeometry, fieldMaterial);
@@ -86,7 +88,7 @@ export default class Drawer {
 
   createBalls(ballsConfig) {
     const ballGeometry = new THREE.SphereGeometry(ballsConfig[0].size, 32, 32);
-    const ballMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
+    const ballMaterial = new THREE.MeshMatcapMaterial({ color: 0xffffff });
 
     for (const ballConfig of ballsConfig) {
       const ball = new THREE.Mesh(ballGeometry, ballMaterial);
@@ -123,9 +125,9 @@ export default class Drawer {
       const x = radius * Math.cos(angle);
       const z = radius * Math.sin(angle);
 
-      this.game.paddles[i].position.set(x, 0.12, z);
+      this.game.paddles.get(i).position.set(x, 0.12, z);
 
-      this.game.paddles[i].lookAt(0, 0.12, 0);
+      this.game.paddles.get(i).lookAt(0, 0.12, 0);
     }
   }
 

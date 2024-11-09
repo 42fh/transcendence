@@ -37,6 +37,12 @@ export default class World {
       this.gui
     );
 
+    // Raycaster
+    this.raycaster = new THREE.Raycaster();
+
+    // Intersection
+    this.currentIntersect = null;
+
     // Renderer
     this.addRenderer(canvas);
 
@@ -44,6 +50,13 @@ export default class World {
 
     this.moveUp = false;
     this.moveDown = false;
+
+    this.mouse = new THREE.Vector2();
+
+    window.addEventListener("mousemove", (event) => {
+      this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    });
   }
 
   addOrthographicCamera() {
@@ -59,27 +72,6 @@ export default class World {
     this.camera.position.y = 2 * Math.tan(Math.PI / 5);
     this.camera.position.z = 2;
     this.camera.position.x = 2;
-
-    // if (this.gui.debug) {
-    //   this.gui.gui
-    //     .add(this.camera.position, "y")
-    //     .min(-5)
-    //     .max(10)
-    //     .step(0.01)
-    //     .name("Camera y");
-    //   this.gui.gui
-    //     .add(this.camera.position, "z")
-    //     .min(-5)
-    //     .max(10)
-    //     .step(0.01)
-    //     .name("Camera z");
-    //   this.gui.gui
-    //     .add(this.camera.position, "x")
-    //     .min(-5)
-    //     .max(10)
-    //     .step(0.01)
-    //     .name("Camera x");
-    // }
   }
 
   addPerspectiveCamera() {
@@ -139,15 +131,15 @@ export default class World {
       const outputPass = new OutputPass();
       this.composer.addPass(outputPass);
       const renderPixelatedPass = new RenderPixelatedPass(
-        6,
+        1,
         this.game.scene,
         this.camera
       );
       this.composer.addPass(renderPixelatedPass);
       let params = {
-        pixelSize: 6,
-        normalEdgeStrength: 0.3,
-        depthEdgeStrength: 0.4,
+        pixelSize: 1,
+        normalEdgeStrength: 0.1,
+        depthEdgeStrength: 0.1,
         pixelAlignedPanning: true,
       };
       if (this.gui.debug) {
@@ -208,6 +200,26 @@ export default class World {
     if (this.moveUp && this.game.websocket) {
       this.game.drawer.movePaddle("right");
     }
+
+    if (this.game.ui.isActive) {
+      this.raycaster.setFromCamera(this.mouse, this.camera);
+      const objectsToTest = [this.game.ui.leftArrow, this.game.ui.rightArrow];
+      const intersects = this.raycaster.intersectObjects(objectsToTest);
+
+      // set to red if intersected
+      if (intersects.length) {
+        intersects[0].object.material.color.set("red");
+        this.currentIntersect = intersects[0].object;
+      } else {
+        if (this.currentIntersect) {
+          this.currentIntersect.material.color.set(
+            objectsToTest[0].originalColor
+          );
+          this.currentIntersect = null;
+        }
+      }
+    }
+
     this.controls.update();
     this.composer.render(this.scene, this.camera);
   }
@@ -242,9 +254,14 @@ export default class World {
     // Fullscreen
     document.addEventListener("dblclick", () => {
       if (!document.fullscreenElement) {
-        canvas.requestFullscreen();
+        this.canvas.requestFullscreen();
       } else {
         document.exitFullscreen();
+      }
+    });
+    document.addEventListener("click", () => {
+      if (this.currentIntersect) {
+        this.currentIntersect.customFunction();
       }
     });
     // Resize
