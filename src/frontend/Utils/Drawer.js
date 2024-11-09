@@ -101,6 +101,17 @@ export default class Drawer {
   }
 
   updateGame(gameState) {
+    // create only at the first update
+
+    if (this.game.ui.isActive) {
+      const players = [
+        { name: "Player 1", score: 0 },
+        { name: "Player 2", score: 0 },
+        { name: "Player 3", score: 0 },
+      ];
+      this.game.ui.createScoreTable(-2, 1, 0, players);
+    }
+
     // update balls
     for (let i = 0; i < gameState.balls.length; i++) {
       this.game.balls[i].position.set(

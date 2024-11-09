@@ -111,6 +111,71 @@ export default class GameUI {
     return button;
   }
 
+  createScoreTable(x, y, z, players) {
+    // delete selector
+    if (this.isActive) {
+      this.selector.removeFromParent();
+    }
+
+    this.isActive = false;
+
+    const tableGroup = new THREE.Group();
+    tableGroup.position.set(x, y, z);
+
+    // Create table header
+    const headerWidth = 1.2;
+    const headerHeight = 0.2;
+    const header = this.createButton(
+      headerWidth,
+      headerHeight,
+      0,
+      0,
+      0,
+      "Scores"
+    );
+    header.material.color.setHex(0x444444);
+    tableGroup.add(header);
+
+    // Create rows for each player
+    const rowHeight = 0.15;
+    const columnWidth = headerWidth / 2;
+
+    players.forEach((player, index) => {
+      const yOffset = -headerHeight - index * rowHeight - 0.05;
+
+      // Player name column
+      const nameButton = this.createButton(
+        columnWidth,
+        rowHeight,
+        -columnWidth / 2,
+        yOffset,
+        0,
+        player.name
+      );
+      nameButton.material.color.setHex(0x555555);
+      tableGroup.add(nameButton);
+
+      // Player score column
+      const scoreButton = this.createButton(
+        columnWidth,
+        rowHeight,
+        columnWidth / 2,
+        yOffset,
+        0,
+        player.score.toString()
+      );
+      scoreButton.material.color.setHex(0x666666);
+      tableGroup.add(scoreButton);
+
+      // Store reference to score button for easy updating
+      player.scoreButton = scoreButton;
+    });
+
+    tableGroup.rotation.y = Math.PI / 2;
+    this.game.addObjects([tableGroup]);
+    return tableGroup;
+  }
+
   updateMainText(newText) {
     this.panel.remove(this.mainText);
 

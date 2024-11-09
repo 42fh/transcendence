@@ -260,7 +260,7 @@ export default class World {
       }
     });
     document.addEventListener("click", () => {
-      if (this.currentIntersect) {
+      if (this.currentIntersect && this.game.ui.isActive) {
         this.currentIntersect.customFunction();
       }
     });
