@@ -5,7 +5,12 @@ import msgpack
 import time
 
 
-
+@add_collision_handlers     # Handles specific collision types
+@add_movement_tracking     # Tracks ball movement data
+@add_collision_detection   # Detects potential collisions
+@add_ratio_calculations   # Polygon deformation 
+@add_polygon_setup       # Basic polygon structure
+@add_helper_methods     # Utility functions
 @AGameManager.register_game_type("polygon")
 class PolygonPongGame(AGameManager):
     def __init__(self, game_id):
