@@ -1,6 +1,5 @@
 
 
-
     async def start_game(self):
         """Start game with process-safe checks"""
         settings = msgpack.unpackb(await self.redis_conn.get(self.settings_key))

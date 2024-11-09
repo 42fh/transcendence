@@ -7,14 +7,22 @@ import math
 import time
 import random
 from channels.layers import get_channel_layer
-
-
+from .method_decorators import *
 
 class GameStateError(Exception):
     """Custom exception for game state validation errors"""
     pass
 
 
+@add_state_validation      # Validation layer (most specific)
+@add_data_event_handling   # Event system
+@add_game_logic           # Core game rules 
+@add_game_physics        # Physics engine
+@add_game_flow          # Game state management
+@add_paddle_management  # Paddle controls
+@add_player_management  # Player handling
+@add_redis_operations   # Basic infrastructure
+@add_initialization    # Most fundamental - sets up the game (most fundamental)
 class AGameManager(ABC):
 
     _game_types = {}
