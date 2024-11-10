@@ -3,6 +3,10 @@ import World from "./World/World.js";
 import GameConstructor from "./Game/Game.js";
 
 const game = new GameConstructor();
+game.addAmbientLight(1, 0xffffff);
+game.addDirectionalLight(1, 0xffffff, new THREE.Vector3(3, 7.5, 3));
+game.addSky(1000, 10, 1.3, 0.001, 0.7, new THREE.Vector3(0.3, 0.001, -0.95));
+game.addSea(1000, 1000, 0x001e0f, 0xffffff, 3.7);
 game.loadResources([
   {
     name: "floorChecker",

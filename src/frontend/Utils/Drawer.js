@@ -125,20 +125,27 @@ export default class Drawer {
     const totalSides = gameState.paddles.length;
     const radius = 0.9;
     for (let i = 0; i < totalSides; i++) {
-      const baseAngle =
-        (gameState.paddles[i].side_index / totalSides) * Math.PI * 2;
+      const paddle = this.game.paddles.get(i);
+      if (!paddle) continue;
 
-      const angle =
-        baseAngle +
-        gameState.paddles[i].position * ((Math.PI * 2) / totalSides) +
-        Math.PI / 2;
+      const sideIndex = gameState.paddles[i].side_index;
+      const position = gameState.paddles[i].position;
 
+      // Calculate the angle
+      const baseAngle = (sideIndex / totalSides) * Math.PI * 2;
+      const angleRange = (Math.PI * 2) / totalSides;
+      const angle = baseAngle + position * angleRange - Math.PI / 2;
+
+      // Calculate new position
       const x = radius * Math.cos(angle);
       const z = radius * Math.sin(angle);
 
-      this.game.paddles.get(i).position.set(x, 0.12, z);
+      // Update paddle position
+      paddle.position.set(x, 0.12, z);
 
-      this.game.paddles.get(i).lookAt(0, 0.12, 0);
+      // Make paddle face outward
+      paddle.lookAt(0, 0.12, 0);
+      paddle.rotateY(Math.PI);
     }
   }
 

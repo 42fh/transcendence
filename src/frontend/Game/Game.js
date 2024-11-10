@@ -117,6 +117,7 @@ export default class GameConstructor {
 
     this.water.rotation.x = -Math.PI / 2;
     this.water.material.uniforms["size"].value = 10;
+    this.water.position.y = -0.5;
     this.scene.add(this.water);
   }
 

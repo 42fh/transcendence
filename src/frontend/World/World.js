@@ -125,63 +125,65 @@ export default class World {
     }
     this.game = newGame;
 
-    if (!isASCII) {
-      // Pixelated rendering
-      this.composer = new EffectComposer(this.renderer);
-      const outputPass = new OutputPass();
-      this.composer.addPass(outputPass);
-      const renderPixelatedPass = new RenderPixelatedPass(
-        1,
-        this.game.scene,
-        this.camera
-      );
-      this.composer.addPass(renderPixelatedPass);
-      let params = {
-        pixelSize: 1,
-        normalEdgeStrength: 0.1,
-        depthEdgeStrength: 0.1,
-        pixelAlignedPanning: true,
-      };
-      if (this.gui.debug) {
-        this.gui.gui
-          .add(params, "pixelSize")
-          .min(1)
-          .max(16)
-          .step(1)
-          .onChange(() => {
-            renderPixelatedPass.setPixelSize(params.pixelSize);
-          });
-        this.gui.gui
-          .add(renderPixelatedPass, "normalEdgeStrength")
-          .min(0)
-          .max(2)
-          .step(0.05);
-        this.gui.gui
-          .add(renderPixelatedPass, "depthEdgeStrength")
-          .min(0)
-          .max(1)
-          .step(0.05);
-      }
+    // if (!isASCII) {
+    //   // Pixelated rendering
+    //   this.composer = new EffectComposer(this.renderer);
+    //   const outputPass = new OutputPass();
+    //   this.composer.addPass(outputPass);
+    //   const renderPixelatedPass = new RenderPixelatedPass(
+    //     1,
+    //     this.game.scene,
+    //     this.camera
+    //   );
+    //   this.composer.addPass(renderPixelatedPass);
+    //   let params = {
+    //     pixelSize: 1,
+    //     normalEdgeStrength: 0.1,
+    //     depthEdgeStrength: 0.1,
+    //     pixelAlignedPanning: true,
+    //   };
+    //   if (this.gui.debug) {
+    //     this.gui.gui
+    //       .add(params, "pixelSize")
+    //       .min(1)
+    //       .max(16)
+    //       .step(1)
+    //       .onChange(() => {
+    //         renderPixelatedPass.setPixelSize(params.pixelSize);
+    //       });
+    //     this.gui.gui
+    //       .add(renderPixelatedPass, "normalEdgeStrength")
+    //       .min(0)
+    //       .max(2)
+    //       .step(0.05);
+    //     this.gui.gui
+    //       .add(renderPixelatedPass, "depthEdgeStrength")
+    //       .min(0)
+    //       .max(1)
+    //       .step(0.05);
+    //   }
 
-      this.controls = new OrbitControls(this.camera, this.canvas);
-      this.controls.enableDamping = true; // makes controls smoother
-    } else {
-      // ASCII rendering
-      this.addRenderer(null); // replace renderer
-      // hide old canvas
-      this.canvas.style.display = "none";
+    //   this.controls = new OrbitControls(this.camera, this.canvas);
+    //   this.controls.enableDamping = true; // makes controls smoother
+    // } else {
+    //   // ASCII rendering
+    //   this.addRenderer(null); // replace renderer
+    //   // hide old canvas
+    //   this.canvas.style.display = "none";
 
-      this.composer = new AsciiEffect(this.renderer, " .:-+*=%@#", {
-        invert: true,
-      });
-      this.composer.setSize(window.innerWidth, window.innerHeight);
-      this.composer.domElement.style.color = "white";
-      this.composer.domElement.style.backgroundColor = "black";
-      document.body.appendChild(this.composer.domElement);
+    //   this.composer = new AsciiEffect(this.renderer, " .:-+*=%@#", {
+    //     invert: true,
+    //   });
+    //   this.composer.setSize(window.innerWidth, window.innerHeight);
+    //   this.composer.domElement.style.color = "white";
+    //   this.composer.domElement.style.backgroundColor = "black";
+    //   document.body.appendChild(this.composer.domElement);
 
-      this.controls = new OrbitControls(this.camera, this.composer.domElement);
-      this.controls.enableDamping = true; // makes controls smoother
-    }
+    //   this.controls = new OrbitControls(this.camera, this.composer.domElement);
+    //   this.controls.enableDamping = true; // makes controls smoother
+    // }
+    this.controls = new OrbitControls(this.camera, this.canvas);
+    this.controls.enableDamping = true; // makes controls smoother
 
     // Game loop
     this.renderer.setAnimationLoop(() => {
@@ -221,7 +223,7 @@ export default class World {
     }
 
     this.controls.update();
-    this.composer.render(this.scene, this.camera);
+    this.renderer.render(this.game.scene, this.camera);
   }
 
   addEventListeners() {
