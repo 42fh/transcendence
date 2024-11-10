@@ -170,3 +170,10 @@
         
         print(f"Sides: {self.num_sides}, Players: {self.num_paddles}, Distribution: {player_sides}")
         return player_sides
+
+    def calculate_inner_boundaries(self):
+        vertex_distances = [ 
+            self.get_distance(v)
+            for v in self.vertices
+            ]
+        self.inner_boundary = float(min(vertex_distances))        

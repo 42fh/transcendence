@@ -1,6 +1,4 @@
 
-
-
     async def game_logic(self, current_state):
         """
         Main game logic orchestrator that uses the step methods.
@@ -14,40 +12,39 @@
             # Step 1: Move ball
             self.move_ball(ball)
             
-            # Step 2: Check ball distance and update metrics
-            distance = self.get_ball_distance(ball)
-            self.update_distance_metrics(distance, cycle_data)
-            distance_result = self.handle_distance_check(ball, distance, new_state)
-            
-            if distance_result.get("skip_ball"):
-                if distance_result.get("game_over"):
+            # Step 2: Check if ball is in valid game field
+            distance_from_center = self.get_distance(ball) 
+            self.update_distance_metrics(distance_from_center, cycle_data)
+            boundary_check = self.handle_distance_check(ball, distance_from_center, new_state)
+            if boundary_check.get("skip_ball"):
+                if boundary_check.get("game_over"):
                     game_over = True
                     self.add_game_over_event(cycle_data, new_state)
                     break
                 continue
                 
-            if distance_result.get("continue_ball"):
-                continue
-            
-            # Step 3: Get current sector
-            sector_info = self.get_ball_sector(ball, ball_index, new_state)
-            if not sector_info:
+            if boundary_check.get("continue_ball"):
+                continue                    
+                
+            # if ball should be. 
+            # Step 3: Find closest side that might result in a collision
+            collision_candidate = self.find_collision_candidate(ball, ball_index, new_state, distance_from_center)
+            if not collision_candidate:
                 continue
                 
-            # Step 4: Handle side/ball interaction
-            collision = self.handle_side_ball_situation(ball, sector_info, new_state)
-            
-            # Step 5: Handle collision outcomes with events
-            collision_result = self.handle_collision_with_events(collision, ball, new_state, cycle_data)
+            # Step 4: Verify if candidate results in actual collision
+            verified_collision = self.verify_collision_candidate(ball, collision_candidate, new_state)
+            if not verified_collision:
+                continue
+
+            # Step 5: Process collision effects and events
+            collision_result = self.handle_collision_with_events(verified_collision, ball, new_state, cycle_data)
             
             if collision_result.get("game_over"):
                 game_over = True
                 self.add_game_over_event(cycle_data, new_state)
-                break
-                
-            if collision_result.get("skip_ball"):
-                continue
-        
+                break            
+
         return new_state, game_over, cycle_data
     
 
@@ -57,7 +54,7 @@
         ball["y"] += ball["velocity_y"]
 
 
-    def handle_distance_check(self, ball, distance, state):
+    def handle_distance_check(self, ball, distance, state, cycle_data):
         """Handle distance checks and related actions"""
         result = {
             "skip_ball": False,
@@ -65,35 +62,49 @@
             "game_over": False
         }
         
-        if distance > self.get_outer_boundary():
+        if distance > self.outer_boundary:
             collision = self.handle_outside_boundary(ball, state)
             if collision:
-                collision_result = self.handle_collision_with_events(collision, ball, state, self.initialize_cycle_data())
+                collision_result = self.handle_collision_with_events(collision, ball, state, cycle_data)
                 result.update(collision_result)
                 
-        elif distance <= self.get_inner_boundary():
+        elif distance < self.get_inner_boundary(state, ball):
             result["continue_ball"] = True
             
         return result
 
-    
-    def handle_side_ball_situation(self, ball, sector_info, state):
+
+    def handle_outside_boundary(self, ball, state):
+        """Handle ball outside boundary"""
+        sector_info = None
+        return self.handle_tunneling(ball, sector_info, state) 
+   
+
+ 
+    def handle_pair_situation(self, ball, pair_info, state):
         """Handle interaction between ball and side"""
-        if sector_info["type"] == "tunneling":
-            return self.handle_tunneling(ball, sector_info, state)
+        if pair_info["type"] == "tunneling":
+            return self.handle_tunneling(ball, pair_info, state)
             
-        if sector_info["distance"] <= self.get_collision_check_range():
-            return self.handle_side_collision(ball, sector_info, state)
+        if pair_info["distance"] <= self.get_collision_check_range():
+            # Priority 2: Handle near-side collisions
+            if pair_info['type'] == 'parallel':
+                # Case 1: Ball moving parallel to side
+                return self.handle_parallel(ball, pair_info, new_state)
+            elif pair_info['side_index'] in self.active_sides:
+                # Case 2: Ball near active paddle side
+                return self.handle_paddle(ball, pair_info, new_state)
+            else
+                # Case 3: Ball near wall
+                return self.handle_wall(ball,  pair_info, new_state)
             
         return None
 
 
     def handle_collision_with_events(self, collision, ball, state, cycle_data):
         """Handle collision and generate appropriate events"""
-        if not collision:
-            return {"game_over": False, "skip_ball": False}
             
-        result = {"game_over": False, "skip_ball": False}
+        result = {"game_over": False} 
         
         if collision["type"] == "paddle":
             self.handle_paddle_collision_with_events(collision, ball, cycle_data)
@@ -105,7 +116,8 @@
             result.update(self.handle_miss_collision_with_events(collision, ball, state, cycle_data))
             
         elif collision["type"] == "tunneling": # ? 
-            self.handle_tunneling(ball,state,  cycle_data)
+            print ("TUNNELING HANDLE COLLISION WITH EVENT")
+            # self.handle_tunneling(ball,state,  cycle_data)
             
         return result
 
@@ -175,10 +187,6 @@
         }
     
 
-    def handle_outside_boundary(self, ball, state):
-        """Handle ball outside boundary"""
-        sector_info = None
-        return self.handle_tunneling(ball, sector_info, state) 
 
 
     def update_scores(self, current_scores, failed_player_index):

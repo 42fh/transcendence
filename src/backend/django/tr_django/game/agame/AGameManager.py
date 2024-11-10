@@ -42,6 +42,10 @@ class AGameManager(ABC):
         self.type_key = f"game_type:{game_id}"
         self.vertices_key = f"game_vertices:{game_id}"  # New key for vertices
 
+        # game physic
+        self.outer_boundary = float(1.0)
+        self.inner_boundary = None
+
         
 
     @classmethod
@@ -157,25 +161,41 @@ class AGameManager(ABC):
 
 
     # game_logic    
-    @abstractmethod
-    def get_ball_distance(self, ball):
-        """Get distance from ball to game center"""
-        pass
 
     @abstractmethod
-    def get_ball_sector(self, ball, ball_index, state):
+    def get_ball_collision_pair(self, ball, ball_index, state, distance):
         """Determine which sector the ball is in"""
         pass
+    
+    @abstractmethod
+    def calculate_inner_boundaries(self):
+        """
+        Calculate inner boundaries based on vertices or radius.
+        """
+        pass
+
 
     @abstractmethod
     def handle_tunneling(self, ball, sector_info, state):
         """Handle case where ball may have passed through a side"""
         pass
-    
+
     @abstractmethod
-    def handle_side_collision(self, ball, sector_info, state):
-        """Handle collision between ball and side"""
+    def handle_parallel(self, ball, current_sector, state):
+        """Handle case where ball is moving parallel to a side"""
         pass
+        
+    @abstractmethod
+    def handle_paddle(self, ball, current_sector, state):
+        """Handle collision between ball and paddle"""
+        pass
+        
+    @abstractmethod
+    def handle_wall(self, ball, current_sector, state):
+        """Handle collision between ball and wall"""
+        pass
+
+    
 
     @abstractmethod
     def get_outer_boundary(self):

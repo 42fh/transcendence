@@ -1,5 +1,25 @@
 
 
+    def get_distance(self, point):
+         """
+        Calculate the Euclidean distance from point to game center (0,0).
+        This is a core utility used by all game types.
+        
+        Args:
+            point (dict): Point object with x,y coordinates
+            
+        Returns:
+            float: Distance from center
+        """
+        return float(math.sqrt(point["x"] * point["x"] + point["y"] * point["y"]))
+
+
+    def get_inner_boundary(self, state, ball):
+        if self._inner_boundary is None:
+            self.calculate_inner_boundaries()
+        return max(0, self.inner_boundary - state['dimensions']['paddle_width'] - ball['size'])
+
+
     def reset_ball(self, ball, speed=0.006):
         """
         Reset ball to center with random direction

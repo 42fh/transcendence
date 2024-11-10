@@ -224,32 +224,54 @@ class PolygonPongGame(AGameManager):
                     }
 
 
-    def get_ball_sector(self, ball, ball_index, new_state):
+    def get_ball_collision_pair(self, ball, ball_index, state, distance):
         """
-        Check for collisions with list-based movement tracking.
+        Determine the most relevant side or sector that the ball is approaching or interacting with.
+
+        Args:
+            ball (dict): Ball object containing position and velocity data
+                        {"x": float, "y": float, "velocity_x": float, "velocity_y": float}
+            ball_index (int): Index of the ball in the game state's balls array (for self.previous_movements)
+            new_state (dict): Current game state containing paddle positions and game dimensions
+
+        Returns:
+            dict or None: Information about the most relevant sector/collision. Returns:
+                For closest approaching side:
+                    {
+                        'side_index': int,      # Index of the closest side
+                        'movement': dict,        # Movement data relative to the side
+                        'type': str             # Movement type ('parallel' or 'approaching')
+                    }
+                - None if no relevant collisions or approaches are detected
+
+        Notes:
+            - Checks each side of the polygon for ball interaction
+            - Prioritizes tunneling detection to prevent ball passing through sides
+            - For non-tunneling cases, returns the closest approaching side based on distance
+            - Used by game_logic() to determine appropriate collision responses
         """
         
-        collisions = []
+        collisions_candidates = []
         
         for side_index in range(self.num_sides) :
-            movement = self.check_ball_movement_relative_to_side(ball, side_index, ball_index, new_state)           
-            if movement['is_approaching']:
-                if movement['type'] == 'tunneling':
+            ball_movement = self.check_ball_movement_relative_to_side(ball, side_index, ball_index, new_state)           
+            if ball_movement['is_approaching']:
+                if ball_movement['type'] == 'tunneling':
                     # Tunneling detected - return immediately
                     return {
                         'side_index': side_index,
-                        'movement' : movement,
+                        'movement' : ball_movement,
                         'type': 'tunneling'
                     }
                 else:
                     # Add collision candidate
-                    collisions.append({
+                    collisions_candidates.append({
                         'side_index': side_index,
-                        'movement' : movement,
-                        'type': movement['type']
+                        'movement' : ball_movement,
+                        'type': ball_movement['type']
                     })
-        if collisions:
-            return min(collisions, key=lambda x: x['movement']['current_distance'])
+        if collisions_candidates:
+            return min(collisions_candidates, key=lambda x: x['movement']['current_distance'])
         
         # No collisions found
         return None

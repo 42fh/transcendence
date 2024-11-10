@@ -12,10 +12,6 @@
     def update_distance_metrics(self, distance, cycle_data):
         """Update distance-related metrics"""
         cycle_data["highest_distance"] = max(cycle_data["highest_distance"], distance)
-        self.game_metrics["highest_recorded_distance"] = max(
-            self.game_metrics["highest_recorded_distance"],
-            distance
-        )
 
 
 
