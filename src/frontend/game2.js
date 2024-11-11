@@ -9,16 +9,29 @@ game.addSky(1000, 10, 1.3, 0.001, 0.7, new THREE.Vector3(0.3, 0.001, -0.95));
 game.addSea(1000, 1000, 0x001e0f, 0xffffff, 3.7);
 game.loadResources([
   {
-    name: "floorChecker",
+    name: "floorAplhaTexture",
     type: "texture",
-    url: "static/textures/checker.png",
-    isSkin: false,
+    url: "static/textures/floor/alpha.webp",
   },
   {
-    name: "sand",
+    name: "floorColorTexture",
     type: "texture",
     url: "static/textures/floor/color.jpg",
-    isSkin: true,
+  },
+  {
+    name: "floorNormalTexture",
+    type: "texture",
+    url: "static/textures/floor/normal.jpg",
+  },
+  {
+    name: "floorDisplacementTexture",
+    type: "texture",
+    url: "static/textures/floor/displacement.jpg",
+  },
+  {
+    name: "floorARMTexture",
+    type: "texture",
+    url: "static/textures/floor/arm.jpg",
   },
   {
     name: "stone",

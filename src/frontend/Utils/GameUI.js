@@ -26,7 +26,7 @@ export default class GameUI {
       0,
       0,
       depth / 2 + 0.001,
-      "beach"
+      "stone"
     );
     this.mainText.material.color.set("purple");
     this.panel.add(this.mainText);

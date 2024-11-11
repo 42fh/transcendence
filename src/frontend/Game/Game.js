@@ -135,13 +135,21 @@ export default class GameConstructor {
     this.loader = new Loader(sources, this);
 
     window.addEventListener("resourcesLoaded", () => {
-      this.loader.items["floorChecker"].colorSpace = THREE.SRGBColorSpace;
-      this.loader.items["floorChecker"].generateMipmaps = false;
-      this.loader.items["floorChecker"].wrapS = THREE.RepeatWrapping;
-      this.loader.items["floorChecker"].wrapT = THREE.RepeatWrapping;
-      this.loader.items["floorChecker"].minFilter = THREE.NearestFilter;
-      this.loader.items["floorChecker"].magFilter = THREE.NearestFilter;
-      this.loader.items["floorChecker"].repeat.set(3, 3);
+      this.loader.items["floorColorTexture"].colorSpace = THREE.SRGBColorSpace;
+      this.loader.items["floorColorTexture"].repeat.set(4, 4);
+      this.loader.items["floorNormalTexture"].repeat.set(4, 4);
+      this.loader.items["floorDisplacementTexture"].repeat.set(4, 4);
+      this.loader.items["floorARMTexture"].repeat.set(4, 4);
+      this.loader.items["floorColorTexture"].wrapS = THREE.RepeatWrapping;
+      this.loader.items["floorColorTexture"].wrapT = THREE.RepeatWrapping;
+      this.loader.items["floorNormalTexture"].wrapS = THREE.RepeatWrapping;
+      this.loader.items["floorNormalTexture"].wrapT = THREE.RepeatWrapping;
+      this.loader.items["floorDisplacementTexture"].wrapS =
+        THREE.RepeatWrapping;
+      this.loader.items["floorDisplacementTexture"].wrapT =
+        THREE.RepeatWrapping;
+      this.loader.items["floorARMTexture"].wrapS = THREE.RepeatWrapping;
+      this.loader.items["floorARMTexture"].wrapT = THREE.RepeatWrapping;
     });
   }
 

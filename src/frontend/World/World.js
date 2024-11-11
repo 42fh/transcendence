@@ -195,6 +195,8 @@ export default class World {
   }
 
   gameLoop() {
+    this.game.water.material.uniforms["time"].value += 1.0 / 240.0;
+
     // move paddle
     if (this.moveDown && this.game.websocket) {
       this.game.drawer.movePaddle("left");

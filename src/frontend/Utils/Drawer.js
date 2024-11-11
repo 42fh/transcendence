@@ -77,7 +77,14 @@ export default class Drawer {
   createGameField(radius) {
     const fieldGeometry = new THREE.CircleGeometry(radius, 64);
     const fieldMaterial = new THREE.MeshMatcapMaterial({
-      map: this.game.loader.items["floorChecker"],
+      map: this.game.loader.items["floorColorTexture"],
+      normalMap: this.game.loader.items["floorNormalTexture"],
+      displacementMap: this.game.loader.items["floorDisplacementTexture"],
+      roughnessMap: this.game.loader.items["floorARMTexture"],
+      aoMap: this.game.loader.items["floorARMTexture"],
+      metalnessMap: this.game.loader.items["floorARMTexture"],
+      displacementScale: 0.06,
+      displacementBias: -0.05,
     });
     const field = new THREE.Mesh(fieldGeometry, fieldMaterial);
     field.rotation.x = -Math.PI / 2;
