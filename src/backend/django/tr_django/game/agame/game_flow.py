@@ -1,3 +1,9 @@
+import redis.asyncio as redis
+import msgpack
+import asyncio
+from .AGameManager import GameStateError
+import math
+
 async def start_game(self):
     """Start game with process-safe checks"""
     settings = msgpack.unpackb(await self.redis_conn.get(self.settings_key))
@@ -92,7 +98,7 @@ async def update_game(self):
                 paddle['position'] = paddle_positions.get(active_paddle_count, 0.5)
                 active_paddle_count += 1 
         # Run game logic
-        new_state, game_over = await self.game_logic(current_state)
+        new_state, game_over, cycle_data  = await self.game_logic(current_state)
         
         # Verify new state
         try:
@@ -132,7 +138,8 @@ async def update_game(self):
             {
                 "type": "game_finished" if game_over else "game_state",
                 "game_state": new_state,
-                "winner": winner
+                "winner": winner,
+                "cycle": cycle_data 
             }
         )
         

@@ -5,7 +5,7 @@ import msgpack
 import time
 
 
-from method_decorators import ( 
+from .method_decorators import ( 
     add_abstract_implementations, 
     add_overwriten_methods,
     add_setup,
@@ -21,8 +21,8 @@ from method_decorators import (
 @add_collision_verification_phase
 @add_setup
 @add_overwriten_methods      
-@add_abstract_implementations
 @AGameManager.register_game_type("polygon")
+@add_abstract_implementations
 class PolygonPongGame(AGameManager):
     def __init__(self, game_id):
         super().__init__(game_id)
@@ -51,14 +51,46 @@ class PolygonPongGame(AGameManager):
         self.initialize_ball_movements(self.settings.get('num_balls', 1))
         self.calculate_polygon_vertices()
         self.calculate_side_normals()
+        self.calculate_inner_boundaries()
         await self.store_vertices(self.vertices)
 
 
     def get_game_type(self):
         return "polygon"
 
-    
 
+    def reset_ball(self, ball, ball_index, speed=0.006):
+        """
+        Extends parent reset_ball method by also resetting movement tracking.
+        
+        Args:
+            ball (dict): Ball object to reset
+            speed (float): Initial ball speed
+        Returns:
+            dict: Updated ball object
+        """
+        # Call parent method first
+        ball = super().reset_ball(ball, ball_index, speed)
+        
+        # Add our polygon-specific reset
+        self.reset_ball_movment(ball_index)
+        
+        return ball
 
+    """
+    # Explicitly declare abstract methods with pass to ensure they're recognized
+    def calculate_inner_boundaries(self):
+        pass
 
+    def find_collision_candidate(self, ball, ball_index, new_state, distance_from_center):
+        pass
 
+    def handle_paddle(self, ball, collision_candidate, new_state):
+        pass
+
+    def handle_tunneling(self, ball, current_sector, new_state):
+        pass
+
+    def handle_wall(self, ball, collision_candidate, new_state):
+        pass
+    """

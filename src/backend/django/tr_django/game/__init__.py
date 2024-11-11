@@ -1,6 +1,6 @@
 from .agame.AGameManager  import AGameManager
-from .polygon import PolygonPongGame
-from .circular import CircularPongGame
+from .polygon.PolygonPongGame import PolygonPongGame
+from .circular.CircularPongGame import CircularPongGame
 
 __all__ = ['AGameManager', 'PolygonPongGame', 'CircularPongGame']
 

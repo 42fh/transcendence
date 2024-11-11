@@ -1,4 +1,6 @@
 
+
+
 # Setup
 def calculate_inner_boundaries(self):
     vertex_distances = [ 
@@ -114,7 +116,7 @@ def handle_paddle(self, ball, collision_candidate, new_state):
     """
     side_index = collision_candidate['side_index']
     paddle = new_state["paddles"][side_index]
-    relative_position = self._calculate_relative_position(ball, side_index)
+    relative_position = self.calculate_relative_position(ball, side_index)
     
     # Calculate paddle position and width
     paddle_width = new_state["dimensions"]["paddle_width"]
@@ -173,7 +175,7 @@ def handle_paddle(self, ball, collision_candidate, new_state):
         "distance": collision_candidate['movement']['current_distance'],
         "normal": self.side_normals[side_index],
         "projection": collision_point,
-        "active_paddle_index": self._get_active_paddle_index(side_index, new_state["paddles"]),
+        "active_paddle_index": self.active_sides.index(side_index),
         "approach_speed": collision_candidate['movement']['approach_speed'],
         # New debug/statistics for misses
         "debug_info": {
@@ -206,7 +208,7 @@ def handle_wall(self, ball, collision_candidate, new_state):
         dict: Complete collision info with enhanced debugging info
     """
     side_index = collision_candidate['side_index']
-    relative_position = self._calculate_relative_position(ball, side_index)
+    relative_position = self.calculate_relative_position(ball, side_index)
     
     
     # Initialize collision point

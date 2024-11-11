@@ -1,36 +1,4 @@
 
-    def _calculate_relative_position(self, ball, side_index):
-        """
-        Calculate relative position of ball along a side (0 to 1).
-        
-        Args:
-            ball (dict): Ball object with position
-            side_index (int): Index of the side
-            
-        Returns:
-            float: Relative position along the side (0 = start, 1 = end)
-        """
-        start = self.vertices[side_index]
-        end = self.vertices[(side_index + 1) % self.num_sides]
-        
-        # Vector from start to end of side
-        side_vector_x = end["x"] - start["x"]
-        side_vector_y = end["y"] - start["y"]
-        
-        # Vector from start to ball
-        ball_vector_x = ball["x"] - start["x"]
-        ball_vector_y = ball["y"] - start["y"]
-        
-        # Calculate dot product and side length
-        dot_product = side_vector_x * ball_vector_x + side_vector_y * ball_vector_y
-        side_length_squared = side_vector_x * side_vector_x + side_vector_y * side_vector_y
-        
-        if side_length_squared == 0:
-            return 0.0
-            
-        # Return relative position clamped between 0 and 1
-        t = dot_product / side_length_squared
-        return max(0.0, min(1.0, t))
     
     def _calculate_paddle_collision(self, side_index, collision_info, ball, paddles, dimensions):
         """

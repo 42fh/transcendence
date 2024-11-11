@@ -1,3 +1,8 @@
+import asyncio
+import math
+import time
+
+
 
 async def game_logic(self, current_state):
     """
@@ -7,15 +12,14 @@ async def game_logic(self, current_state):
     game_over = False
     new_state = current_state.copy()
     cycle_data = self.initialize_cycle_data()
-    
+ 
     for ball_index, ball in enumerate(new_state["balls"]):
         # Movement Phase
         self.move_ball(ball)
-        
         # Boundary Phase
         distance_from_center = self.get_distance(ball) 
-        self.update_distance_metrics(distance_from_center, cycle_data)
-        boundary_check = self.handle_distance_check(ball, distance_from_center, new_state, cyle_data)
+        #self.update_distance_metrics(distance_from_center, cycle_data)
+        boundary_check = self.handle_distance_check(ball, distance_from_center, new_state, cycle_data)
         if boundary_check.get("skip_ball"):
             if boundary_check.get("game_over"):
                 game_over = True
@@ -27,16 +31,19 @@ async def game_logic(self, current_state):
         # if ball should be. 
         # Collision Candidate Phase
         collision_candidate = self.find_collision_candidate(ball, ball_index, new_state, distance_from_center)
+        print("ball4") 
         if not collision_candidate:
             continue
             
         # Collision Verification Phase 
         verified_collision = self.verify_collision_candidate(ball, collision_candidate, new_state)
+        print("ball5") 
         if not verified_collision:
             continue
 
         # Impact Processing Phase
-        collision_result = self.collision_handler(verified_collision, ball, new_state, cycle_data)
+        collision_result = self.collision_handler(verified_collision, ball, new_state, cycle_data, ball_index)
+        print("ball6") 
         
         if collision_result.get("game_over"):
             game_over = True
@@ -55,7 +62,7 @@ def move_ball(self, ball):
 # Boundary Phase
 
 def get_distance(self, point):
-     """
+    """
     Calculate the Euclidean distance from point to game center (0,0).
     This is a core utility used by all game types.
     
@@ -76,7 +83,6 @@ def handle_distance_check(self, ball, distance, state, cycle_data):
         "skip_ball": False,
         "game_over": False
     }
-    
     if distance > self.outer_boundary:
         collision = self.handle_outside_boundary(ball, state)
         if collision:
@@ -97,7 +103,7 @@ def handle_outside_boundary(self, ball, state):
     return self.handle_tunneling(ball, sector_info, state) # jump to Collision Verification Phase  
 
 
-def get_inner_boundaries(self, state, ball):
+def get_inner_boundary(self, state, ball):
     BUFFER = 0.8
     return (self.inner_boundary - state["dimensions"]["paddle_width"] - ball['size']) * BUFFER 
 
@@ -106,26 +112,26 @@ def get_inner_boundaries(self, state, ball):
 # Collision Candidate Phase abstarct 
 
 # Collision Verification Phase 
-def verify_collision_candidate(ball, collision_candidate, new_state) :
+def verify_collision_candidate(self, ball, collision_candidate, new_state) :
     """Handle interaction between ball and side"""
-    if pair_info["type"] == "tunneling":
-        return self.handle_tunneling(ball, pair_info, state)
+    if collision_candidate["type"] == "tunneling":
+        return self.handle_tunneling(ball, collision_candidate, state)
         
-    collision, active = self.get_collision_check_range(collision_candidate, new_state)
+    collision, active = self.get_collision_check_range(ball, collision_candidate, new_state)
     if collision:
-        if pair_info['type'] == 'parallel':
+        if collision_candidate['type'] == 'parallel':
             # Case 1: Ball moving parallel to side
-            return self.handle_parallel(ball, pair_info, new_statei, active)
+            return self.handle_parallel(ball, collision_candidate, new_statei, active)
         if active:
             # Case 2: Ball near active paddle side
-            return self.handle_paddle(ball, pair_info, new_state)
-        else
+            return self.handle_paddle(ball, collision_candidate, new_state)
+        else:
             # Case 3: Ball near wall
-            return self.handle_wall(ball,  pair_info, new_state)
+            return self.handle_wall(ball,  collision_candidate, new_state)
         
     return None
 
-def get_collision_check_range(collision_candidate, new_state)
+def get_collision_check_range(self, ball, collision_candidate, new_state):
     
     side_index = collision_candidate['side_index']
     movement = collision_candidate['movement']
@@ -139,11 +145,11 @@ def get_collision_check_range(collision_candidate, new_state)
     if is_active_side:
         # For paddle sides, include paddle width in collision distance
         paddle_width = new_state['dimensions']['paddle_width']
-       collision_check = collision_distance <= ball['size'] + paddle_width)
+        collision_check = collision_distance <= (ball['size'] + paddle_width)
     else:
         # For walls, just use ball size
-        collision_check = collision_distance <= ball['size'])
-    return collision_check is_active_side
+        collision_check = collision_distance <= ball['size']
+    return collision_check, is_active_side
 
 
 def handle_parallel(self, ball, collision_candidate, new_state):
@@ -173,7 +179,7 @@ def handle_parallel(self, ball, collision_candidate, new_state):
 
 # Impact Processing Phase
 
-def collision_handler(self, collision, ball, new_state, cycle_data):
+def collision_handler(self, collision, ball, new_state, cycle_data, ball_index):
     """Main collision handler that delegates to specific collision type handlers"""
     gameover = {"game_over": False}
     if collision["type"] == "paddle":
@@ -181,7 +187,7 @@ def collision_handler(self, collision, ball, new_state, cycle_data):
     elif collision["type"] == "wall":
         gameover.update(self.collision_wall(collision, ball, new_state, cycle_data))
     elif collision["type"] == "miss":
-        gameover.update(self.collision_miss(collision, ball, new_state, cycle_data))
+        gameover.update(self.collision_miss(collision, ball, new_state, cycle_data, ball_index))
     return gameover
 
 
@@ -262,9 +268,9 @@ def bounce_paddle(self, ball, collision):
     new_speed = math.sqrt(ball["velocity_x"]**2 + ball["velocity_y"]**2)
     
     # Update combo system and speed records
-    current_time = time.time()
-    self.update_hit_combo(current_time, ball)
-    self.highest_recorded_speed = max(self.highest_recorded_speed, new_speed)
+    #current_time = time.time()
+    #self.update_hit_combo(current_time, ball)
+    #self.highest_recorded_speed = max(self.highest_recorded_speed, new_speed)
     
     return {
         "initial": initial_state,
@@ -311,7 +317,7 @@ def collision_wall(self, collision, ball, new_state, cycle_data):
     ball["y"] = wall_outer_y + normal["y"] * (ball["size"] + BUFFER)
     
     # Step 2: Apply bounce effects and get physics data
-    physics_data = self.wall_bounce(ball, collision)
+    physics_data = self.bounce_wall(ball, collision)
     
     # Step 3: Create collision event data
     event_data = {
@@ -332,7 +338,7 @@ def collision_wall(self, collision, ball, new_state, cycle_data):
     return {"game_over": False}
 
 
-def wall_bounce(self, ball, collision):
+def bounce_wall(self, ball, collision):
     """
     Apply wall-specific bounce effects and return physics data.
     Similar pattern to paddle bounce but with wall-specific behavior.
@@ -367,7 +373,51 @@ def wall_bounce(self, ball, collision):
     }
 
 
-def collision_miss(self, collision, ball, new_state, cycle_data):
+def apply_ball_bounce_effect(self, ball, normal, offset=0, speed_multiplier=1.05):
+    """
+    Apply bounce effect to ball including reflection and speed increase
+    Args:
+        ball (dict): Ball object
+        normal (dict): Normal vector of collision
+        offset (float): Normalized offset from center (-1 to 1)
+        speed_multiplier (float): Speed increase factor
+    Returns:
+        dict: Updated ball velocities
+    """
+    # Calculate reflection
+    dot_product = (ball["velocity_x"] * normal["x"] + 
+                  ball["velocity_y"] * normal["y"])
+    
+    reflected_x = ball["velocity_x"] - 2 * dot_product * normal["x"]
+    reflected_y = ball["velocity_y"] - 2 * dot_product * normal["y"]
+    
+    # Apply angle modification based on offset
+    angle_mod = offset * math.pi * 0.25
+    cos_mod = math.cos(angle_mod)
+    sin_mod = math.sin(angle_mod)
+    
+    final_x = reflected_x * cos_mod - reflected_y * sin_mod
+    final_y = reflected_x * sin_mod + reflected_y * cos_mod
+    
+    # Apply speed increase
+    current_speed = math.sqrt(ball["velocity_x"]**2 + ball["velocity_y"]**2)
+    new_speed = current_speed * speed_multiplier
+    # Limit speed to 80% of ball size to prevent tunneling
+    MAX_SPEED = ball["size"] * 0.8
+    if new_speed > MAX_SPEED:
+        scale = MAX_SPEED / new_speed
+        final_x *= scale
+        final_y *= scale       
+
+    return {
+        "velocity_x": (final_x),
+        "velocity_y": (final_y)
+    }
+
+
+
+
+def collision_miss(self, collision, ball, new_state, cycle_data, ball_index):
     """
     Handle miss collision with events.
     Follows same pattern as paddle/wall collisions for consistency.
@@ -398,7 +448,7 @@ def collision_miss(self, collision, ball, new_state, cycle_data):
     self.last_hit_time = time.time()
     
     # Step 3: Reset ball and collect physics data
-    self.reset_ball(ball)
+    self.reset_ball(ball, ball_index)
     physics_data = {
         "pre_collision_position": initial_position,
         "post_collision_position": {"x": ball["x"], "y": ball["y"]},

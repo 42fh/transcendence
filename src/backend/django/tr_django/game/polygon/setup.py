@@ -1,3 +1,4 @@
+import math
 
 def calculate_side_normals(self):
     """

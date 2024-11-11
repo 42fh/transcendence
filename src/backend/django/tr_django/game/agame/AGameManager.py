@@ -14,15 +14,15 @@ class GameStateError(Exception):
     pass
 
 
-@add_state_validation      # Validation layer (most specific)
-@add_data_event_handling   # Event system
-@add_game_logic           # Core game rules 
-@add_game_physics        # Physics engine
+@add_redis
+@add_player
+@add_paddle
+@add_initial
+@add_gamestate   # Validation layer (most specific)
+@add_event_flow         # Event system
+@add_game_physics       # Physics engine
+@add_game_logic         # Core game rules 
 @add_game_flow          # Game state management
-@add_paddle_management  # Paddle controls
-@add_player_management  # Player handling
-@add_redis_operations   # Basic infrastructure
-@add_initialization    # Most fundamental - sets up the game (most fundamental)
 class AGameManager(ABC):
 
     _game_types = {}
@@ -153,59 +153,59 @@ class AGameManager(ABC):
             return False
 
     # setup
-
-    @abstractmethod 
-    async  def apply_game_settings(self): pass
-
-    @abstractmethod
-    def get_game_type(self): pass
-
-    # game_logic    
-
-    # Setup
-    @abstractmethod
-    def calculate_inner_boundaries(self):
-        """
-        Calculate inner boundaries based on vertices or radius.
-        """
-        pass
-
-    # Movement Phase  
-
-    # Boundary Phase
-    
-    # Collision Candidate Phase
-    @abstractmethod
-    def  find_collision_candidate(ball, ball_index, new_state, distance_from_center):
-        """Determine which sector the ball is in"""
-        pass
-    
-    # Collision Verification Phase 
-
-    @abstractmethod
-    def handle_tunneling(self, ball, sector_info, state):
-        """Handle case where ball may have passed through a side"""
-        pass
-
-        
-    @abstractmethod
-    def handle_paddle(self, ball, current_sector, state):
-        """Handle collision between ball and paddle"""
-        pass
-        
-    @abstractmethod
-    def handle_wall(self, ball, current_sector, state):
-        """Handle collision between ball and wall"""
-        pass
-
-    # Impact Processing Phase 
-   
-
-    # ? 
-    #@abstractmethod
-    #def determine_winner(self, state):
-    #    """Determine the winner of the game"""
-    #    pass
-    
-
- 
+#
+#    @abstractmethod 
+#    async  def apply_game_settings(self): pass
+#
+#    @abstractmethod
+#    def get_game_type(self): pass
+#
+#    # game_logic    
+#
+#    # Setup
+#    @abstractmethod
+#    def calculate_inner_boundaries(self):
+#        """
+#        Calculate inner boundaries based on vertices or radius.
+#        """
+#        pass
+#
+#    # Movement Phase  
+#
+#    # Boundary Phase
+#    
+#    # Collision Candidate Phase
+#    @abstractmethod
+#    def  find_collision_candidate(ball, ball_index, new_state, distance_from_center):
+#        """Determine which sector the ball is in"""
+#        pass
+#    
+#    # Collision Verification Phase 
+#
+#    @abstractmethod
+#    def handle_tunneling(self, ball, sector_info, state):
+#        """Handle case where ball may have passed through a side"""
+#        pass
+#
+#        
+#    @abstractmethod
+#    def handle_paddle(self, ball, current_sector, state):
+#        """Handle collision between ball and paddle"""
+#        pass
+#        
+#    @abstractmethod
+#    def handle_wall(self, ball, current_sector, state):
+#        """Handle collision between ball and wall"""
+#        pass
+#
+#    # Impact Processing Phase 
+#   
+#
+#    # ? 
+#    #@abstractmethod
+#    #def determine_winner(self, state):
+#    #    """Determine the winner of the game"""
+#    #    pass
+#    
+#
+# 

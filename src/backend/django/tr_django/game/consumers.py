@@ -1,7 +1,7 @@
 import json
 import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
-from .AGameManager import AGameManager
+from .agame.AGameManager import AGameManager
 import time
 import msgpack
 
@@ -66,7 +66,6 @@ class PongConsumer(AsyncWebsocketConsumer):
                     current_state = msgpack.unpackb(state_data)
                     sanitized_state = self.sanitize_for_json(current_state)
                     vertices_data = await self.game_manager.redis_conn.get(self.game_manager.vertices_key)
-                    print("hallo: " + str(vertices_data))
                     vertices = msgpack.unpackb(vertices_data) if vertices_data else None
                     sanitized_vertices = self.sanitize_for_json(vertices) 
                     await self.send(text_data=json.dumps({
@@ -183,9 +182,11 @@ class PongConsumer(AsyncWebsocketConsumer):
     async def game_state(self, event):
         """Handle game state update events"""
         sanitized_state = self.sanitize_for_json(event["game_state"])
+        cycle = self.sanitize_for_json(event["cycle"]) 
         await self.send(text_data=json.dumps({
             "type": "game_state",
-            "game_state": sanitized_state 
+            "game_state": sanitized_state,
+            "cycle":  cycle
         }))
 
     async def game_finished(self, event):

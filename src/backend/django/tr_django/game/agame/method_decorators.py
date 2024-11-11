@@ -4,7 +4,7 @@ def add_game_flow(cls):
     Decorator that adds game flow management methods to a class.
     Includes methods for starting, updating, and ending games with process-safe checks.
     """
-    from game_flow import start_game, update_game, end_game
+    from .game_flow import start_game, update_game, end_game
     
     methods = {
         'start_game': start_game,
@@ -19,84 +19,172 @@ def add_game_flow(cls):
 
 def add_game_logic(cls):
     """
-    Decorator that adds core game logic methods to a class.
-    Includes methods for ball movement, collision handling, and game mechanics.
+    here game logic flow
     """
+    from .game_logic import (
+
+        # main 
+        game_logic,
+
+        # Movement Phase
+        move_ball,
+
+        # Boundary Phase
+        get_distance,
+        handle_distance_check,
+        handle_outside_boundary,
+        get_inner_boundary,
+
+        # Collision Candidate Phase
+        
+        # Collision Verification Phase
+        verify_collision_candidate,
+        get_collision_check_range,
+        handle_parallel,         
+        
+        # Impact Processing Phase
+        collision_handler,
+        collision_paddle,
+        bounce_paddle,
+        collision_wall,       
+        bounce_wall,
+        apply_ball_bounce_effect,
+        collision_miss,
+        check_winner
+    )
+
     methods = {
+        
+        #  main
         'game_logic': game_logic,
+               
+        # Movement Phase
         'move_ball': move_ball,
+        
+        # Boundary Phase
+        'get_distance': get_distance,
         'handle_distance_check': handle_distance_check,
-        'handle_side_ball_situation': handle_side_ball_situation,
-        'handle_collision_with_events': handle_collision_with_events,
-        'handle_paddle_collision_with_events': handle_paddle_collision_with_events,
-        'handle_wall_collision_with_events': handle_wall_collision_with_events,
-        'handle_miss_collision_with_events': handle_miss_collision_with_events,
-        'handle_outside_boundary': handle_outside_boundary,
-        'update_scores': update_scores,
+        'handle_outside_boundary': handle_outside_boundary,        
+        'get_inner_boundary': get_inner_boundary,
+        
+        # Collision Candidate Phase
+        
+        # Collision Verification Phase
+        'verify_collision_candidate': verify_collision_candidate,
+        'get_collision_check_range': get_collision_check_range,
+        'handle_parallel': handle_parallel,
+
+        # Impact Processing Phase
+        'collision_handler': collision_handler,
+        'collision_paddle': collision_paddle,
+        'bounce_paddle': bounce_paddle,
+        'collision_wall': collision_wall,
+        'bounce_wall': bounce_wall,
+        'apply_ball_bounce_effect': apply_ball_bounce_effect,
+        'collision_miss': collision_miss,
         'check_winner': check_winner
+
+    }
+    
+    for name, method in methods.items():
+        setattr(cls, name, method)
+    
+    return cls
+
+
+def add_event_flow(cls):
+    """
+        cyyle_date and events
+    """
+    from .event_flow import (
+        initialize_cycle_data
+
+    )
+
+    methods = {
+        
+        'initialize_cycle_data': initialize_cycle_data
+               
     }
     
     for name, method in methods.items():
         setattr(cls, name, method)
     return cls
 
-def add_data_event_handling(cls):
+
+def add_game_physics(cls):
     """
-    Decorator that adds data and event handling methods to a class.
-    Includes methods for tracking game events and metrics.
+        game_physic
     """
+    from .game_physic import (
+        reset_ball
+
+    )
+
     methods = {
-        'initialize_cycle_data': initialize_cycle_data,
-        'update_distance_metrics': update_distance_metrics,
-        'add_game_over_event': add_game_over_event
+        
+        'reset_ball': reset_ball
+               
     }
     
     for name, method in methods.items():
         setattr(cls, name, method)
     return cls
 
-def add_redis_operations(cls):
+
+def add_gamestate(cls):
     """
-    Decorator that adds Redis-related operations to a class.
-    Includes methods for connection setup and data storage/retrieval.
+        gamestate
     """
+    from .gamestate import (
+        verify_game_state
+
+    )
+
     methods = {
-        '_setup_connections': _setup_connections,
-        'store_vertices': store_vertices,
-        'get_vertices': get_vertices,
-        'acquire_lock': acquire_lock,
-        'release_lock': release_lock
+        
+        'verify_game_state': verify_game_state
+               
     }
     
     for name, method in methods.items():
         setattr(cls, name, method)
     return cls
 
-def add_player_management(cls):
+
+def add_initial(cls):
     """
-    Decorator that adds player management methods to a class.
-    Includes methods for adding/removing players with process-safe operations.
+        initial
     """
+    from .initial import (
+        initialize,
+        initialize_new_game,
+        create_initial_state
+    )
+
     methods = {
-        'add_player': add_player,
-        'remove_player': remove_player
+        
+        'initialize': initialize,
+        'initialize_new_game': initialize_new_game,
+        'create_initial_state': create_initial_state
     }
     
     for name, method in methods.items():
         setattr(cls, name, method)
     return cls
 
-def add_paddle_management(cls):
+
+def add_paddle(cls):
     """
-    Decorator that adds paddle management methods to a class.
-    Includes methods for updating and retrieving paddle positions atomically.
-    
-    Usage:
-    @add_paddle_management
-    class PaddleManager:
-        ...
+        paddle
     """
+    from .paddle import (
+        update_paddle,
+        get_paddle_positions
+    )
+
     methods = {
+        
         'update_paddle': update_paddle,
         'get_paddle_positions': get_paddle_positions
     }
@@ -105,62 +193,51 @@ def add_paddle_management(cls):
         setattr(cls, name, method)
     return cls
 
-def add_initialization(cls):
+
+def add_player(cls):
     """
-    Decorator that adds game initialization methods to a class.
-    Includes methods for setting up new games and creating initial states.
-    
-    Usage:
-    @add_initialization
-    class GameInitializer:
-        ...
+        player
     """
+    from .player import (
+        add_player,
+        remove_player
+    )
+
     methods = {
-        'initialize': initialize,
-        '_initialize_new_game': _initialize_new_game,
-        'create_initial_state': create_initial_state
+        
+        'add_player': add_player,
+        'remove_player': remove_player
     }
     
     for name, method in methods.items():
         setattr(cls, name, method)
     return cls
 
-def add_state_validation(cls):
+
+def add_redis(cls):
     """
-    Decorator that adds game state validation methods to a class.
-    Includes comprehensive state structure verification.
-    
-    Usage:
-    @add_state_validation
-    class StateValidator:
-        ...
+        redis
     """
+    from .redis import (
+        setup_connections,
+        store_vertices,
+        get_vertices,
+        acquire_lock,
+        release_lock
+
+    )
+
     methods = {
-        'verify_game_state': verify_game_state
+        
+        'setup_connections': setup_connections,
+        'store_vertices': store_vertices,
+        'get_vertices': get_vertices,
+        'acquire_lock': acquire_lock,
+        'release_lock': release_lock
+
+
     }
     
     for name, method in methods.items():
         setattr(cls, name, method)
     return cls
-
-def add_game_physics(cls):
-    """
-    Decorator that adds game physics methods to a class.
-    Includes ball movement, bounce effects, and combo system.
-    
-    Usage:
-    @add_game_physics
-    class PhysicsEngine:
-        ...
-    """
-    methods = {
-        'reset_ball': reset_ball,
-        'apply_ball_bounce_effect': apply_ball_bounce_effect,
-        'initialize_combo_system': initialize_combo_system,
-        'update_hit_combo': update_hit_combo
-    }
-    
-    for name, method in methods.items():
-        setattr(cls, name, method)
-    return cls
-

@@ -2,7 +2,7 @@ def add_abstract_implementations(cls):
     """
     Implements all required abstract methods from AGameManager based on game logic flow
     """
-    from abstract_implementations import (
+    from .abstract_implementations import (
 
         # Setup
         calculate_inner_boundaries,
@@ -17,7 +17,7 @@ def add_abstract_implementations(cls):
         # Collision Verification Phase
         handle_tunneling,         
         handle_paddle,
-        handle_wall,
+        handle_wall
         
         # Impact Processing Phase
     )
@@ -37,7 +37,7 @@ def add_abstract_implementations(cls):
         # Collision Verification Phase
         'handle_tunneling': handle_tunneling,
         'handle_paddle': handle_paddle,
-        'handle_wall': handle_wall,
+        'handle_wall': handle_wall
         
         # Impact Processing Phase
     }
@@ -50,34 +50,34 @@ def add_abstract_implementations(cls):
 
 def add_overwriten_methods(cls):
     """
-        here are the methods which get overitten
+        here are the methods which get overwriten
     """
-    from overwriten_methods import (
-        reset_ball
+    #from .overwriten_methods import (
+        #reset_ball
 
-    )
+   # )
 
     methods = {
         
-        'reset_ball': reset_ball
+        #'reset_ball': reset_ball
                
     }
     
     for name, method in methods.items():
         setattr(cls, name, method)
-
+    return cls
 
 def add_setup(cls):
     """
         here are the methods, we need extra for setup
     """
-    from setup import (
+    from .setup import (
         calculate_side_normals,
         calculate_polygon_vertices,
         get_player_side_indices
 
     )
-    from ratios import (
+    from .ratios import (
         _calculate_regular_ratios,
         _calculate_crazy_ratios,
         _calculate_star_ratios
@@ -98,28 +98,32 @@ def add_setup(cls):
     for name, method in methods.items():
         setattr(cls, name, method)
    
+    return cls
  
 def add_collision_verification_phase(cls):
     """
         here are the methods, we need extra for collision_verification_phase
     """
-    from collision_verification_phase import (
-        get_nearest_side_index
+    from .collision_verification_phase import (
+        get_nearest_side_index,
+        calculate_relative_position
     )
 
     methods = {
-        'get_nearest_side_index': get_nearest_side_index 
+        'get_nearest_side_index': get_nearest_side_index,
+        'calculate_relative_position': calculate_relative_position 
     }
     
     for name, method in methods.items():
         setattr(cls, name, method)
+    return cls
 
 
 def add_collision_candidate_phase(cls):
     """
         here are the methods, we need extra for collision_candidate_phase
     """
-    from collision_candidate_phase import (
+    from .collision_candidate_phase import (
         check_ball_movement_relative_to_side,
         check_paddle
     )
@@ -131,13 +135,14 @@ def add_collision_candidate_phase(cls):
     
     for name, method in methods.items():
         setattr(cls, name, method)
+    return cls
 
 
 def add_ball_movement_tracking(cls):
     """
         here are the methods, we need extra for ball_movement_tracking
     """
-    from ball_movement_tracking import (
+    from .ball_movement_tracking import (
         initialize_ball_movements,
         update_ball_movement,
         reset_ball_movement
@@ -151,5 +156,6 @@ def add_ball_movement_tracking(cls):
     
     for name, method in methods.items():
         setattr(cls, name, method)
+    return cls
 
 
