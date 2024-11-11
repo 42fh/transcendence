@@ -4,59 +4,52 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
-from .models import ChatRoom, Message
+from .models import ChatRoom, Message, BlockedUser
+import json
+from django.middleware.csrf import get_token
 
 
 @login_required
 def get_username(request):
-    return JsonResponse({"username": request.user.username, "status": "success"})
+    """Return the current user's username and CSRF token."""
+    return JsonResponse({"username": request.user.username, "csrfToken": get_token(request)})
 
 
 @login_required
 def get_user_list(request):
-    """
-    TODO: The following features are not used in front, only the basic user list
-    Chat Status: if a user has chat with current user
-     Recent Chats: chat room with current user sorted by the latest message.
-     Unread Messages: track number unread messages.
-    """
     try:
-        # Get all active users except the current user
-        users = (
-            User.objects.exclude(username=request.user.username)
-            # TODO: perhaps precise which is online/active
-            # .filter(is_active=True)
-            .values("username")
+        users = User.objects.exclude(username=request.user.username).values("username")
+
+        # Get blocked users
+        blocked_users = set(
+            BlockedUser.objects.filter(user=request.user).values_list("blocked_user__username", flat=True)
         )
 
-        # recent chat rooms for the current user
+        # Get users who blocked current user
+        blocked_by_users = set(
+            BlockedUser.objects.filter(blocked_user=request.user).values_list("user__username", flat=True)
+        )
+
         recent_chats = (
-            ChatRoom.objects.filter(
-                models.Q(user1=request.user) | models.Q(user2=request.user)
-            )
+            ChatRoom.objects.filter(models.Q(user1=request.user) | models.Q(user2=request.user))
             .select_related("user1", "user2")
             .order_by("-last_message_at")
         )
 
-        # list of users having chats with current user
         users_with_chats = set()
         for chat in recent_chats:
             other_user = chat.user2 if chat.user1 == request.user else chat.user1
             users_with_chats.add(other_user.username)
 
-        # user list with chat information
         user_list = []
         for user in users:
             username = user["username"]
             user_data = {
                 "username": username,
                 "has_chat": username in users_with_chats,
+                "is_blocked": username in blocked_users,
+                "has_blocked_you": username in blocked_by_users,
             }
-
-            # Add unread message count
-            if username in users_with_chats:
-                room_id = "_".join(sorted([request.user.username, username]))
-
             user_list.append(user_data)
 
         return JsonResponse({"status": "success", "users": user_list})
@@ -72,19 +65,53 @@ def mark_messages_read(request, room_id):
         chat_room = ChatRoom.objects.get(room_id=room_id)
 
         if request.user not in [chat_room.user1, chat_room.user2]:
-            return JsonResponse(
-                {"status": "error", "message": "Access denied"}, status=403
-            )
+            return JsonResponse({"status": "error", "message": "Access denied"}, status=403)
 
-        Message.objects.filter(room=chat_room, is_read=False).exclude(
-            sender=request.user
-        ).update(is_read=True)
+        Message.objects.filter(room=chat_room, is_read=False).exclude(sender=request.user).update(is_read=True)
 
         return JsonResponse({"status": "success", "message": "Messages marked as read"})
 
     except ChatRoom.DoesNotExist:
-        return JsonResponse(
-            {"status": "error", "message": "Chat room not found"}, status=404
-        )
+        return JsonResponse({"status": "error", "message": "Chat room not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+
+@login_required
+def block_user(request):
+    try:
+        data = json.loads(request.body)
+        username_to_block = data.get("username")
+
+        if not username_to_block:
+            return JsonResponse({"status": "error", "message": "Username required"}, status=400)
+
+        user_to_block = User.objects.filter(username=username_to_block).first()
+        if not user_to_block:
+            return JsonResponse({"status": "error", "message": "User not found"}, status=404)
+
+        if user_to_block == request.user:
+            return JsonResponse({"status": "error", "message": "Cannot block yourself"}, status=400)
+
+        BlockedUser.objects.get_or_create(user=request.user, blocked_user=user_to_block)
+        return JsonResponse({"status": "success", "message": f"Blocked user {username_to_block}"})
+
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+
+@login_required
+def unblock_user(request):
+    try:
+        data = json.loads(request.body)
+        username_to_unblock = data.get("username")
+
+        if not username_to_unblock:
+            return JsonResponse({"status": "error", "message": "Username required"}, status=400)
+
+        BlockedUser.objects.filter(user=request.user, blocked_user__username=username_to_unblock).delete()
+
+        return JsonResponse({"status": "success", "message": f"Unblocked user {username_to_unblock}"})
+
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)}, status=500)

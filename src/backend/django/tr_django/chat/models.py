@@ -29,12 +29,8 @@ class ChatRoom(models.Model):
 
 
 class Message(models.Model):
-    room = models.ForeignKey(
-        ChatRoom, on_delete=models.CASCADE, related_name="messages"
-    )
-    sender = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="sent_messages"
-    )
+    room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name="messages")
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_messages")
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
@@ -54,3 +50,18 @@ class Message(models.Model):
 
     def __str__(self):
         return f"Message from {self.sender.username} at {self.timestamp}"
+
+
+class BlockedUser(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="blocking")
+    blocked_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="blocked_by")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "blocked_user")
+        indexes = [
+            models.Index(fields=["user", "blocked_user"]),
+        ]
+
+    def __str__(self):
+        return f"{self.user.username} blocked {self.blocked_user.username}"

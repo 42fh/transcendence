@@ -22,7 +22,18 @@ services:
   django:
     build: ./src/backend/django
     # mind that manage.py is in the tr_django folder
-    command: sh -c "python tr_django/manage.py migrate && python tr_django/manage.py collectstatic --noinput && daphne -b 0.0.0.0 -p 8000 tr_django.asgi:application"
+    command: >
+      sh -c "
+        echo 'Running initial migrations...' &&
+        python tr_django/manage.py migrate contenttypes &&
+        python tr_django/manage.py migrate auth &&
+        python tr_django/manage.py migrate admin &&
+        python tr_django/manage.py migrate sessions &&
+        echo 'Running app migrations...' &&
+        python tr_django/manage.py migrate chat --fake-initial &&
+        python tr_django/manage.py migrate game --fake-initial &&
+        python tr_django/manage.py collectstatic --noinput &&
+        daphne -b 0.0.0.0 -p 8000 tr_django.asgi:application"
     env_file:
       - ./.env
     volumes:

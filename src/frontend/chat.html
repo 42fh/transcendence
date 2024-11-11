@@ -27,185 +27,254 @@
         let currentUsername = '';
         let currentChatPartner = '';
         let messageHistoryLoaded = false;
+        let csrfToken = null;
 
-    function showError(message) {
-        const errorContainer = document.getElementById('error-container');
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'error-message';
-        errorDiv.textContent = message;
-        errorContainer.innerHTML = '';
-        errorContainer.appendChild(errorDiv);
-        setTimeout(() => errorDiv.remove(), 5000);
-    }
-
-    async function initializeChat() {
-        try {
-            const response = await fetch('/api/chat/get_username/');
-            if (!response.ok) throw new Error('Failed to get username');
-            const data = await response.json();
-            currentUsername = data.username;
-            document.getElementById('current-username').value = currentUsername;
-            document.querySelector('span#current-username').textContent = currentUsername;
-            await loadUserList();
-        } catch (error) {
-            showError('Failed to initialize chat: ' + error.message);
-        }
-    }
-
-    async function loadUserList() {
-        try {
-            const response = await fetch('/api/chat/get_user_list/');
-            if (!response.ok) throw new Error('Failed to get user list');
-            const data = await response.json();
-            
-            const usersList = document.getElementById('users-list');
-            usersList.innerHTML = '';
-            
-            data.users.forEach(user => {
-                const li = document.createElement('li');
-                li.className = 'user-item' + (user.has_chat ? ' has-chat' : '');
-                li.textContent = user.username;
-                li.onclick = () => startChatWith(user.username);
-                usersList.appendChild(li);
-            });
-        } catch (error) {
-            showError('Failed to load user list: ' + error.message);
-        }
-    }
-
-       let isSwitchingRoom = false;
-
-    function startChatWith(otherUser) {
-        if (currentChatPartner === otherUser || isSwitchingRoom) {
-            return;
-        }
-
-        isSwitchingRoom = true;
-        currentChatPartner = otherUser;
-        const currentUser = document.getElementById('current-username').value;
-        if (!currentUser) {
-            showError('Current user not found');
-            isSwitchingRoom = false;
-            return;
-        }
-
-        const roomName = [currentUser, otherUser].sort().join('_');
-
-        if (window.chatSocket && window.chatSocket.readyState === WebSocket.OPEN) {
-            currentChatPartner = '';
-            window.chatSocket.close(1000, 'Switching rooms');
-        }
-
-        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const host = window.location.hostname || 'localhost';
-        const port = '8000';
-        const wsUrl = `${wsProtocol}//${host}:${port}/ws/chat/${roomName}/`;
-
-        try {
-            window.chatSocket = new WebSocket(wsUrl);
-
-            window.chatSocket.onopen = function (e) {
-                document.getElementById('chat-messages').innerHTML = '';
-                addMessageToChat('System', `Connected to chat with ${otherUser}`, 'system');
-                messageHistoryLoaded = false;
-                isSwitchingRoom = false;
-                    };
-
-            window.chatSocket.onmessage = function (e) {
-                const data = JSON.parse(e.data);
-                if (data.type === 'chat_message') {
-                    const messageType = data.username === 'System' ? 'system' :
-                                        data.username === currentUsername ? 'self' : 'other';
-                    addMessageToChat(data.username, data.message, messageType);
-                } else if (data.type === 'message_history' && !messageHistoryLoaded) {
-                    data.messages.forEach(msg => {
-                        const messageType = msg.username === currentUsername ? 'self' : 'other';
-                        addMessageToChat(msg.username, msg.message, messageType);
-                    });
-                    messageHistoryLoaded = true;
-                } else if (data.type === 'user_list') {
-                    updateUserList(data.users);
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
                 }
-            };
-
-            window.chatSocket.onclose = function (e) {
-                if (currentChatPartner === otherUser) {
-                    addMessageToChat('System', 'Connection closed. Attempting to reconnect...', 'system');
-                    setTimeout(() => startChatWith(otherUser), 3000);
-                }
-                isSwitchingRoom = false;
-            };
-
-            window.chatSocket.onerror = function (e) {
-                showError('WebSocket connection error');
-                isSwitchingRoom = false;
-            };
-
-        } catch (error) {
-            showError('Failed to create connection: ' + error.message);
-            isSwitchingRoom = false;
-        }
-    }
-
-
-    function addMessageToChat(username, message, type = 'other') {
-        const chatBox = document.getElementById('chat-messages');
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${type}`;
-        messageDiv.innerHTML = type === 'system' ? 
-            `${message}` : 
-            `<strong>${username}:</strong> ${message}`;
-        chatBox.appendChild(messageDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    function updateUserList(users) {
-        const userList = document.getElementById('users-list');
-        const currentItems = Array.from(userList.children);
-        
-        users.forEach(username => {
-            const existingItem = currentItems.find(item => item.textContent === username);
-            if (!existingItem) {
-                const li = document.createElement('li');
-                li.className = 'user-item';
-                li.textContent = username;
-                li.onclick = () => startChatWith(username);
-                userList.appendChild(li);
             }
-        });
-
-        currentItems.forEach(item => {
-            if (!users.includes(item.textContent)) {
-                item.remove();
-            }
-        });
-    }
-
-    document.getElementById('chat-message-submit').onclick = function() {
-        sendMessage();
-    };
-
-    document.getElementById('chat-message-input').onkeyup = function(e) {
-        if (e.key === 'Enter') {
-            sendMessage();
+            return cookieValue;
         }
-    };
 
-    function sendMessage() {
-        const messageInput = document.getElementById('chat-message-input');
-        const message = messageInput.value.trim();
-        
-        if (message && window.chatSocket && window.chatSocket.readyState === WebSocket.OPEN) {
+        function showError(message) {
+            const errorContainer = document.getElementById('error-container');
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+            errorContainer.innerHTML = '';
+            errorContainer.appendChild(errorDiv);
+            setTimeout(() => errorDiv.remove(), 5000);
+        }
+
+        async function initializeChat() {
             try {
-                window.chatSocket.send(JSON.stringify({
-                    'message': message
-                }));
-                messageInput.value = '';
+                const response = await fetch('/api/chat/get_username/');
+                if (!response.ok) throw new Error('Failed to get username');
+                const data = await response.json();
+                currentUsername = data.username;
+                csrfToken = data.csrfToken;
+                document.getElementById('current-username').value = currentUsername;
+                document.querySelector('span#current-username').textContent = currentUsername;
+                await loadUserList();
             } catch (error) {
-                showError('Failed to send message: ' + error.message);
+                showError('Failed to initialize chat: ' + error.message);
             }
         }
-    }
+
+        async function loadUserList() {
+            try {
+                const response = await fetch('/api/chat/get_user_list/');
+                if (!response.ok) throw new Error('Failed to get user list');
+                const data = await response.json();
+                
+                const usersList = document.getElementById('users-list');
+                usersList.innerHTML = '';
+                
+                data.users.forEach(user => {
+                    const li = document.createElement('li');
+                    const userDiv = document.createElement('div');
+                    userDiv.className = 'user-item-container';
+                    
+                    const nameSpan = document.createElement('span');
+                    nameSpan.className = 'user-item' + (user.has_chat ? ' has-chat' : '');
+                    nameSpan.textContent = user.username;
+                    
+                    if (!user.has_blocked_you) {
+                        nameSpan.onclick = () => startChatWith(user.username);
+                    }
+                    
+                    const blockButton = document.createElement('button');
+                    blockButton.className = 'block-button';
+                    blockButton.textContent = user.is_blocked ? 'Unblock' : 'Block';
+                    blockButton.onclick = async (e) => {
+                        e.stopPropagation();
+                        await toggleBlockUser(user.username, user.is_blocked);
+                    };
+                    
+                    if (user.has_blocked_you) {
+                        nameSpan.className += ' blocked-by-user';
+                        nameSpan.title = 'This user has blocked you';
+                    }
+                    
+                    userDiv.appendChild(nameSpan);
+                    userDiv.appendChild(blockButton);
+                    li.appendChild(userDiv);
+                    usersList.appendChild(li);
+                });
+            } catch (error) {
+                showError('Failed to load user list: ' + error.message);
+            }
+        }
+
+        async function toggleBlockUser(username, isCurrentlyBlocked) {
+            try {
+                const endpoint = isCurrentlyBlocked ? '/api/chat/unblock_user/' : '/api/chat/block_user/';
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken || getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ username }),
+                });
+                
+                if (!response.ok) throw new Error('Failed to toggle block status');
+                
+                await loadUserList();
+                if (!isCurrentlyBlocked && currentChatPartner === username) {
+                    // Close current chat if we're blocking the current chat partner
+                    if (window.chatSocket) {
+                        window.chatSocket.close();
+                    }
+                    document.getElementById('chat-messages').innerHTML = '';
+                    currentChatPartner = '';
+                }
+            } catch (error) {
+                showError('Failed to toggle block status: ' + error.message);
+            }
+        }
+
+        let isSwitchingRoom = false;
+
+        function startChatWith(otherUser) {
+            if (currentChatPartner === otherUser || isSwitchingRoom) {
+                return;
+            }
+
+            isSwitchingRoom = true;
+            currentChatPartner = otherUser;
+            const currentUser = document.getElementById('current-username').value;
+            if (!currentUser) {
+                showError('Current user not found');
+                isSwitchingRoom = false;
+                return;
+            }
+
+            const roomName = [currentUser, otherUser].sort().join('_');
+
+            if (window.chatSocket && window.chatSocket.readyState === WebSocket.OPEN) {
+                currentChatPartner = '';
+                window.chatSocket.close(1000, 'Switching rooms');
+            }
+
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const host = window.location.hostname || 'localhost';
+            const port = '8000';
+            const wsUrl = `${wsProtocol}//${host}:${port}/ws/chat/${roomName}/`;
+
+            try {
+                window.chatSocket = new WebSocket(wsUrl);
+
+                window.chatSocket.onopen = function (e) {
+                    document.getElementById('chat-messages').innerHTML = '';
+                    addMessageToChat('System', `Connected to chat with ${otherUser}`, 'system');
+                    messageHistoryLoaded = false;
+                    isSwitchingRoom = false;
+                        };
+
+                window.chatSocket.onmessage = function (e) {
+                    const data = JSON.parse(e.data);
+                    if (data.type === 'chat_message') {
+                        const messageType = data.username === 'System' ? 'system' :
+                                            data.username === currentUsername ? 'self' : 'other';
+                        addMessageToChat(data.username, data.message, messageType);
+                    } else if (data.type === 'message_history' && !messageHistoryLoaded) {
+                        data.messages.forEach(msg => {
+                            const messageType = msg.username === currentUsername ? 'self' : 'other';
+                            addMessageToChat(msg.username, msg.message, messageType);
+                        });
+                        messageHistoryLoaded = true;
+                    } else if (data.type === 'user_list') {
+                        updateUserList(data.users);
+                    }
+                };
+
+                window.chatSocket.onclose = function (e) {
+                    if (currentChatPartner === otherUser) {
+                        addMessageToChat('System', 'Connection closed. Attempting to reconnect...', 'system');
+                        setTimeout(() => startChatWith(otherUser), 3000);
+                    }
+                    isSwitchingRoom = false;
+                };
+
+                window.chatSocket.onerror = function (e) {
+                    showError('WebSocket connection error');
+                    isSwitchingRoom = false;
+                };
+
+            } catch (error) {
+                showError('Failed to create connection: ' + error.message);
+                isSwitchingRoom = false;
+            }
+        }
+
+
+        function addMessageToChat(username, message, type = 'other') {
+            const chatBox = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.innerHTML = type === 'system' ? 
+                `${message}` : 
+                `<strong>${username}:</strong> ${message}`;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function updateUserList(users) {
+            const userList = document.getElementById('users-list');
+            const currentItems = Array.from(userList.children);
+            
+            users.forEach(username => {
+                const existingItem = currentItems.find(item => item.textContent === username);
+                if (!existingItem) {
+                    const li = document.createElement('li');
+                    li.className = 'user-item';
+                    li.textContent = username;
+                    li.onclick = () => startChatWith(username);
+                    userList.appendChild(li);
+                }
+            });
+
+            currentItems.forEach(item => {
+                if (!users.includes(item.textContent)) {
+                    item.remove();
+                }
+            });
+        }
+
+        document.getElementById('chat-message-submit').onclick = function() {
+            sendMessage();
+        };
+
+        document.getElementById('chat-message-input').onkeyup = function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        };
+
+        function sendMessage() {
+            const messageInput = document.getElementById('chat-message-input');
+            const message = messageInput.value.trim();
+            
+            if (message && window.chatSocket && window.chatSocket.readyState === WebSocket.OPEN) {
+                try {
+                    window.chatSocket.send(JSON.stringify({
+                        'message': message
+                    }));
+                    messageInput.value = '';
+                } catch (error) {
+                    showError('Failed to send message: ' + error.message);
+                }
+            }
+        }
 
         initializeChat();
     </script>
