@@ -1,135 +1,155 @@
-def add_collision_handlers(cls):
+def add_abstract_implementations(cls):
     """
-    Decorator that adds methods for handling different types of collisions.
-    Includes paddle, wall, tunneling, and parallel collision handlers.
+    Implements all required abstract methods from AGameManager based on game logic flow
     """
-    from handle_collision import (
+    from abstract_implementations import (
+
+        # Setup
+        calculate_inner_boundaries,
+
+        # Movement Phase
+        
+        # Boundary Phase
+        
+        # Collision Candidate Phase
+        find_collision_candidate,  
+        
+        # Collision Verification Phase
+        handle_tunneling,         
         handle_paddle,
         handle_wall,
-        _get_active_paddle_index,
-        handle_tunneling,
-        handle_parallel
+        
+        # Impact Processing Phase
     )
-    
+
     methods = {
+        
+        #  Setup
+        'calculate_inner_boundaries': calculate_inner_boundaries,
+               
+        # Movement Phase
+ 
+        # Boundary Phase
+        
+        # Collision Candidate Phase
+        'find_collision_candidate': find_collision_candidate,
+        
+        # Collision Verification Phase
+        'handle_tunneling': handle_tunneling,
         'handle_paddle': handle_paddle,
         'handle_wall': handle_wall,
-        '_get_active_paddle_index': _get_active_paddle_index,
-        'handle_tunneling': handle_tunneling,
-        'handle_parallel': handle_parallel
+        
+        # Impact Processing Phase
     }
     
     for name, method in methods.items():
         setattr(cls, name, method)
+    
     return cls
 
-def add_movement_tracking(cls):
+
+def add_overwriten_methods(cls):
     """
-    Decorator that adds ball movement tracking functionality.
-    Includes initialization and updating of movement data.
+        here are the methods which get overitten
     """
-    from collisions_helpers import (
-        initialize_ball_movements,
-        update_ball_movement,
-        reset_ball_movement
+    from overwriten_methods import (
+        reset_ball
+
     )
-    
+
     methods = {
-        'initialize_ball_movements': initialize_ball_movements,
-        'update_ball_movement': update_ball_movement,
-        'reset_ball_movement': reset_ball_movement
+        
+        'reset_ball': reset_ball
+               
     }
     
     for name, method in methods.items():
         setattr(cls, name, method)
-    return cls
 
-def add_polygon_setup(cls):
+
+def add_setup(cls):
     """
-    Decorator that adds polygon geometry setup methods to a class.
-    Includes vertex and normal calculation for polygon construction.
+        here are the methods, we need extra for setup
     """
     from setup import (
         calculate_side_normals,
         calculate_polygon_vertices,
-        _get_player_side_indices
-    )
-    
-    methods = {
-        'calculate_side_normals': calculate_side_normals,
-        'calculate_polygon_vertices': calculate_polygon_vertices,
-        '_get_player_side_indices': _get_player_side_indices
-    }
-    
-    for name, method in methods.items():
-        setattr(cls, name, method)
-    return cls
+        get_player_side_indices
 
-def add_ratio_calculations(cls):
-    """
-    Decorator that adds ratio calculation methods for polygon deformation.
-    Includes methods for different game modes (regular, irregular, crazy, star).
-    """
+    )
     from ratios import (
-        _calculate_base_deformation,
-        _calculate_side_ratios,
         _calculate_regular_ratios,
         _calculate_crazy_ratios,
         _calculate_star_ratios
+
     )
-    
+
     methods = {
-        '_calculate_base_deformation': _calculate_base_deformation,
-        '_calculate_side_ratios': _calculate_side_ratios,
+        
+        'calculate_side_normals': calculate_side_normals,
+        'calculate_polygon_vertices': calculate_polygon_vertices,
+        'get_player_side_indices': get_player_side_indices,
         '_calculate_regular_ratios': _calculate_regular_ratios,
         '_calculate_crazy_ratios': _calculate_crazy_ratios,
-        '_calculate_star_ratios': _calculate_star_ratios
+        '_calculate_star_ratios': _calculate_star_ratios 
+               
     }
     
     for name, method in methods.items():
         setattr(cls, name, method)
-    return cls
-
-def add_collision_detection(cls):
+   
+ 
+def add_collision_verification_phase(cls):
     """
-    Decorator that adds collision detection methods for paddle and wall collisions.
-    Includes methods for calculating relative positions and finding nearest collisions.
+        here are the methods, we need extra for collision_verification_phase
     """
-    from paddle_or_wall import (
-        _calculate_relative_position,
-        _calculate_paddle_collision,
-        _find_nearest_collision
+    from collision_verification_phase import (
+        get_nearest_side_index
     )
-    
-    methods = {
-        '_calculate_relative_position': _calculate_relative_position,
-        '_calculate_paddle_collision': _calculate_paddle_collision,
-        '_find_nearest_collision': _find_nearest_collision
-    }
-    
-    for name, method in methods.items():
-        setattr(cls, name, method)
-    return cls
 
-def add_helper_methods(cls):
-    """
-    Decorator that adds various helper methods for polygon game mechanics.
-    Includes vector normalization, paddle checking, and ball reset extensions.
-    """
-    from notused import _normalize_vector
-    from noclue import (
-        check_paddle,
-        reset_ball,
-        _calculate_projection
-    )
-    
     methods = {
-        '_normalize_vector': _normalize_vector,
-        'check_paddle': check_paddle,
-        'reset_ball': reset_ball,
-        '_calculate_projection': _calculate_projection
+        'get_nearest_side_index': get_nearest_side_index 
     }
     
     for name, method in methods.items():
         setattr(cls, name, method)
-    return cls
+
+
+def add_collision_candidate_phase(cls):
+    """
+        here are the methods, we need extra for collision_candidate_phase
+    """
+    from collision_candidate_phase import (
+        check_ball_movement_relative_to_side,
+        check_paddle
+    )
+
+    methods = {
+        'check_ball_movement_relative_to_side': check_ball_movement_relative_to_side,
+        'check_paddle': check_paddle    
+    }
+    
+    for name, method in methods.items():
+        setattr(cls, name, method)
+
+
+def add_ball_movement_tracking(cls):
+    """
+        here are the methods, we need extra for ball_movement_tracking
+    """
+    from ball_movement_tracking import (
+        initialize_ball_movements,
+        update_ball_movement,
+        reset_ball_movement
+    )
+
+    methods = {
+        'initialize_ball_movements': initialize_ball_movements,
+        'update_ball_movement': update_ball_movement,
+        'reset_ball_movement' : reset_ball_movement   
+    }
+    
+    for name, method in methods.items():
+        setattr(cls, name, method)
+
+

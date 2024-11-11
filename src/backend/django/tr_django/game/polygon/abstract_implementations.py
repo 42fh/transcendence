@@ -1,3 +1,104 @@
+
+# Setup
+def calculate_inner_boundaries(self):
+    vertex_distances = [ 
+        self.get_distance(v)
+        for v in self.vertices
+        ]
+    self.inner_boundary = float(min(vertex_distances))        
+
+# Movement Phase
+        
+# Boundary Phase
+        
+# Collision Candidate Phase
+def find_collision_candidate(self, ball, ball_index, new_state, distance_from_center):
+    
+    collisions_candidates = []
+    
+    for side_index in range(self.num_sides) :
+        ball_movement = self.check_ball_movement_relative_to_side(ball, side_index, ball_index, new_state)           
+        if ball_movement['is_approaching']:
+            if ball_movement['type'] == 'tunneling':
+                # Tunneling detected - return immediately
+                return {
+                    'side_index': side_index,
+                    'movement' : ball_movement,
+                    'type': 'tunneling'
+                }
+            else:
+                # Add collision candidate
+                collisions_candidates.append({
+                    'side_index': side_index,
+                    'movement' : ball_movement,
+                    'type': ball_movement['type']
+                })
+    if collisions_candidates:
+        return min(collisions_candidates, key=lambda x: x['movement']['current_distance'])
+    
+    # No collisions found
+    return None
+
+        
+# Collision Verification Phase
+def handle_tunneling(self, ball, current_sector, new_state):
+    """
+    Handle case where ball has tunneled through a side.
+    
+    Args:
+        ball (dict): Current ball state
+        current_sector (dict): Information about the current sector and collision
+        new_state (dict): Current game state
+        
+    Returns:
+        dict: Collision information or None if no valid collision
+    """
+    # Case 1: No current sector - need to detect tunneling
+    if not current_sector:
+        # Get crossed side using sign change detection
+        side_index, intersection = self.get_nearest_side_index(ball)
+        if side_index is None:
+            return None
+            
+        # Calculate approach speed using dot product of velocity and normal
+        normal = self.side_normals[side_index]
+        approach_speed = abs(
+            ball["velocity_x"] * normal["x"] + 
+            ball["velocity_y"] * normal["y"]
+        )
+        
+        # Create standardized movement info
+        movement_info = {
+            'is_approaching': True,
+            'current_distance': float(0.0),
+            'approach_speed': float(approach_speed),
+            'type': 'tunneling'
+        }
+        
+        # Create standardized sector info
+        standardized_sector = {
+            'side_index': side_index,
+            'movement': movement_info,
+            'type': 'tunneling',
+            'projection': intersection
+        }
+        
+        # Set ball position to intersection point
+        ball["x"], ball["y"] = intersection["x"], intersection["y"]
+        
+        # Handle based on side type
+        if side_index in self.active_sides:
+            return self.handle_paddle(ball, standardized_sector, new_state)
+        else:
+            return self.handle_wall(ball, standardized_sector, new_state)
+    
+    # Case 2: Already have sector info - use it directly
+    side_index = current_sector['side_index']
+    if side_index in self.active_sides:
+        return self.handle_paddle(ball, current_sector, new_state)
+    else:
+        return self.handle_wall(ball, current_sector, new_state)
+    
 def handle_paddle(self, ball, collision_candidate, new_state):
     """
     Determines if ball hits a paddle or misses it using pre-calculated sector info.
@@ -151,140 +252,5 @@ def handle_wall(self, ball, collision_candidate, new_state):
             "was_tunneling": (collision_candidate['movement']['type'] == 'tunneling')
         }
     }
-
-
-def handle_parallel(self, ball, collision_candidate, new_state):
-    """
-    Determines whether a parallel moving ball should be handled as paddle or wall collision.
-    Takes advantage of same pre-calculated sector info.
-    
-    Args:
-        ball (dict): Ball object with position and size
-        collision_candidate (dict): Contains sector info like side_index, movement, projection
-        new_state (dict): Current game state with dimensions
         
-    Returns:
-        dict: Complete collision info with enhanced debugging info
-    """
-    side_index = collision_candidate['side_index']
-    
-        
-    # Check if this is a paddle side
-    if side_index in self.active_sides:
-        # Use paddle handler for paddle sides
-        return self.handle_paddle(ball, collision_candidate, new_state)
-    else:
-        # Use wall handler for wall sides
-        return self.handle_wall(ball, collision_candidate, new_state)
-
-
-
-    def handle_tunneling(self, ball, current_sector, new_state):
-        """
-        Handle case where ball has tunneled through a side.
-        
-        Args:
-            ball (dict): Current ball state
-            current_sector (dict): Information about the current sector and collision
-            new_state (dict): Current game state
-            
-        Returns:
-            dict: Collision information or None if no valid collision
-        """
-        if not current_sector:
-            # Get crossed side using sign change detection
-            side_index, intersection = self.get_nearest_side_index(ball)
-            if side_index is None:
-                return None
-                
-            collision_info = {
-                "distance": 0,
-                "normal": self.side_normals[side_index],
-                "projection": intersection
-            }
-            
-            if side_index in self.active_sides:
-                # Check for paddle collision at crossing point
-                original_x, original_y = ball["x"], ball["y"]
-                ball["x"], ball["y"] = intersection["x"], intersection["y"]
-                
-                paddle_collision = self._calculate_paddle_collision(
-                    side_index,
-                    collision_info,
-                    ball,
-                    state["paddles"],
-                    state["dimensions"]
-                )
-                
-                
-                if paddle_collision and paddle_collision["type"] == "paddle":
-                    normal = self.side_normals[side_index]
-                    paddle_width = state["dimensions"]["paddle_width"]
-                    # Move ball out by paddle width plus ball size
-                    ball["x"] += normal["x"] * (paddle_width + ball["size"])
-                    ball["y"] += normal["y"] * (paddle_width + ball["size"])
-                    
-                    return paddle_collision
-                else:
-                    return {
-                        "type": "miss",
-                        "side_index": side_index,
-                        "active_paddle_index": self._get_active_paddle_index(side_index, state["paddles"]),
-                        **collision_info
-                    }
-            else:
-                return {
-                    "type": "wall",
-                    "side_index": side_index,
-                    **collision_info
-                }
-        
-        side_index = current_sector['side_index']
-        
-        # Calculate basic collision info using previous frame's position
-        collision_info = {
-            "distance": current_sector['movement']['current_distance'],
-            "normal": self.side_normals[side_index],
-            "projection": self._calculate_projection(ball, side_index)
-        }
-        
-        if side_index in self.active_sides:
-            # Check for paddle collision
-            paddle_collision = self._calculate_paddle_collision(
-                side_index,
-                collision_info,
-                ball,
-                new_state["paddles"],
-                new_state["dimensions"]
-            )
-            
-            if paddle_collision and paddle_collision["type"] == "paddle":
-                # Reset ball position to paddle surface
-                self.apply_collision_resolution(ball, paddle_collision) 
-                return paddle_collision
-            else:
-                # Reset ball position to wall and return miss
-                self.apply_collision_resolution(ball, {
-                    "type": "miss",
-                    "side_index": side_index,
-                    **collision_info
-                })
-                return {
-                    "type": "miss",
-                    "side_index": side_index,
-                    "active_paddle_index": self._get_active_paddle_index(side_index, new_state["paddles"]),
-                    **collision_info
-                }
-        else:
-            # Reset ball position to wall
-            self.apply_collision_resolution(ball, {
-                "type": "wall",
-                "side_index": side_index,
-                **collision_info
-            })
-            return {
-                "type": "wall",
-                "side_index": side_index,
-                **collision_info
-            }
-
+        # Impact Processing Phase

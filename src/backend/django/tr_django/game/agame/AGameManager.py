@@ -153,20 +153,16 @@ class AGameManager(ABC):
             return False
 
     # setup
-    @abstractmethod
-    def get_game_type(self): pass
 
     @abstractmethod 
     async  def apply_game_settings(self): pass
 
+    @abstractmethod
+    def get_game_type(self): pass
 
     # game_logic    
 
-    @abstractmethod
-    def get_ball_collision_pair(self, ball, ball_index, state, distance):
-        """Determine which sector the ball is in"""
-        pass
-    
+    # Setup
     @abstractmethod
     def calculate_inner_boundaries(self):
         """
@@ -174,16 +170,23 @@ class AGameManager(ABC):
         """
         pass
 
+    # Movement Phase  
+
+    # Boundary Phase
+    
+    # Collision Candidate Phase
+    @abstractmethod
+    def  find_collision_candidate(ball, ball_index, new_state, distance_from_center):
+        """Determine which sector the ball is in"""
+        pass
+    
+    # Collision Verification Phase 
 
     @abstractmethod
     def handle_tunneling(self, ball, sector_info, state):
         """Handle case where ball may have passed through a side"""
         pass
 
-    @abstractmethod
-    def handle_parallel(self, ball, current_sector, state):
-        """Handle case where ball is moving parallel to a side"""
-        pass
         
     @abstractmethod
     def handle_paddle(self, ball, current_sector, state):
@@ -195,35 +198,14 @@ class AGameManager(ABC):
         """Handle collision between ball and wall"""
         pass
 
-    
-
-    @abstractmethod
-    def get_outer_boundary(self):
-        """Get the outer boundary distance"""
-        pass
-    
-    @abstractmethod
-    def get_inner_boundary(self):
-        """Get the inner safe zone boundary"""
-        pass
-    
-    @abstractmethod
-    def get_collision_check_range(self):
-        """Get the collision check distance"""
-        pass
+    # Impact Processing Phase 
    
-    @abstractmethod
-    def get_nearest_side_index(self, ball):
-        """Get index of nearest side"""
-        pass
+
+    # ? 
+    #@abstractmethod
+    #def determine_winner(self, state):
+    #    """Determine the winner of the game"""
+    #    pass
     
-    @abstractmethod
-    def determine_winner(self, state):
-        """Determine the winner of the game"""
-        pass
-    
-
-
-
 
  

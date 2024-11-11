@@ -1,4 +1,4 @@
-from .AGameManager import AGameManager
+from ..agame.AGameManager import AGameManager
 import math
 import random
 import msgpack
