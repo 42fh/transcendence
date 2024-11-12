@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
-from .models import Game, GameMode
+from .models import SingleGame as Game, GameMode, Player
 from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
 
 
 def transcendance(request):
@@ -11,7 +12,6 @@ def transcendance(request):
 @csrf_exempt
 def create_game(request):
     if request.method == "POST":
-        date = request.POST.get("date")
         mode_name = request.POST.get("mode")
 
         # get game mode by name
@@ -20,8 +20,8 @@ def create_game(request):
         except GameMode.DoesNotExist:
             return JsonResponse({"message": "GameMode does not exist"}, status=400)
 
-        # Create the Game instance
-        game = Game.objects.create(date=date, mode=game_mode)
+        # Create the Game instance with current timestamp
+        game = Game.objects.create(date=timezone.now(), mode=game_mode)
 
         return JsonResponse(
             {
@@ -65,8 +65,8 @@ def get_games(request):
                 "id": game.id,
                 "date": game.date,
                 "duration": game.duration if game.duration else None,
-                "mode": game.mode.name,
-                "winner": game.winner.user.username if game.winner else None,
+                "mode": game.mode.name if game.mode else None,
+                "winner": game.winner.username if game.winner else None,
             }
         )
     return JsonResponse(games_list, safe=False)

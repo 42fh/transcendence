@@ -1,6 +1,7 @@
 from django.contrib import admin
-from .models import Game, GameMode
+from .models import SingleGame, TournamentGame, GameMode
 
 # Register your models here.
-admin.site.register(Game)
+admin.site.register(SingleGame)
+admin.site.register(TournamentGame)
 admin.site.register(GameMode)
