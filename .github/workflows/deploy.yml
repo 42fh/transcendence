@@ -1,0 +1,24 @@
+name: Deploy to VM
+
+on:
+  push:
+    branches:
+      - main # Trigger the workflow on push to main branch
+  workflow_dispatch: # This allows manual triggering
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }} # Using the secret with the private key
+
+      - name: Deploy to VM
+        run: |
+          ssh -o StrictHostKeyChecking=no slombard@139.162.183.187 'bash /srv/django_chat/deploy.sh'
