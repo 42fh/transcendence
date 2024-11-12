@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
-from .models import ChatRoom, Message, BlockedUser
+from .models import ChatRoom, Message, BlockedUser, ChatNotification
 import json
 from django.middleware.csrf import get_token
 
@@ -115,3 +115,39 @@ def unblock_user(request):
 
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+
+@login_required
+def get_notifications(request):
+    try:
+        notifications = (
+            ChatNotification.objects.filter(recipient=request.user, is_read=False)
+            .select_related("sender", "chat_room")
+            .order_by("-created_at")
+        )
+
+        notification_data = [
+            {
+                "id": notif.id,
+                "sender": notif.sender.username,
+                "message": notif.message,
+                "room_id": notif.chat_room.room_id,
+                "created_at": notif.created_at.isoformat(),
+            }
+            for notif in notifications
+        ]
+
+        return JsonResponse({"status": "success", "notifications": notification_data})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+
+@login_required
+def mark_notification_read(request, notification_id):
+    try:
+        notification = ChatNotification.objects.get(id=notification_id, recipient=request.user)
+        notification.is_read = True
+        notification.save()
+        return JsonResponse({"status": "success"})
+    except ChatNotification.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "Notification not found"}, status=404)

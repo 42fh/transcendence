@@ -6,6 +6,10 @@
 <body>
     <h1>Hello, <span id="current-username"></span>!</h1>
     <input type="hidden" id="current-username" />
+    <div id="notifications-container" class="notifications">
+        <div id="notification-count" class="notification-badge"></div>
+        <div id="notification-list" class="notification-list"></div>
+    </div>
     <div class="chat-container">
         <div class="user-list">
             <h3>Users</h3>
@@ -28,6 +32,7 @@
         let currentChatPartner = '';
         let messageHistoryLoaded = false;
         let csrfToken = null;
+        let notifications = [];
 
         function getCookie(name) {
             let cookieValue = null;
@@ -64,6 +69,7 @@
                 document.getElementById('current-username').value = currentUsername;
                 document.querySelector('span#current-username').textContent = currentUsername;
                 await loadUserList();
+                await fetchNotifications();
             } catch (error) {
                 showError('Failed to initialize chat: ' + error.message);
             }
@@ -275,6 +281,77 @@
                 }
             }
         }
+
+        async function fetchNotifications() {
+            try {
+                const response = await fetch('/api/chat/notifications/');
+                if (!response.ok) throw new Error('Failed to fetch notifications');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    notifications = data.notifications;
+                    updateNotificationDisplay();
+                }
+            } catch (error) {
+                console.error('Error fetching notifications:', error);
+            }
+        }
+
+        function updateNotificationDisplay() {
+            const unreadCount = notifications.filter(n => !n.is_read).length;
+            const badge = document.getElementById('notification-count');
+            const list = document.getElementById('notification-list');
+            
+            // Update badge
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount;
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+            
+            // Update notification list
+            list.innerHTML = notifications.map(notification => `
+                <div class="notification-item ${notification.is_read ? '' : 'unread'}" 
+                     onclick="handleNotificationClick(${notification.id}, '${notification.room_id}')">
+                    <strong>${notification.sender}:</strong> ${notification.message}
+                    <small>${new Date(notification.created_at).toLocaleTimeString()}</small>
+                </div>
+            `).join('');
+        }
+
+        async function handleNotificationClick(notificationId, roomId) {
+            try {
+                // Mark notification as read
+                await fetch(`/api/chat/notifications/${notificationId}/read/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    }
+                });
+                
+                // Open the chat room
+                await openChatRoom(roomId);
+                
+                // Refresh notifications
+                await fetchNotifications();
+            } catch (error) {
+                console.error('Error handling notification:', error);
+            }
+        }
+
+        // Toggle notification list visibility
+        document.getElementById('notifications-container').addEventListener('click', function(e) {
+            if (e.target.id === 'notification-count') {
+                const list = document.getElementById('notification-list');
+                list.style.display = list.style.display === 'none' ? 'block' : 'none';
+            }
+        });
+
+        // Fetch notifications periodically
+        setInterval(fetchNotifications, 10000); // Every 10 seconds
+        fetchNotifications(); // Initial fetch
 
         initializeChat();
     </script>

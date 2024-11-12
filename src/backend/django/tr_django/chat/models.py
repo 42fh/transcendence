@@ -65,3 +65,18 @@ class BlockedUser(models.Model):
 
     def __str__(self):
         return f"{self.user.username} blocked {self.blocked_user.username}"
+
+
+class ChatNotification(models.Model):
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_notifications")
+    message = models.TextField()
+    chat_room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Notification for {self.recipient.username} from {self.sender.username}"
