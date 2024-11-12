@@ -34,7 +34,7 @@ help:
 
 
 # Run Django development server and Redis (Dockerized Redis)
-rundev: check_venv install_dependencies migrate run_docker_redis run_backend
+rundev: check_venv install_dependencies migrate run_docker_redis run_postgres wait_for_postgres run_backend
 
 # Re-run the development environment with a clean Redis setup
 re-rundev: stop_docker_redis_clean rundev
@@ -116,3 +116,26 @@ clean:
 	@echo "Cleaning up temporary files..."
 	find . -name "*.pyc" -delete
 	find . -name "__pycache__" -delete
+
+# Start PostgreSQL in Docker
+run_postgres:
+	@echo "Starting PostgreSQL server in Docker..."
+	@if docker ps -a --filter "name=postgres-dev" | grep "postgres-dev"; then \
+		echo "PostgreSQL container already exists. Starting it..."; \
+		docker start postgres-dev; \
+	else \
+		docker run --name postgres-dev \
+			-e POSTGRES_USER=your_postgres_user \
+			-e POSTGRES_PASSWORD=your_secure_password \
+			-e POSTGRES_DB=your_database_name \
+			-p 5432:5432 --rm -d postgres; \
+	fi
+
+# Wait for PostgreSQL to be ready
+wait_for_postgres:
+	@echo "Waiting for PostgreSQL to be ready..."
+	@until pg_isready -h localhost -p 5432; do \
+		echo "PostgreSQL is not ready yet. Waiting..."; \
+		sleep 2; \
+	done
+	@echo "PostgreSQL is ready!"
