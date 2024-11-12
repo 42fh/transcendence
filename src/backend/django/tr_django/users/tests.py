@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 from users.models import CustomUser, VisibilityGroup
 from django.core.exceptions import ValidationError
+from uuid import UUID
 
 
 class SignupTestCase(TestCase):
@@ -11,9 +12,7 @@ class SignupTestCase(TestCase):
         """Test user creation directly using the CustomUser model
         This is a simple unit test that bypasses the HTTP layer"""
 
-        user = CustomUser.objects.create_user(
-            username="testuser", password="password123"
-        )
+        user = CustomUser.objects.create_user(username="testuser", password="password123")
         self.assertTrue(CustomUser.objects.filter(username="testuser").exists())
 
     def test_duplicate_username_direct(self):
@@ -139,21 +138,15 @@ class CustomUserStatusVisibilityTestCase(TestCase):
 
     def setUp(self):
         # Set up a user instance to use in tests
-        self.user = CustomUser.objects.create_user(
-            username="testuser", password="password123"
-        )
+        self.user = CustomUser.objects.create_user(username="testuser", password="password123")
 
     # Test default values for status and visibility fields
     def test_default_status_and_visibility_values(self):
         """Test that status and visibility fields have expected default values"""
         self.assertEqual(self.user.online_status, CustomUser.STATUS_OFFLINE)
         self.assertEqual(self.user.default_status, CustomUser.STATUS_OFFLINE)
-        self.assertEqual(
-            self.user.visibility_online_status, CustomUser.VISIBILITY_FRIENDS
-        )
-        self.assertEqual(
-            self.user.visibility_user_profile, CustomUser.VISIBILITY_EVERYONE
-        )
+        self.assertEqual(self.user.visibility_online_status, CustomUser.VISIBILITY_FRIENDS)
+        self.assertEqual(self.user.visibility_user_profile, CustomUser.VISIBILITY_EVERYONE)
 
     # Test valid choices for online_status
     def test_update_online_status_with_valid_choices(self):
@@ -250,15 +243,9 @@ class CustomUserRelationshipTestCase(TestCase):
 
     def setUp(self):
         # Create test users
-        self.user1 = CustomUser.objects.create_user(
-            username="user1", password="password123"
-        )
-        self.user2 = CustomUser.objects.create_user(
-            username="user2", password="password123"
-        )
-        self.user3 = CustomUser.objects.create_user(
-            username="user3", password="password123"
-        )
+        self.user1 = CustomUser.objects.create_user(username="user1", password="password123")
+        self.user2 = CustomUser.objects.create_user(username="user2", password="password123")
+        self.user3 = CustomUser.objects.create_user(username="user3", password="password123")
 
     # Test Friends and Blocked Users
     def test_friends_and_blocked_users(self):
@@ -309,15 +296,9 @@ class CustomUserRelationshipTestCase(TestCase):
 class FriendRequestTests(TestCase):
     def setUp(self):
         # Create test users
-        self.user1 = CustomUser.objects.create_user(
-            username="user1", password="test123"
-        )
-        self.user2 = CustomUser.objects.create_user(
-            username="user2", password="test123"
-        )
-        self.user3 = CustomUser.objects.create_user(
-            username="user3", password="test123"
-        )
+        self.user1 = CustomUser.objects.create_user(username="user1", password="test123")
+        self.user2 = CustomUser.objects.create_user(username="user2", password="test123")
+        self.user3 = CustomUser.objects.create_user(username="user3", password="test123")
 
     def test_friend_request_flow(self):
         """Test sending and accepting a friend request."""
@@ -352,9 +333,7 @@ class FriendRequestTests(TestCase):
         """Test that duplicate friend requests are not created."""
         self.user1.send_friend_request(self.user2)
         self.user1.send_friend_request(self.user2)  # Send duplicate request
-        self.assertEqual(
-            self.user1.friend_requests_sent.filter(id=self.user2.id).count(), 1
-        )
+        self.assertEqual(self.user1.friend_requests_sent.filter(id=self.user2.id).count(), 1)
 
     def test_cancel_friend_request(self):
         """Test canceling a friend request."""
