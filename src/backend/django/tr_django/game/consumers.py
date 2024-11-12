@@ -4,7 +4,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from .agame.AGameManager import AGameManager
 import time
 import msgpack
-
+import redis.asyncio as redis
 
 class PongConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
@@ -29,7 +29,10 @@ class PongConsumer(AsyncWebsocketConsumer):
         game_type = query_params.get("type", "polygon")  # Default to polygon_pong
         print(query_params)        
         self.game_group = f"game_{self.game_id}"
+        channel_key = f"asgi:group:{self.game_group}"
         await self.channel_layer.group_add(self.game_group, self.channel_name)
+        redis_conn = await redis.Redis.from_url('redis://redis:6379', decode_responses=True)
+        await redis_conn.expire(channel_key, 30)
         try:
             # Try to get existing game or create new one with specified type
             self.game_manager = await AGameManager.get_instance(
