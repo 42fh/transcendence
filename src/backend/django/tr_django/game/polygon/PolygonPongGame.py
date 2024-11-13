@@ -46,7 +46,7 @@ class PolygonPongGame(AGameManager):
         """Apply game-specific values from settings"""
         self.num_sides = self.settings['sides']
         self.num_paddles = self.settings['num_players']
-        self.game_mode = self.settings.get('mode', 'regular')  # Get mode from settings
+        self.game_mode = self.settings.get('mode', 'star')  # Get mode from settings
         self.active_sides = self.get_player_side_indices()
         self.initialize_ball_movements(self.settings.get('num_balls', 1))
         self.calculate_polygon_vertices()
@@ -73,7 +73,7 @@ class PolygonPongGame(AGameManager):
         ball = super().reset_ball(ball, ball_index, speed)
         
         # Add our polygon-specific reset
-        self.reset_ball_movment(ball_index)
+        self.reset_ball_movement(ball_index)
         
         return ball
 

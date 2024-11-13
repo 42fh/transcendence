@@ -155,6 +155,7 @@ async def update_game(self):
                 "details": str(e)
             }
         )
+        await self.end_game()
         return False
         
     finally:

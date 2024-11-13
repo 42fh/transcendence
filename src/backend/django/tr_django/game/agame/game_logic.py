@@ -19,7 +19,8 @@ async def game_logic(self, current_state):
         # Boundary Phase
         distance_from_center = self.get_distance(ball) 
         #self.update_distance_metrics(distance_from_center, cycle_data)
-        boundary_check = self.handle_distance_check(ball, distance_from_center, new_state, cycle_data)
+        print(distance_from_center)
+        boundary_check = self.handle_distance_check(ball_index, ball, distance_from_center, new_state, cycle_data)
         if boundary_check.get("skip_ball"):
             if boundary_check.get("game_over"):
                 game_over = True
@@ -27,7 +28,8 @@ async def game_logic(self, current_state):
                 break
             continue
             
-            
+         
+        print("ball2") 
         # if ball should be. 
         # Collision Candidate Phase
         collision_candidate = self.find_collision_candidate(ball, ball_index, new_state, distance_from_center)
@@ -40,11 +42,12 @@ async def game_logic(self, current_state):
         print("ball5") 
         if not verified_collision:
             continue
-
+        print("colliosion: ", verified_collision)
         # Impact Processing Phase
         collision_result = self.collision_handler(verified_collision, ball, new_state, cycle_data, ball_index)
         print("ball6") 
-        
+        if not collision_result:
+            continue
         if collision_result.get("game_over"):
             game_over = True
             # self.add_game_over_event(cycle_data, new_state)
@@ -77,12 +80,62 @@ def get_distance(self, point):
 
 
 
-def handle_distance_check(self, ball, distance, state, cycle_data):
+def handle_distance_check(self, ball_index, ball, distance, state, cycle_data):
     """Handle distance checks and related actions"""
     result = {
         "skip_ball": False,
         "game_over": False
     }
+    
+    inner_boundary = self.get_inner_boundary(state, ball)
+    
+    # Get current deadzone state
+    was_in_deadzone = self.previous_movements[ball_index]['in_deadzone']
+    is_in_deadzone = distance < inner_boundary
+    # Calculate ball movement distance since last frame
+    prev_pos = self.previous_movements[ball_index].get('last_position', {'x': ball['x'], 'y': ball['y']})
+    movement_distance = math.sqrt(
+        (ball['x'] - prev_pos['x'])**2 + 
+        (ball['y'] - prev_pos['y'])**2
+    )
+     
+    # If ball moved more than the inner_boundary in one step, it might have skipped the deadzone
+    if movement_distance > inner_boundary:
+        # Check if ball path intersected deadzone
+        t = inner_boundary / movement_distance  # interpolation factor
+        intersection_point = {
+            'x': prev_pos['x'] + t * (ball['x'] - prev_pos['x']),
+            'y': prev_pos['y'] + t * (ball['y'] - prev_pos['y'])
+        }
+        intersection_distance = math.sqrt(intersection_point['x']**2 + intersection_point['y']**2)
+        
+        if intersection_distance < inner_boundary:
+            # Ball path crossed deadzone - reset movement tracking
+            self.reset_ball_movement(ball_index)
+    
+    # Normal deadzone transitioni
+        # Only reset when entering deadzone
+    elif is_in_deadzone and not was_in_deadzone:
+        print("set deadzone")
+        self.reset_ball_movement(ball_index)
+    # When exiting, just update the state
+    elif was_in_deadzone and not is_in_deadzone:
+        self.previous_movements[ball_index]['in_deadzone'] = False
+        print("out of deadzone")
+    # Store current position for next frame's comparison
+    self.previous_movements[ball_index]['last_position'] = {'x': ball['x'], 'y': ball['y']}
+    
+    if distance > self.outer_boundary:
+        collision = self.handle_outside_boundary(ball, state)
+        if collision:
+            collision_result = self.collision_handler(collision, ball, state, cycle_data)
+            result.update(collision_result)
+            result["skip_ball"] = True
+    elif is_in_deadzone:
+        result["skip_ball"] = True
+        
+    return result
+    """
     if distance > self.outer_boundary:
         collision = self.handle_outside_boundary(ball, state)
         if collision:
@@ -95,7 +148,7 @@ def handle_distance_check(self, ball, distance, state, cycle_data):
         result["skip_ball"] = True
         
     return result
-
+    """
 
 def handle_outside_boundary(self, ball, state):
     """Handle ball outside boundary"""
@@ -115,13 +168,14 @@ def get_inner_boundary(self, state, ball):
 def verify_collision_candidate(self, ball, collision_candidate, new_state) :
     """Handle interaction between ball and side"""
     if collision_candidate["type"] == "tunneling":
-        return self.handle_tunneling(ball, collision_candidate, state)
+        print(collision_candidate)
+        return self.handle_tunneling(ball, collision_candidate, new_state)
         
     collision, active = self.get_collision_check_range(ball, collision_candidate, new_state)
     if collision:
         if collision_candidate['type'] == 'parallel':
             # Case 1: Ball moving parallel to side
-            return self.handle_parallel(ball, collision_candidate, new_statei, active)
+            return self.handle_parallel(ball, collision_candidate, new_state, active)
         if active:
             # Case 2: Ball near active paddle side
             return self.handle_paddle(ball, collision_candidate, new_state)
@@ -135,7 +189,8 @@ def get_collision_check_range(self, ball, collision_candidate, new_state):
     
     side_index = collision_candidate['side_index']
     movement = collision_candidate['movement']
-    
+
+
     # Get basic collision parameters
     collision_distance = movement['current_distance']
     is_active_side = side_index in self.active_sides   
@@ -143,10 +198,12 @@ def get_collision_check_range(self, ball, collision_candidate, new_state):
  
     # Calculate collision threshold based on side type
     if is_active_side:
+        print("paddle: ", side_index, collision_distance, self.active_sides) 
         # For paddle sides, include paddle width in collision distance
         paddle_width = new_state['dimensions']['paddle_width']
         collision_check = collision_distance <= (ball['size'] + paddle_width)
     else:
+        print("wall: ", side_index, collision_distance) 
         # For walls, just use ball size
         collision_check = collision_distance <= ball['size']
     return collision_check, is_active_side
@@ -182,12 +239,13 @@ def handle_parallel(self, ball, collision_candidate, new_state):
 def collision_handler(self, collision, ball, new_state, cycle_data, ball_index):
     """Main collision handler that delegates to specific collision type handlers"""
     gameover = {"game_over": False}
-    if collision["type"] == "paddle":
-        gameover.update(self.collision_paddle(collision, ball, new_state, cycle_data))
-    elif collision["type"] == "wall":
-        gameover.update(self.collision_wall(collision, ball, new_state, cycle_data))
-    elif collision["type"] == "miss":
-        gameover.update(self.collision_miss(collision, ball, new_state, cycle_data, ball_index))
+    if collision:    
+        if collision["type"] == "paddle":
+            gameover.update(self.collision_paddle(collision, ball, new_state, cycle_data))
+        elif collision["type"] == "wall":
+            gameover.update(self.collision_wall(collision, ball, new_state, cycle_data))
+        elif collision["type"] == "miss":
+            gameover.update(self.collision_miss(collision, ball, new_state, cycle_data, ball_index))
     return gameover
 
 
@@ -403,7 +461,7 @@ def apply_ball_bounce_effect(self, ball, normal, offset=0, speed_multiplier=1.05
     current_speed = math.sqrt(ball["velocity_x"]**2 + ball["velocity_y"]**2)
     new_speed = current_speed * speed_multiplier
     # Limit speed to 80% of ball size to prevent tunneling
-    MAX_SPEED = ball["size"] * 0.8
+    MAX_SPEED = ball["size"] * 1.5
     if new_speed > MAX_SPEED:
         scale = MAX_SPEED / new_speed
         final_x *= scale
@@ -449,13 +507,12 @@ def collision_miss(self, collision, ball, new_state, cycle_data, ball_index):
     
     # Step 3: Reset ball and collect physics data
     self.reset_ball(ball, ball_index)
-    physics_data = {
+    """physics_data = {
         "pre_collision_position": initial_position,
         "post_collision_position": {"x": ball["x"], "y": ball["y"]},
         "pre_collision_velocity": initial_velocity,
         "post_collision_velocity": {"x": ball["velocity_x"], "y": ball["velocity_y"]},
         "approach_speed": collision["approach_speed"],
-        "hit_position": collision["hit_position"]
     }
     
     # Step 4: Create collision event data
@@ -478,17 +535,17 @@ def collision_miss(self, collision, ball, new_state, cycle_data, ball_index):
         "type": "miss",
         "data": event_data
     })
-    
+    """
     # Check for winners
     winners = self.check_winner(new_state["scores"])
     if winners:  # If we have any winners
-        cycle_data["events"].append({
+        """cycle_data["events"].append({
             "type": "game_over",
             "data": {
                 "winners": winners,  # List of winning player indices
                 "scores": new_state["scores"]
             }
-        })
+        })"""
         return {"game_over": True}
     
     return {"game_over": False}

@@ -193,7 +193,7 @@ showErrorOnCanvas(errorEvent) {
     renderBalls() {
         this.state.balls.forEach(ball => {
             const ballX = this.config.center + ball.x * this.config.scale;
-            const ballY = this.config.center + ball.y * this.config.scale;
+            const ballY = this.config.center - ball.y * this.config.scale;
             
             this.svg.appendChild(this.createSVGElement('circle', {
                 cx: ballX,
@@ -396,311 +396,6 @@ export class CircularRenderer extends BasePongRenderer {
     }
 
 /*
-generatePaddleCenters() {
-	  console.log("Current game state:", this.state);
-        console.log("Paddles:", this.state.paddles);
-        const centers = [];
-        const sectorSize = (2 * Math.PI) / this.state.paddles.length;
-
-        this.state.paddles.forEach((paddle, i) => {
-            if (!paddle.active) return;
-
-            // Calculate base sector angle
-            const baseSectorAngle = paddle.side_index * sectorSize;
-            
-            // Calculate maximum allowed offset within sector
-            const paddleLength = this.state.dimensions.paddle_length * sectorSize;
-            const hitZoneAngle = this.state.dimensions.ball_size;
-            const totalAngleNeeded = paddleLength + (hitZoneAngle * 2);
-            
-            let maxOffset = 0;
-            if (totalAngleNeeded < sectorSize) {
-                maxOffset = (sectorSize - totalAngleNeeded) / 2;
-            }
-
-            // Calculate final angle with constrained offset
-            const offsetAngle = (paddle.position - 0.5) * 2 * maxOffset;
-            let finalAngle = baseSectorAngle + offsetAngle;
-
-            // Normalize angle to positive range
-            while (finalAngle < 0) finalAngle += 2 * Math.PI;
-            while (finalAngle >= 2 * Math.PI) finalAngle -= 2 * Math.PI;
-
-            centers.push({
-                angle: finalAngle,
-                paddle: paddle
-            });
-        });
-console.log("Generated centers:", centers);
-        return centers;
-    }
-
-    createPaddleArc(cx, cy, radius, startAngle, endAngle, width) {
-        const innerRadius = radius - width;
-        
-        // Calculate points
-        const x1 = cx + radius * Math.cos(startAngle);
-        const y1 = cy + radius * Math.sin(startAngle);
-        const x2 = cx + radius * Math.cos(endAngle);
-        const y2 = cy + radius * Math.sin(endAngle);
-        
-        const x3 = cx + innerRadius * Math.cos(endAngle);
-        const y3 = cy + innerRadius * Math.sin(endAngle);
-        const x4 = cx + innerRadius * Math.cos(startAngle);
-        const y4 = cy + innerRadius * Math.sin(startAngle);
-
-        const largeArcFlagOuter = Math.abs(endAngle - startAngle) > Math.PI ? 1 : 0;
-        const largeArcFlagInner = largeArcFlagOuter;
-
-        return `M ${x1} ${y1} ` +
-               `A ${radius} ${radius} 0 ${largeArcFlagOuter} 1 ${x2} ${y2} ` +
-               `L ${x3} ${y3} ` +
-               `A ${innerRadius} ${innerRadius} 0 ${largeArcFlagInner} 0 ${x4} ${y4} ` +
-               'Z';
-    }
-
-    render() {
-        if (!this.state || !this.svg) return;
-         console.log("Starting render with state:", this.state);
-        this.svg.innerHTML = '';
-        
-        // Draw boundary circle
-        this.svg.appendChild(this.createSVGElement('circle', {
-            cx: this.config.center,
-            cy: this.config.center,
-            r: this.config.scale,
-            fill: 'none',
-            stroke: 'gray',
-            'stroke-width': '1'
-        }));
-
-        // Draw inner circles for visual reference
-        this.svg.appendChild(this.createSVGElement('circle', {
-            cx: this.config.center,
-            cy: this.config.center,
-            r: this.config.scale * (1 - this.state.dimensions.paddle_width),
-            fill: 'none',
-            stroke: 'gray',
-            'stroke-width': '1',
-            'stroke-dasharray': '4'
-        }));
-
-        // Get paddle centers with their corresponding paddle data
-        const paddleCentersWithData = this.generatePaddleCenters();
-        const sectorSize = (2 * Math.PI) / this.state.paddles.length;
-        const paddleLength = this.state.dimensions.paddle_length * sectorSize;
-i
-	
-        console.log("About to render paddles:", {
-            paddleCentersWithData,
-            sectorSize: sectorSize * (180/Math.PI),
-            paddleLength: paddleLength * (180/Math.PI)
-        });
-
-        paddleCentersWithData.forEach(({angle, paddle}) => {
-            const startAngle = angle - paddleLength / 2;
-            const endAngle = angle + paddleLength / 2;
-            
-            // Draw hit zone
-            const hitZoneWidth = (this.state.dimensions.paddle_width + 
-                this.state.dimensions.ball_size * 2) * this.config.scale;
-            
-            const hitZoneArc = this.createPaddleArc(
-                this.config.center,
-                this.config.center,
-                this.config.scale,
-                startAngle,
-                endAngle,
-                hitZoneWidth
-            );
-            
-            const isColliding = this.state.collision?.sideIndex === paddle.side_index;
-            
-            this.svg.appendChild(this.createSVGElement('path', {
-                d: hitZoneArc,
-                fill: isColliding ? 'rgba(255,0,0,0.1)' : 'rgba(0,255,0,0.1)',
-                stroke: isColliding ? 'red' : 'green',
-                'stroke-width': '1',
-                'stroke-dasharray': '4'
-            }));
-            
-            // Draw paddle
-        console.log(`Added hit zone path for paddle ${index}`);   
-	const paddleArc = this.createPaddleArc(
-                this.config.center,
-                this.config.center,
-                this.config.scale,
-                startAngle,
-                endAngle,
-                this.state.dimensions.paddle_width * this.config.scale
-            );
-            
-            this.svg.appendChild(this.createSVGElement('path', {
-                d: paddleArc,
-                fill: isColliding ? 'rgba(255,0,0,0.3)' : 'rgba(0,0,255,0.3)',
-                stroke: isColliding ? 'red' : 'blue',
-                'stroke-width': '1'
-            }));
-        });
-
-        // Draw balls
-        this.renderBalls();
-        this.renderScores();
-    }
-
-    renderBalls() {
-        if (!this.state.balls) return;
-        
-        this.state.balls.forEach(ball => {
-            const ballX = this.config.center + ball.x * this.config.scale;
-            const ballY = this.config.center - ball.y * this.config.scale; // Note the minus for Y coordinate
-            
-            this.svg.appendChild(this.createSVGElement('circle', {
-                cx: ballX,
-                cy: ballY,
-                r: ball.size * this.config.scale,
-                fill: 'yellow',
-                stroke: 'black',
-                'stroke-width': '1'
-            }));
-        });
-    }
-
-
-/*    generatePaddleCenters() {
-        const centers = [];
-        const sectorSize = (2 * Math.PI) / this.state.paddles.length;
-
-        this.state.paddles.forEach((paddle, i) => {
-            if (!paddle.active) return;
-
-            // Calculate base sector angle
-            const baseSectorAngle = i * sectorSize;
-            
-            // Calculate maximum allowed offset within sector
-            const paddleLength = this.state.dimensions.paddle_length * sectorSize;
-            const hitZoneAngle = this.state.dimensions.ball_size;
-            const totalAngleNeeded = paddleLength + (hitZoneAngle * 2);
-            
-            let maxOffset = 0;
-            if (totalAngleNeeded < sectorSize) {
-                maxOffset = (sectorSize - totalAngleNeeded) / 2;
-            }
-
-            // Calculate final angle with constrained offset
-            const offsetAngle = (paddle.position - 0.5) * 2 * maxOffset;
-            let finalAngle = baseSectorAngle + offsetAngle;
-
-            // Normalize angle to positive range
-            while (finalAngle < 0) finalAngle += 2 * Math.PI;
-            while (finalAngle >= 2 * Math.PI) finalAngle -= 2 * Math.PI;
-
-            centers.push(finalAngle);
-        });
-
-        return centers;
-    }
-
-    createPaddleArc(cx, cy, radius, startAngle, endAngle, width) {
-        const innerRadius = radius - width;
-        
-        // Calculate points
-        const x1 = cx + radius * Math.cos(startAngle);
-        const y1 = cy + radius * Math.sin(startAngle);
-        const x2 = cx + radius * Math.cos(endAngle);
-        const y2 = cy + radius * Math.sin(endAngle);
-        
-        const x3 = cx + innerRadius * Math.cos(endAngle);
-        const y3 = cy + innerRadius * Math.sin(endAngle);
-        const x4 = cx + innerRadius * Math.cos(startAngle);
-        const y4 = cy + innerRadius * Math.sin(startAngle);
-
-        // Determine if the arc sweep is greater than 180 degrees
-        const largeArcFlagOuter = Math.abs(endAngle - startAngle) > Math.PI ? 1 : 0;
-        const largeArcFlagInner = largeArcFlagOuter;
-
-        return `M ${x1} ${y1} ` + // Move to start point
-               `A ${radius} ${radius} 0 ${largeArcFlagOuter} 1 ${x2} ${y2} ` + // Outer arc
-               `L ${x3} ${y3} ` + // Line to inner arc start
-               `A ${innerRadius} ${innerRadius} 0 ${largeArcFlagInner} 0 ${x4} ${y4} ` + // Inner arc
-               'Z'; // Close path
-    }
-
-    render() {
-        if (!this.state || !this.svg) return;
-        
-        this.svg.innerHTML = '';
-        
-        // Draw main circle
-        this.svg.appendChild(this.createSVGElement('circle', {
-            cx: this.config.center,
-            cy: this.config.center,
-            r: this.config.scale,
-            fill: 'none',
-            stroke: 'gray',
-            'stroke-width': '1'
-        }));
-
-        // Get paddle centers using sector-based calculation
-        const paddleCenters = this.generatePaddleCenters();
-        const sectorSize = (2 * Math.PI) / this.state.paddles.length;
-        const paddleLength = this.state.dimensions.paddle_length * sectorSize;
-
-        paddleCenters.forEach((centerAngle, index) => {
-            const paddle = this.state.paddles[index];
-            if (!paddle.active) return;
-
-            const startAngle = centerAngle - paddleLength / 2;
-            const endAngle = centerAngle + paddleLength / 2;
-            
-            // Draw hit zone first (includes ball size in width)
-            const hitZoneWidth = (this.state.dimensions.paddle_width + 
-                this.state.dimensions.ball_size * 2) * this.config.scale;
-            
-            const hitZoneArc = this.createPaddleArc(
-                this.config.center,
-                this.config.center,
-                this.config.scale,
-                startAngle,
-                endAngle,
-                hitZoneWidth
-            );
-            
-            // Determine if this paddle is involved in a collision
-            const isColliding = this.state.collision?.sideIndex === paddle.side_index;
-            
-            this.svg.appendChild(this.createSVGElement('path', {
-                d: hitZoneArc,
-                fill: isColliding ? 'rgba(255,0,0,0.1)' : 'rgba(0,255,0,0.1)',
-                stroke: isColliding ? 'red' : 'green',
-                'stroke-width': '1',
-                'stroke-dasharray': '4'
-            }));
-            
-            // Draw actual paddle
-            const paddleArc = this.createPaddleArc(
-                this.config.center,
-                this.config.center,
-                this.config.scale,
-                startAngle,
-                endAngle,
-                this.state.dimensions.paddle_width * this.config.scale
-            );
-            
-            this.svg.appendChild(this.createSVGElement('path', {
-                d: paddleArc,
-                fill: isColliding ? 'rgba(255,0,0,0.3)' : 'rgba(0,0,255,0.3)',
-                stroke: isColliding ? 'red' : 'blue',
-                'stroke-width': '1'
-            }));
-        });
-
-        // Draw balls
-        this.renderBalls();
-        this.renderScores();
-    }
-/*	    createPaddleArc(cx, cy, radius, startAngle, endAngle, width) {
-		const innerRadius = radius - width;
 		
 		// Convert angles to radians
 		const startRad = startAngle;
@@ -1061,7 +756,7 @@ export class PolygonRenderer extends BasePongRenderer {
         // Transform backend coordinates to screen coordinates
         return vertices.map(vertex => ({
             x: this.config.center + vertex.x * this.config.scale,
-            y: this.config.center + vertex.y * this.config.scale
+            y: this.config.center - vertex.y * this.config.scale
         }));
     }
 
@@ -1070,6 +765,7 @@ export class PolygonRenderer extends BasePongRenderer {
         this.render();
     }
 
+/*
     renderPolygonOutline() {
         if (!this.vertices || this.vertices.length === 0) return;
 
@@ -1085,6 +781,50 @@ export class PolygonRenderer extends BasePongRenderer {
             'stroke-width': '2'
         }));
     }
+*/
+renderPolygonOutline() {
+   if (!this.vertices || this.vertices.length === 0) return;
+
+   const transformedVertices = this.transformVertices(this.vertices);
+   
+   // Draw outline path
+   const pathData = transformedVertices
+       .map((vertex, i) => `${i === 0 ? 'M' : 'L'} ${vertex.x} ${vertex.y}`)
+       .join(' ');
+
+   this.svg.appendChild(this.createSVGElement('path', {
+       d: `${pathData} Z`,
+       fill: 'none',
+       stroke: '#808080',
+       'stroke-width': '2'
+   }));
+
+   // Add side index labels
+   transformedVertices.forEach((vertex, i) => {
+       const nextVertex = transformedVertices[(i + 1) % transformedVertices.length];
+       
+       // Calculate midpoint of side
+       const midX = (vertex.x + nextVertex.x) / 2;
+       const midY = (vertex.y + nextVertex.y) / 2;
+       
+       // Calculate offset for label (inward from side)
+       const dx = nextVertex.x - vertex.x;
+       const dy = nextVertex.y - vertex.y;
+       const len = Math.sqrt(dx * dx + dy * dy);
+       const offsetX = -dy / len * 20;  // Offset perpendicular to the side
+       const offsetY = dx / len * 20;
+       
+       // Add label
+       this.svg.appendChild(this.createSVGElement('text', {
+           x: midX + offsetX,
+           y: midY + offsetY,
+           'text-anchor': 'middle',
+           'dominant-baseline': 'middle',
+           'font-size': '14px',
+           'fill': 'gray'
+       })).textContent = `side ${i}`;
+   });
+}
 
     renderPaddle(paddle, sideIndex) {
         if (!paddle.active || !this.vertices) return;
@@ -1100,8 +840,8 @@ export class PolygonRenderer extends BasePongRenderer {
         // Normalize vectors
         const normalizedSideX = sideX / sideLength;
         const normalizedSideY = sideY / sideLength;
-        const normalX = -sideY / sideLength;
-        const normalY = sideX / sideLength;
+        const normalX = sideY / sideLength;
+        const normalY = -sideX / sideLength;
         
         // Calculate paddle center position
         const paddleX = startVertex.x + sideX * paddle.position;

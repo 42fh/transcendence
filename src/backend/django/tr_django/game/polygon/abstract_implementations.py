@@ -35,8 +35,11 @@ def find_collision_candidate(self, ball, ball_index, new_state, distance_from_ce
                     'movement' : ball_movement,
                     'type': ball_movement['type']
                 })
+    #print("here are the candidates: ", collisions_candidates)
     if collisions_candidates:
-        return min(collisions_candidates, key=lambda x: x['movement']['current_distance'])
+        candidate =  min(collisions_candidates, key=lambda x: x['movement']['current_distance'])
+        print(candidate)
+        return candidate
     
     # No collisions found
     return None
@@ -119,8 +122,8 @@ def handle_paddle(self, ball, collision_candidate, new_state):
     relative_position = self.calculate_relative_position(ball, side_index)
     
     # Calculate paddle position and width
-    paddle_width = new_state["dimensions"]["paddle_width"]
-    paddle_half_width = paddle_width / 2.0
+    paddle_length = new_state["dimensions"]["paddle_length"]
+    paddle_half_length= paddle_length / 2.0
     paddle_center = paddle["position"]
     
     # Initialize collision point
@@ -138,8 +141,8 @@ def handle_paddle(self, ball, collision_candidate, new_state):
 
     # Check if ball hits paddle
     distance_from_paddle_center = abs(relative_position - paddle_center)
-    if distance_from_paddle_center <= paddle_half_width:
-        normalized_offset = (relative_position - paddle_center) / paddle_half_width
+    if distance_from_paddle_center <= paddle_half_length:
+        normalized_offset = (relative_position - paddle_center) / paddle_half_length
         normalized_offset = max(-1.0, min(1.0, normalized_offset))
         
         return {
@@ -156,17 +159,20 @@ def handle_paddle(self, ball, collision_candidate, new_state):
             # New debug/statistics information
             "debug_info": {
                 "paddle_center": paddle_center,          # Where paddle should be (0-1)
-                "paddle_width": paddle_width,            # Width of paddle
+                "paddle_length": paddle_length,            #  length of paddle
                 "relative_hit": relative_position,       # Where ball hit on side (0-1)
                 "paddle_range": {                        # Actual paddle coverage
-                    "start": paddle_center - paddle_half_width,
-                    "end": paddle_center + paddle_half_width
+                    "start": paddle_center - paddle_half_length,
+                    "end": paddle_center + paddle_half_length
                 },
                 "distance_from_center": distance_from_paddle_center,  # How far from paddle center
-                "normalized_distance": distance_from_paddle_center / paddle_half_width,  # 0-1 value where 1 is edge
+                "normalized_distance": distance_from_paddle_center / paddle_half_length,  # 0-1 value where 1 is edge
                 "was_tunneling": (collision_candidate.get('movement', {}).get('type') == 'tunneling')
             }
         }
+    elif abs(collision_candidate['movement']['current_distance']) >= ball['size']:
+        return None
+    
     
     # Ball missed the paddle - include miss statistics too
     return {
@@ -180,15 +186,15 @@ def handle_paddle(self, ball, collision_candidate, new_state):
         # New debug/statistics for misses
         "debug_info": {
             "paddle_center": paddle_center,
-            "paddle_width": paddle_width,
+            "paddle_length": paddle_length,
             "ball_position": relative_position,
             "paddle_range": {
-                "start": paddle_center - paddle_half_width,
-                "end": paddle_center + paddle_half_width
+                "start": paddle_center - paddle_half_length,
+                "end": paddle_center + paddle_half_length
             },
             "miss_distance": min(
-                abs(relative_position - (paddle_center - paddle_half_width)),
-                abs(relative_position - (paddle_center + paddle_half_width))
+                abs(relative_position - (paddle_center - paddle_half_length)),
+                abs(relative_position - (paddle_center + paddle_half_length))
             ),  # How far the miss was from nearest paddle edge
             "was_tunneling": (collision_candidate.get('movement', {}).get('type') == 'tunneling')
         }

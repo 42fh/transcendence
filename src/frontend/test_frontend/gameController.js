@@ -100,10 +100,7 @@ export class GameController {
         try {
             switch (message.type) {
                 case 'initial_state':
-                    console.log('Initial State received:', {
-                    vertices: message.vertices,
-                    gameStateVertices: message.game_state?.vertices
-                });
+                    console.log('Initial State received:', message);
 			this.handleInitialState(message);
                     break;
 

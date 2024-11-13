@@ -1,3 +1,5 @@
+import random
+
 def _calculate_base_deformation(self):
     """Calculate deformation based on game mode"""
     player_density = self.num_paddles / self.num_sides

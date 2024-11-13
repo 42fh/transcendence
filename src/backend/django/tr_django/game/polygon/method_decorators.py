@@ -78,9 +78,11 @@ def add_setup(cls):
 
     )
     from .ratios import (
+        _calculate_base_deformation,
         _calculate_regular_ratios,
         _calculate_crazy_ratios,
-        _calculate_star_ratios
+        _calculate_star_ratios,
+        _calculate_side_ratios
 
     )
 
@@ -91,8 +93,9 @@ def add_setup(cls):
         'get_player_side_indices': get_player_side_indices,
         '_calculate_regular_ratios': _calculate_regular_ratios,
         '_calculate_crazy_ratios': _calculate_crazy_ratios,
-        '_calculate_star_ratios': _calculate_star_ratios 
-               
+        '_calculate_star_ratios': _calculate_star_ratios,
+        '_calculate_base_deformation' : _calculate_base_deformation, 
+        '_calculate_side_ratios' : _calculate_side_ratios       
     }
     
     for name, method in methods.items():

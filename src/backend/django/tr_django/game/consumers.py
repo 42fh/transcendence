@@ -31,8 +31,8 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.game_group = f"game_{self.game_id}"
         channel_key = f"asgi:group:{self.game_group}"
         await self.channel_layer.group_add(self.game_group, self.channel_name)
-        redis_conn = await redis.Redis.from_url('redis://redis:6379', decode_responses=True)
-        await redis_conn.expire(channel_key, 30)
+        #redis_conn = await redis.Redis.from_url('redis://redis:6379', decode_responses=True)
+        #await redis_conn.expire(channel_key, 30)
         try:
             # Try to get existing game or create new one with specified type
             self.game_manager = await AGameManager.get_instance(
