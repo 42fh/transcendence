@@ -1,8 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from .models import SingleGame as Game, GameMode, Player
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+from .models import Tournament
 
 
 def transcendance(request):
@@ -85,3 +86,55 @@ def get_game_modes(request):
             }
         )
     return JsonResponse(game_modes_list, safe=False)
+
+
+# TODO: uniformize naming for models and frontend
+@csrf_exempt
+def tournaments(request):
+    """
+    GET: List all tournaments
+    POST: Create multiple tournaments
+    """
+    if request.method == "GET":
+        tournament_list = Tournament.objects.all()
+        data = [
+            {
+                "id": t.id,
+                "name": t.name,
+                "description": t.description,
+                "startingDate": t.start_date.isoformat() if t.start_date else None,
+                "closingRegistrationDate": t.end_registration.isoformat(),
+                "isTimetableAvailable": bool(t.games.exists()),
+                "participants": list(t.participants.values_list("display_name", flat=True)),
+                "type": t.type.replace("_", " "),  # convert e.g., "single_elimination" to "single elimination"
+                "timetable": None,  # You might want to add timetable logic here
+            }
+            for t in tournament_list
+        ]
+        return JsonResponse({"tournaments": data})
+
+    return JsonResponse({"error": "Method not allowed"}, status=405)
+
+
+@csrf_exempt
+def tournament(request, tournament_id):
+    """
+    GET: Retrieve a specific tournament
+    PUT: Update a specific tournament
+    DELETE: Delete a specific tournament
+    """
+    if request.method == "GET":
+        tournament = get_object_or_404(Tournament, id=tournament_id)
+        data = {
+            "id": tournament.id,
+            "name": tournament.name,
+            "description": tournament.description,
+            "start_registration": tournament.start_registration.isoformat(),
+            "end_registration": tournament.end_registration.isoformat(),
+            "type": tournament.type,
+            "start_mode": tournament.start_mode,
+            "participants": list(tournament.participants.values_list("display_name", flat=True)),
+        }
+        return JsonResponse(data)
+
+    return JsonResponse({"error": "Method not allowed"}, status=405)
