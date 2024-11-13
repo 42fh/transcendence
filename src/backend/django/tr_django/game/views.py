@@ -124,17 +124,20 @@ def tournament(request, tournament_id):
     DELETE: Delete a specific tournament
     """
     if request.method == "GET":
-        tournament = get_object_or_404(Tournament, id=tournament_id)
-        data = {
-            "id": tournament.id,
-            "name": tournament.name,
-            "description": tournament.description,
-            "start_registration": tournament.start_registration.isoformat(),
-            "end_registration": tournament.end_registration.isoformat(),
-            "type": tournament.type,
-            "start_mode": tournament.start_mode,
-            "participants": list(tournament.participants.values_list("display_name", flat=True)),
-        }
-        return JsonResponse(data)
+        try:
+            tournament = Tournament.objects.get(id=tournament_id)
+            data = {
+                "id": tournament.id,
+                "name": tournament.name,
+                "description": tournament.description,
+                "start_registration": tournament.start_registration.isoformat(),
+                "end_registration": tournament.end_registration.isoformat(),
+                "type": tournament.type,
+                "start_mode": tournament.start_mode,
+                "participants": list(tournament.participants.values_list("display_name", flat=True)),
+            }
+            return JsonResponse(data)
+        except Tournament.DoesNotExist:
+            return JsonResponse({"error": "Tournament not found"}, status=404)
 
     return JsonResponse({"error": "Method not allowed"}, status=405)

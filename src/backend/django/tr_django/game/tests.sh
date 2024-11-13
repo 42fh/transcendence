@@ -1,34 +1,56 @@
 #!/bin/bash
 
-# This test script is to run specific test cases for the game app outside Docker
-
 # Function to display usage instructions
 function usage() {
-    echo "Usage: $0 {1|A}"
+    echo "Usage: $0 [-m] {1|A}"
     echo "Options:"
+    echo "  -m, --migrate  Run migrations before tests"
     echo "  1  Run GameModeTestCase"
     echo "  2  Run LegacyGameAppTestsRefactored"
     echo "  3  Run PlayerModelTest"
     echo "  4  Run PlayerStatsTest"
     echo "  5  Run SingleGameTest"
     echo "  6  Run TournamentCreationTest"
+    echo "  7  Run TournamentAPITest" 
     echo "  A  Run all tests in the game app"
     exit 1
 }
 
-# Check if an argument is provided
-if [ -z "$1" ]; then
+# Initialize variables
+RUN_MIGRATIONS=false
+TEST_CASE=""
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -m|--migrate)
+            RUN_MIGRATIONS=true
+            shift
+            ;;
+        1|2|3|4|5|6|7|A)
+            TEST_CASE=$1
+            shift
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
+
+# Check if a test case was provided
+if [ -z "$TEST_CASE" ]; then
     usage
 fi
 
-# Make migrations for both users and game apps
-python ../manage.py makemigrations users game --settings=tr_django.test_settings
-
-# Apply migrations
-python ../manage.py migrate --settings=tr_django.test_settings
+# Run migrations if requested
+if [ "$RUN_MIGRATIONS" = true ]; then
+    echo "Running migrations..."
+    python ../manage.py makemigrations users game --settings=tr_django.test_settings
+    python ../manage.py migrate --settings=tr_django.test_settings
+fi
 
 # Run tests based on the argument
-case "$1" in
+case "$TEST_CASE" in
     1)
         python ../manage.py test game.tests.GameModeTestCase --settings=tr_django.test_settings
         ;;
@@ -47,10 +69,10 @@ case "$1" in
     6)
         python ../manage.py test game.tests.TournamentCreationTest --settings=tr_django.test_settings
         ;;
+    7)
+        python ../manage.py test game.tests.TournamentAPITest --settings=tr_django.test_settings
+        ;;
     A)
         python ../manage.py test game --settings=tr_django.test_settings
-        ;;
-    *)
-        usage
         ;;
 esac
