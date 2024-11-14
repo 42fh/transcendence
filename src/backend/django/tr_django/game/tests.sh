@@ -2,7 +2,7 @@
 
 # Function to display usage instructions
 function usage() {
-    echo "Usage: $0 [-m] {1|2|3|4|5|6|7|8|A}"
+    echo "Usage: $0 [-m] {1|2|3|4|5|6|7|8|9|A}"
     echo "Options:"
     echo "  -m, --migrate  Run migrations before tests"
     echo "  1  Run GameModeTestCase"
@@ -13,6 +13,7 @@ function usage() {
     echo "  6  Run TournamentCreationTest"
     echo "  7  Run TournamentAPITest"
     echo "  8  Run TournamentEnrollmentTest"
+    echo "  9  Run TournamentServiceTest"
     echo "  A  Run all tests in the game app"
     exit 1
 }
@@ -28,7 +29,7 @@ while [[ $# -gt 0 ]]; do
             RUN_MIGRATIONS=true
             shift
             ;;
-        1|2|3|4|5|6|7|8|A)
+        1|2|3|4|5|6|7|8|9|A)
             TEST_CASE=$1
             shift
             ;;
@@ -75,6 +76,9 @@ case "$TEST_CASE" in
         ;;
     8)
         python ../manage.py test game.tests.TournamentEnrollmentTest --settings=tr_django.test_settings
+        ;;
+    9)
+        python ../manage.py test game.tests.TournamentServiceTest --settings=tr_django.test_settings
         ;;
     A)
         python ../manage.py test game --settings=tr_django.test_settings

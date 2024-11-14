@@ -15,6 +15,8 @@ from django.core.exceptions import ValidationError
 from django.urls import reverse
 import uuid
 from unittest.mock import patch
+import json
+from .services.tournament_service import build_tournament_data, build_timetable_data
 
 
 class GameModeTestCase(TestCase):
@@ -979,6 +981,36 @@ class TournamentAPITest(TestCase):
         for field in required_fields:
             self.assertIn(field, data)
 
+    def test_create_tournament(self):
+        """Test creating a new tournament via POST /tournaments/"""
+        # Create test data
+        tournament_data = {
+            "name": "New Tournament",
+            "description": "Test tournament creation",
+            "start_registration": (timezone.now() + timedelta(days=1)).isoformat(),
+            "end_registration": (timezone.now() + timedelta(days=7)).isoformat(),
+            "start_date": (timezone.now() + timedelta(days=14)).isoformat(),
+            "type": Tournament.TYPE_SINGLE_ELIMINATION,
+            "start_mode": Tournament.START_MODE_FIXED,
+            "min_participants": 2,
+            "max_participants": 8,
+        }
+
+        # Send POST request
+        response = self.client.post(
+            reverse("tournaments"), data=json.dumps(tournament_data), content_type="application/json"
+        )
+
+        # Check response
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("id", data)
+
+        # Verify tournament was created
+        tournament = Tournament.objects.get(pk=data["id"])
+        self.assertEqual(tournament.name, tournament_data["name"])
+        self.assertEqual(tournament.description, tournament_data["description"])
+
 
 class TournamentEnrollmentTest(TestCase):
     @classmethod
@@ -1055,3 +1087,72 @@ class TournamentEnrollmentTest(TestCase):
         """Test enrollment with invalid tournament ID"""
         response = self.client.post(reverse("tournament_enrollment", kwargs={"tournament_id": 9999}))
         self.assertEqual(response.status_code, 404)
+
+
+class TournamentServiceTest(TestCase):
+    fixtures = ["tournaments.json"]
+
+    def setUp(self):
+        self.tournament = Tournament.objects.get(pk=4)  # Get tournament with games from fixture
+
+    def test_build_tournament_data_structure(self):
+        """Test that tournament data is built correctly"""
+        data = build_tournament_data(self.tournament)
+
+        # Test basic tournament fields
+        self.assertEqual(data["name"], self.tournament.name)
+        self.assertEqual(data["description"], self.tournament.description)
+        self.assertEqual(data["type"], self.tournament.type.replace("_", " "))
+        self.assertEqual(
+            data["startingDate"], self.tournament.start_date.isoformat() if self.tournament.start_date else None
+        )
+        self.assertEqual(data["closingRegistrationDate"], self.tournament.end_registration.isoformat())
+
+        # Test participants
+        self.assertEqual(
+            data["participants"], list(self.tournament.participants.values_list("display_name", flat=True))
+        )
+
+        # Test timetable availability
+        self.assertTrue(data["isTimetableAvailable"])
+        self.assertIsNotNone(data["timetable"])
+
+    def test_build_timetable_structure(self):
+        """Test that timetable data is built correctly"""
+        timetable = build_timetable_data(self.tournament)
+
+        # Test rounds structure
+        self.assertIn("rounds", timetable)
+        self.assertTrue(isinstance(timetable["rounds"], list))
+
+        # Test first round structure
+        first_round = timetable["rounds"][0]
+        self.assertEqual(first_round["round"], 1)
+        self.assertTrue(isinstance(first_round["games"], list))
+
+        # Test game structure in first round
+        first_game = first_round["games"][0]
+        self.assertIn("uuid", first_game)
+        self.assertIn("date", first_game)
+        self.assertIn("player1", first_game)
+        self.assertIn("player2", first_game)
+        self.assertIn("nextGameUuid", first_game)
+        self.assertIn("sourceGames", first_game)
+        self.assertIn("winner", first_game)
+
+    def test_tournament_without_games(self):
+        """Test building data for tournament without games"""
+        # Create a tournament without games
+        tournament = Tournament.objects.create(
+            name="Empty Tournament",
+            description="No games yet",
+            type=Tournament.TYPE_SINGLE_ELIMINATION,
+            start_registration=timezone.now(),
+            end_registration=timezone.now() + timedelta(days=1),
+            start_mode=Tournament.START_MODE_AUTO,
+            creator=Player.objects.first(),
+        )
+
+        data = build_tournament_data(tournament)
+        self.assertFalse(data["isTimetableAvailable"])
+        self.assertIsNone(data["timetable"])

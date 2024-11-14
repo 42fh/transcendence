@@ -122,23 +122,21 @@ export async function handleTournamentAction(tournamentId, isEnrolled) {
 export async function handleCreateTournamentSubmit(tournamentData) {
   try {
     switch (CONFIG.DATA_SOURCE) {
-      case "API":
-        // Future API call
-        /*
-					const response = await fetch(`${CONFIG.API_BASE_URL}/tournaments`, {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-							// Add any auth headers if needed
-						},
-						body: JSON.stringify(tournamentData)
-					});
-	
-					if (!response.ok) {
-						throw new Error('Failed to create tournament');
-					}
-					*/
-        throw new Error("API not implemented yet");
+      case CONFIG.DATA_SOURCE.API:
+        const response = await fetch(`${CONFIG.API_BASE_URL}/game/tournaments/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            // Add any auth headers if needed
+          },
+          body: JSON.stringify(tournamentData),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || "Failed to create tournament");
+        }
+        break;
 
       case "JS":
         // Add to our mutable JavaScript array

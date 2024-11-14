@@ -4,6 +4,8 @@ from .models import SingleGame as Game, GameMode, Player
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from .models import Tournament
+import json
+from .services.tournament_service import build_tournament_data
 
 
 def transcendance(request):
@@ -88,30 +90,33 @@ def get_game_modes(request):
     return JsonResponse(game_modes_list, safe=False)
 
 
-# TODO: uniformize naming for models and frontend
 @csrf_exempt
 def tournaments(request):
     """
     GET: List all tournaments
-    POST: Create multiple tournaments
+    POST: Create a tournament
     """
     if request.method == "GET":
         tournament_list = Tournament.objects.all()
-        data = [
-            {
-                "id": t.id,
-                "name": t.name,
-                "description": t.description,
-                "startingDate": t.start_date.isoformat() if t.start_date else None,
-                "closingRegistrationDate": t.end_registration.isoformat(),
-                "isTimetableAvailable": bool(t.games.exists()),
-                "participants": list(t.participants.values_list("display_name", flat=True)),
-                "type": t.type.replace("_", " "),  # convert e.g., "single_elimination" to "single elimination"
-                "timetable": None,  # You might want to add timetable logic here
-            }
-            for t in tournament_list
-        ]
+        data = [build_tournament_data(t) for t in tournament_list]
         return JsonResponse({"tournaments": data})
+
+    elif request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            tournament = Tournament.objects.create(
+                name=data["name"],
+                description=data["description"],
+                start_registration=data["start_registration"],
+                end_registration=data["end_registration"],
+                type=data["type"],
+                start_mode=data["start_mode"],
+            )
+            return JsonResponse({"id": tournament.id, "message": "Tournament created successfully!"})
+        except (json.JSONDecodeError, KeyError) as e:
+            return JsonResponse({"error": "Invalid data format"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Method not allowed"}, status=405)
 
