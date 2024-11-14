@@ -141,3 +141,33 @@ def tournament(request, tournament_id):
             return JsonResponse({"error": "Tournament not found"}, status=404)
 
     return JsonResponse({"error": "Method not allowed"}, status=405)
+
+
+@csrf_exempt
+def tournament_enrollment(request, tournament_id):
+    """
+    POST: Enroll in tournament
+    DELETE: Leave tournament
+    """
+    try:
+        tournament = Tournament.objects.get(pk=tournament_id)
+    except Tournament.DoesNotExist:
+        return JsonResponse({"error": "Tournament not found"}, status=404)
+
+    # Get the Player instance associated with the user
+    try:
+        player = Player.objects.get(user=request.user)
+    except Player.DoesNotExist:
+        return JsonResponse({"error": "Player profile not found"}, status=400)
+
+    if request.method == "POST":
+        if tournament.participants.filter(user=request.user).exists():
+            return JsonResponse({"error": "Already enrolled in tournament"}, status=400)
+        tournament.participants.add(player)
+        return JsonResponse({"message": f"Successfully enrolled in {tournament.name}"})
+
+    elif request.method == "DELETE":
+        if not tournament.participants.filter(user=request.user).exists():
+            return JsonResponse({"error": "Not enrolled in tournament"}, status=400)
+        tournament.participants.remove(player)
+        return JsonResponse({"message": f"Successfully left {tournament.name}"})
