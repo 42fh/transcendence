@@ -4,8 +4,8 @@ export const CONFIG = {
     API: "API",
     JS: "JS",
   },
-  //   CURRENT_SOURCE: "JS", // Default source
-  CURRENT_SOURCE: "API", // Default source
+  CURRENT_SOURCE: "API",
+  API_BASE_URL: "http://localhost:8080",
   API_ENDPOINTS: {
     TOURNAMENTS: "/api/game/tournaments",
   },

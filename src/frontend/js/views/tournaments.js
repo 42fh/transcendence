@@ -54,7 +54,7 @@ export async function loadTournamentsPage(addToHistory = true) {
       });
     }
 
-    const enhancedTournaments = await fetchTournaments(CONFIG.DATA_SOURCE);
+    const enhancedTournaments = await fetchTournaments(CONFIG.CURRENT_SOURCE);
 
     // Filter tournaments based on enrollment
     const openTournaments = enhancedTournaments.filter((t) => !t.isUserEnrolled);

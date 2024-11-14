@@ -4,13 +4,13 @@ import { showToast } from "../utils/toast.js";
 import { loadTournamentsPage } from "../views/tournaments.js";
 import { updateGlobalTournaments } from "../store/globals.js";
 // Fetch and enhance tournaments
-export async function fetchTournaments(source = CONFIG.DATA_SOURCE) {
+export async function fetchTournaments(source = CONFIG.CURRENT_SOURCE) {
   try {
     let rawTournaments;
 
     switch (source) {
       case CONFIG.DATA_SOURCE.API:
-        const response = await fetch(`${CONFIG.API_BASE_URL}/game/tournaments/`);
+        const response = await fetch(`${CONFIG.API_BASE_URL}${CONFIG.API_ENDPOINTS.TOURNAMENTS}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
