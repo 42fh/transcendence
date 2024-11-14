@@ -61,33 +61,4 @@ export function closeModal() {
   }
 }
 
-// Function to create the modal structure if it doesn’t exist
-function createAndShowModal() {
-  let modalOverlay = document.getElementById("modal-overlay");
-
-  // Create the modal if it doesn't already exist in the DOM
-  if (!modalOverlay) {
-    modalOverlay = document.createElement("div");
-    modalOverlay.id = "modal-overlay";
-    modalOverlay.classList.add("modal-overlay");
-
-    modalOverlay.innerHTML = `
-			  <div id="modal" class="modal">
-				<span id="close-modal" class="close-btn">&times;</span>
-				<div id="modal-content" class="modal-content">
-				  <!-- Content will be injected here by fillModalContent -->
-				</div>
-			  </div>
-			`;
-    document.body.appendChild(modalOverlay); // Add modal to the DOM
-    document.getElementById("close-modal").addEventListener("click", closeModal);
-
-    // Close the modal when clicking outside the modal content
-    modalOverlay.addEventListener("click", (e) => {
-      if (e.target === modalOverlay) {
-        closeModal();
-      }
-    });
-  }
-  openModal();
-}
+f;

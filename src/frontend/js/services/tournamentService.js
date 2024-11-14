@@ -2,7 +2,7 @@ import { CONFIG } from "../config/constants.js";
 import { tournaments } from "../config/tournaments.js";
 import { showToast } from "../utils/toast.js";
 import { loadTournamentsPage } from "../views/tournaments.js";
-
+import { updateGlobalTournaments } from "../store/globals.js";
 // Fetch and enhance tournaments
 export async function fetchTournaments(source = CONFIG.DATA_SOURCE) {
   try {
@@ -25,8 +25,9 @@ export async function fetchTournaments(source = CONFIG.DATA_SOURCE) {
       default:
         throw new Error(`Invalid source specified: ${source}`);
     }
-
-    return rawTournaments.map(enhanceTournament);
+    const enhancedTournaments = rawTournaments.map(enhanceTournament);
+    updateGlobalTournaments(enhancedTournaments);
+    return enhancedTournaments;
   } catch (error) {
     console.error("Error fetching tournaments:", error);
     throw error;
