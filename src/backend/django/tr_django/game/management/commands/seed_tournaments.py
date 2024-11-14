@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from datetime import timedelta
-from game.models import Tournament, TournamentGame
+from game.models import Tournament, TournamentGameSchedule, TournamentGame as Game
 import uuid
 
 
@@ -9,6 +9,13 @@ class Command(BaseCommand):
     help = "Seeds the database with initial tournament data for development"
 
     def handle(self, *args, **options):
+        self.stdout.write("Checking existing tournaments...")
+
+        # Check if tournaments already exist
+        if Tournament.objects.exists():
+            self.stdout.write(self.style.SUCCESS("Tournaments already seeded, skipping..."))
+            return
+
         self.stdout.write("Seeding tournaments...")
 
         # Clear existing tournaments
@@ -75,69 +82,48 @@ class Command(BaseCommand):
         # Then create the timetable for Berlin tournament
         berlin_tournament = Tournament.objects.get(name="42 BERLIN")
 
-        # Create games for round 1
-        game1_1 = TournamentGame.objects.create(
-            tournament=berlin_tournament,
-            game_type=TournamentGame.GAME_TYPE_DIRECT_ELIMINATION,
-            start_date=timezone.now(),
-            status="ready",
-            uuid=uuid.uuid4(),  # Generate unique UUID
-        )
+        # Create games and schedules for round 1
+        for i in range(1, 4):  # 3 games in round 1
+            game = Game.objects.create(
+                game_type="direct_elimination",
+                status="ready",
+            )
 
-        game1_2 = TournamentGame.objects.create(
-            tournament=berlin_tournament,
-            game_type=TournamentGame.GAME_TYPE_DIRECT_ELIMINATION,
-            start_date=timezone.now() + timedelta(minutes=30),
-            status="ready",
-            uuid=uuid.uuid4(),
-        )
+            TournamentGameSchedule.objects.create(
+                tournament=berlin_tournament,
+                game=game,
+                round_number=1,
+                match_number=i,
+                scheduled_time=timezone.now() + timedelta(minutes=30 * i),
+            )
 
-        game1_3 = TournamentGame.objects.create(
-            tournament=berlin_tournament,
-            game_type=TournamentGame.GAME_TYPE_DIRECT_ELIMINATION,
-            start_date=timezone.now() + timedelta(minutes=60),
-            status="ready",
-            uuid=uuid.uuid4(),
-        )
+        # Create games and schedules for round 2
+        for i in range(1, 3):  # 2 games in round 2
+            game = Game.objects.create(
+                game_type="direct_elimination",
+                status="ready",
+            )
 
-        game1_4 = TournamentGame.objects.create(
-            tournament=berlin_tournament,
-            game_type=TournamentGame.GAME_TYPE_DIRECT_ELIMINATION,
-            start_date=timezone.now() + timedelta(minutes=90),
-            status="ready",
-            uuid=uuid.uuid4(),
-        )
-
-        # Create games for round 2 with references to previous games
-        game2_1 = TournamentGame.objects.create(
-            tournament=berlin_tournament,
-            game_type=TournamentGame.GAME_TYPE_DIRECT_ELIMINATION,
-            start_date=timezone.now() + timedelta(days=1),
-            status="draft",
-            uuid=uuid.uuid4(),
-            source_game1=game1_1,
-            source_game2=game1_2,
-        )
-
-        game2_2 = TournamentGame.objects.create(
-            tournament=berlin_tournament,
-            game_type=TournamentGame.GAME_TYPE_DIRECT_ELIMINATION,
-            start_date=timezone.now() + timedelta(days=1),
-            status="draft",
-            uuid=uuid.uuid4(),
-            source_game1=game1_3,
-            source_game2=game1_4,
-        )
+            TournamentGameSchedule.objects.create(
+                tournament=berlin_tournament,
+                game=game,
+                round_number=2,
+                match_number=i,
+                scheduled_time=timezone.now() + timedelta(days=1),
+            )
 
         # Create final game
-        TournamentGame.objects.create(
+        final_game = Game.objects.create(
+            game_type="direct_elimination",
+            status="ready",
+        )
+
+        TournamentGameSchedule.objects.create(
             tournament=berlin_tournament,
-            game_type=TournamentGame.GAME_TYPE_DIRECT_ELIMINATION,
-            start_date=timezone.now() + timedelta(days=2),
-            status="draft",
-            uuid=uuid.uuid4(),
-            source_game1=game2_1,
-            source_game2=game2_2,
+            game=final_game,
+            round_number=3,
+            match_number=1,
+            scheduled_time=timezone.now() + timedelta(days=2),
         )
 
         self.stdout.write(self.style.SUCCESS("Successfully created tournament timetable"))
