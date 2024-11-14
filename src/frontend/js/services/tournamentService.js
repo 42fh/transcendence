@@ -52,7 +52,7 @@ function calculateTimeLeft(closingDate) {
   const closing = new Date(closingDate);
   const diff = closing - now;
 
-  if (diff <= 0) return "000";
+  if (diff <= 0) return "<0 m";
 
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
