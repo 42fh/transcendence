@@ -60,5 +60,3 @@ export function closeModal() {
     modalOverlay.style.opacity = "0";
   }
 }
-
-f;

@@ -1,3 +1,5 @@
+import { CONFIG } from "./constants.js";
+
 /*
  * Tournament Data Structure
  *

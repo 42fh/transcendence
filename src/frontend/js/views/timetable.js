@@ -1,5 +1,5 @@
 import { showToast } from "../utils/toast.js";
-import { CONFIG } from "../config/config.js";
+import { CONFIG } from "../config/constants.js";
 import { getGlobalTournaments } from "../store/globals.js";
 import { tournaments } from "../config/tournaments.js";
 
