@@ -67,8 +67,6 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "tr_django.urls"
 
-AUTH_USER_MODEL = "auth.User"
-
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -93,7 +91,7 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             # "hosts": [("127.0.0.1", 6379)],
-            "hosts": [("redis", 6379)],
+            "hosts": [("redis", 6380)],
         },
     }
 }

@@ -50,8 +50,6 @@ class ChatRoom(models.Model):
 
 class Message(models.Model):
     room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name="messages")
-    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_messages")
-    room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name="messages")
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sent_messages")
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -81,10 +79,9 @@ def ensure_room_id(sender, instance, **kwargs):
         usernames = sorted([instance.user1.username, instance.user2.username])
         instance.room_id = f"{usernames[0]}_{usernames[1]}"
 
-
 class BlockedUser(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="blocking")
-    blocked_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="blocked_by")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="blocking_users")
+    blocked_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="blocked_by_users")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -96,17 +93,20 @@ class BlockedUser(models.Model):
     def __str__(self):
         return f"{self.user.username} blocked {self.blocked_user.username}"
 
+        # Add this model to your existing models.py file
 
 class ChatNotification(models.Model):
-    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
-    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_notifications")
-    message = models.TextField()
-    chat_room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE)
+    message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='notifications')
+    receiver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='chat_notifications')
+    is_seen = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    is_read = models.BooleanField(default=False)
 
     class Meta:
-        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=['receiver', 'is_seen']),
+            models.Index(fields=['created_at']),
+        ]
+        ordering = ['-created_at']
 
     def __str__(self):
-        return f"Notification for {self.recipient.username} from {self.sender.username}"
+        return f"Notification for {self.receiver.username} - Message from {self.message.sender.username}"
