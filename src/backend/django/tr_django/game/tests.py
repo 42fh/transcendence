@@ -14,6 +14,7 @@ from users.models import CustomUser
 from django.core.exceptions import ValidationError
 from django.urls import reverse
 import uuid
+from unittest.mock import patch
 
 
 class GameModeTestCase(TestCase):
@@ -977,3 +978,80 @@ class TournamentAPITest(TestCase):
 
         for field in required_fields:
             self.assertIn(field, data)
+
+
+class TournamentEnrollmentTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # Start patching before any tests run
+        cls.patcher = patch("game.signals.create_player_profile")
+        cls.patcher.start()
+        super().setUpClass()
+
+    @classmethod
+    def tearDownClass(cls):
+        # Stop patching after all tests complete
+        cls.patcher.stop()
+        super().tearDownClass()
+
+    def setUp(self):
+        """Set up test data without relying on fixtures"""
+        self.client = self.client_class()
+
+        # Create a test user and get its automatically created Player
+        self.user = CustomUser.objects.create_user(username="testuser", password="testpass123")
+        self.client.login(username="testuser", password="testpass123")  # Add this line to login the test user
+
+        # Get the automatically created Player instance instead of creating a new one
+        self.player = Player.objects.get(user=self.user)
+        # Update display name if needed
+        self.player.display_name = "TestPlayer"
+        self.player.save()
+
+        # Create a test tournament
+        self.tournament = Tournament.objects.create(
+            name="Test Tournament",
+            description="Test tournament for enrollment",
+            start_registration=timezone.now(),
+            end_registration=timezone.now() + timedelta(days=7),
+            start_date=timezone.now() + timedelta(days=14),
+            type=Tournament.TYPE_SINGLE_ELIMINATION,
+            start_mode=Tournament.START_MODE_FIXED,
+            is_public=True,
+            min_participants=2,
+            max_participants=8,
+            creator=self.player,
+        )
+
+    def test_enrollment_success(self):
+        """Test successful enrollment in tournament"""
+        response = self.client.post(reverse("tournament_enrollment", kwargs={"tournament_id": self.tournament.id}))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(self.tournament.participants.filter(user__username=self.user.username).exists())
+
+    def test_enrollment_duplicate(self):
+        """Test enrolling when already enrolled"""
+        # First enrollment
+        self.client.post(reverse("tournament_enrollment", kwargs={"tournament_id": self.tournament.id}))
+        # Try to enroll again
+        response = self.client.post(reverse("tournament_enrollment", kwargs={"tournament_id": self.tournament.id}))
+        self.assertEqual(response.status_code, 400)
+
+    def test_leave_success(self):
+        """Test successfully leaving tournament"""
+        # First enroll
+        self.tournament.participants.add(self.player)
+        # Then leave
+        response = self.client.delete(reverse("tournament_enrollment", kwargs={"tournament_id": self.tournament.id}))
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(self.tournament.participants.filter(user__username=self.user.username).exists())
+
+    def test_leave_not_enrolled(self):
+        """Test leaving when not enrolled"""
+        response = self.client.delete(reverse("tournament_enrollment", kwargs={"tournament_id": self.tournament.id}))
+        self.assertEqual(response.status_code, 400)
+
+    def test_invalid_tournament(self):
+        """Test enrollment with invalid tournament ID"""
+        response = self.client.post(reverse("tournament_enrollment", kwargs={"tournament_id": 9999}))
+        self.assertEqual(response.status_code, 404)

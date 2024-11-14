@@ -62,5 +62,179 @@
       "min_participants": 2,
       "max_participants": 8
     }
+  },
+  {
+    "model": "game.tournamentgame",
+    "pk": 1,
+    "fields": {
+      "game_type": "direct_elimination",
+      "status": "ready",
+      "start_date": "2024-03-20T14:00:00Z",
+      "created_at": "2024-03-20T13:00:00Z",
+      "uuid": "game1_1",
+      "round": 1,
+      "match_number": 1
+    }
+  },
+  {
+    "model": "game.tournamentgameschedule",
+    "pk": 1,
+    "fields": {
+      "tournament": 4,
+      "game": 1,
+      "round_number": 1,
+      "match_number": 1,
+      "scheduled_time": "2024-03-20T14:00:00Z"
+    }
+  },
+  {
+    "model": "game.tournamentgame",
+    "pk": 2,
+    "fields": {
+      "game_type": "direct_elimination",
+      "status": "ready",
+      "start_date": "2024-03-20T14:30:00Z",
+      "created_at": "2024-03-20T13:00:00Z",
+      "uuid": "game1_2",
+      "round": 1,
+      "match_number": 2
+    }
+  },
+  {
+    "model": "game.tournamentgameschedule",
+    "pk": 2,
+    "fields": {
+      "tournament": 4,
+      "game": 2,
+      "round_number": 1,
+      "match_number": 2,
+      "scheduled_time": "2024-03-20T14:30:00Z"
+    }
+  },
+  {
+    "model": "game.tournamentgame",
+    "pk": 3,
+    "fields": {
+      "game_type": "direct_elimination",
+      "status": "ready",
+      "start_date": "2024-03-20T15:00:00Z",
+      "created_at": "2024-03-20T13:00:00Z",
+      "uuid": "game1_3",
+      "round": 1,
+      "match_number": 3
+    }
+  },
+  {
+    "model": "game.tournamentgameschedule",
+    "pk": 3,
+    "fields": {
+      "tournament": 4,
+      "game": 3,
+      "round_number": 1,
+      "match_number": 3,
+      "scheduled_time": "2024-03-20T15:00:00Z"
+    }
+  },
+  {
+    "model": "game.tournamentgame",
+    "pk": 4,
+    "fields": {
+      "game_type": "direct_elimination",
+      "status": "ready",
+      "start_date": "2024-03-20T15:30:00Z",
+      "created_at": "2024-03-20T13:00:00Z",
+      "uuid": "game1_4",
+      "round": 1,
+      "match_number": 4
+    }
+  },
+  {
+    "model": "game.tournamentgameschedule",
+    "pk": 4,
+    "fields": {
+      "tournament": 4,
+      "game": 4,
+      "round_number": 1,
+      "match_number": 4,
+      "scheduled_time": "2024-03-20T15:30:00Z"
+    }
+  },
+  {
+    "model": "game.tournamentgame",
+    "pk": 5,
+    "fields": {
+      "game_type": "direct_elimination",
+      "status": "draft",
+      "start_date": "2024-03-21T14:00:00Z",
+      "created_at": "2024-03-20T13:00:00Z",
+      "uuid": "game2_1",
+      "round": 2,
+      "match_number": 1,
+      "source_game1": 1,
+      "source_game2": 2
+    }
+  },
+  {
+    "model": "game.tournamentgameschedule",
+    "pk": 5,
+    "fields": {
+      "tournament": 4,
+      "game": 5,
+      "round_number": 2,
+      "match_number": 1,
+      "scheduled_time": "2024-03-21T14:00:00Z"
+    }
+  },
+  {
+    "model": "game.tournamentgame",
+    "pk": 6,
+    "fields": {
+      "game_type": "direct_elimination",
+      "status": "draft",
+      "start_date": "2024-03-21T14:30:00Z",
+      "created_at": "2024-03-20T13:00:00Z",
+      "uuid": "game2_2",
+      "round": 2,
+      "match_number": 2,
+      "source_game1": 3,
+      "source_game2": 4
+    }
+  },
+  {
+    "model": "game.tournamentgameschedule",
+    "pk": 6,
+    "fields": {
+      "tournament": 4,
+      "game": 6,
+      "round_number": 2,
+      "match_number": 2,
+      "scheduled_time": "2024-03-21T14:30:00Z"
+    }
+  },
+  {
+    "model": "game.tournamentgame",
+    "pk": 7,
+    "fields": {
+      "game_type": "direct_elimination",
+      "status": "draft",
+      "start_date": "2024-03-22T14:00:00Z",
+      "created_at": "2024-03-20T13:00:00Z",
+      "uuid": "game3_1",
+      "round": 3,
+      "match_number": 1,
+      "source_game1": 5,
+      "source_game2": 6
+    }
+  },
+  {
+    "model": "game.tournamentgameschedule",
+    "pk": 7,
+    "fields": {
+      "tournament": 4,
+      "game": 7,
+      "round_number": 3,
+      "match_number": 1,
+      "scheduled_time": "2024-03-22T14:00:00Z"
+    }
   }
 ]

@@ -1,6 +1,9 @@
 services:
   django:
-    command: sh -c "python tr_django/manage.py migrate && python tr_django/manage.py runserver 0.0.0.0:8000"
+    command: >
+      sh -c "python tr_django/manage.py migrate && 
+             python tr_django/manage.py seed_tournaments &&
+             python tr_django/manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./src/backend/django:/app
     ports:
@@ -17,6 +20,6 @@ services:
     volumes:
       - ./src/frontend/:/usr/share/nginx/html
     ports:
-      - "8080:80" # Expose Nginx on port 8080 for development
+      - "8080:80"
     environment:
       - ENVIRONMENT=development

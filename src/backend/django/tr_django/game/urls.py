@@ -9,5 +9,9 @@ urlpatterns = [
     path("get_game_modes/", views.get_game_modes, name="get_game_modes"),
     path("tournaments/", views.tournaments, name="tournaments"),
     path("tournament/<int:tournament_id>/", views.tournament, name="tournament"),
-    path("tournaments/<int:tournament_id>/enrollment/", views.tournament_enrollment, name="tournament_enrollment"),
+    path(
+        "tournaments/<int:tournament_id>/enrollment",
+        views.tournament_enrollment,
+        name="tournament_enrollment",
+    ),
 ]
