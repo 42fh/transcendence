@@ -55,10 +55,13 @@ export async function loadTournamentsPage(addToHistory = true) {
     }
 
     const enhancedTournaments = await fetchTournaments(CONFIG.CURRENT_SOURCE);
+    console.log("Enhanced tournaments:", enhancedTournaments); // New log
 
     // Filter tournaments based on enrollment
     const openTournaments = enhancedTournaments.filter((t) => !t.isUserEnrolled);
     const enrolledTournaments = enhancedTournaments.filter((t) => t.isUserEnrolled);
+    console.log("Open tournaments:", openTournaments); // New log
+    console.log("Enrolled tournaments:", enrolledTournaments); // New log
 
     // Add event listener for create tournament button
     createTournamentButton.addEventListener("click", () => {

@@ -92,32 +92,11 @@ def get_game_modes(request):
 
 @csrf_exempt
 def tournaments(request):
-    """
-    GET: List all tournaments
-    POST: Create a tournament
-    """
+    """GET: List all tournaments"""
     if request.method == "GET":
         tournament_list = Tournament.objects.all()
         data = [build_tournament_data(t) for t in tournament_list]
         return JsonResponse({"tournaments": data})
-
-    elif request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            tournament = Tournament.objects.create(
-                name=data["name"],
-                description=data["description"],
-                start_registration=data["start_registration"],
-                end_registration=data["end_registration"],
-                type=data["type"],
-                start_mode=data["start_mode"],
-            )
-            return JsonResponse({"id": tournament.id, "message": "Tournament created successfully!"})
-        except (json.JSONDecodeError, KeyError) as e:
-            return JsonResponse({"error": "Invalid data format"}, status=400)
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
-
     return JsonResponse({"error": "Method not allowed"}, status=405)
 
 

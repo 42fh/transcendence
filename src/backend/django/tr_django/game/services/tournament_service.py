@@ -7,7 +7,7 @@ def build_tournament_data(tournament):
         "startingDate": tournament.start_date.isoformat() if tournament.start_date else None,
         "closingRegistrationDate": tournament.end_registration.isoformat(),
         "isTimetableAvailable": bool(tournament.games.exists()),
-        "participants": list(tournament.participants.values_list("display_name", flat=True)),
+        "participants": list(tournament.participants.values_list("user__username", flat=True)),
         "type": tournament.type.replace("_", " "),
         "timetable": build_timetable_data(tournament) if tournament.games.exists() else None,
     }

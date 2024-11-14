@@ -15,6 +15,7 @@ export async function fetchTournaments(source = CONFIG.CURRENT_SOURCE) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
+        console.log("Raw tournaments from API:", data.tournaments);
         rawTournaments = data.tournaments;
         break;
 
@@ -36,6 +37,11 @@ export async function fetchTournaments(source = CONFIG.CURRENT_SOURCE) {
 
 // Enhance a single tournament with derived data
 export function enhanceTournament(tournament) {
+  const username = localStorage.getItem("username");
+  console.log(`Checking enrollment for tournament ${tournament.name}:`); // New log
+  console.log("Current username:", username); // New log
+  console.log("Tournament participants:", tournament.participants); // New log
+
   return {
     ...tournament,
     isRegistrationOpen: checkRegistrationOpen(tournament.closingRegistrationDate),
@@ -68,20 +74,19 @@ function checkUserEnrollment(participants, username) {
   return participants.includes(username);
 }
 
-export async function handleTournamentAction(tournamentId, isEnrolled) {
+export async function handleTournamentAction(tournament, isEnrolled) {
   try {
     const username = localStorage.getItem("username");
     if (!username) {
       throw new Error("User not logged in");
     }
 
-    switch (CONFIG.DATA_SOURCE) {
+    switch (CONFIG.CURRENT_SOURCE) {
       case CONFIG.DATA_SOURCE.API:
-        const response = await fetch(`${CONFIG.API_BASE_URL}/game/tournaments/${tournamentId}/enrollment/`, {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/api/game/tournaments/${tournament.id}/enrollment/`, {
           method: isEnrolled ? "DELETE" : "POST",
           headers: {
             "Content-Type": "application/json",
-            // Add any auth headers if needed
           },
         });
 
@@ -93,16 +98,16 @@ export async function handleTournamentAction(tournamentId, isEnrolled) {
 
       case CONFIG.DATA_SOURCE.JS:
         // Existing JS mock implementation
-        const tournament = tournaments.find((t) => t.id === tournamentId);
-        if (!tournament) {
+        const foundTournament = tournaments.find((t) => t.id === tournament.id);
+        if (!foundTournament) {
           throw new Error("Tournament not found");
         }
 
         if (isEnrolled) {
-          tournament.participants = tournament.participants.filter((p) => p !== username);
+          foundTournament.participants = foundTournament.participants.filter((p) => p !== username);
         } else {
-          if (!tournament.participants.includes(username)) {
-            tournament.participants.push(username);
+          if (!foundTournament.participants.includes(username)) {
+            foundTournament.participants.push(username);
           }
         }
         break;
