@@ -104,22 +104,11 @@ def tournaments(request):
 def tournament(request, tournament_id):
     """
     GET: Retrieve a specific tournament
-    PUT: Update a specific tournament
-    DELETE: Delete a specific tournament
     """
     if request.method == "GET":
         try:
             tournament = Tournament.objects.get(id=tournament_id)
-            data = {
-                "id": tournament.id,
-                "name": tournament.name,
-                "description": tournament.description,
-                "start_registration": tournament.start_registration.isoformat(),
-                "end_registration": tournament.end_registration.isoformat(),
-                "type": tournament.type,
-                "start_mode": tournament.start_mode,
-                "participants": list(tournament.participants.values_list("display_name", flat=True)),
-            }
+            data = build_tournament_data(tournament)
             return JsonResponse(data)
         except Tournament.DoesNotExist:
             return JsonResponse({"error": "Tournament not found"}, status=404)
