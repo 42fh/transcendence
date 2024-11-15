@@ -1,5 +1,3 @@
 from .PolygonPongGame import PolygonPongGame
 
-__all__ = [ 'PolygonPongGame']
-
-
+__all__ = ["PolygonPongGame"]

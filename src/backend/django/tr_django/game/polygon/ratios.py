@@ -1,44 +1,49 @@
 import random
 
+
 def _calculate_base_deformation(self):
     """Calculate deformation based on game mode"""
     player_density = self.num_paddles / self.num_sides
-    
-    if self.game_mode == 'irregular':
+
+    if self.game_mode == "irregular":
         # Original balanced ratios
         if self.num_sides == 4:
-            return 4/3 if self.num_paddles == 2 else 1.0
+            return 4 / 3 if self.num_paddles == 2 else 1.0
         else:
             if player_density <= 0.5:
                 return 1.0 + (player_density * 0.5)
             else:
                 return 1.25 - (player_density * 0.25)
-                
-    elif self.game_mode == 'crazy':
+
+    elif self.game_mode == "crazy":
         # Extreme deformation
         if self.num_sides == 4:
-            return 4/3 if self.num_paddles == 2 else 1.0
+            return 4 / 3 if self.num_paddles == 2 else 1.0
         else:
             return 1.8 if player_density <= 0.5 else 1.5
-            
-    elif self.game_mode == 'star':
+
+    elif self.game_mode == "star":
         # Alternating long and short sides
         return 2.2 if player_density <= 0.3 else 1.8
-        
+
     return 1.0  # Default if mode not recognized
+
 
 def _calculate_side_ratios(self):
     """Calculate ratios based on game mode"""
     base_deform = self._calculate_base_deformation()
-    
-    if self.game_mode == 'irregular':
-        return self._calculate_regular_ratios(base_deform)  # This is now our irregular mode
-    elif self.game_mode == 'crazy':
+
+    if self.game_mode == "irregular":
+        return self._calculate_regular_ratios(
+            base_deform
+        )  # This is now our irregular mode
+    elif self.game_mode == "crazy":
         return self._calculate_crazy_ratios(base_deform)
-    elif self.game_mode == 'star':
+    elif self.game_mode == "star":
         return self._calculate_star_ratios(base_deform)
     else:
         return self._calculate_regular_ratios(base_deform)  # Default
+
 
 def _calculate_regular_ratios(self, base_deform):
     """Original balanced ratio calculation"""
@@ -77,26 +82,28 @@ def _calculate_regular_ratios(self, base_deform):
 
     return ratios, angle_adjustments
 
+
 def _calculate_crazy_ratios(self, base_deform):
     """Extreme ratio calculation with sharp transitions"""
     ratios = [0.6] * self.num_sides  # Compressed non-player sides
     angle_adjustments = [0] * self.num_sides
-    
+
     # Set player sides
     for side in self.active_sides:
         ratios[side] = base_deform
         if (side + 1) % self.num_sides not in self.active_sides:
             angle_adjustments[side] = random.uniform(-0.26, 0.26)
-    
+
     return ratios, angle_adjustments
+
 
 def _calculate_star_ratios(self, base_deform):
     """Star-like shape with alternating long and short sides"""
     ratios = [0.4 if i % 2 == 0 else 1.2 for i in range(self.num_sides)]
     angle_adjustments = [0] * self.num_sides
-    
+
     # Ensure player sides are equal
     for side in self.active_sides:
         ratios[side] = base_deform
-        
+
     return ratios, angle_adjustments

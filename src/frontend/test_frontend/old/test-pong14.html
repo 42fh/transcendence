@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Improved Pong Test Interface</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Improved Pong Test Interface</h1>
+
+        <form id="gameForm" class="space-y-6">
+            <!-- Basic Info Section -->
+            <div class="form-section">
+                <h2>Basic Game Info</h2>
+                <div class="form-group">
+                    <label for="gameId">Game ID</label>
+                    <input type="text" id="gameId" placeholder="Enter game ID or leave empty for new game">
+                </div>
+                <div class="form-group">
+                    <label for="playerId">Player ID</label>
+                    <input type="text" id="playerId" placeholder="Enter player ID or leave empty for random">
+                </div>
+            </div>
+
+            <!-- Settings Toggle -->
+            <div class="form-group center">
+                <button type="button" id="toggleSettings" class="secondary-button">Show Settings ▶</button>
+            </div>
+
+            <!-- Advanced Settings Section -->
+            <div id="advancedSettings" class="form-section">
+                <h2>Game Settings</h2>
+                <div class="form-group">
+                    <label for="gameType">Game Type</label>
+                    <select id="gameType">
+                        <option value="polygon">Polygon Pong</option>
+                        <option value="circular">Circular Pong</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="numPlayers">Number of Players</label>
+                    <input type="number" id="numPlayers" min="2" max="8" value="2">
+                </div>
+
+                <div class="form-group polygon-only">
+                    <label for="numSides">Number of Sides</label>
+                    <input type="number" id="numSides" min="3" max="12" value="4">
+                </div>
+
+                <div class="form-group">
+                    <label for="numBalls">Number of Balls</label>
+                    <input type="number" id="numBalls" min="1" max="4" value="1">
+                </div>
+
+                <div class="form-group">
+                    <label for="shape">Shape Mode</label>
+                    <select id="shape">
+                        <option value="regular">Regular</option>
+                        <option value="star">Star</option>
+                        <option value="crazy">Crazy</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="scoreMode">Score Mode</label>
+                    <select id="scoreMode">
+                        <option value="classic">Classic (First to 11)</option>
+                        <option value="timed">Timed (5 minutes)</option>
+                        <option value="survival">Survival</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="debugMode" class="checkbox-label">
+                        <input type="checkbox" id="debugMode">
+                        Enable Debug Mode
+                    </label>
+                </div>
+            </div>
+
+            <!-- Start Button -->
+            <div class="form-group center">
+                <button type="submit" class="primary-button">Start Game</button>
+            </div>
+        </form>
+
+        <!-- Status Message -->
+        <div id="status" class="status" style="display: none;"></div>
+
+        <!-- Game Area -->
+        <div id="gameArea" style="display: none;">
+            <h2>Game Running</h2>
+            
+            <div id="gameCanvas">
+                <svg id="pongSvg" viewBox="0 0 300 300"></svg>
+            </div>
+
+            <div id="scoreDisplay"></div>
+
+            <div class="controls-info">
+                <h3>Controls:</h3>
+                <ul>
+                    <li>Left Arrow / A: Move paddle left</li>
+                    <li>Right Arrow / D: Move paddle right</li>
+                </ul>
+            </div>
+
+            <div id="debugPanel" class="debug-panel" style="display: none;">
+                <h3>Debug Information</h3>
+                <pre id="debugInfo"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="improved_interface.js"></script>
+</body>
+</html>

@@ -3,31 +3,26 @@ def add_game_logic(cls):
     Decorator that adds methods for handling the game_logic
     """
 
-    
-
-    
-
-
-
     from handle_collision import (
         handle_paddle,
         handle_wall,
         _get_active_paddle_index,
         handle_tunneling,
-        handle_parallel
+        handle_parallel,
     )
-    
+
     methods = {
-        'handle_paddle': handle_paddle,
-        'handle_wall': handle_wall,
-        '_get_active_paddle_index': _get_active_paddle_index,
-        'handle_tunneling': handle_tunneling,
-        'handle_parallel': handle_parallel
+        "handle_paddle": handle_paddle,
+        "handle_wall": handle_wall,
+        "_get_active_paddle_index": _get_active_paddle_index,
+        "handle_tunneling": handle_tunneling,
+        "handle_parallel": handle_parallel,
     }
-    
+
     for name, method in methods.items():
         setattr(cls, name, method)
     return cls
+
 
 def add_collision_handlers(cls):
     """
@@ -39,20 +34,21 @@ def add_collision_handlers(cls):
         handle_wall,
         _get_active_paddle_index,
         handle_tunneling,
-        handle_parallel
+        handle_parallel,
     )
-    
+
     methods = {
-        'handle_paddle': handle_paddle,
-        'handle_wall': handle_wall,
-        '_get_active_paddle_index': _get_active_paddle_index,
-        'handle_tunneling': handle_tunneling,
-        'handle_parallel': handle_parallel
+        "handle_paddle": handle_paddle,
+        "handle_wall": handle_wall,
+        "_get_active_paddle_index": _get_active_paddle_index,
+        "handle_tunneling": handle_tunneling,
+        "handle_parallel": handle_parallel,
     }
-    
+
     for name, method in methods.items():
         setattr(cls, name, method)
     return cls
+
 
 def add_movement_tracking(cls):
     """
@@ -62,18 +58,19 @@ def add_movement_tracking(cls):
     from collisions_helpers import (
         initialize_ball_movements,
         update_ball_movement,
-        reset_ball_movement
+        reset_ball_movement,
     )
-    
+
     methods = {
-        'initialize_ball_movements': initialize_ball_movements,
-        'update_ball_movement': update_ball_movement,
-        'reset_ball_movement': reset_ball_movement
+        "initialize_ball_movements": initialize_ball_movements,
+        "update_ball_movement": update_ball_movement,
+        "reset_ball_movement": reset_ball_movement,
     }
-    
+
     for name, method in methods.items():
         setattr(cls, name, method)
     return cls
+
 
 def add_polygon_setup(cls):
     """
@@ -83,18 +80,19 @@ def add_polygon_setup(cls):
     from setup import (
         calculate_side_normals,
         calculate_polygon_vertices,
-        _get_player_side_indices
+        _get_player_side_indices,
     )
-    
+
     methods = {
-        'calculate_side_normals': calculate_side_normals,
-        'calculate_polygon_vertices': calculate_polygon_vertices,
-        '_get_player_side_indices': _get_player_side_indices
+        "calculate_side_normals": calculate_side_normals,
+        "calculate_polygon_vertices": calculate_polygon_vertices,
+        "_get_player_side_indices": _get_player_side_indices,
     }
-    
+
     for name, method in methods.items():
         setattr(cls, name, method)
     return cls
+
 
 def add_ratio_calculations(cls):
     """
@@ -106,20 +104,21 @@ def add_ratio_calculations(cls):
         _calculate_side_ratios,
         _calculate_regular_ratios,
         _calculate_crazy_ratios,
-        _calculate_star_ratios
+        _calculate_star_ratios,
     )
-    
+
     methods = {
-        '_calculate_base_deformation': _calculate_base_deformation,
-        '_calculate_side_ratios': _calculate_side_ratios,
-        '_calculate_regular_ratios': _calculate_regular_ratios,
-        '_calculate_crazy_ratios': _calculate_crazy_ratios,
-        '_calculate_star_ratios': _calculate_star_ratios
+        "_calculate_base_deformation": _calculate_base_deformation,
+        "_calculate_side_ratios": _calculate_side_ratios,
+        "_calculate_regular_ratios": _calculate_regular_ratios,
+        "_calculate_crazy_ratios": _calculate_crazy_ratios,
+        "_calculate_star_ratios": _calculate_star_ratios,
     }
-    
+
     for name, method in methods.items():
         setattr(cls, name, method)
     return cls
+
 
 def add_collision_detection(cls):
     """
@@ -129,18 +128,19 @@ def add_collision_detection(cls):
     from paddle_or_wall import (
         _calculate_relative_position,
         _calculate_paddle_collision,
-        _find_nearest_collision
+        _find_nearest_collision,
     )
-    
+
     methods = {
-        '_calculate_relative_position': _calculate_relative_position,
-        '_calculate_paddle_collision': _calculate_paddle_collision,
-        '_find_nearest_collision': _find_nearest_collision
+        "_calculate_relative_position": _calculate_relative_position,
+        "_calculate_paddle_collision": _calculate_paddle_collision,
+        "_find_nearest_collision": _find_nearest_collision,
     }
-    
+
     for name, method in methods.items():
         setattr(cls, name, method)
     return cls
+
 
 def add_helper_methods(cls):
     """
@@ -148,19 +148,15 @@ def add_helper_methods(cls):
     Includes vector normalization, paddle checking, and ball reset extensions.
     """
     from notused import _normalize_vector
-    from noclue import (
-        check_paddle,
-        reset_ball,
-        _calculate_projection
-    )
-    
+    from noclue import check_paddle, reset_ball, _calculate_projection
+
     methods = {
-        '_normalize_vector': _normalize_vector,
-        'check_paddle': check_paddle,
-        'reset_ball': reset_ball,
-        '_calculate_projection': _calculate_projection
+        "_normalize_vector": _normalize_vector,
+        "check_paddle": check_paddle,
+        "reset_ball": reset_ball,
+        "_calculate_projection": _calculate_projection,
     }
-    
+
     for name, method in methods.items():
         setattr(cls, name, method)
     return cls

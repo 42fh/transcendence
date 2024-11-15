@@ -3,9 +3,9 @@ import { CONFIG } from './config.js';
 import { GameAPI } from './api.js';
 import { GameState } from './gamestate.js';
 import { GameWebSocket } from './websocket.js';
-import { PolygonRenderer } from './pong-renderers.js'
-import {  CircularRenderer} from './pong-renderers.js'
-
+// gameController.js
+import { PolygonRenderer } from './pong-renderers.js';
+import { CircularRenderer } from './pong-renderers.js';
 
 
 export class GameController {

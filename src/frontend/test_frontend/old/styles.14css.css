@@ -1,0 +1,174 @@
+/* Responsive layout containers */
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: #f5f5f5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.game-container {
+    display: none;
+    max-width: 100%;
+    height: calc(100vh - 40px);
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.setup-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Responsive game layout */
+.game-layout {
+    display: flex;
+    gap: 20px;
+    height: 100%;
+    flex-wrap: wrap;
+}
+
+.game-main {
+    flex: 1;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: 100%;
+}
+
+.game-sidebar {
+    width: 320px;
+    min-width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-height: 100%;
+    overflow-y: auto;
+}
+
+/* Responsive game canvas */
+.game-canvas-container {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#pongSvg {
+    width: 100%;
+    height: 100%;
+    max-width: min(100%, 100vh - 200px);
+    max-height: min(100%, 100vh - 200px);
+    background: #fafafa;
+    border-radius: 4px;
+}
+
+/* Panel adjustments for responsive layout */
+.panel {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    flex-shrink: 0;
+}
+
+/* Event log panel */
+.event-log {
+    height: 150px;
+    min-height: 100px;
+    max-height: 200px;
+    overflow-y: auto;
+    font-family: monospace;
+    font-size: 14px;
+}
+
+/* Error log adjustments */
+.error-log {
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 1024px) {
+    .game-layout {
+        flex-direction: column;
+    }
+
+    .game-sidebar {
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .panel {
+        flex: 1;
+        min-width: 280px;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    .game-container {
+        padding: 10px;
+    }
+
+    .game-layout {
+        gap: 10px;
+    }
+
+    .game-canvas-container {
+        padding: 10px;
+    }
+
+    .panel {
+        padding: 10px;
+    }
+}
+
+/* Score display adjustments */
+.score-display {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.score-item {
+    flex: 1;
+    min-width: 120px;
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    text-align: center;
+}
+
+/* Game info adjustments */
+.game-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+}
+
+.game-info-item {
+    background: #f8f9fa;
+    padding: 8px;
+    border-radius: 4px;
+}

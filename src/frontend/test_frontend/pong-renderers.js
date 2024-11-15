@@ -1,7 +1,7 @@
 // Base renderer with shared functionality
 // Add to BasePongRenderer class
 
-class BasePongRenderer {
+export class BasePongRenderer {
     constructor(config = {
         viewboxSize: 300,
         scale: 75,
