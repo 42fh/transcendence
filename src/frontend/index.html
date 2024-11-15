@@ -100,7 +100,7 @@
             <div class="net-segment white"></div>
           </div>
           <div class="button-wrapper">
-            <button id="chat" onclick="window.location.href='/chat.html'">CHAT</button>
+            <button id="chats">CHATS</button>
           </div>
         </div>
         <div class="button-wrapper threejs-wrapper">
@@ -317,6 +317,30 @@
         </div>
         <div class="tournament-timetable-game-result"></div>
         <div class="tournament-timetable-game-status"></div>
+      </div>
+    </template>
+
+
+    <!-- Chat Template -->
+    <template id="chat-template">
+      <div class="chat-page">
+        <h3>Hello, <span id="current-username-display"></span>!</h3>
+        <input type="hidden" id="current-username" />
+              <div class="chat-container">
+          <div class="user-list">
+            <h3>Users</h3>
+            <div id="error-container"></div>
+            <ul id="users-list"></ul>
+          </div>
+          
+          <div class="chat-window">
+            <div id="chat-messages"></div>
+            <div class="input-area">
+              <input type="text" id="chat-message-input" placeholder="Type your message..." />
+              <button id="chat-message-submit">Send</button>
+            </div>
+          </div>
+        </div>
       </div>
     </template>
 

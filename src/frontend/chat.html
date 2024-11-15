@@ -56,18 +56,52 @@
 
         async function initializeChat() {
             try {
-                const response = await fetch('/api/chat/get_username/');
-                if (!response.ok) throw new Error('Failed to get username');
+                // First check if we have a stored username
+                const storedUsername = localStorage.getItem("username");
+                if (!storedUsername) {
+                throw new Error("Not logged in");
+                }
+
+                console.log("Fetching username from server...");
+                const response = await fetch("/api/chat/get_username/");
+                console.log("Response status:", response.status);
+
+                if (response.status === 401 || response.status === 403) {
+                throw new Error("Not authenticated");
+                }
+                if (!response.ok) throw new Error("Failed to get username");
+
                 const data = await response.json();
-                currentUsername = data.username;
-                csrfToken = data.csrfToken;
-                document.getElementById('current-username').value = currentUsername;
-                document.querySelector('span#current-username').textContent = currentUsername;
-                await loadUserList();
+                console.log("Fetched username:", data.username);
+                this.state.currentUsername = data.username;
+                this.state.csrfToken = data.csrfToken;
+
+                // Update username display
+                const usernameDisplay = document.getElementById(
+                "current-username-display"
+                );
+                const usernameInput = document.getElementById("current-username");
+
+                if (usernameDisplay) {
+                usernameDisplay.textContent = this.state.currentUsername;
+                }
+
+                if (usernameInput) {
+                usernameInput.value = this.state.currentUsername;
+                }
+
+                await this.loadUserList();
             } catch (error) {
-                showError('Failed to initialize chat: ' + error.message);
+                this.showError(`Failed to initialize chat: ${error.message}`);
+                // Redirect to login if not authenticated
+                if (
+                error.message === "Not authenticated" ||
+                error.message === "Not logged in"
+                ) {
+                window.location.href = "/accounts/login/";
+                }
             }
-        }
+            }
 
         async function loadUserList() {
             try {
