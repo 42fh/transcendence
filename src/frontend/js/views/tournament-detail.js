@@ -111,7 +111,7 @@ function setupEnrolledState(timetableStatus, actionButton, tournament) {
   actionButton.textContent = "LEAVE";
   timetableStatus.textContent = "You're in! 🎮";
   actionButton.addEventListener("click", () => {
-    handleTournamentAction(tournament.name, true);
+    handleTournamentAction(tournament, true);
   });
 }
 
@@ -119,7 +119,7 @@ function setupUnenrolledState(timetableStatus, actionButton, tournament) {
   actionButton.textContent = "JOIN";
   timetableStatus.textContent = "Join the tournament! 🏆";
   actionButton.addEventListener("click", () => {
-    handleTournamentAction(tournament.name, false);
+    handleTournamentAction(tournament, false);
   });
 }
 

@@ -2,31 +2,33 @@ import { CONFIG } from "../config/constants.js";
 import { tournaments } from "../config/tournaments.js";
 import { showToast } from "../utils/toast.js";
 import { loadTournamentsPage } from "../views/tournaments.js";
-
+import { updateGlobalTournaments } from "../store/globals.js";
 // Fetch and enhance tournaments
-export async function fetchTournaments(source = CONFIG.DATA_SOURCE) {
+export async function fetchTournaments(source = CONFIG.CURRENT_SOURCE) {
   try {
     let rawTournaments;
 
     switch (source) {
-      case "API":
-        // const response = await fetch(`${CONFIG.API_BASE_URL}`);
-        // rawTournaments = await response.json();
-        throw new Error("API not implemented yet");
-
-      case "JS":
-        rawTournaments = tournaments;
+      case CONFIG.DATA_SOURCE.API:
+        const response = await fetch(`${CONFIG.API_BASE_URL}${CONFIG.API_ENDPOINTS.TOURNAMENTS}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log("Raw tournaments from API:", data.tournaments);
+        rawTournaments = data.tournaments;
         break;
 
-      case "JSON":
-        rawTournaments = tournamentsData;
+      case CONFIG.DATA_SOURCE.JS:
+        rawTournaments = tournaments;
         break;
 
       default:
         throw new Error(`Invalid source specified: ${source}`);
     }
-
-    return rawTournaments.map(enhanceTournament);
+    const enhancedTournaments = rawTournaments.map(enhanceTournament);
+    updateGlobalTournaments(enhancedTournaments);
+    return enhancedTournaments;
   } catch (error) {
     console.error("Error fetching tournaments:", error);
     throw error;
@@ -35,6 +37,11 @@ export async function fetchTournaments(source = CONFIG.DATA_SOURCE) {
 
 // Enhance a single tournament with derived data
 export function enhanceTournament(tournament) {
+  const username = localStorage.getItem("username");
+  console.log(`Checking enrollment for tournament ${tournament.name}:`); // New log
+  console.log("Current username:", username); // New log
+  console.log("Tournament participants:", tournament.participants); // New log
+
   return {
     ...tournament,
     isRegistrationOpen: checkRegistrationOpen(tournament.closingRegistrationDate),
@@ -52,7 +59,7 @@ function calculateTimeLeft(closingDate) {
   const closing = new Date(closingDate);
   const diff = closing - now;
 
-  if (diff <= 0) return "Now";
+  if (diff <= 0) return "<0 m";
 
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -67,52 +74,49 @@ function checkUserEnrollment(participants, username) {
   return participants.includes(username);
 }
 
-export async function handleTournamentAction(tournamentName, isEnrolled) {
+export async function handleTournamentAction(tournament, isEnrolled) {
   try {
     const username = localStorage.getItem("username");
     if (!username) {
       throw new Error("User not logged in");
     }
 
-    switch (CONFIG.DATA_SOURCE) {
-      case "API":
-        // Future API call
-        /*
-				  await fetch(`${CONFIG.API_BASE_URL}/enroll`, {
-					  method: 'POST',
-					  headers: { 'Content-Type': 'application/json' },
-					  body: JSON.stringify({ 
-						  tournamentName,
-						  action: isEnrolled ? 'leave' : 'join'
-					  })
-				  });
-				  */
-        throw new Error("API not implemented yet");
+    switch (CONFIG.CURRENT_SOURCE) {
+      case CONFIG.DATA_SOURCE.API:
+        const response = await fetch(`${CONFIG.API_BASE_URL}/api/game/tournaments/${tournament.id}/enrollment/`, {
+          method: isEnrolled ? "DELETE" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
-      case "JS":
-        // Update our mutable JavaScript array
-        const tournament = tournaments.find((t) => t.name === tournamentName);
-        if (!tournament) {
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || "Failed to update enrollment");
+        }
+        break;
+
+      case CONFIG.DATA_SOURCE.JS:
+        // Existing JS mock implementation
+        const foundTournament = tournaments.find((t) => t.id === tournament.id);
+        if (!foundTournament) {
           throw new Error("Tournament not found");
         }
 
         if (isEnrolled) {
-          tournament.participants = tournament.participants.filter((p) => p !== username);
+          foundTournament.participants = foundTournament.participants.filter((p) => p !== username);
         } else {
-          if (!tournament.participants.includes(username)) {
-            tournament.participants.push(username);
+          if (!foundTournament.participants.includes(username)) {
+            foundTournament.participants.push(username);
           }
         }
         break;
-
-      case "JSON":
-        throw new Error("Cannot modify read-only JSON data");
 
       default:
         throw new Error(`Invalid data source: ${CONFIG.DATA_SOURCE}`);
     }
 
-    showToast(`Successfully ${isEnrolled ? "left" : "joined"} ${tournamentName}!`);
+    showToast(`Successfully ${isEnrolled ? "left" : "joined"} tournament!`);
     await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for toast
     await loadTournamentsPage(); // Reload the page to show changes
   } catch (error) {
@@ -123,26 +127,23 @@ export async function handleTournamentAction(tournamentName, isEnrolled) {
 
 export async function handleCreateTournamentSubmit(tournamentData) {
   try {
-    switch (CONFIG.DATA_SOURCE) {
-      case "API":
-        // Future API call
-        /*
-					const response = await fetch(`${CONFIG.API_BASE_URL}/tournaments`, {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-							// Add any auth headers if needed
-						},
-						body: JSON.stringify(tournamentData)
-					});
-	
-					if (!response.ok) {
-						throw new Error('Failed to create tournament');
-					}
-					*/
-        throw new Error("API not implemented yet");
+    switch (CONFIG.CURRENT_SOURCE) {
+      case CONFIG.DATA_SOURCE.API:
+        const response = await fetch(`${CONFIG.API_BASE_URL}/api/game/tournaments/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(tournamentData),
+        });
 
-      case "JS":
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || "Failed to create tournament");
+        }
+        break;
+
+      case CONFIG.DATA_SOURCE.JS:
         // Add to our mutable JavaScript array
         const newTournament = {
           name: tournamentData.name,
@@ -165,7 +166,7 @@ export async function handleCreateTournamentSubmit(tournamentData) {
         throw new Error("Cannot modify read-only JSON data");
 
       default:
-        throw new Error(`Invalid data source: ${CONFIG.DATA_SOURCE}`);
+        throw new Error(`Invalid data source: ${CONFIG.CURRENT_SOURCE}`);
     }
 
     showToast("Tournament created successfully!");
