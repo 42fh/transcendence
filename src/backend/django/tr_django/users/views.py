@@ -9,6 +9,8 @@ from django.contrib.auth.hashers import make_password
 from django.utils.decorators import method_decorator
 from django.views import View
 from users.models import CustomUser
+from django.db.models import Q
+from game.models import Player
 
 logger = logging.getLogger(__name__)
 
@@ -136,3 +138,95 @@ class DeleteUserView(View):
         logout(request)
 
         return JsonResponse({"success": True, "message": "User account deactivated."})
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class UserListView(View):
+    """View for listing users with pagination and search functionality"""
+
+    def get(self, request):
+        search = request.GET.get("search", "")
+        page = int(request.GET.get("page", 1))
+        per_page = int(request.GET.get("per_page", 10))
+
+        # Filter users by username or email
+        users = CustomUser.objects.filter(Q(username__icontains=search) | Q(email__icontains=search))
+
+        # Calculate pagination
+        start = (page - 1) * per_page
+        end = start + per_page
+        total_users = users.count()
+        users_page = users[start:end]
+
+        # Build response with additional fields
+        users_data = []
+        for user in users_page:
+            try:
+                player = user.player  # Get associated Player instance
+
+                # Get recent matches (both single and tournament games)
+                recent_matches = []
+                player_stats = player.playergamestats_set.select_related("single_game", "tournament_game").order_by(
+                    "-joined_at"
+                )[
+                    :5
+                ]  # Get last 5 matches
+
+                for stat in player_stats:
+                    game = stat.game  # This uses the property we defined in PlayerGameStats
+                    if game:
+                        match_data = {
+                            "game_id": str(game.id),
+                            "date": game.start_date,
+                            "score": stat.score,
+                            "won": game.winner == player if game.winner else None,
+                            "game_type": "tournament" if stat.tournament_game else "single",
+                            "opponent": None,  # We'll set this next
+                        }
+
+                        # Get opponent (for 2-player games)
+                        other_stat = game.playergamestats_set.exclude(player=player).first()
+                        if other_stat:
+                            match_data["opponent"] = {
+                                "username": other_stat.player.username,
+                                "display_name": other_stat.player.get_display_name,
+                                "score": other_stat.score,
+                            }
+
+                        recent_matches.append(match_data)
+
+                user_data = {
+                    "id": str(user.id),  # Convert UUID to string
+                    "username": user.username,
+                    "email": user.email,
+                    "avatar": user.avatar.url if user.avatar else None,
+                    "bio": user.bio,
+                    "telephone_number": user.telephone_number,
+                    "pronoun": user.pronoun,
+                    "is_active": user.is_active,
+                    "visibility_online_status": user.visibility_online_status,
+                    "visibility_user_profile": user.visibility_user_profile,
+                    # Game stats from Player model
+                    "stats": {
+                        "wins": player.wins,
+                        "losses": player.losses,
+                        "win_ratio": player.win_ratio(),
+                        "display_name": player.get_display_name,
+                    },
+                    "recent_matches": recent_matches,
+                }
+                users_data.append(user_data)
+            except Player.DoesNotExist:
+                continue
+
+        return JsonResponse(
+            {
+                "users": users_data,
+                "pagination": {
+                    "total": total_users,
+                    "page": page,
+                    "per_page": per_page,
+                    "total_pages": (total_users + per_page - 1) // per_page,
+                },
+            }
+        )
