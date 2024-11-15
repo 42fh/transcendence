@@ -6,14 +6,14 @@ import { loadHomePage } from "./home.js";
 export function initAuthListeners() {
   document.getElementById("login-button").addEventListener("click", () => {
     fillModalContent("login-template", {
-      submitHandler: (event) => handleFormSubmitSignupLogin(event, "/api/users/login/"),
+      submitHandler: (event) => handleFormSubmitSignupLogin(event, "/api/users/auth/login/"),
     });
     openModal();
   });
 
   document.getElementById("signup-button").addEventListener("click", () => {
     fillModalContent("signup-template", {
-      submitHandler: (event) => handleFormSubmitSignupLogin(event, "/api/users/signup/"),
+      submitHandler: (event) => handleFormSubmitSignupLogin(event, "/api/users/auth/signup/"),
     });
     openModal();
   });
@@ -100,7 +100,7 @@ async function handleFormSubmitSignupLogin(event, endpoint) {
 export async function handleLogout() {
   console.log("Attempting to log out...");
   try {
-    const response = await fetch("/api/users/logout/", {
+    const response = await fetch("/api/users/auth/logout/", {
       method: "POST",
       cache: "no-store",
     });
