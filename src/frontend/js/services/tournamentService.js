@@ -127,13 +127,12 @@ export async function handleTournamentAction(tournament, isEnrolled) {
 
 export async function handleCreateTournamentSubmit(tournamentData) {
   try {
-    switch (CONFIG.DATA_SOURCE) {
+    switch (CONFIG.CURRENT_SOURCE) {
       case CONFIG.DATA_SOURCE.API:
-        const response = await fetch(`${CONFIG.API_BASE_URL}/game/tournaments/`, {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/api/game/tournaments/`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            // Add any auth headers if needed
           },
           body: JSON.stringify(tournamentData),
         });
@@ -144,7 +143,7 @@ export async function handleCreateTournamentSubmit(tournamentData) {
         }
         break;
 
-      case "JS":
+      case CONFIG.DATA_SOURCE.JS:
         // Add to our mutable JavaScript array
         const newTournament = {
           name: tournamentData.name,
@@ -167,7 +166,7 @@ export async function handleCreateTournamentSubmit(tournamentData) {
         throw new Error("Cannot modify read-only JSON data");
 
       default:
-        throw new Error(`Invalid data source: ${CONFIG.DATA_SOURCE}`);
+        throw new Error(`Invalid data source: ${CONFIG.CURRENT_SOURCE}`);
     }
 
     showToast("Tournament created successfully!");
