@@ -175,6 +175,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
             timestamp = await self.save_message(message)
 
+            # Send message to the group
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
@@ -182,6 +183,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     "message": message,
                     "username": self.username,
                     "timestamp": timestamp.isoformat(),
+                    "requires_notification": True,
                 },
             )
 
@@ -209,6 +211,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     "message": event["message"],
                     "username": event["username"],
                     "timestamp": event["timestamp"],
+                    "requires_notification": event.get("requires_notification", False),
                 }
             )
         )

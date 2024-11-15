@@ -56,6 +56,7 @@
 
         async function initializeChat() {
             try {
+                requestNotificationPermission();
                 const response = await fetch('/api/chat/get_username/');
                 if (!response.ok) throw new Error('Failed to get username');
                 const data = await response.json();
@@ -182,10 +183,27 @@
 
                 window.chatSocket.onmessage = function (e) {
                     const data = JSON.parse(e.data);
+                    console.log("WebSocket message received:", data);  // Debug log
+
                     if (data.type === 'chat_message') {
                         const messageType = data.username === 'System' ? 'system' :
                                             data.username === currentUsername ? 'self' : 'other';
                         addMessageToChat(data.username, data.message, messageType);
+                        
+                        // Debug logs for notification conditions
+                        console.log("Message conditions:", {
+                            isOtherMessage: messageType === 'other',
+                            requiresNotification: data.requires_notification,
+                            windowFocused: document.hasFocus(),
+                            shouldNotify: messageType === 'other' && data.requires_notification && !document.hasFocus()
+                        });
+
+                        if (messageType === 'other' && data.requires_notification && !document.hasFocus()) {
+                            showNotification(`New message from ${data.username}`, {
+                                body: data.message,
+                                tag: 'chat-message'
+                            });
+                        }
                     } else if (data.type === 'message_history' && !messageHistoryLoaded) {
                         data.messages.forEach(msg => {
                             const messageType = msg.username === currentUsername ? 'self' : 'other';
@@ -276,7 +294,92 @@
             }
         }
 
+        function requestNotificationPermission() {
+            console.log("Checking notification support...");
+            
+            if (!("Notification" in window)) {
+                console.log("❌ This browser does not support notifications");
+                return;
+            }
+
+            console.log("Current notification permission:", Notification.permission);
+            
+            if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+                Notification.requestPermission().then(permission => {
+                    console.log("👉 Permission response:", permission);
+                    if (permission === "granted") {
+                        console.log("✅ Notification permission granted");
+                    }
+                });
+            }
+        }
+
+        function showNotification(title, options = {}) {
+            console.log("Attempting to show notification:", { title, options });
+            
+            if (!("Notification" in window)) {
+                console.log("❌ Cannot show notification: Browser doesn't support notifications");
+                return;
+            }
+            
+            if (Notification.permission !== "granted") {
+                console.log("❌ Cannot show notification: Permission not granted");
+                return;
+            }
+
+            // Default options
+            const defaultOptions = {
+                icon: '/static/images/chat-icon.png',
+                silent: false,
+                body: options.body || 'New message received'
+            };
+
+            try {
+                const notification = new Notification(title, { ...defaultOptions, ...options });
+                console.log("✅ Notification created successfully");
+                
+                notification.onclick = function() {
+                    console.log("Notification clicked");
+                    window.focus();
+                    this.close();
+                };
+            } catch (error) {
+                console.error("❌ Error creating notification:", error);
+            }
+        }
+
+        function checkNotificationStatus() {
+            console.log("Notification.permission:", Notification.permission);
+            if (Notification.permission === "granted") {
+                // Test notification with more noticeable options
+                new Notification("Test Notification", {
+                    body: "This is a test notification",
+                    icon: "https://via.placeholder.com/64", // Temporary test icon
+                    requireInteraction: true, // Makes notification stay until user interacts
+                    vibrate: [200, 100, 200], // Vibration pattern for mobile
+                    sound: true // Enable sound
+                });
+            } else {
+                // Request permission with a user gesture (button click)
+                Notification.requestPermission().then(function(permission) {
+                    console.log("Permission status after request:", permission);
+                    if (permission === "granted") {
+                        checkNotificationStatus(); // Try again if permission granted
+                    }
+                });
+            }
+        }
         initializeChat();
+
+        const testButton = document.createElement('button');
+        testButton.textContent = 'Test Notification (Click Me)';
+        testButton.onclick = checkNotificationStatus;
+        document.querySelector('.chat-container').appendChild(testButton);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("Page loaded, requesting notification permission...");
+            requestNotificationPermission();
+        });
     </script>
 </body>
 </html>
