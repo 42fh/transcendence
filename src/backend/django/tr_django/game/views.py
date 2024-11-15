@@ -6,6 +6,7 @@ from django.utils import timezone
 from .models import Tournament
 import json
 from .services.tournament_service import build_tournament_data
+from datetime import datetime
 
 
 def transcendance(request):
@@ -90,13 +91,20 @@ def get_game_modes(request):
     return JsonResponse(game_modes_list, safe=False)
 
 
+# TODO: we have a naming issue here.
 @csrf_exempt
 def all_tournaments(request):
-    """GET: List all tournaments"""
+    """
+    GET: List all tournaments
+    POST: Create a new tournament
+    """
     if request.method == "GET":
         tournament_list = Tournament.objects.all()
         data = [build_tournament_data(t) for t in tournament_list]
         return JsonResponse({"tournaments": data})
+    elif request.method == "POST":
+        return create_tournament(request)
+
     return JsonResponse({"error": "Method not allowed"}, status=405)
 
 
@@ -147,32 +155,23 @@ def create_tournament(request):
 
 
 @csrf_exempt
-def single_tournament(request, tournament_id=None):
+def single_tournament(request, tournament_id):
     """
     GET: Retrieve a specific tournament
-    POST: Create a new tournament
-    PUT: Update a tournament (full update)
-    PATCH: Update a tournament (partial update)
+    PUT: Update a tournament
     DELETE: Delete a tournament
     """
-    if request.method == "POST":
-        return create_tournament(request)
+    try:
+        tournament = Tournament.objects.get(id=tournament_id)
+    except Tournament.DoesNotExist:
+        return JsonResponse({"error": "Tournament not found"}, status=404)
 
     if request.method == "GET":
-        try:
-            tournament = Tournament.objects.get(id=tournament_id)
-            data = build_tournament_data(tournament)
-            return JsonResponse(data)
-        except Tournament.DoesNotExist:
-            return JsonResponse({"error": "Tournament not found"}, status=404)
-
-    if request.method == "PUT":
-        return JsonResponse({"message": "Full tournament update not implemented yet"}, status=501)
-
-    if request.method == "PATCH":
-        return JsonResponse({"message": "Partial tournament update not implemented yet"}, status=501)
-
-    if request.method == "DELETE":
+        data = build_tournament_data(tournament)
+        return JsonResponse(data)
+    elif request.method in ["PUT", "PATCH"]:
+        return JsonResponse({"message": "Tournament update not implemented yet"}, status=501)
+    elif request.method == "DELETE":
         return JsonResponse({"message": "Tournament deletion not implemented yet"}, status=501)
 
     return JsonResponse({"error": "Method not allowed"}, status=405)
