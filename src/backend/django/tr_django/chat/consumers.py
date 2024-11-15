@@ -3,8 +3,9 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
-from chat.models import ChatRoom, Message
+from chat.models import ChatRoom, Message, BlockedUser
 from users.models import CustomUser
+from django.db import models
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -128,7 +129,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             user1 = CustomUser.objects.get(username=usernames[0])
             user2 = CustomUser.objects.get(username=usernames[1])
 
-            chat_room = ChatRoom.objects.create_room(user1, user2)[0]
+            chat_room, created = ChatRoom.objects.create_room(user1, user2)
 
             if chat_room:
                 chat_room.last_message_at = timezone.now()
@@ -163,6 +164,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
             if not message:
                 await self.send(text_data=json.dumps({"type": "error", "message": "Empty messages are not allowed"}))
+                return
+
             # Check if either user has blocked the other
             if await self.is_blocked(self.scope["user"], other_user):
                 await self.send(
@@ -184,20 +187,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         except json.JSONDecodeError:
             await self.send(text_data=json.dumps({"type": "error", "message": "Invalid message format"}))
-                    "username": self.scope["user"].username,
-                    "timestamp": timestamp.isoformat() if timestamp else None,
-                },
-            )
         except Exception as e:
             print(f"DEBUG: Error in receive: {str(e)}")
-            await self.send(text_data=json.dumps({"type": "error", "message": "Failed to process message"}))
-            print(f"Error in receive: {str(e)}")
             await self.send(text_data=json.dumps({"type": "error", "message": "Failed to process message"}))
 
     @database_sync_to_async
     def save_message(self, content):
         try:
-            message = Message.objects.create(room=self.chat_room, sender=self.scope["user"], content=content)
             message = Message.objects.create(room=self.chat_room, sender=self.scope["user"], content=content)
             print(f"DEBUG: Message saved: {message.content} at {message.timestamp}")
             return message.timestamp

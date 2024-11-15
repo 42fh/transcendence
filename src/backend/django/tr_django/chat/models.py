@@ -81,8 +81,8 @@ def ensure_room_id(sender, instance, **kwargs):
 
 
 class BlockedUser(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="blocking")
-    blocked_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="blocked_by")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="chat_blocking")
+    blocked_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="chat_blocked_by")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

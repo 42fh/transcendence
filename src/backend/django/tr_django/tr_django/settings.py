@@ -65,9 +65,14 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "tr_django.urls"
+# Add these to your Django settings.py
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
+SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
+SESSION_COOKIE_SECURE = True  # for HTTPS
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
 
-AUTH_USER_MODEL = "auth.User"
+ROOT_URLCONF = "tr_django.urls"
 
 TEMPLATES = [
     {

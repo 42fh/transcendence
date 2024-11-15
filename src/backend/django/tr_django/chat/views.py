@@ -1,12 +1,14 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
-from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import models
 from .models import ChatRoom, Message, BlockedUser
+from users.models import CustomUser
 import json
 from django.middleware.csrf import get_token
+from django.utils import timezone
+from channels.db import database_sync_to_async
 
 
 @login_required
@@ -18,23 +20,30 @@ def get_username(request):
 @login_required
 def get_user_list(request):
     try:
-        users = User.objects.exclude(username=request.user.username).values("username")
+        if not request.user.is_authenticated:
+            return JsonResponse({"status": "error", "message": "User not authenticated"}, status=401)
+
+        users = CustomUser.objects.exclude(username=request.user.username).values("username")
+        print(f"DEBUG: Retrieved {len(users)} users")
 
         # Get blocked users
         blocked_users = set(
             BlockedUser.objects.filter(user=request.user).values_list("blocked_user__username", flat=True)
         )
+        print(f"DEBUG: Blocked users: {blocked_users}")
 
         # Get users who blocked current user
         blocked_by_users = set(
             BlockedUser.objects.filter(blocked_user=request.user).values_list("user__username", flat=True)
         )
+        print(f"DEBUG: Blocked by users: {blocked_by_users}")
 
         recent_chats = (
             ChatRoom.objects.filter(models.Q(user1=request.user) | models.Q(user2=request.user))
             .select_related("user1", "user2")
             .order_by("-last_message_at")
         )
+        print(f"DEBUG: Retrieved {recent_chats.count()} recent chats")
 
         users_with_chats = set()
         for chat in recent_chats:
@@ -55,6 +64,7 @@ def get_user_list(request):
         return JsonResponse({"status": "success", "users": user_list})
 
     except Exception as e:
+        print(f"DEBUG: Error in get_user_list: {str(e)}")
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
 
@@ -86,7 +96,7 @@ def block_user(request):
         if not username_to_block:
             return JsonResponse({"status": "error", "message": "Username required"}, status=400)
 
-        user_to_block = User.objects.filter(username=username_to_block).first()
+        user_to_block = CustomUser.objects.filter(username=username_to_block).first()
         if not user_to_block:
             return JsonResponse({"status": "error", "message": "User not found"}, status=404)
 
@@ -115,3 +125,30 @@ def unblock_user(request):
 
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+
+@database_sync_to_async
+def get_or_create_chat_room(self):
+    try:
+        # Sort usernames to ensure consistent room_id regardless of order
+        usernames = sorted(self.room_name.split("_"))
+        if len(usernames) != 2:
+            raise ValueError("Invalid room name format")
+
+        user1 = CustomUser.objects.get(username=usernames[0])
+        user2 = CustomUser.objects.get(username=usernames[1])
+
+        chat_room, created = ChatRoom.objects.create_room(user1, user2)
+
+        if chat_room:
+            chat_room.last_message_at = timezone.now()
+            chat_room.save(update_fields=["last_message_at"])
+
+        print(f"DEBUG: Chat room {'created' if created else 'retrieved'}: {chat_room}")
+        return chat_room
+
+    except CustomUser.DoesNotExist as e:
+        raise ObjectDoesNotExist(f"User not found: {str(e)}")
+    except Exception as e:
+        print(f"DEBUG: Error in get_or_create_chat_room: {str(e)}")
+        raise
