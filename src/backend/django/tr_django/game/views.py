@@ -91,7 +91,7 @@ def get_game_modes(request):
 
 
 @csrf_exempt
-def tournaments(request):
+def all_tournaments(request):
     """GET: List all tournaments"""
     if request.method == "GET":
         tournament_list = Tournament.objects.all()
@@ -100,11 +100,64 @@ def tournaments(request):
     return JsonResponse({"error": "Method not allowed"}, status=405)
 
 
+def create_tournament(request):
+    """Helper function to handle tournament creation logic"""
+    try:
+        data = json.loads(request.body)
+
+        # Get the Player instance associated with the user
+        try:
+            creator = Player.objects.get(user=request.user)
+        except Player.DoesNotExist:
+            return JsonResponse({"error": "Player profile not found"}, status=400)
+
+        # Convert frontend dates to backend format
+        start_date = timezone.make_aware(datetime.fromisoformat(data["startingDate"].replace("Z", "+00:00")))
+        reg_start = timezone.make_aware(datetime.fromisoformat(data["registrationStart"].replace("Z", "+00:00")))
+        reg_end = timezone.make_aware(datetime.fromisoformat(data["registrationClose"].replace("Z", "+00:00")))
+
+        # Create tournament
+        tournament = Tournament.objects.create(
+            name=data["name"],
+            description=data["description"],
+            start_registration=reg_start,
+            end_registration=reg_end,
+            start_date=start_date,
+            type=data["type"].lower().replace(" ", "_"),
+            start_mode=Tournament.START_MODE_FIXED,
+            is_public=data["visibility"] == "public",
+            creator=creator,
+            min_participants=2,
+            max_participants=8,
+        )
+
+        # Handle private tournament allowed users
+        if data["visibility"] == "private" and data.get("allowedUsers"):
+            allowed_players = Player.objects.filter(user__username__in=data["allowedUsers"])
+            tournament.allowed_players.set(allowed_players)
+
+        return JsonResponse(
+            {"message": "Tournament created successfully", "tournament": build_tournament_data(tournament)}
+        )
+
+    except (json.JSONDecodeError, KeyError) as e:
+        return JsonResponse({"error": f"Invalid request data: {str(e)}"}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": f"Server error: {str(e)}"}, status=500)
+
+
 @csrf_exempt
-def tournament(request, tournament_id):
+def single_tournament(request, tournament_id=None):
     """
     GET: Retrieve a specific tournament
+    POST: Create a new tournament
+    PUT: Update a tournament (full update)
+    PATCH: Update a tournament (partial update)
+    DELETE: Delete a tournament
     """
+    if request.method == "POST":
+        return create_tournament(request)
+
     if request.method == "GET":
         try:
             tournament = Tournament.objects.get(id=tournament_id)
@@ -112,6 +165,15 @@ def tournament(request, tournament_id):
             return JsonResponse(data)
         except Tournament.DoesNotExist:
             return JsonResponse({"error": "Tournament not found"}, status=404)
+
+    if request.method == "PUT":
+        return JsonResponse({"message": "Full tournament update not implemented yet"}, status=501)
+
+    if request.method == "PATCH":
+        return JsonResponse({"message": "Partial tournament update not implemented yet"}, status=501)
+
+    if request.method == "DELETE":
+        return JsonResponse({"message": "Tournament deletion not implemented yet"}, status=501)
 
     return JsonResponse({"error": "Method not allowed"}, status=405)
 
@@ -144,3 +206,5 @@ def tournament_enrollment(request, tournament_id):
             return JsonResponse({"error": "Not enrolled in tournament"}, status=400)
         tournament.participants.remove(player)
         return JsonResponse({"message": f"Successfully left {tournament.name}"})
+
+    return JsonResponse({"error": "Method not allowed"}, status=405)
