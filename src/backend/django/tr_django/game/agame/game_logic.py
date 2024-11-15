@@ -29,13 +29,13 @@ async def game_logic(self, current_state):
                 break
             continue
 
-        print("ball2")
+        # print("ball2")
         # if ball should be.
         # Collision Candidate Phase
         collision_candidate = self.find_collision_candidate(
             ball, ball_index, new_state, distance_from_center
         )
-        print("ball4")
+        # print("ball4")
         if not collision_candidate:
             continue
 
@@ -43,7 +43,7 @@ async def game_logic(self, current_state):
         verified_collision = self.verify_collision_candidate(
             ball, collision_candidate, new_state
         )
-        print("ball5")
+        # print("ball5")
         if not verified_collision:
             continue
         print("colliosion: ", verified_collision)
@@ -51,7 +51,7 @@ async def game_logic(self, current_state):
         collision_result = self.collision_handler(
             verified_collision, ball, new_state, cycle_data, ball_index
         )
-        print("ball6")
+        # print("ball6")
         if not collision_result:
             continue
         if collision_result.get("game_over"):
@@ -122,12 +122,12 @@ def handle_distance_check(self, ball_index, ball, distance, state, cycle_data):
     # Normal deadzone transitioni
     # Only reset when entering deadzone
     elif is_in_deadzone and not was_in_deadzone:
-        print("set deadzone")
+        # print("set deadzone")
         self.reset_ball_movement(ball_index)
     # When exiting, just update the state
     elif was_in_deadzone and not is_in_deadzone:
         self.previous_movements[ball_index]["in_deadzone"] = False
-        print("out of deadzone")
+        # print("out of deadzone")
     # Store current position for next frame's comparison
     self.previous_movements[ball_index]["last_position"] = {
         "x": ball["x"],
@@ -137,6 +137,7 @@ def handle_distance_check(self, ball_index, ball, distance, state, cycle_data):
     if distance > self.outer_boundary:
         collision = self.handle_outside_boundary(ball, state)
         if collision:
+            print("tunnel: ", collision)
             collision_result = self.collision_handler(
                 collision, ball, state, cycle_data, ball_index
             )
@@ -184,7 +185,7 @@ def get_inner_boundary(self, state, ball):
 def verify_collision_candidate(self, ball, collision_candidate, new_state):
     """Handle interaction between ball and side"""
     if collision_candidate["type"] == "tunneling":
-        print(collision_candidate)
+        # print(collision_candidate)
         return self.handle_tunneling(ball, collision_candidate, new_state)
 
     collision, active = self.get_collision_check_range(
@@ -217,12 +218,12 @@ def get_collision_check_range(self, ball, collision_candidate, new_state):
 
     # Calculate collision threshold based on side type
     if is_active_side:
-        print("paddle: ", side_index, collision_distance, self.active_sides)
+        # print("paddle: ", side_index, collision_distance, self.active_sides)
         # For paddle sides, include paddle width in collision distance
         paddle_width = new_state["dimensions"]["paddle_width"]
         collision_check = collision_distance <= (ball["size"] + paddle_width)
     else:
-        print("wall: ", side_index, collision_distance)
+        # print("wall: ", side_index, collision_distance)
         # For walls, just use ball size
         collision_check = collision_distance <= ball["size"]
     return collision_check, is_active_side

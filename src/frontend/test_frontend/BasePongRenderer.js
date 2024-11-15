@@ -1,4 +1,4 @@
-// base-renderer.js
+// BasePongRenderer.js
 export class BasePongRenderer {
     constructor(config = {
         viewboxSize: 300,
@@ -10,15 +10,11 @@ export class BasePongRenderer {
         this.scoreList = null;
         this.playerIndex = null;
         this.state = null;
-        this.errorLog = null;
-        this.errorHistory = [];
-        this.maxErrorLogSize = 5;
     }
 
     initialize(gameState) {
         this.svg = document.getElementById('pongSvg');
         this.scoreList = document.getElementById('scoreDisplay');
-        this.initializeErrorLog();
         
         if (!this.svg) {
             throw new Error('SVG element not found');
@@ -83,5 +79,9 @@ export class BasePongRenderer {
         });
         textElement.textContent = message;
         this.svg.appendChild(textElement);
+    }
+
+    render() {
+        throw new Error("Method 'render' must be implemented");
     }
 }

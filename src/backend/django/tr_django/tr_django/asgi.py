@@ -36,14 +36,14 @@ application = ProtocolTypeRouter(
 
 django_asgi_app = get_asgi_application()
 
-websocket_urlpatterns = [
-    path("ws/game/<int:game_id>/", PongConsumer.as_asgi()),
-    *chat_routing.websocket_urlpatterns,
-]
+#websocket_urlpatterns = [
+#    path("ws/game/<int:game_id>/", PongConsumer.as_asgi()),
+#    *chat_routing.websocket_urlpatterns,
+#]
 
-application = ProtocolTypeRouter(
-    {
-        "http": django_asgi_app,
-        "websocket": AuthMiddlewareStack(URLRouter(websocket_urlpatterns)),
-    }
-)
+#application = ProtocolTypeRouter(
+#    {
+#        "http": django_asgi_app,
+#        "websocket": AuthMiddlewareStack(URLRouter(websocket_urlpatterns)),
+#    }
+#)

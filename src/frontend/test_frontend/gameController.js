@@ -4,8 +4,8 @@ import { GameAPI } from './api.js';
 import { GameState } from './gamestate.js';
 import { GameWebSocket } from './websocket.js';
 // gameController.js
-import { PolygonRenderer } from './pong-renderers.js';
-import { CircularRenderer } from './pong-renderers.js';
+import { PolygonRenderer } from './PolygonRenderer.js';
+import { CircularRenderer } from './CircularRenderer.js';
 
 
 export class GameController {
@@ -121,12 +121,12 @@ export class GameController {
                     console.log(message);
                     // Simply pass the error message to the renderer
                     if (this.renderer) {
-                        this.renderer.showError({
+                        /*this.renderer.showError({
                             	type: 'backend',
 			 	error: message.error || 'Unknown error',
             			details: message.details || '',
             			timestamp: new Date().toISOString()
-                        });
+                        });*/
                     }
                     break;
             }

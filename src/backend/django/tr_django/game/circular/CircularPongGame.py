@@ -220,6 +220,7 @@ class CircularPongGame(AGameManager):
 
         # Select closest potential collision if any exist
         if collision_candidates:
+            # print (collision_candidates)
             return min(
                 collision_candidates, key=lambda x: x["movement"]["current_distance"]
             )
@@ -248,7 +249,28 @@ class CircularPongGame(AGameManager):
         sector_start = side_index * sector_size
         sector_end = sector_start + sector_size
         sector_mid = (sector_start + sector_end) / 2
-
+        # Calculate angular distance to sector
+        relative_angle = current_angle
+        if relative_angle < sector_start:
+            relative_angle += 2 * math.pi
+            
+        # Calculate how far the ball is from this sector's arc
+        angular_distance = min(
+            abs(relative_angle - sector_start),
+            abs(relative_angle - sector_end)
+        )
+        
+        # Use both radial and angular components to determine true distance to sector
+        if sector_start <= relative_angle <= sector_end:
+            # Ball is directly in front of sector - use radial distance
+            current_distance = self.outer_boundary - radial_distance
+        else:
+            # Ball is at an angle - use combination of radial and angular distance
+            # Convert angular distance to arc length at current radius
+            arc_length = angular_distance * radial_distance
+            current_distance = math.sqrt(
+                (self.outer_boundary - radial_distance)**2 + arc_length**2
+            )
         # Calculate radial velocity (positive means moving outward)
         radial_velocity = (
             ball["x"] * ball["velocity_x"] + ball["y"] * ball["velocity_y"]
@@ -273,7 +295,7 @@ class CircularPongGame(AGameManager):
             )
             return {
                 "is_approaching": True,
-                "current_distance": float(radial_distance),
+                "current_distance": float(current_distance),
                 "signed_distance": float(signed_distance),
                 "approach_speed": float(0.0),
                 "type": "parallel",
@@ -290,7 +312,7 @@ class CircularPongGame(AGameManager):
             )
             return {
                 "is_approaching": True,
-                "current_distance": float(radial_distance),
+                "current_distance": float( current_distance),
                 "signed_distance": float(signed_distance),
                 "approach_speed": float(radial_velocity),
                 "type": "approaching",
@@ -309,7 +331,7 @@ class CircularPongGame(AGameManager):
                 )
                 return {
                     "is_approaching": False,
-                    "current_distance": float(radial_distance),
+                    "current_distance": float( current_distance),
                     "signed_distance": float(signed_distance),
                     "approach_speed": float(abs(radial_velocity)),
                     "type": "moving_away",
@@ -331,7 +353,7 @@ class CircularPongGame(AGameManager):
                         # Don't update movement tracking for tunneling
                         return {
                             "is_approaching": True,
-                            "current_distance": float(radial_distance),
+                            "current_distance": float( current_distance),
                             "signed_distance": float(signed_distance),
                             "approach_speed": float(abs(radial_velocity)),
                             "type": "tunneling",
@@ -347,7 +369,7 @@ class CircularPongGame(AGameManager):
                 )
                 return {
                     "is_approaching": False,
-                    "current_distance": float(radial_distance),
+                    "current_distance": float( current_distance),
                     "signed_distance": float(signed_distance),
                     "approach_speed": float(abs(radial_velocity)),
                     "type": "moving_away",
@@ -505,7 +527,7 @@ class CircularPongGame(AGameManager):
 
         # If no paddle hit, check if ball is within hitzone distance
         current_distance = collision_candidate["movement"]["current_distance"]
-        hitzone_distance = paddle_width + ball["size"]
+        hitzone_distance = ball["size"]
 
         if abs(current_distance) >= hitzone_distance:
             return None  # Let ball continue moving if not within hitzone
