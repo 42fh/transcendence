@@ -64,6 +64,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             print("calling send_message_history")
             await self.send_message_history()
 
+            # Add user to their personal notification group
+            await self.channel_layer.group_add(f"notifications_{self.scope['user'].username}", self.channel_name)
+
         except Exception as e:
             print(f"DEBUG: Connection error: {str(e)}")
             await self.close()
@@ -151,6 +154,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 if self.room_group_name in self.connected_users:
                     self.connected_users[self.room_group_name].discard(self.username)
                 await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+
+            # Remove from notification group
+            if hasattr(self, "scope") and self.scope.get("user"):
+                await self.channel_layer.group_discard(
+                    f"notifications_{self.scope['user'].username}", self.channel_name
+                )
+
         except Exception as e:
             print(f"DEBUG: Disconnect error: {str(e)}")
 
@@ -222,3 +232,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         return BlockedUser.objects.filter(
             models.Q(user=sender, blocked_user=recipient) | models.Q(user=recipient, blocked_user=sender)
         ).exists()
+
+    async def send_notification(self, event):
+        """Handle sending notifications to the WebSocket"""
+        await self.send(text_data=json.dumps({"type": "notification", "notification": event["notification"]}))

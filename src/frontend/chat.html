@@ -65,6 +65,7 @@
                 document.getElementById('current-username').value = currentUsername;
                 document.querySelector('span#current-username').textContent = currentUsername;
                 await loadUserList();
+                setupNotifications();
             } catch (error) {
                 showError('Failed to initialize chat: ' + error.message);
             }
@@ -212,6 +213,8 @@
                         messageHistoryLoaded = true;
                     } else if (data.type === 'user_list') {
                         updateUserList(data.users);
+                    } else if (data.type === 'notification') {
+                        showNotification(data.notification);
                     }
                 };
 
@@ -369,6 +372,54 @@
                 });
             }
         }
+
+        function setupNotifications() {
+            const notificationContainer = document.createElement('div');
+            notificationContainer.id = 'notification-container';
+            notificationContainer.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 1000;
+            `;
+            document.body.appendChild(notificationContainer);
+
+            // Handle incoming notifications
+            window.chatSocket.onmessage = function(e) {
+                const data = JSON.parse(e.data);
+                if (data.type === 'notification') {
+                    showNotification(data.notification);
+                }
+                // Your existing message handling code...
+            };
+        }
+
+        function showNotification(notification) {
+            const notificationElement = document.createElement('div');
+            notificationElement.className = 'notification';
+            notificationElement.style.cssText = `
+                background: #333;
+                color: white;
+                padding: 10px;
+                margin-bottom: 10px;
+                border-radius: 4px;
+                max-width: 300px;
+                animation: slideIn 0.5s ease-out;
+            `;
+            notificationElement.innerHTML = `
+                <p>${notification.message}</p>
+                <small>${new Date(notification.created_at).toLocaleTimeString()}</small>
+            `;
+            
+            document.getElementById('notification-container').appendChild(notificationElement);
+            
+            // Remove notification after 5 seconds
+            setTimeout(() => {
+                notificationElement.style.animation = 'slideOut 0.5s ease-in';
+                setTimeout(() => notificationElement.remove(), 500);
+            }, 5000);
+        }
+
         initializeChat();
 
         const testButton = document.createElement('button');

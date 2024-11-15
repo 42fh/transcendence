@@ -1,8 +1,10 @@
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 
 class ChatRoomManager(models.Manager):
@@ -93,3 +95,45 @@ class BlockedUser(models.Model):
 
     def __str__(self):
         return f"{self.user.username} blocked {self.blocked_user.username}"
+
+
+class Notification(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications")
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["user", "is_read"]),
+            models.Index(fields=["created_at"]),
+        ]
+
+    def __str__(self):
+        return f"Notification for {self.user.username}: {self.message[:50]}"
+
+
+@receiver(post_save, sender=Message)
+def create_message_notification(sender, instance, created, **kwargs):
+    if created:
+        # Create notification for message recipient
+        recipient = instance.room.user2 if instance.sender == instance.room.user1 else instance.room.user1
+
+        notification = Notification.objects.create(
+            user=recipient, message=f"New message from {instance.sender.username}: {instance.content[:50]}"
+        )
+
+        # Send notification through WebSocket
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f"notifications_{recipient.username}",
+            {
+                "type": "send_notification",
+                "notification": {
+                    "id": notification.id,
+                    "message": notification.message,
+                    "created_at": notification.created_at.isoformat(),
+                },
+            },
+        )
