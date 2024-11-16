@@ -143,23 +143,26 @@ export class ChatView {
       const response = await fetch("/api/chat/get_user_list/");
       if (!response.ok) throw new Error("Failed to get user list");
       const data = await response.json();
-
+  
       const usersList = document.getElementById("users-list");
       usersList.innerHTML = "";
-
+  
       data.users.forEach((user) => {
         const li = document.createElement("li");
         const userDiv = document.createElement("div");
         userDiv.className = "user-item-container";
-
+  
         const nameSpan = document.createElement("span");
         nameSpan.className = "user-item" + (user.has_chat ? " has-chat" : "");
         nameSpan.textContent = user.username;
-
+  
+        // Set the cursor to pointer on hover for usernames
+        nameSpan.style.cursor = 'pointer';  // Ensures pointer cursor is applied
+  
         if (!user.has_blocked_you) {
           nameSpan.onclick = () => this.startChatWith(user.username);
         }
-
+  
         const blockButton = document.createElement("button");
         blockButton.className = "button-small";
         blockButton.textContent = user.is_blocked ? "Unblock" : "Block";
@@ -167,12 +170,12 @@ export class ChatView {
           e.stopPropagation();
           await this.toggleBlockUser(user.username, user.is_blocked);
         };
-
+  
         if (user.has_blocked_you) {
           nameSpan.className += " blocked-by-user";
           nameSpan.title = "This user has blocked you";
         }
-
+  
         userDiv.appendChild(nameSpan);
         userDiv.appendChild(blockButton);
         li.appendChild(userDiv);
@@ -182,6 +185,7 @@ export class ChatView {
       this.showError(`Failed to load user list: ${error.message}`);
     }
   }
+  
 
   async toggleBlockUser(username, isCurrentlyBlocked) {
     try {

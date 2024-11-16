@@ -53,6 +53,11 @@ h1 {
   text-align: center; /* Center the title */
 }
 
+.user-item {
+  cursor: pointer;
+}
+
+
 button {
   background: none;
   color: white;
