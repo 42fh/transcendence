@@ -1,4 +1,6 @@
 import { showToast } from "../utils/toast.js";
+import { CONFIG } from "../config/constants.js";
+import { getGlobalTournaments } from "../store/globals.js";
 import { tournaments } from "../config/tournaments.js";
 
 export async function loadTimetablePage(tournamentName, addToHistory = true) {
@@ -13,8 +15,14 @@ export async function loadTimetablePage(tournamentName, addToHistory = true) {
       );
     }
 
-    // Find tournament with timetable
-    const tournament = tournaments.find((t) => t.name === tournamentName);
+    // Find tournament with timetable based on data source
+    let tournament;
+    if (CONFIG.DATA_SOURCE === CONFIG.DATA_SOURCE.API) {
+      tournament = getGlobalTournaments()?.find((t) => t.name === tournamentName);
+    } else {
+      tournament = tournaments.find((t) => t.name === tournamentName);
+    }
+
     if (!tournament || !tournament.timetable) {
       throw new Error("Timetable not found");
     }

@@ -11,12 +11,15 @@ WORKDIR /app
 # Copy the requirements.txt from the backend directory
 COPY requirements.txt /app/
 
-# Install build dependencies
+# Install build dependencies and postgresql client
 RUN apt-get update && apt-get install -y \
     build-essential \
     gcc \
     python3-dev \
-    libffi-dev
+    libffi-dev \
+    netcat-openbsd \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies before copying the rest of the project
 RUN pip install --upgrade pip && pip install -r requirements.txt
