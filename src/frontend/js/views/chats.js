@@ -1,3 +1,5 @@
+import { displayErrorMessageModalModal } from "../utils/modals.js";
+
 export function loadChatPage(addToHistory = true) {
   try {
     // Check if user is logged in
@@ -83,16 +85,6 @@ export class ChatView {
     return cookieValue;
   }
 
-  showError(message) {
-    const errorContainer = document.getElementById("error-container");
-    const errorDiv = document.createElement("div");
-    errorDiv.className = "error-message";
-    errorDiv.textContent = message;
-    errorContainer.innerHTML = "";
-    errorContainer.appendChild(errorDiv);
-    setTimeout(() => errorDiv.remove(), 5000);
-  }
-
   async initializeChat() {
     try {
       // First check if we have a stored username
@@ -127,7 +119,7 @@ export class ChatView {
 
       await this.loadUserList();
     } catch (error) {
-      this.showError(`Failed to initialize chat: ${error.message}`);
+      displayErrorMessageModalModal(`Failed to initialize chat: ${error.message}`);
       // Redirect to login if not authenticated
       if (
         error.message === "Not authenticated" ||
@@ -182,7 +174,7 @@ export class ChatView {
         usersList.appendChild(li);
       });
     } catch (error) {
-      this.showError(`Failed to load user list: ${error.message}`);
+      displayErrorMessageModalModal(`Failed to load user list: ${error.message}`);
     }
   }
   
@@ -212,7 +204,7 @@ export class ChatView {
         this.state.currentChatPartner = "";
       }
     } catch (error) {
-      this.showError(`Failed to toggle block status: ${error.message}`);
+      displayErrorMessageModalModal(`Failed to block/unblock user: ${error.message}`);
     }
   }
 
@@ -228,7 +220,7 @@ export class ChatView {
     this.state.currentChatPartner = otherUser;
     const currentUser = document.getElementById("current-username").value;
     if (!currentUser) {
-      this.showError("Current user not found");
+      displayErrorMessageModalModal("No username found");
       this.state.isSwitchingRoom = false;
       return;
     }
@@ -247,7 +239,7 @@ export class ChatView {
     try {
       this.initializeWebSocket(wsUrl, otherUser);
     } catch (error) {
-      this.showError(`Failed to create connection: ${error.message}`);
+      displayErrorMessageModalModal(`Failed to connect to chat: ${error.message}`);
       this.state.isSwitchingRoom = false;
     }
   }
@@ -284,7 +276,7 @@ export class ChatView {
     };
 
     window.chatSocket.onerror = () => {
-      this.showError("WebSocket connection error");
+      displayErrorMessageModalModal("Failed to connect to chat");
       this.state.isSwitchingRoom = false;
     };
   }
@@ -360,7 +352,7 @@ export class ChatView {
         window.chatSocket.send(JSON.stringify({ message }));
         messageInput.value = "";
       } catch (error) {
-        this.showError(`Failed to send message: ${error.message}`);
+        displayErrorMessageModalModal(`Failed to send message: ${error.message}`);
       }
     }
   }
