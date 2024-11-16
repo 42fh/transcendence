@@ -161,7 +161,7 @@ export class ChatView {
         }
 
         const blockButton = document.createElement("button");
-        blockButton.className = "block-button";
+        blockButton.className = "button-small";
         blockButton.textContent = user.is_blocked ? "Unblock" : "Block";
         blockButton.onclick = async (e) => {
           e.stopPropagation();

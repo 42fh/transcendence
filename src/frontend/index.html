@@ -324,25 +324,33 @@
     <!-- Chat Template -->
     <template id="chat-template">
       <div class="chat-page">
-        <h3>Hello, <span id="current-username-display"></span>!</h3>
+        <!-- Add px or rem to the margin-bottom -->
+        <h3 style="margin-bottom: 70px;">Hello, <span id="current-username-display"></span>!</h3>
+    
         <input type="hidden" id="current-username" />
-              <div class="chat-container">
-          <div class="user-list">
-            <h3>Users</h3>
+        
+        <div class="chat-container">
+          <div class="user-list" >
+            <h3 style="margin-bottom: 20px;">Users</h3>
             <div id="error-container"></div>
-            <ul id="users-list"></ul>
+            <!-- Add px or rem to the margin-bottom -->
+            <ul id="users-list" style="margin-bottom: 20px;"></ul>
           </div>
           
           <div class="chat-window">
             <div id="chat-messages"></div>
             <div class="input-area">
-              <input type="text" id="chat-message-input" placeholder="Type your message..." />
-              <button id="chat-message-submit">Send</button>
+              <input type="text" id="chat-message-input" class="input-retro" style="margin-bottom: 10px;" placeholder="Type your message..." /> 
+              <div>
+
+                <button id="chat-message-submit">Send</button>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </template>
+    
 
     <script type="module" src="js/main.js"></script>
   </body>
