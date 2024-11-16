@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from .models import ChatRoom, Message, BlockedUser
+from django.views.decorators.csrf import csrf_exempt
 from users.models import CustomUser
 import json
 from django.middleware.csrf import get_token
@@ -87,6 +88,7 @@ def mark_messages_read(request, room_id):
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
 
+@csrf_exempt
 @login_required
 def block_user(request):
     try:
@@ -110,6 +112,7 @@ def block_user(request):
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
 
+@csrf_exempt
 @login_required
 def unblock_user(request):
     try:
