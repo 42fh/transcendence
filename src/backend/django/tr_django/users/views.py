@@ -11,6 +11,8 @@ from django.views import View
 from users.models import CustomUser
 from django.db.models import Q
 from game.models import Player
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 
 logger = logging.getLogger(__name__)
 
@@ -142,38 +144,75 @@ class DeleteUserView(View):
 
 @method_decorator(csrf_exempt, name="dispatch")
 class UserListView(View):
-    """View for listing users with pagination and search functionality"""
+    """View for listing users with basic information"""
 
     def get(self, request):
         search = request.GET.get("search", "")
         page = int(request.GET.get("page", 1))
         per_page = int(request.GET.get("per_page", 10))
 
+        try:
+            page = int(page)
+            per_page = int(per_page)
+            if page <= 0 or per_page <= 0:
+                raise ValueError
+        except ValueError:
+            return JsonResponse({"error": "Invalid pagination parameters"}, status=400)
+
         # Filter users by username or email
         users = CustomUser.objects.filter(Q(username__icontains=search) | Q(email__icontains=search))
+        paginator = Paginator(users, per_page)
 
-        # Calculate pagination
-        start = (page - 1) * per_page
-        end = start + per_page
-        total_users = users.count()
-        users_page = users[start:end]
+        try:
+            users_page = paginator.page(page)
+        except EmptyPage:
+            return JsonResponse({"error": "Page not found"}, status=404)
+        except PageNotAnInteger:
+            return JsonResponse({"error": "Invalid page number"}, status=400)
 
-        # Build response with additional fields
-        users_data = []
-        for user in users_page:
+        users_data = [
+            {
+                "id": str(user.id),
+                "username": user.username,
+                "avatar": user.avatar.url if user.avatar else None,
+                "is_active": user.is_active,
+                "visibility_online_status": user.visibility_online_status,
+                "visibility_user_profile": user.visibility_user_profile,
+            }
+            for user in users_page
+        ]
+
+        return JsonResponse(
+            {
+                "users": users_data,
+                "pagination": {
+                    "total": paginator.count,
+                    "page": page,
+                    "per_page": per_page,
+                    "total_pages": paginator.num_pages,
+                },
+            }
+        )
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class UserDetailView(View):
+    """View for getting detailed user information including game stats and match history"""
+
+    def get(self, request, user_id):
+        try:
+            user = CustomUser.objects.get(id=user_id)
+
             try:
-                player = user.player  # Get associated Player instance
-
-                # Get recent matches (both single and tournament games)
+                player = user.player
+                # Get recent matches
                 recent_matches = []
                 player_stats = player.playergamestats_set.select_related("single_game", "tournament_game").order_by(
                     "-joined_at"
-                )[
-                    :5
-                ]  # Get last 5 matches
+                )[:5]
 
                 for stat in player_stats:
-                    game = stat.game  # This uses the property we defined in PlayerGameStats
+                    game = stat.game
                     if game:
                         match_data = {
                             "game_id": str(game.id),
@@ -181,10 +220,9 @@ class UserListView(View):
                             "score": stat.score,
                             "won": game.winner == player if game.winner else None,
                             "game_type": "tournament" if stat.tournament_game else "single",
-                            "opponent": None,  # We'll set this next
+                            "opponent": None,
                         }
 
-                        # Get opponent (for 2-player games)
                         other_stat = game.playergamestats_set.exclude(player=player).first()
                         if other_stat:
                             match_data["opponent"] = {
@@ -196,7 +234,7 @@ class UserListView(View):
                         recent_matches.append(match_data)
 
                 user_data = {
-                    "id": str(user.id),  # Convert UUID to string
+                    "id": str(user.id),
                     "username": user.username,
                     "email": user.email,
                     "avatar": user.avatar.url if user.avatar else None,
@@ -206,7 +244,6 @@ class UserListView(View):
                     "is_active": user.is_active,
                     "visibility_online_status": user.visibility_online_status,
                     "visibility_user_profile": user.visibility_user_profile,
-                    # Game stats from Player model
                     "stats": {
                         "wins": player.wins,
                         "losses": player.losses,
@@ -215,18 +252,11 @@ class UserListView(View):
                     },
                     "recent_matches": recent_matches,
                 }
-                users_data.append(user_data)
-            except Player.DoesNotExist:
-                continue
 
-        return JsonResponse(
-            {
-                "users": users_data,
-                "pagination": {
-                    "total": total_users,
-                    "page": page,
-                    "per_page": per_page,
-                    "total_pages": (total_users + per_page - 1) // per_page,
-                },
-            }
-        )
+                return JsonResponse(user_data)
+
+            except Player.DoesNotExist:
+                return JsonResponse({"error": "Player profile not found"}, status=404)
+
+        except CustomUser.DoesNotExist:
+            return JsonResponse({"error": "User not found"}, status=404)

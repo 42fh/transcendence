@@ -9,7 +9,7 @@ from .views import (
     LogoutView,
     DeleteUserView,
     UserListView,
-    # UserDetailView,
+    UserDetailView,
     # FriendListView,
     # FriendRequestView,
     # FriendStatusView,
@@ -22,7 +22,8 @@ urlpatterns = [
     path("auth/logout/", LogoutView.as_view(), name="logout"),
     path("auth/delete/", DeleteUserView.as_view(), name="delete_user"),
     # Future endpoints (commented out)
-    path("", UserListView.as_view(), name="user_list"),
+    path("users/", UserListView.as_view(), name="users_list"),
+    path("users/<uuid:user_id>/", UserDetailView.as_view(), name="user_detail"),
     # path("<int:user_id>/", UserDetailView.as_view(), name="user_detail"),
     # path("<int:user_id>/friends/", FriendListView.as_view(), name="friend_list"),
     # path("<int:user_id>/friends/<int:friend_id>/", FriendRequestView.as_view(), name="friend_request"),
