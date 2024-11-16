@@ -1,7 +1,7 @@
 :root {
   /* Colors */
   --color-primary: white;
-  --color-background: black;
+  --color-background: rgb(0, 0, 0);
   --color-error: red;
   --color-overlay: rgba(255, 255, 255, 0.9);
 
@@ -38,7 +38,7 @@
 }
 
 body {
-  background-color: black;
+  background-color: rgb(0, 0, 0);
   color: white;
   font-family: "Press Start 2P", cursive;
   display: flex;
@@ -536,6 +536,50 @@ button:hover {
   color: red;
   border-color: red;
 }
+
+#notification-container {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  width: auto;
+  max-width: 400px;
+  padding: 10px;
+}
+
+.notification {
+  background-color: #4caf50;
+  color: white;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  animation: fadeInOut 5s ease-out forwards;
+}
+
+.notification.error {
+  background-color: #f44336;
+}
+
+.notification.success {
+  background-color: #4caf50;
+}
+
+.notification.info {
+  background-color: #2196f3;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
 
 .create-tournament-container {
   padding: 2rem;

@@ -1,3 +1,4 @@
+
 export function loadChatPage(addToHistory = true) {
   try {
     // Check if user is logged in
@@ -52,6 +53,25 @@ export class ChatView {
       HISTORY: "message_history",
       USER_LIST: "user_list",
     };
+  }
+
+  // Function to show notifications
+  showNotification(message, type = "info") {
+    const notificationContainer = document.getElementById("notification-container");
+
+    const notification = document.createElement("div");
+    notification.classList.add("notification", type); // Add type classes like 'success', 'error', 'info'
+    
+    notification.innerHTML = `
+      <span>${message}</span>
+      <button class="close-btn" onclick="this.parentElement.remove()">&#10006;</button>
+    `;
+    notificationContainer.appendChild(notification);
+
+    // Automatically remove notification after 5 seconds
+    setTimeout(() => {
+      notification.remove();
+    }, 5000);
   }
 
   async init() {
@@ -125,9 +145,12 @@ export class ChatView {
         usernameInput.value = this.state.currentUsername;
       }
 
+      // Show success notification
+      this.showNotification("Welcome to the chat!", "success");
+
       await this.loadUserList();
     } catch (error) {
-      this.showError(`Failed to initialize chat: ${error.message}`);
+      this.showNotification(`Error: ${error.message}`, "error");
       // Redirect to login if not authenticated
       if (
         error.message === "Not authenticated" ||
@@ -143,26 +166,26 @@ export class ChatView {
       const response = await fetch("/api/chat/get_user_list/");
       if (!response.ok) throw new Error("Failed to get user list");
       const data = await response.json();
-  
+
       const usersList = document.getElementById("users-list");
       usersList.innerHTML = "";
-  
+
       data.users.forEach((user) => {
         const li = document.createElement("li");
         const userDiv = document.createElement("div");
         userDiv.className = "user-item-container";
-  
+
         const nameSpan = document.createElement("span");
         nameSpan.className = "user-item" + (user.has_chat ? " has-chat" : "");
         nameSpan.textContent = user.username;
-  
+
         // Set the cursor to pointer on hover for usernames
         nameSpan.style.cursor = 'pointer';  // Ensures pointer cursor is applied
-  
+
         if (!user.has_blocked_you) {
           nameSpan.onclick = () => this.startChatWith(user.username);
         }
-  
+
         const blockButton = document.createElement("button");
         blockButton.className = "button-small";
         blockButton.textContent = user.is_blocked ? "Unblock" : "Block";
@@ -170,22 +193,23 @@ export class ChatView {
           e.stopPropagation();
           await this.toggleBlockUser(user.username, user.is_blocked);
         };
-  
+
         if (user.has_blocked_you) {
           nameSpan.className += " blocked-by-user";
           nameSpan.title = "This user has blocked you";
         }
-  
+
         userDiv.appendChild(nameSpan);
         userDiv.appendChild(blockButton);
         li.appendChild(userDiv);
         usersList.appendChild(li);
       });
+
+      this.showNotification("User list loaded successfully.", "success");
     } catch (error) {
-      this.showError(`Failed to load user list: ${error.message}`);
+      this.showNotification(`Failed to load user list: ${error.message}`, "error");
     }
   }
-  
 
   async toggleBlockUser(username, isCurrentlyBlocked) {
     try {
@@ -212,7 +236,7 @@ export class ChatView {
         this.state.currentChatPartner = "";
       }
     } catch (error) {
-      this.showError(`Failed to toggle block status: ${error.message}`);
+      this.showNotification(`Failed to toggle block status: ${error.message}`, "error");
     }
   }
 
@@ -228,7 +252,7 @@ export class ChatView {
     this.state.currentChatPartner = otherUser;
     const currentUser = document.getElementById("current-username").value;
     if (!currentUser) {
-      this.showError("Current user not found");
+      this.showNotification("Current user not found", "error");
       this.state.isSwitchingRoom = false;
       return;
     }
@@ -247,7 +271,7 @@ export class ChatView {
     try {
       this.initializeWebSocket(wsUrl, otherUser);
     } catch (error) {
-      this.showError(`Failed to create connection: ${error.message}`);
+      this.showNotification(`Failed to create connection: ${error.message}`, "error");
       this.state.isSwitchingRoom = false;
     }
   }
@@ -268,60 +292,46 @@ export class ChatView {
 
     window.chatSocket.onmessage = (e) => {
       const data = JSON.parse(e.data);
-      this.handleWebSocketMessage(data);
-    };
-
-    window.chatSocket.onclose = () => {
-      if (this.state.currentChatPartner === otherUser) {
-        this.addMessageToChat(
-          "System",
-          "Connection closed. Attempting to reconnect...",
-          "system"
-        );
-        setTimeout(() => this.startChatWith(otherUser), 3000);
+      
+      if (data.type === this.MESSAGE_TYPES.CHAT) {
+        this.addMessageToChat(data.username, data.message, "chat");
+      } else if (data.type === this.MESSAGE_TYPES.HISTORY) {
+        if (!this.state.messageHistoryLoaded) {
+          this.addMessageHistory(data.messages);
+          this.state.messageHistoryLoaded = true;
+        }
+      } else if (data.type === this.MESSAGE_TYPES.USER_LIST) {
+        this.updateUserList(data.users);
       }
-      this.state.isSwitchingRoom = false;
+    };
+    
+    window.chatSocket.onerror = (error) => {
+      this.showNotification(`WebSocket error: ${error}`, "error");
     };
 
-    window.chatSocket.onerror = () => {
-      this.showError("WebSocket connection error");
-      this.state.isSwitchingRoom = false;
+    window.chatSocket.onclose = (e) => {
+      this.showNotification("Connection closed.", "info");
     };
   }
 
-  handleWebSocketMessage(data) {
-    if (data.type === this.MESSAGE_TYPES.CHAT) {
-      const messageType =
-        data.username === "System"
-          ? "system"
-          : data.username === this.state.currentUsername
-          ? "self"
-          : "other";
-      this.addMessageToChat(data.username, data.message, messageType);
-    } else if (
-      data.type === this.MESSAGE_TYPES.HISTORY &&
-      !this.state.messageHistoryLoaded
-    ) {
-      data.messages.forEach((msg) => {
-        const messageType =
-          msg.username === this.state.currentUsername ? "self" : "other";
-        this.addMessageToChat(msg.username, msg.message, messageType);
+  addMessageToChat(username, message, messageType) {
+    const messageContainer = document.createElement("div");
+    messageContainer.className = messageType;
+    messageContainer.innerHTML = `<strong>${username}:</strong> ${message}`;
+    document.getElementById("chat-messages").appendChild(messageContainer);
+  }
+
+  addMessageHistory(history) {
+    // Ensure history is an array before proceeding
+    if (Array.isArray(history)) {
+      history.forEach((message) => {
+        this.addMessageToChat(message.username, message.message, "chat");
       });
-      this.state.messageHistoryLoaded = true;
-    } else if (data.type === this.MESSAGE_TYPES.USER_LIST) {
-      this.updateUserList(data.users);
+    } else {
+      this.showNotification("Failed to load message history: Invalid data", "error");
     }
   }
-
-  addMessageToChat(username, message, type = "other") {
-    const chatBox = document.getElementById("chat-messages");
-    const messageDiv = document.createElement("div");
-    messageDiv.className = `message ${type}`;
-    messageDiv.innerHTML =
-      type === "system" ? message : `<strong>${username}:</strong> ${message}`;
-    chatBox.appendChild(messageDiv);
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
+  
 
   updateUserList(users) {
     const userList = document.getElementById("users-list");
