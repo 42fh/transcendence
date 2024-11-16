@@ -142,7 +142,7 @@ export class ChatView {
       data.users.forEach((user) => {
         const li = document.createElement("li");
         const userDiv = document.createElement("div");
-        userDiv.className = "user-item-container";
+        userDiv.className = "chat-user-item-container";
   
         const nameSpan = document.createElement("span");
         nameSpan.className = "user-item" + (user.has_chat ? " has-chat" : "");
