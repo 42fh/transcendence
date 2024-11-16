@@ -1,4 +1,5 @@
 import { displayErrorMessageModalModal } from "../utils/modals.js";
+import { showNotification } from "../utils/notifications.js";
 
 export function loadChatPage(addToHistory = true) {
   try {
