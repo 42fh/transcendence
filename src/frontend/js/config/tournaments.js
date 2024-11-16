@@ -1,3 +1,5 @@
+import { CONFIG } from "./constants.js";
+
 /*
  * Tournament Data Structure
  *
@@ -153,21 +155,32 @@ export const timetableExample42Berlin = {
   ],
 };
 
-export function initializeTournaments() {
+// This function only initializes mock data when using JS source
+// When using API, the data comes directly from the backend
+export function initializeTournaments(source = CONFIG.CURRENT_SOURCE) {
+  // Skip initialization if using API source
+  if (source === CONFIG.DATA_SOURCE.API) {
+    return;
+  }
+
+  // Initialize JS mock data with relative dates
+  const now = new Date();
+
+  // Set timetable for Berlin tournament
   tournaments[3].timetable = timetableExample42Berlin;
 
-  // Modify tournament dates to be relative to current time for demo purposes
-  const now = new Date();
+  // Update starting dates
   tournaments[0].startingDate = new Date(now.getTime() + 6 * 24 * 60 * 60 * 1000).toISOString(); // Wimbledon: 6 days from now
   tournaments[1].startingDate = new Date(now.getTime() + 3 * 60 * 60 * 1000).toISOString(); // US Open: 3 hours from now
   tournaments[2].startingDate = new Date(now.getTime() + 40 * 60 * 1000).toISOString(); // 42 Network: 40 minutes from now
   tournaments[3].startingDate = new Date(now.getTime() - 30 * 60 * 1000).toISOString(); // 42 Berlin: started 30 minutes ago
 
-  // Also update closing registration dates to be consistent
+  // Update registration dates
   tournaments[0].closingRegistrationDate = new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString(); // 1 day before start
   tournaments[1].closingRegistrationDate = new Date(now.getTime() + 2 * 60 * 60 * 1000).toISOString(); // 1 hour before start
   tournaments[2].closingRegistrationDate = new Date(now.getTime() + 30 * 60 * 1000).toISOString(); // 10 minutes before start
   tournaments[3].closingRegistrationDate = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString(); // closed yesterday
+
   addCurrentUserToTournaments();
 }
 

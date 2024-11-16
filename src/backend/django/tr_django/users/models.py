@@ -11,34 +11,21 @@ class CustomUser(AbstractUser):
     """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    # Optional email field for now, but it could be made mandatory later.
-    # When making it mandatory, remove `null=True` and `blank=True`.
-    # Email field is currently not enforcing uniqueness.
-    # TODO: When implementing email verification system, change unique=False to True
-    # and consider adding a conditional unique constraint to allow multiple NULL values.
     email = models.EmailField(
-        unique=False,  # Explicitly not enforcing uniqueness for now
+        unique=False,
         null=True,
         blank=True,
         error_messages={
-            "unique": "A user with that email already exists.",  # Can be removed until unique=True
+            "unique": "A user with that email already exists.",
         },
     )
-
     email_verified = models.BooleanField(default=False)  # Verification status
-
     avatar = models.ImageField(upload_to="avatars/", null=True, blank=True)
     bio = models.TextField(null=True, blank=True)
     telephone_number = models.CharField(max_length=20, null=True, blank=True)
     pronoun = models.CharField(max_length=20, null=True, blank=True)
 
-    # 2FA and JWT Fields for CustomUser Model // TODO: check this with Jonathan
-    # Note: Most of the fields will not be necessary if using libraries such as SimpleJWT for JWT authentication and django-two-factor-auth for 2FA.
-    # The only two needed is the two_factor_enabled field and eventually the one to choose the 2FA method.
-
-    # Field to enable or disable 2FA for the user.
     two_factor_enabled = models.BooleanField(default=False)
-
     two_factor_method = models.CharField(
         max_length=20,
         choices=[
@@ -52,36 +39,11 @@ class CustomUser(AbstractUser):
         ],
         default="TOTP",
     )
-
-    # Stores the user's secret key for generating 2FA codes,
-    # typically used in TOTP (Time-based One-Time Password) algorithms.
-    # This key is unique to the user and is used to create time-based codes.
     two_factor_secret = models.CharField(max_length=32, null=True, blank=True)
-
-    # JSON field to store backup codes, which are single-use codes
-    # the user can use to access their account if they cannot access
-    # their primary 2FA method (like an authenticator app).
     backup_codes = models.JSONField(null=True, blank=True)
-
-    # Stores the last successful 2FA code used, allowing the system to check
-    # if a code has already been used (preventing replay attacks).
-    # This helps ensure each 2FA code can only be used once.
     last_2fa_code = models.CharField(max_length=6, null=True, blank=True)
-
-    # Tracks the last time a JWT was issued for this user.
-    # This is useful if you want to invalidate all previously issued tokens
-    # when a specific event occurs, like a password change.
     last_token_issued_at = models.DateTimeField(null=True, blank=True)
-
-    # Stores a hashed version of the user's refresh token.
-    # Refresh tokens allow the user to get a new access token after the
-    # initial one expires, without needing to re-authenticate. This field
-    # stores a secure hash of the refresh token for validation when the user
-    # requests a new access token. Keeping the hash instead of the raw token
-    # ensures that sensitive data is not stored directly in the database.
     refresh_token_hash = models.CharField(max_length=64, null=True, blank=True)
-
-    # Status fields
 
     STATUS_OFFLINE = "offline"
     STATUS_ONLINE = "online"
@@ -91,7 +53,6 @@ class CustomUser(AbstractUser):
     ONLINE_STATUS_CHOICES = [
         (status, status.capitalize()) for status in [STATUS_OFFLINE, STATUS_ONLINE, STATUS_BUSY, STATUS_AWAY]
     ]
-    # TODO: Remove this, cause it's transitient. It's not something that needs to be stored in the database.
     online_status = models.CharField(max_length=10, choices=ONLINE_STATUS_CHOICES, default=STATUS_OFFLINE)
 
     default_status = models.CharField(
@@ -121,7 +82,6 @@ class CustomUser(AbstractUser):
 
     visibility_user_profile = models.CharField(max_length=10, choices=VISIBILITY_CHOICES, default=VISIBILITY_EVERYONE)
 
-    # This will not be implemented first: we can just stick with the friends list for the beginning.
     custom_visibility_group = models.ForeignKey(
         to="users.VisibilityGroup",
         on_delete=models.SET_NULL,
@@ -132,7 +92,7 @@ class CustomUser(AbstractUser):
 
     groups = models.ManyToManyField(
         "auth.Group",
-        related_name="members",  # Changed from classic `custom_user_set` to `members` for readability
+        related_name="members",
         blank=True,
         verbose_name="groups",
         help_text="The groups this user belongs to.",
@@ -140,15 +100,13 @@ class CustomUser(AbstractUser):
 
     user_permissions = models.ManyToManyField(
         "auth.Permission",
-        related_name="permitted_users",  # Changed from `custom_user_set` to `permitted_users` for readability
+        related_name="permitted_users",
         blank=True,
         verbose_name="user permissions",
         help_text="Specific permissions for this user.",
     )
 
-    # Friendship and Blocking
     friends = models.ManyToManyField("self", blank=True, symmetrical=True)
-    blocked_users = models.ManyToManyField("self", blank=True, symmetrical=False, related_name="user_blocked_by")
 
     # Friend Request System
     friend_requests_sent = models.ManyToManyField(
@@ -158,8 +116,6 @@ class CustomUser(AbstractUser):
     def send_friend_request(self, user):
         """Sends a friend request to another user."""
         if user != self and not self.is_friend_with(user):
-            if self.is_blocked_by(user) or user in self.blocked_users.all():
-                raise ValueError("Cannot send friend request to/from blocked user")
             self.friend_requests_sent.add(user)
 
     def accept_friend_request(self, user):
@@ -182,9 +138,6 @@ class CustomUser(AbstractUser):
 
     def is_friend_with(self, user) -> bool:
         return self.friends.filter(id=user.id).exists()
-
-    def is_blocked_by(self, user) -> bool:
-        return user.blocked_users.filter(id=self.id).exists()
 
     def __str__(self):
         return str(self.username)

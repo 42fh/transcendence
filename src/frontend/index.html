@@ -100,7 +100,7 @@
             <div class="net-segment white"></div>
           </div>
           <div class="button-wrapper">
-            <button id="chat" onclick="window.location.href='/chat.html'">CHAT</button>
+            <button id="chats">CHATS</button>
           </div>
         </div>
         <div class="button-wrapper threejs-wrapper">
@@ -319,6 +319,65 @@
         <div class="tournament-timetable-game-status"></div>
       </div>
     </template>
+
+<!-- Chat Template -->
+<template id="chat-template">
+  <div class="chat-page">
+    <!-- Greeting and user name display -->
+    <h3 style="margin-bottom: 70px;">Hello, <span id="current-username-display"></span>!</h3>
+    
+    <!-- Hidden input to store current username -->
+    <input type="hidden" id="current-username" />
+    
+    <div class="chat-container">
+      <!-- User list section -->
+      <div class="user-list">
+        <h3 style="margin-bottom: 20px;">Users</h3>
+        <div id="error-container"></div>
+        <ul id="users-list" style="margin-bottom: 20px;"></ul>
+      </div>
+
+      <!-- Chat window section -->
+      <div class="chat-window">
+        <div id="chat-messages"></div>
+
+        <!-- Input area for chat messages -->
+        <div class="input-area">
+          <input 
+            type="text" 
+            id="chat-message-input" 
+            class="input-retro" 
+            style="margin-bottom: 10px;" 
+            placeholder="Type your message..." 
+          /> 
+
+          <!-- Templates for user items and messages -->
+          <template id="user-item-template">
+            <li>
+              <div class="user-item-container">
+                <span class="user-item"></span>
+                <button class="button-small"></button>
+              </div>
+            </li>
+          </template>
+
+          <template id="chat-message-template">
+            <div class="message">
+              <strong></strong>: <span></span>
+            </div>
+          </template>
+
+          <!-- Button to send a message -->
+          <div>
+            <button id="chat-message-submit">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+    
 
     <script type="module" src="js/main.js"></script>
   </body>

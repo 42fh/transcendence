@@ -1,5 +1,5 @@
 import { displayLogoutError } from "../utils/errors.js";
-import { fillModalContent, openModal, closeModal } from "../utils/modals.js";
+import { fillModalContent, openModal, closeModal, initModalListeners } from "../utils/modals.js";
 import { loadHomePage } from "./home.js";
 
 // Event listeners initialization
@@ -35,6 +35,10 @@ export async function loadAuthPage(addToHistory = true) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
     document.body.innerHTML = doc.body.innerHTML;
+
+    // Re-initialize listeners after setting new content
+    initModalListeners();
+    initAuthListeners();
   } catch (error) {
     console.error("Error loading auth page:", error);
     displayLogoutError("An error occurred while loading the login page.");

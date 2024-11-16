@@ -1,6 +1,32 @@
 import { showToast } from "../utils/toast.js";
 import { handleCreateTournamentSubmit } from "../services/tournamentService.js";
 
+function setDefaultDates() {
+  // Get current date and time
+  const now = new Date();
+
+  // Registration start: now
+  const registrationStart = now;
+
+  // Registration end: 7 days from now
+  const registrationEnd = new Date(now);
+  registrationEnd.setDate(now.getDate() + 7);
+
+  // Tournament start: 1 day after registration ends
+  const tournamentStart = new Date(registrationEnd);
+  tournamentStart.setDate(registrationEnd.getDate() + 1);
+
+  // Format dates for datetime-local input (YYYY-MM-DDThh:mm)
+  const formatDateForInput = (date) => {
+    return date.toISOString().slice(0, 16);
+  };
+
+  // Set the values with correct IDs
+  document.getElementById("registration-start").value = formatDateForInput(registrationStart);
+  document.getElementById("registration-close").value = formatDateForInput(registrationEnd);
+  document.getElementById("tournament-start").value = formatDateForInput(tournamentStart);
+}
+
 export function loadCreateTournamentPage(addToHistory = true) {
   try {
     if (addToHistory) {
@@ -20,6 +46,9 @@ export function loadCreateTournamentPage(addToHistory = true) {
     const mainContent = document.getElementById("main-content");
     mainContent.innerHTML = "";
     mainContent.appendChild(document.importNode(template.content, true));
+
+    // Set default values when page loads
+    setDefaultDates(); // Call this after adding content to DOM
 
     // Add event listeners for form interactions
     const form = mainContent.querySelector(".create-tournament-form");

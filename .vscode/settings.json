@@ -2,6 +2,7 @@
   "editor.formatOnSave": true,
   "editor.formatOnSaveMode": "file",
   "editor.formatOnType": true,
+  "editor.rulers": [120],
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter",
     "editor.wordBasedSuggestions": "off",
@@ -9,8 +10,7 @@
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.organizeImports": "explicit"
-    },
-    "editor.rulers": [120]
+    }
   },
   "black-formatter.importStrategy": "useBundled",
   "black-formatter.path": [],
@@ -29,11 +29,11 @@
   "python.analysis.autoSearchPaths": true,
   "black-formatter.args": ["--line-length", "120"],
   "python.languageServer": "Pylance",
-  "editor.rulers": [120],
-"makefile.configureOnOpen": false,
-"workbench.colorCustomizations": {
-	"activityBar.background": "#073609",
-	"titleBar.activeBackground": "#0A4B0D",
-	"titleBar.activeForeground": "#F0FDF0"
-}
+  "makefile.configureOnOpen": false,
+  "workbench.colorCustomizations": {
+    "activityBar.background": "#073609",
+    "titleBar.activeBackground": "#0A4B0D",
+    "titleBar.activeForeground": "#F0FDF0"
+  },
+  "pylint.args": ["--disable=C0111,no-member"]
 }

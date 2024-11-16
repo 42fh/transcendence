@@ -1,5 +1,12 @@
 // Configuration for data source and state management
 export const CONFIG = {
-  DATA_SOURCE: "JS", // 'API' | 'JSON' | 'JS'
-  API_BASE_URL: "/api/game/tournaments", // For future use
+  DATA_SOURCE: {
+    API: "API",
+    JS: "JS",
+  },
+  CURRENT_SOURCE: "API",
+  API_BASE_URL: "http://localhost:8080",
+  API_ENDPOINTS: {
+    TOURNAMENTS: "/api/game/tournaments",
+  },
 };
