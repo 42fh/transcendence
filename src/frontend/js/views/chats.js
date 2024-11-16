@@ -181,32 +181,30 @@ export class ChatView {
 
   async toggleBlockUser(username, isCurrentlyBlocked) {
     try {
-      const endpoint = isCurrentlyBlocked
-        ? "/api/chat/unblock_user/"
-        : "/api/chat/block_user/";
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": this.state.csrfToken || this.getCookie("csrftoken"),
-        },
-        body: JSON.stringify({ username }),
-      });
+        const method = isCurrentlyBlocked ? "DELETE" : "POST";
+        const response = await fetch("/api/chat/blocked_user/", {
+            method: method,
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": this.state.csrfToken || this.getCookie("csrftoken"),
+            },
+            body: JSON.stringify({ username }),
+        });
 
-      if (!response.ok) throw new Error("Failed to toggle block status");
+        if (!response.ok) throw new Error("Failed to toggle block status");
 
-      await this.loadUserList();
-      if (!isCurrentlyBlocked && this.state.currentChatPartner === username) {
-        if (window.chatSocket) {
-          window.chatSocket.close();
+        await this.loadUserList();
+        if (!isCurrentlyBlocked && this.state.currentChatPartner === username) {
+            if (window.chatSocket) {
+                window.chatSocket.close();
+            }
+            document.getElementById("chat-messages").innerHTML = "";
+            this.state.currentChatPartner = "";
         }
-        document.getElementById("chat-messages").innerHTML = "";
-        this.state.currentChatPartner = "";
-      }
     } catch (error) {
-      displayErrorMessageModalModal(`Failed to block/unblock user: ${error.message}`);
+        displayErrorMessageModalModal(`Failed to block/unblock user: ${error.message}`);
     }
-  }
+}
 
   startChatWith(otherUser) {
     if (
