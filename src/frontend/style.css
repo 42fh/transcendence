@@ -134,7 +134,7 @@ button:hover {
   margin-bottom: var(--spacing-sm);
 }
 
-.chat-window {
+.chat-window-messages {
   width: 70%;
   display: flex;
   flex-direction: column;
