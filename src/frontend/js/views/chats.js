@@ -1,4 +1,4 @@
-import { showNotification } from "./notifications.js";
+import { displayErrorMessageModalModal } from "../utils/modals.js";
 
 export function loadChatPage(addToHistory = true) {
   try {
@@ -85,16 +85,6 @@ export class ChatView {
     return cookieValue;
   }
 
-  showError(message) {
-    const errorContainer = document.getElementById("error-container");
-    const errorDiv = document.createElement("div");
-    errorDiv.className = "error-message";
-    errorDiv.textContent = message;
-    errorContainer.innerHTML = "";
-    errorContainer.appendChild(errorDiv);
-    setTimeout(() => errorDiv.remove(), 5000);
-  }
-
   async initializeChat() {
     try {
       // First check if we have a stored username
@@ -132,7 +122,7 @@ export class ChatView {
 
       await this.loadUserList();
     } catch (error) {
-      showNotification(`Error: ${error.message}`, "error");
+      displayErrorMessageModalModal(`Failed to initialize chat: ${error.message}`);
       // Redirect to login if not authenticated
       if (
         error.message === "Not authenticated" ||
@@ -155,8 +145,8 @@ export class ChatView {
       data.users.forEach((user) => {
         const li = document.createElement("li");
         const userDiv = document.createElement("div");
-        userDiv.className = "user-item-container";
-
+        userDiv.className = "chat-user-item-container";
+  
         const nameSpan = document.createElement("span");
         nameSpan.className = "user-item" + (user.has_chat ? " has-chat" : "");
         nameSpan.textContent = user.username;
@@ -189,38 +179,36 @@ export class ChatView {
 
       showNotification("User list loaded successfully.", "success");
     } catch (error) {
-      showNotification(`Failed to load user list: ${error.message}`, "error");
+      displayErrorMessageModalModal(`Failed to load user list: ${error.message}`);
     }
   }
 
   async toggleBlockUser(username, isCurrentlyBlocked) {
     try {
-      const endpoint = isCurrentlyBlocked
-        ? "/api/chat/unblock_user/"
-        : "/api/chat/block_user/";
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": this.state.csrfToken || this.getCookie("csrftoken"),
-        },
-        body: JSON.stringify({ username }),
-      });
+        const method = isCurrentlyBlocked ? "DELETE" : "POST";
+        const response = await fetch("/api/chat/blocked_user/", {
+            method: method,
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": this.state.csrfToken || this.getCookie("csrftoken"),
+            },
+            body: JSON.stringify({ username }),
+        });
 
-      if (!response.ok) throw new Error("Failed to toggle block status");
+        if (!response.ok) throw new Error("Failed to toggle block status");
 
-      await this.loadUserList();
-      if (!isCurrentlyBlocked && this.state.currentChatPartner === username) {
-        if (window.chatSocket) {
-          window.chatSocket.close();
+        await this.loadUserList();
+        if (!isCurrentlyBlocked && this.state.currentChatPartner === username) {
+            if (window.chatSocket) {
+                window.chatSocket.close();
+            }
+            document.getElementById("chat-messages").innerHTML = "";
+            this.state.currentChatPartner = "";
         }
-        document.getElementById("chat-messages").innerHTML = "";
-        this.state.currentChatPartner = "";
-      }
     } catch (error) {
-      showNotification(`Failed to toggle block status: ${error.message}`, "error");
+        displayErrorMessageModalModal(`Failed to block/unblock user: ${error.message}`);
     }
-  }
+}
 
   startChatWith(otherUser) {
     if (
@@ -234,7 +222,7 @@ export class ChatView {
     this.state.currentChatPartner = otherUser;
     const currentUser = document.getElementById("current-username").value;
     if (!currentUser) {
-      showNotification("Current user not found", "error");
+      displayErrorMessageModalModal("No username found");
       this.state.isSwitchingRoom = false;
       return;
     }
@@ -253,7 +241,7 @@ export class ChatView {
     try {
       this.initializeWebSocket(wsUrl, otherUser);
     } catch (error) {
-      showNotification(`Failed to create connection: ${error.message}`, "error");
+      displayErrorMessageModalModal(`Failed to connect to chat: ${error.message}`);
       this.state.isSwitchingRoom = false;
     }
   }
@@ -352,7 +340,7 @@ export class ChatView {
         window.chatSocket.send(JSON.stringify({ message }));
         messageInput.value = "";
       } catch (error) {
-        this.showError(`Failed to send message: ${error.message}`);
+        displayErrorMessageModalModal(`Failed to send message: ${error.message}`);
       }
     }
   }

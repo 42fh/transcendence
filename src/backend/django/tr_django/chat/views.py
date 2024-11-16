@@ -90,41 +90,29 @@ def mark_messages_read(request, room_id):
 
 @csrf_exempt
 @login_required
-def block_user(request):
+def blocked_user(request):
     try:
         data = json.loads(request.body)
-        username_to_block = data.get("username")
+        username = data.get("username")
 
-        if not username_to_block:
+        if not username:
             return JsonResponse({"status": "error", "message": "Username required"}, status=400)
 
-        user_to_block = CustomUser.objects.filter(username=username_to_block).first()
-        if not user_to_block:
+        user = CustomUser.objects.filter(username=username).first()
+        if not user:
             return JsonResponse({"status": "error", "message": "User not found"}, status=404)
 
-        if user_to_block == request.user:
-            return JsonResponse({"status": "error", "message": "Cannot block yourself"}, status=400)
+        if user == request.user:
+            return JsonResponse({"status": "error", "message": "Cannot block/unblock yourself"}, status=400)
 
-        BlockedUser.objects.get_or_create(user=request.user, blocked_user=user_to_block)
-        return JsonResponse({"status": "success", "message": f"Blocked user {username_to_block}"})
-
-    except Exception as e:
-        return JsonResponse({"status": "error", "message": str(e)}, status=500)
-
-
-@csrf_exempt
-@login_required
-def unblock_user(request):
-    try:
-        data = json.loads(request.body)
-        username_to_unblock = data.get("username")
-
-        if not username_to_unblock:
-            return JsonResponse({"status": "error", "message": "Username required"}, status=400)
-
-        BlockedUser.objects.filter(user=request.user, blocked_user__username=username_to_unblock).delete()
-
-        return JsonResponse({"status": "success", "message": f"Unblocked user {username_to_unblock}"})
+        if request.method == "POST":
+            BlockedUser.objects.get_or_create(user=request.user, blocked_user=user)
+            return JsonResponse({"status": "success", "message": f"Blocked user {username}"})
+        elif request.method == "DELETE":
+            BlockedUser.objects.filter(user=request.user, blocked_user=user).delete()
+            return JsonResponse({"status": "success", "message": f"Unblocked user {username}"})
+        else:
+            return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
 
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)}, status=500)

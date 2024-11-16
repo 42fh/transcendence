@@ -323,44 +323,36 @@
 <!-- Chat Template -->
 <!-- Chat Template -->
 <template id="chat-template">
-  <div class="chat-page">
-    <!-- Notification container -->
     <div id="notification-container"></div>
 
-    <!-- Greeting and user name display -->
-    <h3 style="margin-bottom: 70px;">Hello, <span id="current-username-display"></span>!</h3>
-    
-    <!-- Hidden input to store current username -->
-    <input type="hidden" id="current-username" />
+    <h3 class="chat-greeting">Hello, <span id="current-username-display"></span>!</h3>
+        <input type="hidden" id="current-username" />
     
     <div class="chat-container">
-      <!-- User list section -->
-      <div class="user-list">
-        <h3 style="margin-bottom: 20px;">Users</h3>
+      <div>
+        <h3 >Users</h3>
         <div id="error-container"></div>
-        <ul id="users-list" style="margin-bottom: 20px;"></ul>
+        <ul id="users-list" class="chat-user-list-ul"></ul>
       </div>
 
-      <!-- Chat window section -->
-      <div class="chat-window">
+      <div class="chat-window-messages">
         <div id="chat-messages"></div>
 
-        <!-- Input area for chat messages -->
-        <div class="input-area">
-          <input 
-            type="text" 
-            id="chat-message-input" 
-            class="input-retro" 
-            style="margin-bottom: 10px;" 
-            placeholder="Type your message..." 
-          /> 
+      <!-- Input area for chat messages -->
+      <div class="chat-input-area">
+        <input 
+          type="text" 
+          id="chat-message-input" 
+          class="input-retro" 
+          placeholder="Type your message..." 
+        />
+      </div>
 
-          <!-- Templates for user items and messages -->
           <template id="user-item-template">
             <li>
-              <div class="user-item-container">
+              <div class="chat-user-item-container">
                 <span class="user-item"></span>
-                <button class="button-small"></button>
+                <button class="chat-button-small"></button>
               </div>
             </li>
           </template>
@@ -370,19 +362,13 @@
               <strong></strong>: <span></span>
             </div>
           </template>
-
-          <!-- Button to send a message -->
           <div>
             <button id="chat-message-submit">Send</button>
           </div>
         </div>
       </div>
     </div>
-  </div>
 </template>
-
-
-    
 
     <script type="module" src="js/main.js"></script>
   </body>
