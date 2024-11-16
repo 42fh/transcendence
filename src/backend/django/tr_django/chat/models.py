@@ -14,9 +14,7 @@ class ChatRoomManager(models.Manager):
 
         # Check if room exists with either user order
         existing_room = self.filter(
-            models.Q(room_id=room_id)
-            | models.Q(user1=user1, user2=user2)
-            | models.Q(user1=user2, user2=user1)
+            models.Q(room_id=room_id) | models.Q(user1=user1, user2=user2) | models.Q(user1=user2, user2=user1)
         ).first()
 
         if existing_room:
@@ -32,12 +30,8 @@ class ChatRoomManager(models.Manager):
 
 class ChatRoom(models.Model):
     room_id = models.CharField(max_length=255, unique=True)
-    user1 = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="chat_user1"
-    )
-    user2 = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="chat_user2"
-    )
+    user1 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="chat_user1")
+    user2 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="chat_user2")
     created_at = models.DateTimeField(auto_now_add=True)
     last_message_at = models.DateTimeField(default=timezone.now)
 
@@ -55,12 +49,8 @@ class ChatRoom(models.Model):
 
 
 class Message(models.Model):
-    room = models.ForeignKey(
-        ChatRoom, on_delete=models.CASCADE, related_name="messages"
-    )
-    sender = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sent_messages"
-    )
+    room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name="messages")
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sent_messages")
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
@@ -91,14 +81,8 @@ def ensure_room_id(sender, instance, **kwargs):
 
 
 class BlockedUser(models.Model):
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="chat_blocking"
-    )
-    blocked_user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="chat_blocked_by",
-    )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="blocked_users")
+    blocked_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="blocking_users")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
