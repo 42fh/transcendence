@@ -1,3 +1,4 @@
+import { showNotification } from "./notifications.js";
 
 export function loadChatPage(addToHistory = true) {
   try {
@@ -53,25 +54,6 @@ export class ChatView {
       HISTORY: "message_history",
       USER_LIST: "user_list",
     };
-  }
-
-  // Function to show notifications
-  showNotification(message, type = "info") {
-    const notificationContainer = document.getElementById("notification-container");
-
-    const notification = document.createElement("div");
-    notification.classList.add("notification", type); // Add type classes like 'success', 'error', 'info'
-    
-    notification.innerHTML = `
-      <span>${message}</span>
-      <button class="close-btn" onclick="this.parentElement.remove()">&#10006;</button>
-    `;
-    notificationContainer.appendChild(notification);
-
-    // Automatically remove notification after 5 seconds
-    setTimeout(() => {
-      notification.remove();
-    }, 5000);
   }
 
   async init() {
@@ -146,11 +128,11 @@ export class ChatView {
       }
 
       // Show success notification
-      this.showNotification("Welcome to the chat!", "success");
+      showNotification("Welcome to the chat!", "success");
 
       await this.loadUserList();
     } catch (error) {
-      this.showNotification(`Error: ${error.message}`, "error");
+      showNotification(`Error: ${error.message}`, "error");
       // Redirect to login if not authenticated
       if (
         error.message === "Not authenticated" ||
@@ -205,9 +187,9 @@ export class ChatView {
         usersList.appendChild(li);
       });
 
-      this.showNotification("User list loaded successfully.", "success");
+      showNotification("User list loaded successfully.", "success");
     } catch (error) {
-      this.showNotification(`Failed to load user list: ${error.message}`, "error");
+      showNotification(`Failed to load user list: ${error.message}`, "error");
     }
   }
 
@@ -236,7 +218,7 @@ export class ChatView {
         this.state.currentChatPartner = "";
       }
     } catch (error) {
-      this.showNotification(`Failed to toggle block status: ${error.message}`, "error");
+      showNotification(`Failed to toggle block status: ${error.message}`, "error");
     }
   }
 
@@ -252,7 +234,7 @@ export class ChatView {
     this.state.currentChatPartner = otherUser;
     const currentUser = document.getElementById("current-username").value;
     if (!currentUser) {
-      this.showNotification("Current user not found", "error");
+      showNotification("Current user not found", "error");
       this.state.isSwitchingRoom = false;
       return;
     }
@@ -271,7 +253,7 @@ export class ChatView {
     try {
       this.initializeWebSocket(wsUrl, otherUser);
     } catch (error) {
-      this.showNotification(`Failed to create connection: ${error.message}`, "error");
+      showNotification(`Failed to create connection: ${error.message}`, "error");
       this.state.isSwitchingRoom = false;
     }
   }
@@ -306,11 +288,11 @@ export class ChatView {
     };
     
     window.chatSocket.onerror = (error) => {
-      this.showNotification(`WebSocket error: ${error}`, "error");
+      showNotification(`WebSocket error: ${error}`, "error");
     };
 
     window.chatSocket.onclose = (e) => {
-      this.showNotification("Connection closed.", "info");
+      showNotification("Connection closed.", "info");
     };
   }
 
@@ -328,7 +310,7 @@ export class ChatView {
         this.addMessageToChat(message.username, message.message, "chat");
       });
     } else {
-      this.showNotification("Failed to load message history: Invalid data", "error");
+      showNotification("Failed to load message history: Invalid data", "error");
     }
   }
   
