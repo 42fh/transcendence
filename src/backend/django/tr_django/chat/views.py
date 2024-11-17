@@ -13,13 +13,13 @@ from channels.db import database_sync_to_async
 
 
 @login_required
-def get_username(request):
+def username(request):
     """Return the current user's username and CSRF token."""
     return JsonResponse({"username": request.user.username, "csrfToken": get_token(request)})
 
 
 @login_required
-def get_user_list(request):
+def users_overview(request):
     try:
         if not request.user.is_authenticated:
             return JsonResponse({"status": "error", "message": "User not authenticated"}, status=401)
@@ -65,7 +65,7 @@ def get_user_list(request):
         return JsonResponse({"status": "success", "users": user_list})
 
     except Exception as e:
-        print(f"DEBUG: Error in get_user_list: {str(e)}")
+        print(f"DEBUG: Error in users_overview: {str(e)}")
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
 

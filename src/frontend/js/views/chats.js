@@ -87,44 +87,29 @@ export class ChatView {
 
   async initializeChat() {
     try {
-      // First check if we have a stored username
       const storedUsername = localStorage.getItem("username");
       if (!storedUsername) {
         throw new Error("Not logged in");
       }
-
-      const response = await fetch("/api/chat/get_username/");
-      if (response.status === 401 || response.status === 403) {
-        throw new Error("Not authenticated");
-      }
-      if (!response.ok) throw new Error("Failed to get username");
-
-      const data = await response.json();
-      this.state.currentUsername = data.username;
-      this.state.csrfToken = data.csrfToken;
-
-      // Update username display
-      const usernameDisplay = document.getElementById(
-        "current-username-display"
-      );
+  
+      this.state.currentUsername = storedUsername;
+  
+      const usernameDisplay = document.getElementById("current-username-display");
       const usernameInput = document.getElementById("current-username");
-
+  
       if (usernameDisplay) {
         usernameDisplay.textContent = this.state.currentUsername;
       }
-
+  
       if (usernameInput) {
         usernameInput.value = this.state.currentUsername;
       }
-
+  
       await this.loadUserList();
     } catch (error) {
       displayErrorMessageModalModal(`Failed to initialize chat: ${error.message}`);
       // Redirect to login if not authenticated
-      if (
-        error.message === "Not authenticated" ||
-        error.message === "Not logged in"
-      ) {
+      if (error.message === "Not logged in") {
         window.location.href = "/accounts/login/";
       }
     }
@@ -132,7 +117,7 @@ export class ChatView {
 
   async loadUserList() {
     try {
-      const response = await fetch("/api/chat/get_user_list/");
+      const response = await fetch("/api/chat/users_overview/");
       if (!response.ok) throw new Error("Failed to get user list");
       const data = await response.json();
   
