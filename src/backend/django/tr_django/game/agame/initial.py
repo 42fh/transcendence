@@ -66,31 +66,15 @@ def create_initial_state(self):
 
         # Initialize paddles based on game type
         paddles = []
-        # if self.get_game_type() == "polygon":
-        spacing = math.floor(self.num_sides / self.num_paddles)
-        active_paddle_count = 0
-
         for side_index in range(self.num_sides):
-            is_active = False
-            for i in range(min(self.num_paddles, self.num_sides)):
-                if side_index == (i * spacing) % self.num_sides:
-                    is_active = True
-                    active_paddle_count += 1
-                    break
-
             paddles.append(
-                {"position": float(0.5), "active": is_active, "side_index": side_index}
+                {
+                    "position": float(0.5), 
+                    "active": side_index in self.active_sides, 
+                    "side_index": side_index
+                }
             )
-        score_count = active_paddle_count
-
-        # elif self.get_game_type() == "circular":
-        #    for i in range(self.num_players):
-        #        paddles.append({
-        #            "position": float(0.5),
-        #            "active": True,
-        #            "side_index": i
-        #        })
-        #    score_count = self.num_players
+        score_count = len(self.active_sides)
 
         state = {
             "balls": balls,
