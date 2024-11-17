@@ -63,14 +63,15 @@ class PongConsumer(AsyncWebsocketConsumer):
             if player_count == 0:
                 asyncio.create_task(self.game_manager.start_game())
 
-            self.player_index = await self.game_manager.add_player(self.player_id)
-            if isinstance(self.player_index, dict):  # If player_data is returned
-                self.current_pos = self.player_index.get("position", 0.5)
-                self.player_index = self.player_index.get("index", 0)
-
-            print(
-                f"Player {self.player_id} connected to game {self.game_id} as player {self.player_index}"
-            )
+            player_index = await self.game_manager.add_player(self.player_id)
+            if not player_index:
+                await self.close(code=1011)
+                return
+            self.role = player_index['role']
+            if self.role == 'player':
+                self.current_pos = player_index.get("position", 0.5)
+                self.player_index = player_index.get("index", 0)
+                print(f"Player {self.player_id} connected to game {self.game_id} as player {self.player_index}")
 
             await self.accept()
 
@@ -92,7 +93,9 @@ class PongConsumer(AsyncWebsocketConsumer):
                             {
                                 "type": "initial_state",
                                 "game_state": sanitized_state,
-                                "player_index": self.player_index,
+                                "role": self.role,        
+                                "player_index": self.player_index if self.role == "player" else None,
+                                "message": player_index.get("message", "no message given"),        
                                 "player_values": self.player_values,
                                 "game_setup": {
                                     "type": game_type,
@@ -114,20 +117,29 @@ class PongConsumer(AsyncWebsocketConsumer):
 
         except Exception as e:
             print(f"Error in connect: {e}")
-            await self.close()
+            await self.close(code=1011)
 
     # TODO: disconnect could not be called (browser crash etc. so we need a extra test if the client is there
     async def disconnect(self, close_code):
-        await self.game_manager.remove_player(self.player_id)
         await self.channel_layer.group_discard(self.game_group, self.channel_name)
-        print(f"Player {self.player_id} disconnected from game {self.game_id}")
+        if self.role == "player": 
+            await self.game_manager.remove_player(self.player_id)
+            print(f"Player {self.player_id} disconnected from game {self.game_id}")
 
     # TODO: What else do/ could we recieve from the client: 1.answer for PING, 2.want to use powerup etc ....
     async def receive(self, text_data):
         try:
             data = json.loads(text_data)
             action = data.get("action")
-
+                        
+            if self.role == "spectator":
+                await self.send(
+                    text_data=json.dumps(
+                        {"type": "error", "message": "Your are only allowed to watch"}
+                    )
+                )
+                return
+             
             # here we could decide what the client can set up during waiting
             if not await self.game_manager.running:
                 await self.send(

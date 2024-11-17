@@ -11,23 +11,28 @@ async def add_player(self, player_id):
 
         # Check if player exists
         if await self.redis_conn.sismember(self.players_key, str(player_id)):
-            player_data = await self.get_player_data(player_id)
-            return player_data if player_data else False
+            return {
+                "role" : "spectator",
+                "message" : "Already connected - switching to spectator mode"
+            }
 
         # Check if game is full
         current_count = await self.redis_conn.scard(self.players_key)
         if current_count >= max_players:
-            return False
-
+            return {
+                "role" : "spectator",
+                "message" : "Game full - joining as spectator"
+            }
         # Add player atomically
         if await self.redis_conn.sadd(self.players_key, str(player_id)):
             # Initialize player data
-            player_data = {
+            return {
+                "role" : "player",
                 "index": current_count,
                 "position": 0.5,
                 "settings": settings.get("player_settings", {}),
+                "message" : "Successfully joined as player"
             }
-            return player_data
 
         return False
 
