@@ -1,5 +1,5 @@
 export async function fetchUserList() {
-    const response = await fetch("/api/chat/users_overview/");
+    const response = await fetch("/api/chat/users/");
     if (!response.ok) throw new Error("Failed to get user list");
     return response.json();
   }

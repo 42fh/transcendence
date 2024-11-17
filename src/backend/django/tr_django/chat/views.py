@@ -13,7 +13,7 @@ from channels.db import database_sync_to_async
 
 
 @login_required
-def users_overview(request):
+def users(request):
     try:
         if not request.user.is_authenticated:
             return JsonResponse({"status": "error", "message": "User not authenticated"}, status=401)
@@ -59,7 +59,7 @@ def users_overview(request):
         return JsonResponse({"status": "success", "users": user_list})
 
     except Exception as e:
-        print(f"DEBUG: Error in users_overview: {str(e)}")
+        print(f"DEBUG: Error in users: {str(e)}")
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
 
