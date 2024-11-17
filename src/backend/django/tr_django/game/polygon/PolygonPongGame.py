@@ -42,9 +42,13 @@ class PolygonPongGame(AGameManager):
 
     async def apply_game_settings(self):
         """Apply game-specific values from settings"""
+        print("settings: ", self.settings)
         self.num_sides = self.settings["sides"]
         self.num_paddles = self.settings["num_players"]
-        self.game_mode = self.settings.get("mode", "star")  # Get mode from settings
+        self.game_mode = self.settings.get("pongType", "regular")  # Get mode from settings
+        self.game_shape = self.settings.get("shape", "regular")  # Get mode from settings
+        self.score_mode = self.settings.get("scoreMode", "classic")
+        
         self.active_sides = self.get_player_side_indices()
         self.initialize_ball_movements(self.settings.get("num_balls", 1))
         self.calculate_polygon_vertices()
