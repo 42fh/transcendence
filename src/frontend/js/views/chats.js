@@ -1,5 +1,6 @@
 import { displayErrorMessageModalModal } from "../utils/modals.js";
 import { fetchUserList, toggleBlockUser } from "../services/chatService.js";
+import { initializeChatWebSocket } from "../services/chatSocketService.js";
 
 export function loadChatPage(addToHistory = true) {
   try {
@@ -200,48 +201,11 @@ export class ChatView {
     const wsUrl = `${wsProtocol}//${host}:${this.WEBSOCKET_PORT}/ws/chat/${roomName}/`;
 
     try {
-      this.initializeWebSocket(wsUrl, otherUser);
+      initializeChatWebSocket(wsUrl, otherUser, this);
     } catch (error) {
       displayErrorMessageModalModal(`Failed to connect to chat: ${error.message}`);
       this.state.isSwitchingRoom = false;
     }
-  }
-
-  initializeWebSocket(wsUrl, otherUser) {
-    window.chatSocket = new WebSocket(wsUrl);
-
-    window.chatSocket.onopen = () => {
-      document.getElementById("chat-messages").innerHTML = "";
-      this.addMessageToChat(
-        "System",
-        `Connected to chat with ${otherUser}`,
-        "system"
-      );
-      this.state.messageHistoryLoaded = false;
-      this.state.isSwitchingRoom = false;
-    };
-
-    window.chatSocket.onmessage = (e) => {
-      const data = JSON.parse(e.data);
-      this.handleWebSocketMessage(data);
-    };
-
-    window.chatSocket.onclose = () => {
-      if (this.state.currentChatPartner === otherUser) {
-        this.addMessageToChat(
-          "System",
-          "Connection closed. Attempting to reconnect...",
-          "system"
-        );
-        setTimeout(() => this.startChatWith(otherUser), 3000);
-      }
-      this.state.isSwitchingRoom = false;
-    };
-
-    window.chatSocket.onerror = () => {
-      displayErrorMessageModalModal("Failed to connect to chat");
-      this.state.isSwitchingRoom = false;
-    };
   }
 
   handleWebSocketMessage(data) {
