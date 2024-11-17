@@ -93,7 +93,7 @@ def create_initial_state(self):
         print(f"Error in create_initial_state: {e}")
         # Return minimal valid state as fallback
         return {
-            "balls": 
+            "balls":[ 
                 {
                     "x": float(0),
                     "y": float(0),
