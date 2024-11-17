@@ -7,25 +7,31 @@ import math
 
 async def start_game(self):
     """Start game with process-safe checks"""
-    settings = msgpack.unpackb(await self.redis_conn.get(self.settings_key))
-    min_players = settings.get("min_players", 2)
+    try:
+        settings = msgpack.unpackb(await self.redis_conn.get(self.settings_key))
+        min_players = settings.get("min_players", 2)
 
-    while True:
-        player_count = await self.redis_conn.scard(self.players_key)
-        if player_count >= min_players:
-            break
-        print(f"Waiting for players... ({player_count}/{min_players})")
-        await asyncio.sleep(1)
+        while True:
+            player_count = await self.redis_conn.scard(self.players_key)
+            if player_count == 0:
+                return
+            if player_count >= min_players:
+                break
+            print(f"Waiting for players... ({player_count}/{min_players})")
+            await asyncio.sleep(1)
 
-    await self.redis_conn.set(self.running_key, b"1")
+        await self.redis_conn.set(self.running_key, b"1")
 
-    while await self.redis_conn.get(self.running_key) == b"1":
-        game_over = await self.update_game()
-        if game_over:
-            await self.end_game()  # can be sync not async !
-            break
-        await asyncio.sleep(0.016)  # ~60 FPS
-
+        while await self.redis_conn.get(self.running_key) == b"1":
+            game_over = await self.update_game()
+            if game_over:
+                await self.end_game()  # can be sync not async !
+                break
+            await asyncio.sleep(0.016)  # ~60 FPS
+    except Exception as e:
+        print(f"Error in start_game: {e}")
+        await self.end_game()
+        return
 
 async def end_game(self):
     """End game with process-safe cleanup"""
