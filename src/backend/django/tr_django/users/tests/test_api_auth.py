@@ -1,6 +1,8 @@
 from django.test import TestCase
 from django.urls import reverse
 from users.models import CustomUser
+import json
+import uuid
 
 
 class SignupTestCase(TestCase):
@@ -98,3 +100,73 @@ class FriendRequestTests(TestCase):
         self.user2.accept_friend_request(self.user1)
         self.assertTrue(self.user1.is_friend_with(self.user2))
         self.assertTrue(self.user2.is_friend_with(self.user1))
+
+
+class DeleteUserTests(TestCase):
+    def setUp(self):
+        # Add this line to define the URL
+        self.url = reverse("delete_user")  # Change from delete-user to delete_user
+        # Create test users
+        self.user1 = CustomUser.objects.create_user(username="user1", password="test123")
+        self.user2 = CustomUser.objects.create_user(username="user2", password="test123")
+        self.user3 = CustomUser.objects.create_user(username="user3", password="test123")
+
+    def test_unique_anonymous_username_generation(self):
+        """Test that anonymous usernames are always unique"""
+        # Create first user and anonymize
+        user1 = CustomUser.objects.create_user(
+            id=uuid.UUID("12345678-1234-5678-1234-567812345678"), username="testuser1", password="testpass123"
+        )
+
+        self.client.force_login(user1)
+        response1 = self.client.post(
+            self.url, data=json.dumps({"password": "testpass123"}), content_type="application/json"
+        )
+        self.assertEqual(response1.status_code, 200)
+        anon_username1 = CustomUser.objects.get(id=user1.id).username
+
+        # Create second user with similar UUID and anonymize
+        user2 = CustomUser.objects.create_user(
+            id=uuid.UUID("12345678-1234-5678-1234-567812345679"),  # Only last digit different
+            username="testuser2",
+            password="testpass123",
+        )
+
+        self.client.force_login(user2)
+        response2 = self.client.post(
+            self.url, data=json.dumps({"password": "testpass123"}), content_type="application/json"
+        )
+        self.assertEqual(response2.status_code, 200)
+        anon_username2 = CustomUser.objects.get(id=user2.id).username
+
+        # Verify usernames are different but share prefix
+        self.assertNotEqual(anon_username1, anon_username2)
+        prefix = "user_12345678"  # First 8 chars of UUID
+        self.assertTrue(anon_username1.startswith(prefix))
+        self.assertTrue(anon_username2.startswith(prefix))
+
+    def test_multiple_anonymizations(self):
+        """Test handling of multiple anonymizations with same UUID prefix"""
+        base_uuid = "12345678-1234-5678-1234-56781234567"
+        usernames = []
+
+        # Create and anonymize multiple users with similar UUIDs
+        for i in range(3):
+            # Create user with UUID that differs only in last character
+            user = CustomUser.objects.create_user(
+                id=uuid.UUID(f"{base_uuid}{i}"), username=f"testuser{i}", password="testpass123"
+            )
+
+            self.client.force_login(user)
+            response = self.client.post(
+                self.url, data=json.dumps({"password": "testpass123"}), content_type="application/json"
+            )
+            self.assertEqual(response.status_code, 200)
+
+            username = CustomUser.objects.get(id=user.id).username
+            usernames.append(username)
+
+        # Verify all usernames are unique but share the same prefix
+        self.assertEqual(len(set(usernames)), 3)  # All usernames should be unique
+        prefix = "user_12345678"  # First 8 chars of UUID
+        self.assertTrue(all(u.startswith(prefix) for u in usernames))
