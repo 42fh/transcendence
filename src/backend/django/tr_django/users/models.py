@@ -85,6 +85,7 @@ class CustomUser(AbstractUser):
     ONLINE_STATUS_CHOICES = [
         (status, status.capitalize()) for status in [STATUS_OFFLINE, STATUS_ONLINE, STATUS_BUSY, STATUS_AWAY]
     ]
+
     # TODO: Remove this, cause it's transitient. It's not something that needs to be stored in the database.
     online_status = models.CharField(max_length=10, choices=ONLINE_STATUS_CHOICES, default=STATUS_OFFLINE)
 
