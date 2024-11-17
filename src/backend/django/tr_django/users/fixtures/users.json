@@ -204,5 +204,21 @@
       "joined_at": "2024-01-01T12:00:00Z",
       "score": 7
     }
+  },
+  {
+    "model": "users_customuser_friends",
+    "pk": 1,
+    "fields": {
+      "customuser_id": "123e4567-e89b-12d3-a456-426614174000",
+      "customuser_id1": "223e4567-e89b-12d3-a456-426614174000"
+    }
+  },
+  {
+    "model": "users_customuser_friends",
+    "pk": 2,
+    "fields": {
+      "customuser_id": "123e4567-e89b-12d3-a456-426614174000",
+      "customuser_id1": "323e4567-e89b-12d3-a456-426614174000"
+    }
   }
 ]

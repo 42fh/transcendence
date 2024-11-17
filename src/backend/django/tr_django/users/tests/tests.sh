@@ -47,6 +47,7 @@ function usage() {
     echo "  7  Run tests in test_api_user.py (APIUserListGetTests)"
     echo "  8  Run tests in test_api_user.py (APIUserDetailGetTests)"
     echo "  9  Run tests in test_api_user.py (APIUserUpdateTests)"
+    echo "  10 Run tests in test_api_user.py (FriendsListViewTests)"
     echo "  A  Run all tests"
     exit 1
 }
@@ -90,6 +91,9 @@ case "$1" in
         ;;
     9)
         python "$MANAGE_PY" test users.tests.test_api_user.APIUserUpdateTests --settings=tr_django.test_settings
+        ;;
+    10)
+        python "$MANAGE_PY" test users.tests.test_api_user.FriendsListViewTests --settings=tr_django.test_settings
         ;;
     A)
         python "$MANAGE_PY" test users.tests --settings=tr_django.test_settings
