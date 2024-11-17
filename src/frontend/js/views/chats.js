@@ -138,40 +138,30 @@ export class ChatView {
   
       const usersList = document.getElementById("users-list");
       usersList.innerHTML = "";
+      const template = document.getElementById("user-list-item-template");
   
       data.users.forEach((user) => {
-        const li = document.createElement("li");
-        const userDiv = document.createElement("div");
-        userDiv.className = "chat-user-item-container";
-  
-        const nameSpan = document.createElement("span");
-        nameSpan.className = "user-item" + (user.has_chat ? " has-chat" : "");
+        const userElement = document.importNode(template.content, true);
+        const nameSpan = userElement.querySelector(".chat-user-item");
+        const blockButton = userElement.querySelector(".chat-button-small");
+        
         nameSpan.textContent = user.username;
-  
-        // Set the cursor to pointer on hover for usernames
-        nameSpan.style.cursor = 'pointer';  // Ensures pointer cursor is applied
-  
+        nameSpan.classList.toggle("has-chat", user.has_chat);
+        
         if (!user.has_blocked_you) {
           nameSpan.onclick = () => this.startChatWith(user.username);
+        } else {
+          nameSpan.classList.add("blocked-by-user");
+          nameSpan.title = "This user has blocked you";
         }
   
-        const blockButton = document.createElement("button");
-        blockButton.className = "button-small";
         blockButton.textContent = user.is_blocked ? "Unblock" : "Block";
         blockButton.onclick = async (e) => {
           e.stopPropagation();
           await this.toggleBlockUser(user.username, user.is_blocked);
         };
   
-        if (user.has_blocked_you) {
-          nameSpan.className += " blocked-by-user";
-          nameSpan.title = "This user has blocked you";
-        }
-  
-        userDiv.appendChild(nameSpan);
-        userDiv.appendChild(blockButton);
-        li.appendChild(userDiv);
-        usersList.appendChild(li);
+        usersList.appendChild(userElement);
       });
     } catch (error) {
       displayErrorMessageModalModal(`Failed to load user list: ${error.message}`);
@@ -305,13 +295,23 @@ export class ChatView {
 
   addMessageToChat(username, message, type = "other") {
     const chatBox = document.getElementById("chat-messages");
-    const messageDiv = document.createElement("div");
-    messageDiv.className = `message ${type}`;
-    messageDiv.innerHTML =
-      type === "system" ? message : `<strong>${username}:</strong> ${message}`;
-    chatBox.appendChild(messageDiv);
+    const template = document.getElementById("chat-message-template");
+    const messageElement = document.importNode(template.content, true);
+    
+    const messageDiv = messageElement.querySelector(".chat-message");
+    messageDiv.classList.add(`chat-message-${type}`);
+  
+    if (type === "system") {
+      messageDiv.textContent = message;
+    } else {
+      messageDiv.querySelector(".chat-message-username").textContent = username + ":";
+      messageDiv.querySelector(".chat-message-text").textContent = message;
+    }
+  
+    chatBox.appendChild(messageElement);
     chatBox.scrollTop = chatBox.scrollHeight;
-  }
+}
+  
 
   updateUserList(users) {
     const userList = document.getElementById("users-list");
@@ -323,7 +323,7 @@ export class ChatView {
       );
       if (!existingItem) {
         const li = document.createElement("li");
-        li.className = "user-item";
+        li.className = "chat-user-item";
         li.textContent = username;
         li.onclick = () => this.startChatWith(username);
         userList.appendChild(li);

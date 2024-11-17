@@ -71,17 +71,11 @@ button:hover {
 
 /* Chats page */
 
-.chat-chat-user-item-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
 .chat-clickable-item {
   cursor: pointer;
 }
 
-.button-small {
+.chat-button-small {
   background: transparent;
   color: white;
   font-size: 0.6em;
@@ -99,7 +93,7 @@ button:hover {
   color: black;
 }
 
-.input-retro {
+.chat-input-retro {
   width: 620px;
   height: 60px;
   padding: 1em 2em;
@@ -112,7 +106,7 @@ button:hover {
   transition: all 0.3s ease;
 }
 
-.input-retro:focus {
+.chat-input-retro:focus {
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
   background-color: rgba(255, 255, 255, 0.1);
 }
@@ -170,6 +164,50 @@ button:hover {
 .chat-input-area .input-retro:focus {
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
   background-color: rgba(255, 255, 255, 0.1);
+}
+
+.chat-message {
+  margin-bottom: var(--spacing-xs);
+  padding: var(--spacing-xs);
+}
+
+.chat-message-system {
+  color: gray;
+  font-style: italic;
+}
+
+.chat-message-self {
+  text-align: right;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.chat-message-other {
+  text-align: left;
+}
+
+/* Add cursor pointer for clickable elements */
+.chat-user-item {
+  cursor: pointer;
+}
+
+
+.chat-user-item-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-user-item {
+  cursor: pointer;
+}
+
+.chat-user-item.has-chat {
+  color: green;
+}
+
+.chat-user-item.blocked-by-user {
+  color: gray;
+  cursor: not-allowed;
 }
 
 /* Home Page */

@@ -342,25 +342,27 @@
         <input 
           type="text" 
           id="chat-message-input" 
-          class="input-retro" 
+          class="chat-input-retro" 
           placeholder="Type your message..." 
         />
       </div>
 
-          <template id="user-item-template">
-            <li>
-              <div class="chat-user-item-container">
-                <span class="user-item"></span>
-                <button class="chat-button-small"></button>
-              </div>
-            </li>
-          </template>
+      <template id="user-list-item-template">
+        <li>
+          <div class="chat-user-item-container">
+            <span class="chat-user-item"></span>
+            <button class="chat-button-small"></button>
+          </div>
+        </li>
+      </template>
 
-          <template id="chat-message-template">
-            <div class="chat-message">
-              <strong></strong>: <span></span>
-            </div>
-          </template>
+      <template id="chat-message-template">
+        <div class="chat-message">
+          <strong class="chat-message-username"></strong>
+          <span class="chat-message-text"></span>
+        </div>
+      </template>
+      
           <div>
             <button id="chat-message-submit">Send</button>
           </div>
