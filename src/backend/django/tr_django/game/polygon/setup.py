@@ -131,11 +131,11 @@ def calculate_polygon_vertices(self):
         max(abs(v["x"]) for v in vertices), max(abs(v["y"]) for v in vertices)
     )
 
-    scale = 1.0 / max_coord
+    self.scale = 1.0 / max_coord
     for vertex in vertices:
-        vertex["x"] *= scale
-        vertex["y"] *= scale
-    print("scale: ", scale)
+        vertex["x"] *= self.scale
+        vertex["y"] *= self.scale
+    print("scale: ", self.scale)
     self.vertices = vertices
 
 

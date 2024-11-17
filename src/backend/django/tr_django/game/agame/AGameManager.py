@@ -47,6 +47,8 @@ class AGameManager(ABC):
         # game physic
         self.outer_boundary = float(1.0)
         self.inner_boundary = None
+        self.scale =float(1.0)        
+
 
     @classmethod
     def register_game_type(cls, game_type_name):

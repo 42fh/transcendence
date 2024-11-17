@@ -49,8 +49,8 @@ def create_initial_state(self):
         # Initialize ball(s) with random direction
         balls = []
         num_balls = self.settings.get("num_balls", 1)
-        ball_size = self.settings.get("ball_size", 0.08)
-        initial_speed = self.settings.get("initial_ball_speed", 0.006)
+        ball_size = self.settings.get("ball_size", 0.08) / self.scale 
+        initial_speed = self.settings.get("initial_ball_speed", 0.006) /self.scale
 
         for _ in range(num_balls):
             angle = random.uniform(0, 2 * math.pi)
@@ -81,8 +81,8 @@ def create_initial_state(self):
             "paddles": paddles,
             "scores": [int(0)] * score_count,
             "dimensions": {
-                "paddle_length": float(self.settings.get("paddle_length", 0.3)),
-                "paddle_width": float(self.settings.get("paddle_width", 0.1)),
+                "paddle_length": float(self.settings.get("paddle_length", 0.3)) / self.scale,
+                "paddle_width": float(self.settings.get("paddle_width", 0.1))/ self.scale,
             },
             "game_type": self.get_game_type(),
         }
@@ -93,7 +93,7 @@ def create_initial_state(self):
         print(f"Error in create_initial_state: {e}")
         # Return minimal valid state as fallback
         return {
-            "balls": [
+            "balls": 
                 {
                     "x": float(0),
                     "y": float(0),
