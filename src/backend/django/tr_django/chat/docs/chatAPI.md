@@ -1,3 +1,4 @@
+
 # Chat Application API
 
 ## **Users Endpoint**
@@ -9,7 +10,7 @@ Retrieve a list of all users, along with their chat statuses and blocking inform
 #### **Request**
 
 - **Headers**:
-  - `Authorization`: Bearer `<JWT_TOKEN>` (required)
+  - `Authorization`: (required)
 
 #### **Response**
 
@@ -54,7 +55,7 @@ Block a user.
 #### **Request**
 
 - **Headers**:
-  - `Authorization`: Bearer `<JWT_TOKEN>` (required)
+  - `Authorization`: (required)
   - `Content-Type`: `application/json`
 - **Body**:
   ```json
@@ -89,7 +90,7 @@ Unblock a user.
 #### **Request**
 
 - **Headers**:
-  - `Authorization`: Bearer `<JWT_TOKEN>` (required)
+  - `Authorization`: (required)
   - `Content-Type`: `application/json`
 - **Body**:
   ```json
@@ -123,7 +124,7 @@ Unblock a user.
 
 ---
 
-## **Mark Messages as Read --> NOT YET USED**
+## **Mark Messages as Read**
 
 ### `POST /mark_messages_read/<room_id>/`
 
@@ -132,7 +133,7 @@ Mark all messages in a specific chat room as read.
 #### **Request**
 
 - **Headers**:
-  - `Authorization`: Bearer `<JWT_TOKEN>` (required)
+  - `Authorization`: (required)
 
 #### **Response**
 
@@ -157,4 +158,3 @@ Mark all messages in a specific chat room as read.
   }
   ```
 
----
