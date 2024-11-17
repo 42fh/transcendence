@@ -13,12 +13,6 @@ from channels.db import database_sync_to_async
 
 
 @login_required
-def username(request):
-    """Return the current user's username and CSRF token."""
-    return JsonResponse({"username": request.user.username, "csrfToken": get_token(request)})
-
-
-@login_required
 def users_overview(request):
     try:
         if not request.user.is_authenticated:
