@@ -8,7 +8,7 @@ from .views import (
     LoginView,
     LogoutView,
     DeleteUserView,
-    UserListView,
+    UsersListView,
     UserDetailView,
     # FriendListView,
     # FriendRequestView,
@@ -16,15 +16,12 @@ from .views import (
 )
 
 urlpatterns = [
-    # Auth endpoints
     path("auth/signup/", SignupView.as_view(), name="signup"),
     path("auth/login/", LoginView.as_view(), name="login"),
     path("auth/logout/", LogoutView.as_view(), name="logout"),
     path("auth/delete/", DeleteUserView.as_view(), name="delete_user"),
-    # Future endpoints (commented out)
-    path("", UserListView.as_view(), name="users_list"),
+    path("", UsersListView.as_view(), name="users_list"),
     path("<uuid:user_id>/", UserDetailView.as_view(), name="user_detail"),
-    # path("<int:user_id>/", UserDetailView.as_view(), name="user_detail"),
     # path("<int:user_id>/friends/", FriendListView.as_view(), name="friend_list"),
     # path("<int:user_id>/friends/<int:friend_id>/", FriendRequestView.as_view(), name="friend_request"),
     # path("<int:user_id>/status/", UserStatusView.as_view(), name="user_status"),
