@@ -1,7 +1,7 @@
 // gameController.js
 import { CONFIG } from './config.js';
 import { GameAPI } from './api.js';
-import { GameState } from './gamestate.js';
+import { GameState } from './gameState.js';
 import { GameWebSocket } from './websocket.js';
 // gameController.js
 import { PolygonRenderer } from './PolygonRenderer.js';
