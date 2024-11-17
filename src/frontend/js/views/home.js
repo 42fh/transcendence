@@ -2,6 +2,7 @@ import { handleLogout } from "./auth.js";
 import { displayLogoutError } from "../utils/errors.js";
 import { loadTournamentsPage } from "./tournaments.js";
 import { loadChatPage } from "./chats.js";
+import { showNotification } from "../utils/notification.js";
 
 export function loadHomePage(addToHistory = true) {
   try {
@@ -13,6 +14,7 @@ export function loadHomePage(addToHistory = true) {
         ""
       );
     }
+    
 
     // Hide the initial container
     const container = document.getElementById("container");
@@ -36,6 +38,19 @@ export function loadHomePage(addToHistory = true) {
 
     const homeContent = document.importNode(template.content, true);
     mainContent.appendChild(homeContent);
+
+
+
+    // Add event listener for the test-notification button (AFTER content is added to the DOM)
+    const testNotificationButton = document.getElementById("test-notification");
+    if (testNotificationButton) {
+      testNotificationButton.addEventListener("click", () => {
+        showNotification("This is a test notification!", "info");
+      });
+    }
+
+
+
 
     // Get the username from localStorage and set the greeting message
     const username = localStorage.getItem("username");
