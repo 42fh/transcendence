@@ -26,7 +26,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.game_id = self.scope["url_route"]["kwargs"]["game_id"]
         query_string = self.scope["query_string"].decode("utf-8")
         query_params = dict(param.split("=") for param in query_string.split("&"))
-        self.player_id = query_params.get("player")
+        self.player_id = query_params.get("player") 
         game_type = query_params.get("type", "polygon")  # Default to polygon_pong
         print(query_params)
         self.game_group = f"game_{self.game_id}"
@@ -44,6 +44,13 @@ class PongConsumer(AsyncWebsocketConsumer):
                     "num_balls": int(query_params.get("balls", "1")),
                     "min_players": int(query_params.get("players", "2")),
                     "sides": int(query_params.get("sides", "4")),
+                    "pongType": str(query_params.get("pongType", "regular")),   # Type of pong (e.g., regular, irregular)
+                    "shape": query_params.get("shape", "regular"),         # Shape of the pong field (e.g., regular, polygon)
+                    "scoreMode": query_params.get("scoreMode", "classic"), # Scoring mode (e.g., classic, modern)
+                    "debug": query_params.get("debug", "false").lower() == "true",  # Debug mode (true or false)
+                    "playerId": int(query_params.get("playerId", "1")),    # ID of the player
+                    "gameId": int(query_params.get("gameId", "1")),        # ID of the game session
+                    "type": query_params.get("type", "polygon"),           # Type of game (e.g., polygon, other modes)
                 },
             )
 

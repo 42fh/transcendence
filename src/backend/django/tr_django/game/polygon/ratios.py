@@ -5,7 +5,7 @@ def _calculate_base_deformation(self):
     """Calculate deformation based on game mode"""
     player_density = self.num_paddles / self.num_sides
 
-    if self.game_mode == "irregular":
+    if self.game_shape == "irregular":
         # Original balanced ratios
         if self.num_sides == 4:
             return 4 / 3 if self.num_paddles == 2 else 1.0
@@ -15,14 +15,14 @@ def _calculate_base_deformation(self):
             else:
                 return 1.25 - (player_density * 0.25)
 
-    elif self.game_mode == "crazy":
+    elif self.game_shape == "crazy":
         # Extreme deformation
         if self.num_sides == 4:
             return 4 / 3 if self.num_paddles == 2 else 1.0
         else:
             return 1.8 if player_density <= 0.5 else 1.5
 
-    elif self.game_mode == "star":
+    elif self.game_shape == "star":
         # Alternating long and short sides
         return 2.2 if player_density <= 0.3 else 1.8
 
@@ -33,13 +33,13 @@ def _calculate_side_ratios(self):
     """Calculate ratios based on game mode"""
     base_deform = self._calculate_base_deformation()
 
-    if self.game_mode == "irregular":
+    if self.game_shape == "irregular":
         return self._calculate_regular_ratios(
             base_deform
         )  # This is now our irregular mode
-    elif self.game_mode == "crazy":
+    elif self.game_shape == "crazy":
         return self._calculate_crazy_ratios(base_deform)
-    elif self.game_mode == "star":
+    elif self.game_shape == "star":
         return self._calculate_star_ratios(base_deform)
     else:
         return self._calculate_regular_ratios(base_deform)  # Default
