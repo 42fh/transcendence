@@ -189,7 +189,7 @@ class CustomUserStatusVisibilityTestCase(TestCase):
 
 
 class CustomUserRelationshipTestCase(TestCase):
-    """Test cases for friends, blocked users, and custom visibility group relationships."""
+    """Test cases for friends and custom visibility group relationships."""
 
     def setUp(self):
         # Create test users
@@ -197,10 +197,8 @@ class CustomUserRelationshipTestCase(TestCase):
         self.user2 = CustomUser.objects.create_user(username="user2", password="password123")
         self.user3 = CustomUser.objects.create_user(username="user3", password="password123")
 
-    # Test Friends and Blocked Users
-    def test_friends_and_blocked_users(self):
-        """Test adding, removing, and checking friends and blocked users."""
-
+    def test_friends(self):
+        """Test adding, removing, and checking friends."""
         # Add a friend
         self.user1.friends.add(self.user2)
         # Test is_friend_with method
@@ -209,15 +207,6 @@ class CustomUserRelationshipTestCase(TestCase):
         # Remove friend and confirm they are no longer friends
         self.user1.friends.remove(self.user2)
         self.assertFalse(self.user1.is_friend_with(self.user2))
-
-        # Add a blocked user
-        self.user1.blocked_users.add(self.user3)
-        # Test is_blocked_by method
-        self.assertTrue(self.user3.is_blocked_by(self.user1))
-
-        # Unblock user and confirm they are no longer blocked
-        self.user1.blocked_users.remove(self.user3)
-        self.assertFalse(self.user3.is_blocked_by(self.user1))
 
     # Test Custom Visibility Group
     def test_custom_visibility_group(self):

@@ -146,11 +146,8 @@ class CustomUser(AbstractUser):
         help_text="Specific permissions for this user.",
     )
 
-    # Friendship and Blocking
+    # Friendship
     friends = models.ManyToManyField("self", blank=True, symmetrical=True)
-    blocked_users = models.ManyToManyField("self", blank=True, symmetrical=False, related_name="blocked_by")
-
-    # Friend Request System
     friend_requests_sent = models.ManyToManyField(
         "self", blank=True, symmetrical=False, related_name="friend_requests_received"
     )
@@ -158,8 +155,6 @@ class CustomUser(AbstractUser):
     def send_friend_request(self, user):
         """Sends a friend request to another user."""
         if user != self and not self.is_friend_with(user):
-            if self.is_blocked_by(user) or user in self.blocked_users.all():
-                raise ValueError("Cannot send friend request to/from blocked user")
             self.friend_requests_sent.add(user)
 
     def accept_friend_request(self, user):
@@ -182,9 +177,6 @@ class CustomUser(AbstractUser):
 
     def is_friend_with(self, user) -> bool:
         return self.friends.filter(id=user.id).exists()
-
-    def is_blocked_by(self, user) -> bool:
-        return user.blocked_users.filter(id=self.id).exists()
 
     def __str__(self):
         return str(self.username)

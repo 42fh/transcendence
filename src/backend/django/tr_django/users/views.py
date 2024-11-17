@@ -326,3 +326,65 @@ class UserDetailView(View):
             return JsonResponse({"error": "Invalid JSON"}, status=400)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class FriendsListView(View):
+    """View for listing a user's friends with pagination and search capabilities"""
+
+    def get(self, request, user_id):
+        try:
+            user = CustomUser.objects.get(id=user_id)
+
+            # Get query parameters
+            search = request.GET.get("search", "")
+            page = request.GET.get("page", 1)
+            per_page = request.GET.get("per_page", 10)
+
+            try:
+                page = int(page)
+                per_page = int(per_page)
+                if page <= 0 or per_page <= 0:
+                    raise ValueError
+            except ValueError:
+                return JsonResponse({"error": "Invalid pagination parameters"}, status=400)
+
+            # Get friends with search filter
+            friends = user.friends.filter(Q(username__icontains=search)).order_by("username")
+
+            # Paginate results
+            paginator = Paginator(friends, per_page)
+
+            try:
+                friends_page = paginator.page(page)
+            except EmptyPage:
+                return JsonResponse({"error": "Page not found"}, status=404)
+            except PageNotAnInteger:
+                return JsonResponse({"error": "Invalid page number"}, status=400)
+
+            # Format friend data with minimal information
+            friends_data = [
+                {
+                    "id": str(friend.id),
+                    "username": friend.username,
+                    "avatar": friend.avatar.url if friend.avatar else None,
+                }
+                for friend in friends_page
+            ]
+
+            return JsonResponse(
+                {
+                    "friends": friends_data,
+                    "pagination": {
+                        "total": paginator.count,
+                        "page": page,
+                        "per_page": per_page,
+                        "total_pages": paginator.num_pages,
+                    },
+                }
+            )
+
+        except CustomUser.DoesNotExist:
+            return JsonResponse({"error": "User not found"}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)

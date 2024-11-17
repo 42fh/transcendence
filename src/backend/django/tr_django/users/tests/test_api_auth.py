@@ -79,15 +79,6 @@ class FriendRequestTests(TestCase):
         self.assertFalse(self.user2 in self.user1.friend_requests_sent.all())
         self.assertFalse(self.user1.is_friend_with(self.user2))
 
-    def test_blocked_user_request(self):
-        """Test sending a friend request to a blocked user."""
-        # Block user2
-        self.user1.blocked_users.add(self.user2)
-
-        # Attempt to send friend request should raise ValueError
-        with self.assertRaises(ValueError):
-            self.user1.send_friend_request(self.user2)
-
     def test_duplicate_friend_request(self):
         """Test that duplicate friend requests are not created."""
         self.user1.send_friend_request(self.user2)
@@ -101,22 +92,9 @@ class FriendRequestTests(TestCase):
         self.assertFalse(self.user2 in self.user1.friend_requests_sent.all())
         self.assertFalse(self.user1 in self.user2.friend_requests_received.all())
 
-    def test_blocked_user_cannot_send_request(self):
-        """Test that a blocked user cannot send a friend request."""
-        self.user2.blocked_users.add(self.user1)
-        with self.assertRaises(ValueError):
-            self.user1.send_friend_request(self.user2)
-
     def test_friendship_symmetry(self):
         """Test that friendships are symmetric."""
         self.user1.send_friend_request(self.user2)
         self.user2.accept_friend_request(self.user1)
         self.assertTrue(self.user1.is_friend_with(self.user2))
         self.assertTrue(self.user2.is_friend_with(self.user1))
-
-    def test_unblock_user_allows_friend_request(self):
-        """Test that unblocking a user allows sending a friend request."""
-        self.user1.blocked_users.add(self.user2)
-        self.user1.blocked_users.remove(self.user2)  # Unblock user
-        self.user1.send_friend_request(self.user2)
-        self.assertTrue(self.user2 in self.user1.friend_requests_sent.all())
