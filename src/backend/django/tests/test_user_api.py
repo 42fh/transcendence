@@ -200,3 +200,138 @@ class TestUserAPI(unittest.TestCase):
             f"{self.api_url}/{user_id}/", data="not-json", headers={"Content-Type": "application/json"}, cookies=cookies
         )
         self.assertEqual(response.status_code, 400)
+
+    def test_friend_request_flow(self):
+        """Test the complete friend request flow through the API"""
+        # Create two users
+        signup_data1 = {
+            "username": f"user1_{os.urandom(4).hex()}",
+            "password": "pass123",
+            "email": "user1@example.com",
+        }
+        signup_data2 = {
+            "username": f"user2_{os.urandom(4).hex()}",
+            "password": "pass123",
+            "email": "user2@example.com",
+        }
+
+        # Sign up users
+        response1 = requests.post(f"{self.api_url}/auth/signup/", json=signup_data1)
+        user1_cookies = response1.cookies
+        user1_id = response1.json()["id"]
+
+        response2 = requests.post(f"{self.api_url}/auth/signup/", json=signup_data2)
+        user2_cookies = response2.cookies
+        user2_id = response2.json()["id"]
+
+        # Send friend request (user1 -> user2)
+        response = requests.post(
+            f"{self.api_url}/friend-requests/", json={"to_user_id": user2_id}, cookies=user1_cookies
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Check sent requests for user1
+        response = requests.get(f"{self.api_url}/friend-requests/", cookies=user1_cookies)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(len(data["sent"]), 1)
+        self.assertEqual(data["sent"][0]["id"], user2_id)
+
+        # Check received requests for user2
+        response = requests.get(f"{self.api_url}/friend-requests/", cookies=user2_cookies)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(len(data["received"]), 1)
+        self.assertEqual(data["received"][0]["id"], user1_id)
+
+        # Accept friend request (as user2)
+        response = requests.patch(
+            f"{self.api_url}/friend-requests/",
+            json={"from_user_id": user1_id, "action": "accept"},
+            cookies=user2_cookies,
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Verify friendship status through friends list
+        response = requests.get(f"{self.api_url}/{user1_id}/friends/", cookies=user1_cookies)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        friend_ids = [friend["id"] for friend in data["friends"]]
+        self.assertIn(user2_id, friend_ids)
+
+    def test_friend_requests_error_cases(self):
+        """Test error cases for friend request endpoints"""
+        # Create test user
+        signup_data = {
+            "username": f"user_{os.urandom(4).hex()}",
+            "password": "pass123",
+            "email": "user@example.com",
+        }
+        response = requests.post(f"{self.api_url}/auth/signup/", json=signup_data)
+        user_cookies = response.cookies
+        user_id = response.json()["id"]
+
+        # Test unauthenticated access
+        response = requests.get(f"{self.api_url}/friend-requests/")
+        self.assertEqual(response.status_code, 401)
+
+        # Test sending request to non-existent user
+        response = requests.post(
+            f"{self.api_url}/friend-requests/",
+            json={"to_user_id": "00000000-0000-0000-0000-000000000000"},
+            cookies=user_cookies,
+        )
+        self.assertEqual(response.status_code, 404)
+
+        # Test sending request to self
+        response = requests.post(f"{self.api_url}/friend-requests/", json={"to_user_id": user_id}, cookies=user_cookies)
+        self.assertEqual(response.status_code, 400)
+
+    def test_friends_list_features(self):
+        """Test friends list features including pagination and search"""
+        # Create main test user
+        signup_data = {
+            "username": f"main_user_{os.urandom(4).hex()}",
+            "password": "pass123",
+            "email": "main@example.com",
+        }
+        response = requests.post(f"{self.api_url}/auth/signup/", json=signup_data)
+        user_cookies = response.cookies
+        user_id = response.json()["id"]
+
+        # Create and add multiple friends
+        friend_ids = []
+        for i in range(3):
+            friend_data = {
+                "username": f"friend{i}_{os.urandom(4).hex()}",
+                "password": "pass123",
+                "email": f"friend{i}@example.com",
+            }
+            response = requests.post(f"{self.api_url}/auth/signup/", json=friend_data)
+            friend_id = response.json()["id"]
+            friend_ids.append(friend_id)
+
+            # Send and accept friend request
+            requests.post(f"{self.api_url}/friend-requests/", json={"to_user_id": friend_id}, cookies=user_cookies)
+            friend_cookies = response.cookies
+            requests.patch(
+                f"{self.api_url}/friend-requests/",
+                json={"from_user_id": user_id, "action": "accept"},
+                cookies=friend_cookies,
+            )
+
+        # Test pagination
+        response = requests.get(f"{self.api_url}/{user_id}/friends/?page=1&per_page=2", cookies=user_cookies)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(len(data["friends"]), 2)
+        self.assertEqual(data["pagination"]["total"], 3)
+        self.assertEqual(data["pagination"]["total_pages"], 2)
+
+        # Test search functionality
+        friend_username = data["friends"][0]["username"]
+        search_term = friend_username[:5]
+        response = requests.get(f"{self.api_url}/{user_id}/friends/?search={search_term}", cookies=user_cookies)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(any(friend["username"].startswith(search_term) for friend in data["friends"]))
