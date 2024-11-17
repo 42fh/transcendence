@@ -10,7 +10,7 @@ class SignupTestCase(TestCase):
         """Test user creation directly using the CustomUser model
         This is a simple unit test that bypasses the HTTP layer"""
 
-        user = CustomUser.objects.create_user(username="testuser", password="password123")
+        CustomUser.objects.create_user(username="testuser", password="password123")
         self.assertTrue(CustomUser.objects.filter(username="testuser").exists())
 
     def test_duplicate_username_direct(self):

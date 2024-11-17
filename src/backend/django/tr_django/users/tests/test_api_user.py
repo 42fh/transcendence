@@ -1,6 +1,7 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 import json
+from users.models import CustomUser
 
 
 class APIUserListGetTests(TestCase):
@@ -155,3 +156,86 @@ class APIUserDetailGetTests(TestCase):
         url = reverse("user_detail", kwargs={"user_id": "123e4567-e89b-12d3-a456-426614174999"})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
+
+
+class APIUserUpdateTests(TestCase):
+    """Test suite for PATCH /api/users/<uuid:user_id>/ endpoint"""
+
+    fixtures = ["users.json"]
+
+    def setUp(self):
+        self.client = Client()
+        self.user_id = "123e4567-e89b-12d3-a456-426614174000"  # ID from fixture
+        self.url = reverse("user_detail", kwargs={"user_id": self.user_id})
+
+        # Get the user and log them in
+        self.user = CustomUser.objects.get(pk=self.user_id)
+        self.client.force_login(self.user)
+
+    def test_update_user_profile(self):
+        """Test updating user's own profile"""
+        update_data = {
+            "first_name": "Updated",
+            "last_name": "Name",
+            "bio": "Updated bio",
+            "telephone_number": "9876543210",
+            "pronoun": "they/them",
+            "visibility_online_status": "friends",
+            "visibility_user_profile": "everyone",
+        }
+
+        response = self.client.patch(self.url, data=json.dumps(update_data), content_type="application/json")
+
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+
+        # Verify updated fields
+        self.assertEqual(data["bio"], "Updated bio")
+        self.assertEqual(data["telephone_number"], "9876543210")
+        self.assertEqual(data["pronoun"], "they/them")
+        self.assertEqual(data["visibility_online_status"], "friends")
+        self.assertEqual(data["visibility_user_profile"], "everyone")
+
+    def test_update_other_user_profile(self):
+        """Test attempting to update another user's profile"""
+        other_user_id = "223e4567-e89b-12d3-a456-426614174000"  # Another ID from fixture
+        other_url = reverse("user_detail", kwargs={"user_id": other_user_id})
+
+        update_data = {
+            "bio": "Should not update",
+        }
+
+        response = self.client.patch(other_url, data=json.dumps(update_data), content_type="application/json")
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_update_user_profile_unauthenticated(self):
+        """Test updating profile while not logged in"""
+        self.client.logout()
+
+        update_data = {
+            "bio": "Should not update",
+        }
+
+        response = self.client.patch(self.url, data=json.dumps(update_data), content_type="application/json")
+
+        self.assertEqual(response.status_code, 401)
+
+    def test_update_invalid_fields(self):
+        """Test updating with invalid or non-updatable fields"""
+        update_data = {
+            "username": "should_not_change",  # username shouldn't be updatable
+            "is_staff": True,  # privileged field
+            "invalid_field": "value",  # non-existent field
+            "bio": "This should update",  # valid field
+        }
+
+        response = self.client.patch(self.url, data=json.dumps(update_data), content_type="application/json")
+
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+
+        # Verify only valid fields were updated
+        self.assertEqual(data["bio"], "This should update")
+        self.assertNotEqual(data["username"], "should_not_change")
+        self.assertFalse(data.get("is_staff", False))

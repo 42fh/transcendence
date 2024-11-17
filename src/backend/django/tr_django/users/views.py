@@ -57,6 +57,7 @@ class SignupView(View):
                     "success": True,
                     "message": "User created and logged in successfully.",
                     "username": username,
+                    "id": str(user.id),
                     "action": "signup",
                 }
             )
@@ -94,6 +95,7 @@ class LoginView(View):
                     "success": True,
                     "message": "User logged in successfully.",
                     "username": username,
+                    "id": str(user.id),
                     "action": "login",
                 }
             )
@@ -260,3 +262,67 @@ class UserDetailView(View):
 
         except CustomUser.DoesNotExist:
             return JsonResponse({"error": "User not found"}, status=404)
+
+    def patch(self, request, user_id):
+        """Handle PATCH request to update user details"""
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Not authenticated"}, status=401)
+
+        # Check if user is updating their own profile
+        if str(request.user.id) != str(user_id):
+            return JsonResponse({"error": "Cannot update other users' profiles"}, status=403)
+
+        try:
+            data = json.loads(request.body)
+            user = request.user
+
+            # Fields that can be updated
+            updatable_fields = {
+                "first_name",
+                "last_name",
+                "email",
+                "bio",
+                "telephone_number",
+                "pronoun",
+                "visibility_online_status",
+                "visibility_user_profile",
+            }
+
+            # Handle avatar separately if it's in request.FILES
+            if request.FILES.get("avatar"):
+                user.avatar = request.FILES["avatar"]
+
+            # Update other fields if they exist in the request
+            for field in updatable_fields:
+                if field in data:
+                    setattr(user, field, data[field])
+
+            user.save()
+
+            # Return the same format as your GET response
+            player = user.player
+            user_data = {
+                "id": str(user.id),
+                "username": user.username,
+                "email": user.email,
+                "avatar": user.avatar.url if user.avatar else None,
+                "bio": user.bio,
+                "telephone_number": user.telephone_number,
+                "pronoun": user.pronoun,
+                "is_active": user.is_active,
+                "visibility_online_status": user.visibility_online_status,
+                "visibility_user_profile": user.visibility_user_profile,
+                "stats": {
+                    "wins": player.wins,
+                    "losses": player.losses,
+                    "win_ratio": player.win_ratio(),
+                    "display_name": player.get_display_name,
+                },
+            }
+
+            return JsonResponse(user_data)
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
