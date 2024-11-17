@@ -85,6 +85,7 @@ def calculate_polygon_vertices(self):
     base_radius = 1.0
 
     if self.game_mode == "regular":
+        print("regular")
         # Perfect regular polygon: all sides equal, evenly spaced
         angle_step = (2 * math.pi) / self.num_sides
         # start_angle = -math.pi / 2  # Start from top
@@ -95,8 +96,22 @@ def calculate_polygon_vertices(self):
             vertices.append(
                 {"x": base_radius * math.cos(angle), "y": base_radius * math.sin(angle)}
             )
+    elif self.game_mode == "classic":
+        print("classic")
+        width = 1.0  # Base width
+        height = width * (9/16)  # Height based on 16:9 ratio
+    
+        # Create rectangle vertices in clockwise order starting from top-left
+        vertices = [
+            {"x": -width/2, "y": height/2},   # Top-left
+            {"x": width/2, "y": height/2},    # Top-right
+            {"x": width/2, "y": -height/2},   # Bottom-right
+            {"x": -width/2, "y": -height/2}   # Bottom-left
+    ]     
+
 
     else:  # irregular modes
+        print("irregular")
         # Get ratios and adjustments based on specific irregular mode
         ratios, angle_adjustments = self._calculate_side_ratios()
 
@@ -120,7 +135,7 @@ def calculate_polygon_vertices(self):
     for vertex in vertices:
         vertex["x"] *= scale
         vertex["y"] *= scale
-
+    print("scale: ", scale)
     self.vertices = vertices
 
 
@@ -135,10 +150,13 @@ def get_player_side_indices(self):
 
     player_sides = []
 
-    if self.num_paddles == 2:
+    if self.game_mode == "classic" and self.num_paddles == 2 and self.num_sides == 4:
+        player_sides = [1, 3]  # Vertical sides for classic Pong layout
+    elif self.num_paddles == 2:
         # For 2 players, prefer opposite sides
         half_sides = self.num_sides // 2
         player_sides = [0, half_sides]  # Top and bottom when possible
+
 
     else:
         half_sides = self.num_sides // 2

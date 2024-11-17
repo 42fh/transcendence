@@ -112,7 +112,7 @@ class AGameManager(ABC):
                         "num_players": 2,
                         "num_balls": 1,
                         "min_players": 2,
-                        "sides": 4 if final_game_type == "polygon" else None,
+                        "sides": 4,
                         "paddle_length": 0.3,
                         "paddle_width": 0.2,
                         "ball_size": 0.1,

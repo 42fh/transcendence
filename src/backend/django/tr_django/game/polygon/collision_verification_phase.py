@@ -83,7 +83,7 @@ def get_nearest_side_index(self, ball):
             current_dist * test_dist <= 0
         ):  # Less than or equal includes touching the side
             # Calculate relative position along the side
-            relative_pos = self._calculate_relative_position(ball, side_index)
+            relative_pos = self.calculate_relative_position(ball, side_index)
 
             # Only count if intersection is within the side segment
             if 0 <= relative_pos <= 1:
