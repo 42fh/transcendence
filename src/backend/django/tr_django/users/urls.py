@@ -11,7 +11,7 @@ from .views import (
     UsersListView,
     UserDetailView,
     FriendsListView,
-    # FriendRequestView,
+    FriendRequestsView,
     # FriendStatusView,
 )
 
@@ -23,6 +23,5 @@ urlpatterns = [
     path("", UsersListView.as_view(), name="users_list"),
     path("<uuid:user_id>/", UserDetailView.as_view(), name="user_detail"),
     path("<uuid:user_id>/friends/", FriendsListView.as_view(), name="friends_list"),
-    # path("<int:user_id>/friends/<int:friend_id>/", FriendRequestView.as_view(), name="friend_request"),
-    # path("<int:user_id>/status/", UserStatusView.as_view(), name="user_status"),
+    path("friend-requests/", FriendRequestsView.as_view(), name="friend_requests"),
 ]
