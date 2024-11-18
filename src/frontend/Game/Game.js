@@ -191,6 +191,11 @@ export default class GameConstructor {
   createGame(initialState) {
     this.drawer = new Drawer(initialState, this);
     this.ui.createSelector();
+
+    this.scores = new Map();
+    for (let i = 0; i < initialState.paddles.length; i++) {
+      this.scores.set(i, 0);
+    }
   }
 
   generateRandomId() {
@@ -207,11 +212,6 @@ export default class GameConstructor {
           break;
 
         case "game_state":
-          console.log(
-            "paddles: ",
-            message.game_state.paddles[0],
-            message.game_state.paddles[1]
-          );
           this.drawer.updateGame(message.game_state);
           break;
 

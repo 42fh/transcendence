@@ -1,6 +1,20 @@
 import * as THREE from "three";
 import GameUI from "./GameUI.js";
 
+const sectorColors = [
+  0xff0000, // Red
+  0x00ff00, // Green
+  0x0000ff, // Blue
+  0xffff00, // Yellow
+  0xff00ff, // Magenta
+  0x00ffff, // Cyan
+  0xff8000, // Orange
+  0x8000ff, // Purple
+  0x0080ff, // Light Blue
+  0xff0080, // Pink
+  0x80ff00, // Lime
+];
+
 export default class Drawer {
   constructor(initialConfig, game) {
     this.config = initialConfig;
@@ -35,20 +49,6 @@ export default class Drawer {
       this.game.paddles.set(i, paddle);
       this.game.addObjects([this.game.paddles.get(i)]);
     }
-
-    const sectorColors = [
-      0xff0000, // Red
-      0x00ff00, // Green
-      0x0000ff, // Blue
-      0xffff00, // Yellow
-      0xff00ff, // Magenta
-      0x00ffff, // Cyan
-      0xff8000, // Orange
-      0x8000ff, // Purple
-      0x0080ff, // Light Blue
-      0xff0080, // Pink
-      0x80ff00, // Lime
-    ];
 
     for (let i = 0; i < player_count; i++) {
       const startAngle = (i / player_count) * Math.PI * 2 + Math.PI / 2;
@@ -108,16 +108,10 @@ export default class Drawer {
   }
 
   updateGame(gameState) {
-    // create only at the first update
-
     if (this.game.ui.isActive) {
-      const players = [
-        { name: "Player 1", score: 0 },
-        { name: "Player 2", score: 0 },
-        { name: "Player 3", score: 0 },
-      ];
-      this.game.ui.createScoreTable(-2, 1, 0, players);
+      this.game.ui.createScoreTable(-2, 1, 0);
     }
+    this.game.ui.updateScoreTable(gameState.scores);
 
     // update balls
     for (let i = 0; i < gameState.balls.length; i++) {

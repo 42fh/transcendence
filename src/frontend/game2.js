@@ -17,11 +17,17 @@ game.loadResources([
     name: "floorColorTexture",
     type: "texture",
     url: "static/textures/floor/color.jpg",
+    isSkin: true,
   },
   {
     name: "floorNormalTexture",
     type: "texture",
     url: "static/textures/floor/normal.jpg",
+  },
+  {
+    name: "paddle",
+    type: "gltf",
+    url: "static/models/paddle.gltf",
   },
   {
     name: "floorDisplacementTexture",

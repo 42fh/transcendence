@@ -12,6 +12,9 @@ export default class GameUI {
     this.selector = new THREE.Group();
     this.isActive = false;
     this.currentSkin = 0;
+    this.fontUrl =
+      "https://cdn.jsdelivr.net/npm/three@0.149.0/examples/fonts/helvetiker_regular.typeface.json";
+    this.fontLoader = new FontLoader();
   }
 
   createSelector() {
@@ -26,7 +29,7 @@ export default class GameUI {
       0,
       0,
       depth / 2 + 0.001,
-      "stone"
+      "random"
     );
     this.mainText.material.color.set("purple");
     this.panel.add(this.mainText);
@@ -91,11 +94,7 @@ export default class GameUI {
     const button = new THREE.Mesh(geometry, material);
     button.position.set(x, y, z);
 
-    // Add text to the button
-    const fontUrl =
-      "https://cdn.jsdelivr.net/npm/three@0.149.0/examples/fonts/helvetiker_regular.typeface.json"; // TODO: download font and move to the static folder
-    const loader = new FontLoader();
-    loader.load(fontUrl, (font) => {
+    this.fontLoader.load(this.fontUrl, (font) => {
       const textGeometry = new TextGeometry(text, {
         font: font,
         size: height * 0.5,
@@ -111,8 +110,7 @@ export default class GameUI {
     return button;
   }
 
-  createScoreTable(x, y, z, players) {
-    // delete selector
+  createScoreTable(x, y, z) {
     if (this.isActive) {
       this.selector.removeFromParent();
     }
@@ -122,7 +120,6 @@ export default class GameUI {
     const tableGroup = new THREE.Group();
     tableGroup.position.set(x, y, z);
 
-    // Create table header
     const headerWidth = 1.2;
     const headerHeight = 0.2;
     const header = this.createButton(
@@ -136,44 +133,69 @@ export default class GameUI {
     header.material.color.setHex(0x444444);
     tableGroup.add(header);
 
-    // Create rows for each player
     const rowHeight = 0.15;
     const columnWidth = headerWidth / 2;
 
-    players.forEach((player, index) => {
+    this.game.paddles.forEach((player, index) => {
       const yOffset = -headerHeight - index * rowHeight - 0.05;
 
-      // Player name column
       const nameButton = this.createButton(
         columnWidth,
         rowHeight,
         -columnWidth / 2,
         yOffset,
         0,
-        player.name
+        "Player " + (index + 1)
       );
       nameButton.material.color.setHex(0x555555);
       tableGroup.add(nameButton);
 
-      // Player score column
       const scoreButton = this.createButton(
         columnWidth,
         rowHeight,
         columnWidth / 2,
         yOffset,
         0,
-        player.score.toString()
+        0
       );
       scoreButton.material.color.setHex(0x666666);
       tableGroup.add(scoreButton);
 
-      // Store reference to score button for easy updating
       player.scoreButton = scoreButton;
     });
 
     tableGroup.rotation.y = Math.PI / 2;
     this.game.addObjects([tableGroup]);
     return tableGroup;
+  }
+
+  updateScoreTable(scores) {
+    scores.forEach((score, index) => {
+      if (score !== this.game.scores[index]) {
+        console.log(`Player ${index + 1} score: ${score}`);
+        this.game.scores[index] = score;
+
+        const player = this.game.paddles.get(index);
+        if (player.scoreButton && player.scoreButton.children[0]) {
+          const textMesh = player.scoreButton.children[0];
+
+          this.fontLoader.load(this.fontUrl, (font) => {
+            textMesh.geometry.dispose();
+            const newGeometry = new TextGeometry(score.toString(), {
+              font: font,
+              size: 0.1,
+              height: 0.01,
+            });
+            newGeometry.computeBoundingBox();
+            const centerOffset =
+              -0.5 *
+              (newGeometry.boundingBox.max.x - newGeometry.boundingBox.min.x);
+            textMesh.geometry = newGeometry;
+            textMesh.position.x = centerOffset;
+          });
+        }
+      }
+    });
   }
 
   updateMainText(newText) {
