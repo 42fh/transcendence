@@ -19,7 +19,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             "move_speed": 0.05,
             "move_speed_boost": 1.0,  # example for player own values
             "reverse_controls": False,  # example for player own values
-            "paddle_size": 1.0,  # example for player own values
+            "paddle_size": 0.3,  # example for player own values
         }  # should come from the GameManager
 
     async def connect(self):
@@ -178,9 +178,9 @@ class PongConsumer(AsyncWebsocketConsumer):
             return False
 
         # check if paddle already at max or min
-        if direction == "left" and self.current_pos <= 0:
+        if direction == "left" and self.current_pos < self.player_values["paddle_size"] / 2 :
             return False
-        if direction == "right" and self.current_pos >= 1:
+        if direction == "right" and self.current_pos > 1 - self.player_values["paddle_size"] / 2:
             return False
 
         return True
@@ -191,9 +191,9 @@ class PongConsumer(AsyncWebsocketConsumer):
         )
 
         if direction == "left":
-            self.current_pos = max(0, self.current_pos - move_amount)
+            self.current_pos = max(self.player_values["paddle_size"] / 2, self.current_pos - move_amount)
         elif direction == "right":
-            self.current_pos = min(1, self.current_pos + move_amount)
+            self.current_pos = min(1 - self.player_values["paddle_size"] / 2, self.current_pos + move_amount)
 
         # Use player_index instead of index
         await self.game_manager.update_paddle(self.player_index, self.current_pos)
