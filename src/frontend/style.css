@@ -53,6 +53,7 @@ h1 {
   text-align: center; /* Center the title */
 }
 
+
 button {
   background: none;
   color: white;
@@ -66,6 +67,147 @@ button {
 button:hover {
   background-color: white;
   color: black;
+}
+
+/* Chats page */
+
+.chat-clickable-item {
+  cursor: pointer;
+}
+
+.chat-button-small {
+  background: transparent;
+  color: white;
+  font-size: 0.6em;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: "Press Start 2P", cursive;
+  border: 0.5px solid white;
+  border-radius: 4px;
+  margin: 1px;
+}
+
+.chat-button-small:hover {
+  background-color: rgb(255, 0, 0);
+  color: black;
+}
+
+.chat-input-retro {
+  width: 620px;
+  height: 60px;
+  padding: 1em 2em;
+  font-family: "Press Start 2P", cursive;
+  font-size: 1.2em;
+  background: none;
+  color: white;
+  border: 2px solid white;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.chat-input-retro:focus {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.chat-greeting {
+  margin-bottom: var(--spacing-lg);
+}
+
+
+.chat-user-list {
+  width: 25%;
+}
+
+.chat-section-title {
+  margin-bottom: var(--spacing-sm);
+}
+
+.chat-user-list-ul {
+  margin-bottom: var(--spacing-sm);
+}
+
+.chat-window-messages {
+  width: 70%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.chat-messages {
+  flex-grow: 1;
+  overflow-y: auto;
+  margin-bottom: var(--spacing-sm);
+}
+.chat-input-area {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.chat-input-area .input-retro {
+  margin-bottom: var(--spacing-sm);
+  width: 100%;
+  height: 60px;
+  width: 620px;
+  padding: 1em 2em;
+  font-family: "Press Start 2P", cursive;
+  font-size: 1.2em;
+  background: none;
+  color: white;
+  border: 2px solid white;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.chat-input-area .input-retro:focus {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.chat-message {
+  margin-bottom: var(--spacing-xs);
+  padding: var(--spacing-xs);
+}
+
+.chat-message-system {
+  color: gray;
+  font-style: italic;
+}
+
+.chat-message-self {
+  text-align: right;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.chat-message-other {
+  text-align: left;
+}
+
+/* Add cursor pointer for clickable elements */
+.chat-user-item {
+  cursor: pointer;
+}
+
+
+.chat-user-item-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-user-item {
+  cursor: pointer;
+}
+
+.chat-user-item.has-chat {
+  color: green;
+}
+
+.chat-user-item.blocked-by-user {
+  color: gray;
+  cursor: not-allowed;
 }
 
 /* Home Page */
@@ -358,7 +500,7 @@ button:hover {
 /* Add media queries for different screen sizes */
 @media (max-width: 600px) {
   .tournament-card {
-    grid-template-columns: 1fr 1.5fr 0.8fr; /* Adjust ratios for smaller screens */
+    grid-template-columns: 1fr 1.5fr 0.8fr;
     gap: 0.5rem;
     padding: 0.6rem 0.8rem;
   }

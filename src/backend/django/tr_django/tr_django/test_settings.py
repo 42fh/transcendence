@@ -7,5 +7,4 @@ DATABASES = {
     }
 }
 
-# Make sure to use the CustomUser model
 AUTH_USER_MODEL = "users.CustomUser"

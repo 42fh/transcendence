@@ -1,6 +1,7 @@
 import { handleLogout } from "./auth.js";
 import { displayLogoutError } from "../utils/errors.js";
 import { loadTournamentsPage } from "./tournaments.js";
+import { loadChatPage } from "./chats.js";
 
 export function loadHomePage(addToHistory = true) {
   try {
@@ -76,6 +77,11 @@ export function loadHomePage(addToHistory = true) {
           })
           .catch((err) => console.warn("Failed to load threejs_11.html", err));
       });
+    }
+
+    const chatsButton = document.getElementById("chats");
+    if (chatsButton) {
+      chatsButton.addEventListener("click", loadChatPage);
     }
 
     const tournamentsButton = document.getElementById("tournaments");
