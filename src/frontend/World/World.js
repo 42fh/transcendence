@@ -7,16 +7,8 @@ import * as THREE from "three";
 import Debug from "../Utils/Debug.js";
 import Audio from "../Utils/Audio.js";
 
-let instance = null;
-
 export default class World {
   constructor(canvas, isPerspectiveCamera = true) {
-    // Singleton
-    if (instance) {
-      return instance;
-    }
-    instance = this;
-
     // Canvas
     this.canvas = canvas;
 
@@ -81,7 +73,7 @@ export default class World {
       0.1,
       1000
     );
-    this.camera.position.set(3.22, 1.75, 0.2);
+    this.camera.position.set(0.22, 1, 2);
 
     if (this.gui.debug) {
       this.gui.gui
@@ -101,7 +93,7 @@ export default class World {
         .min(-15)
         .max(20)
         .step(0.01)
-        .name("Camera x");
+        .name("Camera xx");
     }
   }
 

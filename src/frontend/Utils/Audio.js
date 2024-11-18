@@ -20,6 +20,18 @@ export default class Audio {
     this.masterVolume = this.listener.getMasterVolume();
   }
 
+  addAmbientSound(sound) {
+    const audio = new THREE.Audio(this.listener);
+    this.audioLoader.load(sound, (buffer) => {
+      audio.setBuffer(buffer);
+      audio.setVolume(0.5);
+      audio.setLoop(true);
+      audio.play();
+    });
+
+    console.log("Ambient sound added ", sound);
+  }
+
   addBackgroundMusic(songs, gui = null) {
     this.backgroundMusic = [];
     this.backgroundMusicCurrentTime = [];
@@ -29,7 +41,7 @@ export default class Audio {
       const audio = new THREE.Audio(this.listener);
       this.audioLoader.load(song, (buffer) => {
         audio.setBuffer(buffer);
-        audio.setVolume(0.5);
+        audio.setVolume(0.1);
         audio.setLoop(false);
         this.backgroundMusic[index] = audio;
         this.backgroundMusicCurrentTime[index] = 0;

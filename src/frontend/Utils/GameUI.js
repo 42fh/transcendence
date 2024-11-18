@@ -24,6 +24,7 @@ export default class GameUI {
   constructor(game) {
     this.game = game;
     this.selector = new THREE.Group();
+    this.tableGroup = new THREE.Group();
     this.isActive = false;
     this.currentSkin = 0;
     this.fontUrl =
@@ -32,10 +33,9 @@ export default class GameUI {
   }
 
   createSelector() {
-    // Create main panel
     const panelGeometry = new THREE.BoxGeometry(width, height, depth);
     const panelMaterial = new THREE.MeshBasicMaterial({ color: "purple" });
-    this.panel = new THREE.Mesh(panelGeometry, panelMaterial);
+    const panel = new THREE.Mesh(panelGeometry, panelMaterial);
 
     this.mainText = this.createButton(
       width * 0.9,
@@ -46,8 +46,8 @@ export default class GameUI {
       "random"
     );
     this.mainText.material.color.set("purple");
-    this.panel.add(this.mainText);
-    this.selector.add(this.panel);
+    this.selector.add(this.mainText);
+    this.selector.add(panel);
 
     // Create left arrow
     this.leftArrow = this.createButton(
@@ -64,8 +64,7 @@ export default class GameUI {
       } else {
         this.currentSkin--;
       }
-      this.game.paddles.get(this.game.playerId).material.map =
-        this.game.skins[this.currentSkin];
+      this.game.paddles.get(0).material.map = this.game.skins[this.currentSkin];
 
       this.updateMainText(this.game.skins[this.currentSkin].name);
     };
@@ -87,19 +86,18 @@ export default class GameUI {
       } else {
         this.currentSkin++;
       }
-      this.game.paddles.get(this.game.playerId).material.map =
-        this.game.skins[this.currentSkin];
+      this.game.paddles.get(0).material.map = this.game.skins[this.currentSkin];
 
       this.updateMainText(this.game.skins[this.currentSkin].name);
     };
     this.rightArrow.originalColor = this.rightArrow.material.color.getHex();
     this.selector.add(this.rightArrow);
 
-    this.game.addObjects([this.selector]);
-    this.selector.rotation.y = Math.PI / 2;
-    this.selector.position.set(-2, 0.5, 0);
+    this.selector.rotation.y = 0;
+    this.selector.position.set(0.12, 0.5, -1.5);
 
     this.isActive = true;
+    this.game.scene.add(this.selector);
   }
 
   createButton(width, height, x, y, z, text) {
@@ -120,7 +118,6 @@ export default class GameUI {
       button.add(textMesh);
     });
 
-    this.game.addObjects([button]);
     return button;
   }
 
@@ -131,8 +128,7 @@ export default class GameUI {
 
     this.isActive = false;
 
-    const tableGroup = new THREE.Group();
-    tableGroup.position.set(x, y, z);
+    this.tableGroup.position.set(x, y, z);
 
     const headerWidth = 1.2;
     const headerHeight = 0.2;
@@ -145,7 +141,7 @@ export default class GameUI {
       "Scores"
     );
     header.material.color.setHex(0x444444);
-    tableGroup.add(header);
+    this.tableGroup.add(header);
 
     const rowHeight = 0.15;
     const columnWidth = headerWidth / 2;
@@ -165,7 +161,7 @@ export default class GameUI {
       });
       const colorSquare = new THREE.Mesh(colorGeometry, colorMaterial);
       colorSquare.position.set(-columnWidth + colorSquareSize, yOffset, 0.01);
-      tableGroup.add(colorSquare);
+      this.tableGroup.add(colorSquare);
 
       const nameButton = this.createButton(
         columnWidth,
@@ -176,7 +172,7 @@ export default class GameUI {
         "Player " + (index + 1)
       );
       nameButton.material.color.setHex(0x555555);
-      tableGroup.add(nameButton);
+      this.tableGroup.add(nameButton);
 
       const scoreButton = this.createButton(
         columnWidth / 3,
@@ -187,13 +183,14 @@ export default class GameUI {
         "0"
       );
       scoreButton.material.color.setHex(0x666666);
-      tableGroup.add(scoreButton);
+      this.tableGroup.add(scoreButton);
 
       player.scoreButton = scoreButton;
     });
 
-    tableGroup.rotation.y = Math.PI / 2;
-    this.game.addObjects([tableGroup]);
+    this.tableGroup.rotation.y = 0;
+    this.tableGroup.position.set(0.12, 0.5, -1.5);
+    this.game.scene.add(this.tableGroup);
     return tableGroup;
   }
 
@@ -227,7 +224,7 @@ export default class GameUI {
   }
 
   updateMainText(newText) {
-    this.panel.remove(this.mainText);
+    this.selector.remove(this.mainText);
 
     this.mainText = this.createButton(
       width * 0.9,
@@ -238,6 +235,6 @@ export default class GameUI {
       newText
     );
     this.mainText.material.color.set("purple");
-    this.panel.add(this.mainText);
+    this.selector.add(this.mainText);
   }
 }

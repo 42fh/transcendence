@@ -10,8 +10,7 @@ import GameUI from "../Utils/GameUI.js";
 
 export default class GameConstructor {
   constructor() {
-    // Does not create a new instance of World because it is a singleton
-    this.world = new World(document.querySelector(".webgl"));
+    this.world = new World(document.querySelector(".webgl"), false);
 
     // Objects group
     this.gameGroup = new THREE.Group();
@@ -36,9 +35,6 @@ export default class GameConstructor {
 
     this.paddles = new Map();
 
-    // GUI
-    this.gui = new Debug();
-
     // UI
     this.ui = new GameUI(this);
   }
@@ -51,26 +47,6 @@ export default class GameConstructor {
   addDirectionalLight(intensity, color, Vector3) {
     const directionalLight = new THREE.DirectionalLight(color, intensity);
     directionalLight.position.set(Vector3.x, Vector3.y, Vector3.z);
-    if (this.gui.debug) {
-      this.gui.gui
-        .add(directionalLight.position, "x")
-        .min(-10)
-        .max(10)
-        .step(0.001)
-        .name("Light x");
-      this.gui.gui
-        .add(directionalLight.position, "y")
-        .min(-10)
-        .max(10)
-        .step(0.001)
-        .name("Light y");
-      this.gui.gui
-        .add(directionalLight.position, "z")
-        .min(-10)
-        .max(10)
-        .step(0.001)
-        .name("Light z");
-    }
     this.scene.add(directionalLight);
   }
 
@@ -100,8 +76,8 @@ export default class GameConstructor {
     const waterGeometry = new THREE.PlaneGeometry(width, height);
 
     this.water = new Water(waterGeometry, {
-      textureWidth: 512,
-      textureHeight: 512,
+      textureWidth: 200,
+      textureHeight: 200,
       waterNormals: new THREE.TextureLoader().load(
         "static/textures/waternormals.jpg",
         function (texture) {
@@ -196,6 +172,7 @@ export default class GameConstructor {
     for (let i = 0; i < initialState.paddles.length; i++) {
       this.scores.set(i, 0);
     }
+    this.world.audio.addAmbientSound("static/music/sea.mp3");
   }
 
   generateRandomId() {
@@ -207,10 +184,16 @@ export default class GameConstructor {
       switch (message.type) {
         case "initial_state":
           console.log("initial_state: ", message);
-          this.playerId = message.player_index;
+          this.playerId = message.player_index + 1;
+          console.log("playerId: ", this.playerId);
           this.createGame(message.game_state);
-          this.gameGroup.rotation.y = -Math.PI / 2;
-          this.gameGroup.position.y = -0.4;
+
+          // Rotate the game to the player's perspective
+          const playerAngle =
+            (this.playerId / message.game_state.paddles.length) * Math.PI * 2;
+          const rotationNeeded = Math.PI - playerAngle;
+          this.drawer.field.rotation.y = rotationNeeded - Math.PI / 2; // Subtract PI/2 for initial game orientation
+          this.drawer.field.position.y = -0.4;
           break;
 
         case "game_state":

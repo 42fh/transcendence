@@ -19,10 +19,13 @@ export default class Drawer {
     this.config = initialConfig;
     this.game = game;
     this.radius = 1;
+    this.field = new THREE.Group();
 
     this.generatePaddles(this.config.paddles.length, this.radius);
     this.createGameField(this.radius);
     this.createBalls(this.config.balls);
+
+    this.game.scene.add(this.field);
   }
 
   generatePaddles(player_count, radius) {
@@ -46,9 +49,8 @@ export default class Drawer {
       paddle.receiveShadow = true;
 
       this.game.paddles.set(i, paddle);
-      this.game.addObjects([this.game.paddles.get(i)]);
+      this.field.add(this.game.paddles.get(i));
 
-      // Adjust the ring sector starting angle to match paddle positions
       const startAngle = (i / player_count) * Math.PI * 2 - Math.PI / 2;
       const ringGeometry = new THREE.RingGeometry(
         radius - 0.05,
@@ -68,7 +70,7 @@ export default class Drawer {
       ringMesh.rotation.x = -Math.PI / 2;
       ringMesh.position.y = 0.01;
 
-      this.game.addObjects([ringMesh]);
+      this.field.add(ringMesh);
     }
   }
 
@@ -90,7 +92,7 @@ export default class Drawer {
     field.rotation.x = -Math.PI / 2;
     field.receiveShadow = true;
 
-    this.game.addObjects([field]);
+    this.field.add(field);
   }
 
   createBalls(ballsConfig) {
@@ -103,8 +105,8 @@ export default class Drawer {
       ball.castShadow = true;
       ball.receiveShadow = true;
       this.game.balls.push(ball);
+      this.field.add(ball);
     }
-    this.game.addObjects(this.game.balls);
   }
 
   updateGame(gameState) {
@@ -145,7 +147,7 @@ export default class Drawer {
       paddle.position.set(x, 0.12, z);
 
       // Make paddle face outward
-      paddle.lookAt(0, 0.12, 0);
+      paddle.lookAt(0, -0.28, 0);
       paddle.rotateY(Math.PI);
     }
   }
