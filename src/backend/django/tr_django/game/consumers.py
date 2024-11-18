@@ -94,7 +94,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                                 "type": "initial_state",
                                 "game_state": sanitized_state,
                                 "role": self.role,        
-                                "player_index": self.player_index if self.role == "player" else None,
+                                "player_index":self.game_manager.active_sides[self.player_index] if self.role == "player" else None,
                                 "message": player_index.get("message", "no message given"),        
                                 "player_values": self.player_values,
                                 "game_setup": {
