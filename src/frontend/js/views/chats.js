@@ -2,6 +2,20 @@ import { displayErrorMessageModalModal } from "../utils/modals.js";
 import { fetchUserList, toggleBlockUser } from "../services/chatService.js";
 import { initializeChatWebSocket } from "../services/chatSocketService.js";
 
+const chatState = {
+  currentUsername: "",
+  currentChatPartner: "",
+  messageHistoryLoaded: false,
+  csrfToken: null,
+  isSwitchingRoom: false,
+  WEBSOCKET_PORT: "8000",
+  MESSAGE_TYPES: {
+    CHAT: "chat_message",
+    HISTORY: "message_history",
+    USER_LIST: "user_list",
+  }
+};
+
 export function loadChatPage(addToHistory = true) {
   try {
     // Check if user is logged in
@@ -31,266 +45,273 @@ export function loadChatPage(addToHistory = true) {
     mainContent.appendChild(document.importNode(template.content, true));
 
     // Initialize chat functionality
-    const chatView = new ChatView();
-    chatView.init();
+    initializeChat();
   } catch (error) {
     console.error("Error loading chat page:", error);
   }
 }
 
-export class ChatView {
-  constructor() {
-    // State management
-    this.state = {
-      currentUsername: "",
-      currentChatPartner: "",
-      messageHistoryLoaded: false,
-      csrfToken: null,
-      isSwitchingRoom: false,
-    };
-
-    // Constants
-    this.WEBSOCKET_PORT = "8000";
-    this.MESSAGE_TYPES = {
-      CHAT: "chat_message",
-      HISTORY: "message_history",
-      USER_LIST: "user_list",
-    };
-  }
-
-  async init() {
-    // Initialize event listeners
-    this.initializeEventListeners();
-    await this.initializeChat();
-  }
-
-  initializeEventListeners() {
-    document.getElementById("chat-message-submit").onclick = () =>
-      this.sendMessage();
-    document.getElementById("chat-message-input").onkeyup = (e) => {
-      if (e.key === "Enter") this.sendMessage();
-    };
-  }
-
-  getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== "") {
-      const cookies = document.cookie.split(";");
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === name + "=") {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
-      }
-    }
-    return cookieValue;
-  }
-
-  async initializeChat() {
-    try {
-      const storedUsername = localStorage.getItem("username");
-      if (!storedUsername) {
-        throw new Error("Not logged in");
-      }
-  
-      this.state.currentUsername = storedUsername;
-  
-      const usernameDisplay = document.getElementById("current-username-display");
-      const usernameInput = document.getElementById("current-username");
-  
-      if (usernameDisplay) {
-        usernameDisplay.textContent = this.state.currentUsername;
-      }
-  
-      if (usernameInput) {
-        usernameInput.value = this.state.currentUsername;
-      }
-  
-      await this.loadUserList();
-    } catch (error) {
-      displayErrorMessageModalModal(`Failed to initialize chat: ${error.message}`);
-      // Redirect to login if not authenticated
-      if (error.message === "Not logged in") {
-        window.location.href = "/accounts/login/";
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== "") {
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === name + "=") {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
       }
     }
   }
-
-  
-  async loadUserList() {
-    try {
-      const data = await fetchUserList();
-      const usersList = document.getElementById("users-list");
-      usersList.innerHTML = "";
-      const template = document.getElementById("user-list-item-template");
-
-      data.users.forEach((user) => {
-        const userElement = document.importNode(template.content, true);
-        const nameSpan = userElement.querySelector(".chat-user-item");
-        const blockButton = userElement.querySelector(".chat-button-small");
-
-        nameSpan.textContent = user.username;
-        nameSpan.classList.toggle("has-chat", user.has_chat);
-
-        if (!user.has_blocked_you) {
-          nameSpan.onclick = () => this.startChatWith(user.username);
-        } else {
-          nameSpan.classList.add("blocked-by-user");
-          nameSpan.title = "This user has blocked you";
-        }
-
-        blockButton.textContent = user.is_blocked ? "Unblock" : "Block";
-        blockButton.onclick = async (e) => {
-          e.stopPropagation();
-          await this.toggleBlockUser(user.username, user.is_blocked);
-        };
-
-        usersList.appendChild(userElement);
-      });
-    } catch (error) {
-      displayErrorMessageModalModal(`Failed to load user list: ${error.message}`);
-    }
-  }
-  
-
-
-  async toggleBlockUser(username, isCurrentlyBlocked) {
-    try {
-      const csrfToken = this.state.csrfToken || this.getCookie("csrftoken");
-      await toggleBlockUser(username, isCurrentlyBlocked, csrfToken);
-      await this.loadUserList();
-      if (!isCurrentlyBlocked && this.state.currentChatPartner === username) {
-        if (window.chatSocket) {
-          window.chatSocket.close();
-        }
-        document.getElementById("chat-messages").innerHTML = "";
-        this.state.currentChatPartner = "";
-      }
-    } catch (error) {
-      displayErrorMessageModalModal(`Failed to block/unblock user: ${error.message}`);
-    }
-  }
-
-  startChatWith(otherUser) {
-    if (
-      this.state.currentChatPartner === otherUser ||
-      this.state.isSwitchingRoom
-    ) {
-      return;
-    }
-
-    this.state.isSwitchingRoom = true;
-    this.state.currentChatPartner = otherUser;
-    const currentUser = document.getElementById("current-username").value;
-    if (!currentUser) {
-      displayErrorMessageModalModal("No username found");
-      this.state.isSwitchingRoom = false;
-      return;
-    }
-
-    const roomName = [currentUser, otherUser].sort().join("_");
-
-    if (window.chatSocket && window.chatSocket.readyState === WebSocket.OPEN) {
-      this.state.currentChatPartner = "";
-      window.chatSocket.close(1000, "Switching rooms");
-    }
-
-    const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const host = window.location.hostname || "localhost";
-    const wsUrl = `${wsProtocol}//${host}:${this.WEBSOCKET_PORT}/ws/chat/${roomName}/`;
-
-    try {
-      initializeChatWebSocket(wsUrl, otherUser, this);
-    } catch (error) {
-      displayErrorMessageModalModal(`Failed to connect to chat: ${error.message}`);
-      this.state.isSwitchingRoom = false;
-    }
-  }
-
-  handleWebSocketMessage(data) {
-    if (data.type === this.MESSAGE_TYPES.CHAT) {
-      const messageType =
-        data.username === "System"
-          ? "system"
-          : data.username === this.state.currentUsername
-          ? "self"
-          : "other";
-      this.addMessageToChat(data.username, data.message, messageType);
-    } else if (
-      data.type === this.MESSAGE_TYPES.HISTORY &&
-      !this.state.messageHistoryLoaded
-    ) {
-      data.messages.forEach((msg) => {
-        const messageType =
-          msg.username === this.state.currentUsername ? "self" : "other";
-        this.addMessageToChat(msg.username, msg.message, messageType);
-      });
-      this.state.messageHistoryLoaded = true;
-    } else if (data.type === this.MESSAGE_TYPES.USER_LIST) {
-      this.updateUserList(data.users);
-    }
-  }
-
-  addMessageToChat(username, message, type = "other") {
-    const chatBox = document.getElementById("chat-messages");
-    const template = document.getElementById("chat-message-template");
-    const messageElement = document.importNode(template.content, true);
-    
-    const messageDiv = messageElement.querySelector(".chat-message");
-    messageDiv.classList.add(`chat-message-${type}`);
-  
-    if (type === "system") {
-      messageDiv.textContent = message;
-    } else {
-      messageDiv.querySelector(".chat-message-username").textContent = username + ":";
-      messageDiv.querySelector(".chat-message-text").textContent = message;
-    }
-  
-    chatBox.appendChild(messageElement);
-    chatBox.scrollTop = chatBox.scrollHeight;
+  return cookieValue;
 }
-  
 
-  updateUserList(users) {
-    const userList = document.getElementById("users-list");
-    const currentItems = Array.from(userList.children);
+function initializeEventListeners() {
+  document.getElementById("chat-message-submit").onclick = () => sendMessage();
+  document.getElementById("chat-message-input").onkeyup = (e) => {
+    if (e.key === "Enter") sendMessage();
+  };
+}
 
-    users.forEach((username) => {
-      const existingItem = currentItems.find(
-        (item) => item.textContent === username
-      );
-      if (!existingItem) {
-        const li = document.createElement("li");
-        li.className = "chat-user-item";
-        li.textContent = username;
-        li.onclick = () => this.startChatWith(username);
-        userList.appendChild(li);
+async function initializeChat() {
+  try {
+    const storedUsername = localStorage.getItem("username");
+    if (!storedUsername) {
+      throw new Error("Not logged in");
+    }
+
+    chatState.currentUsername = storedUsername;
+
+    const usernameDisplay = document.getElementById("current-username-display");
+    const usernameInput = document.getElementById("current-username");
+
+    if (usernameDisplay) {
+      usernameDisplay.textContent = chatState.currentUsername;
+    }
+
+    if (usernameInput) {
+      usernameInput.value = chatState.currentUsername;
+    }
+
+    initializeEventListeners();
+    await loadUserList();
+  } catch (error) {
+    displayErrorMessageModalModal(`Failed to initialize chat: ${error.message}`);
+    // Redirect to login if not authenticated
+    if (error.message === "Not logged in") {
+      window.location.href = "/accounts/login/";
+    }
+  }
+}
+
+async function loadUserList() {
+  try {
+    const data = await fetchUserList();
+    const usersList = document.getElementById("users-list");
+    usersList.innerHTML = "";
+    const template = document.getElementById("user-list-item-template");
+
+    data.users.forEach((user) => {
+      const userElement = document.importNode(template.content, true);
+      const nameSpan = userElement.querySelector(".chat-user-item");
+      const blockButton = userElement.querySelector(".chat-button-small");
+
+      nameSpan.textContent = user.username;
+      nameSpan.classList.toggle("has-chat", user.has_chat);
+
+      if (!user.has_blocked_you) {
+        nameSpan.onclick = () => startChatWith(user.username);
+      } else {
+        nameSpan.classList.add("blocked-by-user");
+        nameSpan.title = "This user has blocked you";
       }
-    });
 
-    currentItems.forEach((item) => {
-      if (!users.includes(item.textContent)) {
-        item.remove();
-      }
+      blockButton.textContent = user.is_blocked ? "Unblock" : "Block";
+      blockButton.onclick = async (e) => {
+        e.stopPropagation();
+        const wasBlocked = user.is_blocked;
+        
+        // Immediately update button text
+        blockButton.textContent = wasBlocked ? "Block" : "Unblock";
+        
+        try {
+          await toggleBlockUser(user.username, wasBlocked);
+          user.is_blocked = !wasBlocked;
+        } catch (error) {
+          blockButton.textContent = wasBlocked ? "Unblock" : "Block";
+          displayErrorMessageModalModal(`Failed to ${wasBlocked ? 'unblock' : 'block'} user: ${error.message}`);
+        }
+      };
+
+      usersList.appendChild(userElement);
     });
+  } catch (error) {
+    displayErrorMessageModalModal(`Failed to load user list: ${error.message}`);
+  }
+}
+
+async function toggleBlockUserAction(username, isCurrentlyBlocked) {
+  try {
+    const csrfToken = chatState.csrfToken || getCookie("csrftoken");
+    await toggleBlockUser(username, isCurrentlyBlocked, csrfToken);
+    await loadUserList();
+    if (!isCurrentlyBlocked && chatState.currentChatPartner === username) {
+      if (window.chatSocket) {
+        window.chatSocket.close();
+      }
+      document.getElementById("chat-messages").innerHTML = "";
+      chatState.currentChatPartner = "";
+    }
+  } catch (error) {
+    displayErrorMessageModalModal(`Failed to block/unblock user: ${error.message}`);
+  }
+}
+
+function startChatWith(otherUser) {
+  // Don't start a new chat if we're already chatting with this user
+  if (chatState.currentChatPartner === otherUser) {
+      return;
   }
 
-  sendMessage() {
-    const messageInput = document.getElementById("chat-message-input");
-    const message = messageInput.value.trim();
+  // If we're already switching rooms, don't allow another switch
+  if (chatState.isSwitchingRoom) {
+      return;
+  }
 
-    if (
-      message &&
-      window.chatSocket &&
-      window.chatSocket.readyState === WebSocket.OPEN
-    ) {
-      try {
-        window.chatSocket.send(JSON.stringify({ message }));
-        messageInput.value = "";
-      } catch (error) {
-        displayErrorMessageModalModal(`Failed to send message: ${error.message}`);
+  // Clear existing messages before switching
+  const chatMessages = document.getElementById("chat-messages");
+  if (chatMessages) {
+      chatMessages.innerHTML = "";
+  }
+
+  // Set switching state and update current chat partner
+  chatState.isSwitchingRoom = true;
+  chatState.currentChatPartner = otherUser;
+  chatState.messageHistoryLoaded = false;
+
+  const currentUser = document.getElementById("current-username").value;
+  if (!currentUser) {
+      displayErrorMessageModalModal("No username found");
+      chatState.isSwitchingRoom = false;
+      return;
+  }
+
+  const roomName = [currentUser, otherUser].sort().join("_");
+  const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+  const host = window.location.hostname || "localhost";
+  const wsUrl = `${wsProtocol}//${host}:${chatState.WEBSOCKET_PORT}/ws/chat/${roomName}/`;
+
+  try {
+      // Create handlers object with bound functions
+      const handlers = {
+          handleWebSocketMessage: handleWebSocketMessage.bind(this),
+          addMessageToChat: addMessageToChat.bind(this),
+          startChatWith: startChatWith.bind(this),
+          state: chatState
+      };
+      
+      initializeChatWebSocket(wsUrl, otherUser, handlers);
+  } catch (error) {
+      displayErrorMessageModalModal(`Failed to connect to chat: ${error.message}`);
+      chatState.isSwitchingRoom = false;
+  }
+}
+
+
+function handleWebSocketMessage(data) {
+  if (data.type === chatState.MESSAGE_TYPES.CHAT) {
+    const messageType =
+      data.username === "System"
+        ? "system"
+        : data.username === chatState.currentUsername
+        ? "self"
+        : "other";
+    addMessageToChat(data.username, data.message, messageType);
+  } else if (
+    data.type === chatState.MESSAGE_TYPES.HISTORY &&
+    !chatState.messageHistoryLoaded
+  ) {
+    data.messages.forEach((msg) => {
+      const messageType =
+        msg.username === chatState.currentUsername ? "self" : "other";
+      addMessageToChat(msg.username, msg.message, messageType);
+    });
+    chatState.messageHistoryLoaded = true;
+  } else if (data.type === chatState.MESSAGE_TYPES.USER_LIST) {
+    updateUserList(data.users);
+  }
+}
+
+
+function addMessageToChat(username, message, type = "other") {
+  const chatBox = document.getElementById("chat-messages");
+  const template = document.getElementById("chat-message-template");
+  
+  if (!chatBox || !template) {
+      console.error("Required chat elements not found");
+      return;
+  }
+
+  const messageElement = document.importNode(template.content, true);
+  const messageDiv = messageElement.querySelector(".chat-message");
+  messageDiv.classList.add(`chat-message-${type}`);
+
+  if (type === "system") {
+      messageDiv.textContent = message;
+  } else {
+      const usernameElement = messageDiv.querySelector(".chat-message-username");
+      const textElement = messageDiv.querySelector(".chat-message-text");
+      
+      if (usernameElement && textElement) {
+          usernameElement.textContent = username + ":";
+          textElement.textContent = message;
       }
+  }
+
+  chatBox.appendChild(messageElement);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+
+
+function updateUserList(users) {
+  const userList = document.getElementById("users-list");
+  const currentItems = Array.from(userList.children);
+
+  users.forEach((username) => {
+    const existingItem = currentItems.find(
+      (item) => item.textContent === username
+    );
+    if (!existingItem) {
+      const li = document.createElement("li");
+      li.className = "chat-user-item";
+      li.textContent = username;
+      li.onclick = () => startChatWith(username);
+      userList.appendChild(li);
+    }
+  });
+
+  currentItems.forEach((item) => {
+    if (!users.includes(item.textContent)) {
+      item.remove();
+    }
+  });
+}
+
+function sendMessage() {
+  const messageInput = document.getElementById("chat-message-input");
+  const message = messageInput.value.trim();
+
+  if (
+    message &&
+    window.chatSocket &&
+    window.chatSocket.readyState === WebSocket.OPEN
+  ) {
+    try {
+      window.chatSocket.send(JSON.stringify({ message }));
+      messageInput.value = "";
+    } catch (error) {
+      displayErrorMessageModalModal(`Failed to send message: ${error.message}`);
     }
   }
 }
