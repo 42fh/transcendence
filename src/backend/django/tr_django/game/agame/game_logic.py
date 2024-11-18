@@ -58,7 +58,7 @@ async def game_logic(self, current_state):
             game_over = True
             # self.add_game_over_event(cycle_data, new_state)
             break
-
+    
     return new_state, game_over, cycle_data
 
 
@@ -311,7 +311,6 @@ def collision_paddle(self, collision, ball, new_state, cycle_data):
     }
 
     # Store data
-    cycle_data["collision_data"].append(event_data)
     cycle_data["events"].append({"type": "paddle_hit", "data": event_data})
 
     return {"game_over": False}
@@ -509,35 +508,14 @@ def collision_miss(self, collision, ball, new_state, cycle_data, ball_index):
 
     # Step 3: Reset ball and collect physics data
     self.reset_ball(ball, ball_index)
-    """physics_data = {
-        "pre_collision_position": initial_position,
-        "post_collision_position": {"x": ball["x"], "y": ball["y"]},
-        "pre_collision_velocity": initial_velocity,
-        "post_collision_velocity": {"x": ball["velocity_x"], "y": ball["velocity_y"]},
-        "approach_speed": collision["approach_speed"],
-    }
     
-    # Step 4: Create collision event data
+    # Step 3: Create collision event data
     event_data = {
         "collision": collision,
-        "timing": {
-            "timestamp": time.time(),
-            "combo_break": True
-        },
-        "physics": physics_data,
-        "game_data": {
-            "failed_paddle_index": active_paddle_index,
-            "new_scores": new_state["scores"]
-        }
+        "timing": {"timestamp": time.time()},
     }
-    
     # Store data
-    cycle_data["collision_data"].append(event_data)
-    cycle_data["events"].append({
-        "type": "miss",
-        "data": event_data
-    })
-    """
+    cycle_data["events"].append({"type": "miss", "data": event_data})
     # Check for winners
     winners = self.check_winner(new_state["scores"])
     if winners:  # If we have any winners

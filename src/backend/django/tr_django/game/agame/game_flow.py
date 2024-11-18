@@ -153,10 +153,20 @@ async def update_game(self):
             {
                 "type": "game_finished" if game_over else "game_state",
                 "game_state": new_state,
-                "winner": winner,
-                "cycle": cycle_data,
+                "winner": winner
             },
         )
+        if len(cycle_data["events"]) > 0:
+            await self.channel_layer.group_send(
+                f"game_{self.game_id}",
+                {
+                    "type": "game_collision",
+                    "data": cycle_data["events"]
+                },
+            )
+            
+
+        
 
         return game_over
 

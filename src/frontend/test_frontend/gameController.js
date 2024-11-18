@@ -9,12 +9,13 @@ import { CircularRenderer } from './CircularRenderer.js';
 
 
 export class GameController {
-    constructor(renderer) {
+    constructor(renderer, onEvent=null) {
         this.gameState = new GameState();
         this.renderer = renderer;
         this.websocket = null;
         this.gameId = null;
         this.playerId = null;
+	this.onEvent = onEvent;
     }
 
     async initializeGame(gameSettings) {
@@ -102,33 +103,66 @@ export class GameController {
                 case 'initial_state':
                     console.log('Initial State received:', message);
 			this.handleInitialState(message);
+			if (this.onEvent) {
+                        this.onEvent({
+                            type: 'info',
+                            message: 'Game initialized',
+                            details: `Player ${this.playerId} joined game ${this.gameId}`
+                        });
+                    }
                     break;
 
                 case 'game_state':
-			console.log(message);
+			// console.log(message);
                     this.gameState.updateState(message.game_state);
                     if (this.renderer) {
                         this.renderer.update(message.game_state);
                     }
                     break;
+		
+		case 'game_event':
+			if (this.onEvent) {
+                        	this.onEvent({
+                            	type: 'game',
+                            	message: `Game Event: ${message.game_state.type}`,
+                            	details: "not set"
+                        });
+                    }
+                    break;
+
 
                 case 'game_finished':
                     console.log(message);
                     this.handleGameFinished(message);
-                    break;
+                    if (this.onEvent) {
+                        this.onEvent({
+                            type: 'info',
+                            message: 'Game finished',
+                            details: `Winner: ${message.winner}`
+                        });
+                    }
+		    break;
 
                 case 'error':
                     console.log(message);
+		    if (this.onEvent) {
+                        this.onEvent({
+                            type: 'error',
+                            message: message.message || 'Unknown error',
+                            details: message.details || ''
+                        });
+                    }
+                    break;
                     // Simply pass the error message to the renderer
-                    if (this.renderer) {
+                   // if (this.renderer) {
                         /*this.renderer.showError({
                             	type: 'backend',
 			 	error: message.error || 'Unknown error',
             			details: message.details || '',
             			timestamp: new Date().toISOString()
                         });*/
-                    }
-                    break;
+                    //}
+                    //break;
             }
         } catch (error) {
             console.error('Error handling message:', error);
@@ -191,3 +225,4 @@ export class GameController {
         });
     }
 }
+

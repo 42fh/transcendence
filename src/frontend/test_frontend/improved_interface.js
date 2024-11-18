@@ -8,7 +8,8 @@ export class PongInterface {
         this.debugEnabled = false;
         this.gameType = 'polygon';
         this.showSettings = false;
-        this.formData = {
+        this.eventLog = document.getElementById('eventLog');
+	this.formData = {
             gameId: '',
             playerId: '',
             numPlayers: 2,
@@ -221,6 +222,37 @@ export class PongInterface {
         return Math.random().toString(36).substring(2, 15);
     }
 
+
+    logEvent(event) {
+        if (!this.eventLog) return;
+
+        const logEntry = document.createElement('div');
+        logEntry.className = `log-entry ${event.type}`;
+
+        const timestamp = new Date().toLocaleTimeString();
+        
+        logEntry.innerHTML = `
+            <span class="log-timestamp">[${timestamp}]</span>
+            <span class="log-message">${event.message}</span>
+            ${event.details ? `<div class="log-details">${event.details}</div>` : ''}
+        `;
+
+        // Add new entry at the top
+        if (this.eventLog.firstChild) {
+            this.eventLog.insertBefore(logEntry, this.eventLog.firstChild);
+        } else {
+            this.eventLog.appendChild(logEntry);
+        }
+
+        // Limit the number of log entries (optional)
+        while (this.eventLog.children.length > 50) {
+            this.eventLog.removeChild(this.eventLog.lastChild);
+        }
+    }
+
+
+
+
     async startGame() {
 	        const config = this.gameConfigs[this.gameType];
         if (!config) {
@@ -261,7 +293,7 @@ export class PongInterface {
         }
 
         try {
-            this.controller = new GameController();
+            this.controller = new GameController(null, (event) => this.logEvent(event));
 
             const gameConfig = {
                 gameId,
@@ -289,12 +321,14 @@ export class PongInterface {
                 document.getElementById('gameContainer').style.display = 'block';
                 
                 this.updateGameInfo(gameConfig);
-                this.logEvent('Game started successfully');
-                this.showStatus(`Connected to game ${gameId} as player ${playerId}`);
+                this.logEvent({
+                    type: 'info',
+                    message: 'Game started',
+                    details: `Game ID: ${gameId}`
+                });
+		this.showStatus(`Connected to game ${gameId} as player ${playerId}`);
                 
-                if (debug) {
-                    this.setupDebugHandler();
-                }
+                
             } else {
                 this.showStatus('Failed to connect to game', true);
             }

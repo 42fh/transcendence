@@ -100,6 +100,16 @@ body {
     overflow-y: auto;
 }
 
+.log-details {
+    margin-left: 20px;
+    font-size: 12px;
+    color: #adb5bd;
+    margin-top: 2px;
+    white-space: pre-wrap;
+    font-family: monospace;
+}
+
+
 .log-entry {
     padding: 8px;
     border-bottom: 1px solid #eee;

@@ -161,26 +161,51 @@ class PongConsumer(AsyncWebsocketConsumer):
 
     async def handle_paddle_move(self, direction, user_id):
         if user_id != self.player_id:  # this could go into a cheatlog
+            await self.send(
+                text_data=json.dumps(
+                    {"type": "error", "message": "Your are not allowed to move this player"}
+                )
+            )
             return
 
         current_time = time.time()
 
         if current_time - self.last_move_time < self.player_values["move_cooldown"]:
+            await self.send(
+                text_data=json.dumps(
+                    {"type": "error", "message": "Your are are to fast"}
+                )
+            )
             return  # could send back feedback that is too fast or and log it in cheatlog
 
-        if self.is_valid_paddle_move(direction):
+        if await self.is_valid_paddle_move(direction):
             await self.update_paddle_position(direction)
             self.last_move_time = current_time
 
-    def is_valid_paddle_move(self, direction):
+    async def is_valid_paddle_move(self, direction):
         # check if directions are right
         if direction not in ["left", "right"]:
+            await self.send(
+                text_data=json.dumps(
+                    {"type": "error", "message": "wrong move key [left , right]"}
+                )
+            )
             return False
 
         # check if paddle already at max or min
         if direction == "left" and self.current_pos < self.player_values["paddle_size"] / 2 :
+            await self.send(
+                text_data=json.dumps(
+                    {"type": "error", "message": "Your are reached beginning of paddle"}
+                )
+            )
             return False
         if direction == "right" and self.current_pos > 1 - self.player_values["paddle_size"] / 2:
+            await self.send(
+                text_data=json.dumps(
+                    {"type": "error", "message": "Your are reached end of paddle"}
+                )
+            )
             return False
 
         return True
@@ -234,12 +259,27 @@ class PongConsumer(AsyncWebsocketConsumer):
     async def game_state(self, event):
         """Handle game state update events"""
         sanitized_state = self.sanitize_for_json(event["game_state"])
-        cycle = self.sanitize_for_json(event["cycle"])
         await self.send(
             text_data=json.dumps(
-                {"type": "game_state", "game_state": sanitized_state, "cycle": cycle}
+                {"type": "game_state", "game_state": sanitized_state}
             )
         )
+
+    async def game_collision(self, event):
+        collisions = event.get("data")
+        print("collisons: ", collisions)
+        for event in collisions:
+            sanitized_event = self.sanitize_for_json(event)
+            await self.send(
+                text_data=json.dumps(
+                    {
+                        "type": "game_event",
+                        "game_state": sanitized_event
+                    }
+                )
+            )
+            
+        
 
     async def game_finished(self, event):
         """Handle game finished events"""
