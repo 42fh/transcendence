@@ -209,6 +209,8 @@ export default class GameConstructor {
           console.log("initial_state: ", message);
           this.playerId = message.player_index;
           this.createGame(message.game_state);
+          this.gameGroup.rotation.y = -Math.PI / 2;
+          this.gameGroup.position.y = -0.4;
           break;
 
         case "game_state":

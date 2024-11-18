@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import GameUI from "./GameUI.js";
 
 const sectorColors = [
   0xff0000, // Red
@@ -48,10 +47,9 @@ export default class Drawer {
 
       this.game.paddles.set(i, paddle);
       this.game.addObjects([this.game.paddles.get(i)]);
-    }
 
-    for (let i = 0; i < player_count; i++) {
-      const startAngle = (i / player_count) * Math.PI * 2 + Math.PI / 2;
+      // Adjust the ring sector starting angle to match paddle positions
+      const startAngle = (i / player_count) * Math.PI * 2 - Math.PI / 2;
       const ringGeometry = new THREE.RingGeometry(
         radius - 0.05,
         radius,
@@ -75,9 +73,11 @@ export default class Drawer {
   }
 
   createGameField(radius) {
-    const fieldGeometry = new THREE.CircleGeometry(radius, 64);
-    const fieldMaterial = new THREE.MeshMatcapMaterial({
+    const fieldGeometry = new THREE.CircleGeometry(radius + 0.5, 64);
+    const fieldMaterial = new THREE.MeshStandardMaterial({
       map: this.game.loader.items["floorColorTexture"],
+      alphaMap: this.game.loader.items["floorAplhaTexture"],
+      transparent: true,
       normalMap: this.game.loader.items["floorNormalTexture"],
       displacementMap: this.game.loader.items["floorDisplacementTexture"],
       roughnessMap: this.game.loader.items["floorARMTexture"],

@@ -6,6 +6,20 @@ const width = 1;
 const height = 0.3;
 const depth = 0.1;
 
+const sectorColors = [
+  0xff0000, // Red
+  0x00ff00, // Green
+  0x0000ff, // Blue
+  0xffff00, // Yellow
+  0xff00ff, // Magenta
+  0x00ffff, // Cyan
+  0xff8000, // Orange
+  0x8000ff, // Purple
+  0x0080ff, // Light Blue
+  0xff0080, // Pink
+  0x80ff00, // Lime
+];
+
 export default class GameUI {
   constructor(game) {
     this.game = game;
@@ -135,14 +149,28 @@ export default class GameUI {
 
     const rowHeight = 0.15;
     const columnWidth = headerWidth / 2;
+    const colorSquareSize = rowHeight;
 
     this.game.paddles.forEach((player, index) => {
       const yOffset = -headerHeight - index * rowHeight - 0.05;
 
+      // Create color indicator square
+      const colorGeometry = new THREE.PlaneGeometry(
+        colorSquareSize,
+        colorSquareSize
+      );
+      const colorMaterial = new THREE.MeshBasicMaterial({
+        color: sectorColors[index],
+        side: THREE.DoubleSide,
+      });
+      const colorSquare = new THREE.Mesh(colorGeometry, colorMaterial);
+      colorSquare.position.set(-columnWidth + colorSquareSize, yOffset, 0.01);
+      tableGroup.add(colorSquare);
+
       const nameButton = this.createButton(
         columnWidth,
         rowHeight,
-        -columnWidth / 2,
+        -columnWidth / 2 + colorSquareSize * 1.2,
         yOffset,
         0,
         "Player " + (index + 1)
@@ -151,12 +179,12 @@ export default class GameUI {
       tableGroup.add(nameButton);
 
       const scoreButton = this.createButton(
-        columnWidth,
+        columnWidth / 3,
         rowHeight,
         columnWidth / 2,
         yOffset,
         0,
-        0
+        "0"
       );
       scoreButton.material.color.setHex(0x666666);
       tableGroup.add(scoreButton);
@@ -171,7 +199,7 @@ export default class GameUI {
 
   updateScoreTable(scores) {
     scores.forEach((score, index) => {
-      if (score !== this.game.scores[index]) {
+      if (score !== this.game.scores[index] && score !== 0) {
         console.log(`Player ${index + 1} score: ${score}`);
         this.game.scores[index] = score;
 
