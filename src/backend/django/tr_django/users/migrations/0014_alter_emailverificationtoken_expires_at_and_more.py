@@ -15,18 +15,14 @@ class Migration(migrations.Migration):
             model_name="emailverificationtoken",
             name="expires_at",
             field=models.DateTimeField(
-                default=datetime.datetime(
-                    2024, 11, 17, 19, 51, 54, 439460, tzinfo=datetime.timezone.utc
-                )
+                default=datetime.datetime(2024, 11, 17, 19, 51, 54, 439460, tzinfo=datetime.timezone.utc)
             ),
         ),
         migrations.AlterField(
             model_name="passwordresettoken",
             name="expires_at",
             field=models.DateTimeField(
-                default=datetime.datetime(
-                    2024, 11, 16, 20, 51, 54, 439801, tzinfo=datetime.timezone.utc
-                )
+                default=datetime.datetime(2024, 11, 16, 20, 51, 54, 439801, tzinfo=datetime.timezone.utc)
             ),
         ),
     ]

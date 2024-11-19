@@ -100,7 +100,7 @@
             <div class="net-segment white"></div>
           </div>
           <div class="button-wrapper">
-            <button id="chat" onclick="window.location.href='/chat.html'">CHAT</button>
+            <button id="chats">CHATS</button>
           </div>
         </div>
         <div class="button-wrapper threejs-wrapper">
@@ -319,6 +319,57 @@
         <div class="tournament-timetable-game-status"></div>
       </div>
     </template>
+
+<!-- Chat Template -->
+<template id="chat-template">
+    <div id="notification-container"></div>
+
+    <h3 class="chat-greeting">Hello, <span id="current-username-display"></span>!</h3>
+        <input type="hidden" id="current-username" />
+    
+    <div class="chat-container">
+      <div>
+        <h3 >Users</h3>
+        <div id="error-container"></div>
+        <ul id="users-list" class="chat-user-list-ul"></ul>
+      </div>
+
+      <div class="chat-window-messages">
+        <div id="chat-messages"></div>
+
+      <!-- Input area for chat messages -->
+      <div class="chat-input-area">
+        <input 
+          type="text" 
+          id="chat-message-input" 
+          class="chat-input-retro" 
+          placeholder="Type your message..." 
+        />
+      </div>
+
+      <template id="user-list-item-template">
+        <li>
+          <div class="chat-user-item-container">
+            <span class="chat-user-item"></span>
+            <button class="chat-button-small"></button>
+          </div>
+        </li>
+      </template>
+
+      <template id="chat-message-template">
+        <div class="chat-message">
+          <strong class="chat-message-username"></strong>
+          <span class="chat-message-text"></span>
+        </div>
+      </template>
+      
+          <div>
+            <button id="chat-message-submit">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+</template>
 
     <script type="module" src="js/main.js"></script>
   </body>
