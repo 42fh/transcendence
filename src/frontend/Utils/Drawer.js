@@ -51,14 +51,15 @@ export default class Drawer {
       this.game.paddles.set(i, paddle);
       this.field.add(this.game.paddles.get(i));
 
-      const startAngle = (i / player_count) * Math.PI * 2 - Math.PI / 2;
+      const sectorAngle = (2 * Math.PI) / player_count;
+      const startAngle = ((i - 0.5) / player_count) * Math.PI * 2;
       const ringGeometry = new THREE.RingGeometry(
         radius - 0.05,
         radius,
         32,
         1,
         startAngle,
-        (2 * Math.PI) / player_count
+        sectorAngle
       );
       const ringMaterial = new THREE.MeshMatcapMaterial({
         color: sectorColors[i],
@@ -73,7 +74,6 @@ export default class Drawer {
       this.field.add(ringMesh);
     }
   }
-
   createGameField(radius) {
     const fieldGeometry = new THREE.CircleGeometry(radius + 0.5, 64);
     const fieldMaterial = new THREE.MeshStandardMaterial({
@@ -127,6 +127,11 @@ export default class Drawer {
     // update paddles
     const totalSides = gameState.paddles.length;
     const radius = 0.9;
+
+    const paddleArcLength = this.config.dimensions.paddle_length / radius;
+    const sectorAngle = (2 * Math.PI) / totalSides;
+    const availableRange = sectorAngle - paddleArcLength;
+
     for (let i = 0; i < totalSides; i++) {
       const paddle = this.game.paddles.get(i);
       if (!paddle) continue;
@@ -134,24 +139,19 @@ export default class Drawer {
       const sideIndex = gameState.paddles[i].side_index;
       const position = gameState.paddles[i].position;
 
-      // Calculate the angle
-      const baseAngle = (sideIndex / totalSides) * Math.PI * 2;
-      const angleRange = (Math.PI * 2) / totalSides;
-      const angle = baseAngle + position * angleRange - Math.PI / 2;
+      const clampedPosition = position * availableRange;
+      const startAngle = (sideIndex - 0.5) * sectorAngle;
+      const angle = startAngle + paddleArcLength / 2 + clampedPosition;
 
-      // Calculate new position
       const x = radius * Math.cos(angle);
       const z = radius * Math.sin(angle);
 
-      // Update paddle position
-      paddle.position.set(x, 0.12, z);
+      paddle.position.set(x, 0.11, z);
 
-      // Make paddle face outward
-      paddle.lookAt(0, -0.28, 0);
+      paddle.lookAt(0, -0.29, 0);
       paddle.rotateY(Math.PI);
     }
   }
-
   movePaddle(direction) {
     this.game.websocket.sendMessage({
       action: "move_paddle",

@@ -23,11 +23,6 @@ game.loadResources([
     url: "static/textures/floor/normal.jpg",
   },
   {
-    name: "paddle",
-    type: "gltf",
-    url: "static/models/paddle.gltf",
-  },
-  {
     name: "42berlin",
     type: "texture",
     url: "static/textures/player/42berlin.jpg",
