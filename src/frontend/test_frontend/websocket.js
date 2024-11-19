@@ -12,10 +12,14 @@ export class GameWebSocket {
     }
 
     connect() {
+        const filteredOptions = Object.fromEntries(
+            Object.entries(this.options).filter(([key, value]) => typeof value !== 'function')
+        );
+        
         // Build query parameters
         const queryParams = new URLSearchParams({
             player: this.playerId,
-            ...this.options
+            ...filteredOptions
         }).toString();
 
         const url = `${CONFIG.WS_BASE_URL}/pong/${this.gameId}/?${queryParams}`;
