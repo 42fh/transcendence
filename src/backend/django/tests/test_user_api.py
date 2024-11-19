@@ -223,3 +223,13 @@ class TestUserAPI(unittest.TestCase):
         update_data = {"visibility_online_status": "invalid_option"}
         response = requests.patch(f"{self.api_url}/{user_id}/", json=update_data, headers=headers)
         self.assertEqual(response.status_code, 400)
+
+    def test_invalid_user_format(self):
+        """Test requesting user with invalid UUID format"""
+        response = requests.get(f"{self.api_url}/invalid-format/")
+        self.assertEqual(response.status_code, 404)
+
+    def test_nonexistent_user(self):
+        """Test requesting user with valid UUID format but non-existent"""
+        response = requests.get(f"{self.api_url}/123e4567-e89b-12d3-a456-999999999999/")
+        self.assertEqual(response.status_code, 404)
