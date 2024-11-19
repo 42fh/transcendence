@@ -155,9 +155,14 @@ class AGameManager(ABC):
             print(f"Error checking running state: {e}")
             return False
 
-    # setup
 
 
+
+
+
+
+#  this is comment out, because when i use decorators and insert the abstract functions into decorators, then the abstract function request is evaluated before the decorators are added to the class. i decided to use the decorators so that the class would not be so huge. therefore, commenting out the abstract functions was the quickest solution.
+#    # setup
 #
 #    @abstractmethod
 #    async  def apply_game_settings(self): pass
