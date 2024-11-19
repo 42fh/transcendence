@@ -57,19 +57,6 @@ export function loadHomePage(addToHistory = true) {
       });
     }
 
-    const threejsButton = document.getElementById("threejs");
-    if (threejsButton) {
-      threejsButton.addEventListener("click", function () {
-        const baseUrl = window.location.origin;
-        fetch(`${baseUrl}/threejs_11.html`)
-          .then((response) => response.text())
-          .then((html) => {
-            mainContent.innerHTML = html;
-          })
-          .catch((err) => console.warn("Failed to load threejs_11.html", err));
-      });
-    }
-
     const chatsButton = document.getElementById("chats");
     if (chatsButton) {
       chatsButton.addEventListener("click", loadChatPage);
