@@ -83,13 +83,10 @@ class CustomUser(AbstractUser):
     STATUS_AWAY = "away"
 
     ONLINE_STATUS_CHOICES = [
-        (status, status.capitalize())
-        for status in [STATUS_OFFLINE, STATUS_ONLINE, STATUS_BUSY, STATUS_AWAY](status, status.capitalize())
-        for status in [STATUS_OFFLINE, STATUS_ONLINE, STATUS_BUSY, STATUS_AWAY]
+        (status, status.capitalize()) for status in [STATUS_OFFLINE, STATUS_ONLINE, STATUS_BUSY, STATUS_AWAY]
     ]
 
     # TODO: Remove this, cause it's transitient. It's not something that needs to be stored in the database.
-    online_status = models.CharField(max_length=10, choices=ONLINE_STATUS_CHOICES, default=STATUS_OFFLINE)
     online_status = models.CharField(max_length=10, choices=ONLINE_STATUS_CHOICES, default=STATUS_OFFLINE)
 
     default_status = models.CharField(
@@ -116,9 +113,7 @@ class CustomUser(AbstractUser):
         ]
     ]
     visibility_online_status = models.CharField(max_length=10, choices=VISIBILITY_CHOICES, default=VISIBILITY_FRIENDS)
-    visibility_online_status = models.CharField(max_length=10, choices=VISIBILITY_CHOICES, default=VISIBILITY_FRIENDS)
 
-    visibility_user_profile = models.CharField(max_length=10, choices=VISIBILITY_CHOICES, default=VISIBILITY_EVERYONE)
     visibility_user_profile = models.CharField(max_length=10, choices=VISIBILITY_CHOICES, default=VISIBILITY_EVERYONE)
 
     custom_visibility_group = models.ForeignKey(
@@ -146,9 +141,6 @@ class CustomUser(AbstractUser):
     )
 
     friends = models.ManyToManyField("self", blank=True, symmetrical=True)
-    blocked_users = models.ManyToManyField("self", blank=True, symmetrical=False, related_name="blocked_by")
-
-    # Friend Request System
     friend_requests_sent = models.ManyToManyField(
         "self", blank=True, symmetrical=False, related_name="friend_requests_received"
     )
@@ -192,8 +184,6 @@ class VisibilityGroup(models.Model):
     description = models.TextField(null=True, blank=True)
     created_by = models.ForeignKey("CustomUser", on_delete=models.CASCADE, related_name="created_visibility_groups")
     members = models.ManyToManyField("CustomUser", related_name="visibility_group_memberships", blank=True)
-    created_by = models.ForeignKey("CustomUser", on_delete=models.CASCADE, related_name="created_visibility_groups")
-    members = models.ManyToManyField("CustomUser", related_name="visibility_group_memberships", blank=True)
 
     def __str__(self):
         return self.name
@@ -201,10 +191,8 @@ class VisibilityGroup(models.Model):
 
 class EmailVerificationToken(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="verification_tokens")
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="verification_tokens")
     token = models.UUIDField(default=uuid.uuid4, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField(default=timezone.now() + timedelta(days=1))  # 1-day expiry
     expires_at = models.DateTimeField(default=timezone.now() + timedelta(days=1))  # 1-day expiry
 
     def is_expired(self):
@@ -213,10 +201,8 @@ class EmailVerificationToken(models.Model):
 
 class PasswordResetToken(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="password_reset_tokens")
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="password_reset_tokens")
     token = models.UUIDField(default=uuid.uuid4, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField(default=timezone.now() + timedelta(hours=1))  # 1-hour expiry
     expires_at = models.DateTimeField(default=timezone.now() + timedelta(hours=1))  # 1-hour expiry
 
     def is_expired(self):
