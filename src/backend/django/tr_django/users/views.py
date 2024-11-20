@@ -12,6 +12,8 @@ from users.models import CustomUser
 from django.db.models import Q
 from game.models import Player
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from uuid import UUID
+from django.core.exceptions import ValidationError
 import uuid
 
 
@@ -272,6 +274,12 @@ class UserDetailView(View):
 
     def get(self, request, user_id):
         try:
+            # Validate UUID format
+            try:
+                UUID(str(user_id))
+            except ValueError:
+                return JsonResponse({"error": "Invalid user ID format"}, status=400)
+
             user = CustomUser.objects.get(id=user_id)
 
             try:
@@ -308,6 +316,8 @@ class UserDetailView(View):
                     "id": str(user.id),
                     "username": user.username,
                     "email": user.email,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
                     "avatar": user.avatar.url if user.avatar else None,
                     "bio": user.bio,
                     "telephone_number": user.telephone_number,
@@ -374,6 +384,8 @@ class UserDetailView(View):
                 "id": str(user.id),
                 "username": user.username,
                 "email": user.email,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
                 "avatar": user.avatar.url if user.avatar else None,
                 "bio": user.bio,
                 "telephone_number": user.telephone_number,
