@@ -136,7 +136,6 @@ export default class GameConstructor {
       const gameType = "circular";
       const numPlayers = document.getElementById("playerCount").value;
       console.log("numPlayers: ", numPlayers);
-      // const numSides = 2; // only polygon
       const numBalls = 1;
       const debug = true;
 
@@ -184,15 +183,14 @@ export default class GameConstructor {
       switch (message.type) {
         case "initial_state":
           console.log("initial_state: ", message);
-          this.playerId = message.player_index + 1;
+          this.playerId = message.player_index;
           console.log("playerId: ", this.playerId);
           this.createGame(message.game_state);
 
-          // Rotate the game to the player's perspective
           const playerAngle =
             (this.playerId / message.game_state.paddles.length) * Math.PI * 2;
-          const rotationNeeded = Math.PI - playerAngle;
-          this.drawer.field.rotation.y = rotationNeeded - Math.PI / 2; // Subtract PI/2 for initial game orientation
+
+          this.drawer.field.rotation.y = -playerAngle - Math.PI / 2;
           this.drawer.field.position.y = -0.4;
           break;
 

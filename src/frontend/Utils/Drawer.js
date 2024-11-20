@@ -52,13 +52,13 @@ export default class Drawer {
       this.field.add(this.game.paddles.get(i));
 
       const sectorAngle = (2 * Math.PI) / player_count;
-      const startAngle = ((i - 0.5) / player_count) * Math.PI * 2;
+      const startAngle = ((i + 1 - 0.5) / player_count) * Math.PI * 2; // Added +1 to shift rings one position
       const ringGeometry = new THREE.RingGeometry(
         radius - 0.05,
         radius,
         32,
         1,
-        startAngle,
+        -startAngle,
         sectorAngle
       );
       const ringMaterial = new THREE.MeshMatcapMaterial({
