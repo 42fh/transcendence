@@ -52,6 +52,7 @@ export function loadHomePage(addToHistory = true) {
     const playButton = document.getElementById("play");
     if (playButton) {
       playButton.addEventListener("click", function () {
+        console.log("playButton pressed");
         const baseUrl = window.location.origin;
         fetch(`${baseUrl}/play.html`)
           .then((response) => response.text())
