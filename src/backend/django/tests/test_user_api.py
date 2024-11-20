@@ -233,3 +233,7 @@ class TestUserAPI(unittest.TestCase):
         """Test requesting user with valid UUID format but non-existent"""
         response = requests.get(f"{self.api_url}/123e4567-e89b-12d3-a456-999999999999/")
         self.assertEqual(response.status_code, 404)
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)
