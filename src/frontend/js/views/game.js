@@ -10,5 +10,7 @@ export async function loadGamePage(addToHistory = true) {
         }
 
         console.log("loadGamePage called");
+    } catch (error) {
+        console.error(error);
     }
 }
