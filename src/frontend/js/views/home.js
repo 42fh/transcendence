@@ -1,6 +1,7 @@
 import { handleLogout } from "./auth.js";
 import { displayLogoutError } from "../utils/errors.js";
 import { loadTournamentsPage } from "./tournaments.js";
+import { loadGamePage } from "./game.js";
 
 export function loadHomePage(addToHistory = true) {
   try {
@@ -51,19 +52,7 @@ export function loadHomePage(addToHistory = true) {
 
     const playButton = document.getElementById("play");
     if (playButton) {
-      playButton.addEventListener("click", function () {
-        console.log("playButton pressed");
-        const baseUrl = window.location.origin;
-        fetch(`${baseUrl}/play.html`)
-          .then((response) => response.text())
-          .then((html) => {
-            mainContent.innerHTML = html;
-            const script = document.createElement("script");
-            script.src = "play.js";
-            document.body.appendChild(script);
-          })
-          .catch((err) => console.warn("Failed to load play.html", err));
-      });
+      playButton.addEventListener("click", loadGamePage);
     }
 
     const threejsButton = document.getElementById("threejs");
