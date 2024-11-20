@@ -141,8 +141,6 @@ class CustomUser(AbstractUser):
     )
 
     friends = models.ManyToManyField("self", blank=True, symmetrical=True)
-
-    # Friend Request System
     friend_requests_sent = models.ManyToManyField(
         "self", blank=True, symmetrical=False, related_name="friend_requests_received"
     )
