@@ -10,3 +10,9 @@ export const CONFIG = {
     TOURNAMENTS: "/api/game/tournaments",
   },
 };
+
+export const LOCAL_STORAGE_KEYS = {
+  USER_ID: "pongUserId",
+  USERNAME: "pongUsername",
+  THEME: "pongTheme",
+};

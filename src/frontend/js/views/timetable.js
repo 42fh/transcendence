@@ -90,7 +90,8 @@ export async function loadTimetablePage(tournamentName, addToHistory = true) {
         }
 
         // Highlight current user's games
-        const currentUser = localStorage.getItem("username");
+        const currentUser = localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME);
+
         if (game.player1 === currentUser || game.player2 === currentUser) {
           gameElement.querySelector(".tournament-timetable-game").classList.add("tournament-timetable-game--user-game");
         }

@@ -24,7 +24,8 @@ export async function loadProfilePage(addToHistory = true) {
     mainContent.innerHTML = '<div class="loading">Loading profile...</div>';
 
     // Get current user's ID from localStorage
-    const userId = localStorage.getItem("user_id");
+    const userId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
+
     if (!userId) {
       throw new Error("User ID not found");
     }

@@ -81,8 +81,8 @@ async function handleFormSubmitSignupLogin(event, endpoint) {
         console.warn("Element with id 'modal-message' not found in the DOM or result.message is undefined.");
       }
       console.log("result", result);
-      localStorage.setItem("username", result.username);
-      localStorage.setItem("user_id", result.id);
+      localStorage.setItem(LOCAL_STORAGE_KEYS.USERNAME, result.username);
+      localStorage.setItem(LOCAL_STORAGE_KEYS.USER_ID, result.id);
       form.style.display = "none";
       setTimeout(() => {
         closeModal();
@@ -109,8 +109,8 @@ export async function handleLogout() {
     console.log("Logout response status:", response.status);
 
     if (response.ok) {
-      localStorage.removeItem("username");
-      localStorage.removeItem("user_id");
+      localStorage.removeItem(LOCAL_STORAGE_KEYS.USERNAME);
+      localStorage.removeItem(LOCAL_STORAGE_KEYS.USER_ID);
       history.pushState({ view: "auth" }, "");
       loadAuthPage();
     } else {

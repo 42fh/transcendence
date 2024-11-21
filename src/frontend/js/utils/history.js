@@ -21,7 +21,8 @@ import { loadProfilePage } from "../views/profile.js";
 export function initializeHistory() {
   // Initial state on load
   window.addEventListener("load", () => {
-    const username = localStorage.getItem("username");
+    const username = localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME);
+
     const initialView = username ? "home" : "auth";
     history.replaceState({ view: initialView }, "");
 
@@ -76,14 +77,16 @@ export function initializeHistory() {
           // TODO: Implement profile data caching
           // Cache user profiles with timestamp for invalidation
           // Consider different cache durations for own profile vs other users
-          const userId = event.state.userId || localStorage.getItem("userId");
+          const userId = event.state.userId || localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
+
           loadProfilePage(userId, false);
           break;
         default:
           loadHomePage(false);
       }
     } else {
-      const username = localStorage.getItem("username");
+      const username = localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME);
+
       if (username) {
         loadHomePage(false);
       } else {
@@ -113,7 +116,8 @@ export function initializeHistory() {
           loadTimetablePage(event.target.dataset.tournamentName);
           break;
         case "profile":
-          const userId = event.target.dataset.userId || localStorage.getItem("userId");
+          const userId = event.target.dataset.userId || localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
+
           loadProfilePage(userId);
           break;
         default:

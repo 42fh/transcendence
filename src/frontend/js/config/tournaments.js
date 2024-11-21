@@ -1,4 +1,4 @@
-import { CONFIG } from "./constants.js";
+import { CONFIG, LOCAL_STORAGE_KEYS } from "./constants.js";
 
 /*
  * Tournament Data Structure
@@ -105,7 +105,7 @@ export const timetableExample42Berlin = {
           uuid: "game1_4",
           date: "2024-03-20T15:30:00Z",
           player1: "User7",
-          player2: localStorage.getItem("username"), // Current user
+          player2: localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME), // Current user
           nextGameUuid: "game2_2",
           score: null,
           winner: null,
@@ -188,7 +188,8 @@ function addCurrentUserToTournaments() {
   // Add current user to specific tournaments for demo purposes
   // If you want to test the enrollment functionality, uncomment the following lines or comment all of them out
   // I mean like testing the empty state in the UI
-  const username = localStorage.getItem("username");
+  const username = localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME);
+
   if (username) {
     //   tournaments[0].participants.push(username); // Add to Wimbledon
     //   tournaments[1].participants.push(username); // Add to US Open
