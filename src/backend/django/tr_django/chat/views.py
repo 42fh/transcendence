@@ -47,11 +47,17 @@ def rooms(request):
         user_list = []
         for user in users:
             username = user["username"]
+            # Check if the user has a chat and count unread messages
+            unread_count = (
+                Message.objects.filter(room__user1=request.user, room__user2__username=username, is_read=False).count()
+                + Message.objects.filter(
+                    room__user2=request.user, room__user1__username=username, is_read=False
+                ).count()
+            )
+
             user_data = {
                 "username": username,
-                "has_chat": username in users_with_chats,
-                "is_blocked": username in blocked_users,
-                "has_blocked_you": username in blocked_by_users,
+                "unread_messages": unread_count,  # New field for unread messages count
             }
             user_list.append(user_data)
 
