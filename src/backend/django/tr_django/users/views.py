@@ -55,7 +55,9 @@ class SignupView(View):
         if user is not None:
             login(request, user)  # This creates the session for the new user
             # Return success response with username
-            return JsonResponse(
+            print("Session Key After Login:", request.session.session_key)  # Should not be None
+            print("Session Data:", request.session.items())  # Debug session contents
+            response = JsonResponse(
                 {
                     "success": True,
                     "message": "User created and logged in successfully.",
@@ -64,6 +66,9 @@ class SignupView(View):
                     "action": "signup",
                 }
             )
+            print("Set-Cookie Header in SignupView Response:", response.get("Set-Cookie"))  # Debug
+            return response
+
         # In case authentication fails for some reason, which is rare
         return JsonResponse(
             {
@@ -270,7 +275,10 @@ class UsersListView(View):
 
 @method_decorator(csrf_exempt, name="dispatch")
 class UserDetailView(View):
-    """View for getting detailed user information including game stats and match history"""
+    """
+    GET: View for getting detailed user information including game stats and match history
+    PATCH: View for updating user details
+    """
 
     def get(self, request, user_id):
         try:
