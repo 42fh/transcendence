@@ -210,6 +210,24 @@ button:hover {
   cursor: not-allowed;
 }
 
+.chat-horizontal-scroll {
+  display: flex;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.chat-user-initial {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  text-align: center;
+  margin: 0 20px;
+  background-color: #ccff00;
+  border-radius: 50%;
+  font-weight: bold;
+}
+
 /* Home Page */
 
 .home-container {

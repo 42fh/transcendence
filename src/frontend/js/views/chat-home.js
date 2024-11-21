@@ -30,40 +30,59 @@ export async function loadChatPage(addToHistory = true) {
       console.error("Error loading chat home:", error);
     }
   }
-async function populateUserList() {
-  try {
-    const data = await fetchUserList();
-    const usersList = document.getElementById("users-list");
-    usersList.innerHTML = "";
 
-    const template = document.getElementById("user-list-item-template");
-    data.users.forEach((user) => {
-      const userElement = document.importNode(template.content, true);
-      const nameSpan = userElement.querySelector(".chat-user-item");
-      const blockButton = userElement.querySelector(".chat-button-small");
-
-      nameSpan.textContent = user.username;
-      nameSpan.classList.toggle("has-chat", user.has_chat);
-
-      if (!user.has_blocked_you) {
-        nameSpan.onclick = () => loadChatRoom(user.username);
-      } else {
-        nameSpan.classList.add("blocked-by-user");
-        nameSpan.title = "This user has blocked you";
-      }
-
-      blockButton.textContent = user.is_blocked ? "Unblock" : "Block";
-      blockButton.onclick = async (e) => {
-        e.stopPropagation();
-        await handleBlockUser(user.username, user.is_blocked, blockButton);
-      };
-
-      usersList.appendChild(userElement);
-    });
-  } catch (error) {
-    displayErrorMessageModalModal(`Failed to load user list: ${error.message}`);
+  
+  async function populateUserList() {
+    try {
+      const data = await fetchUserList();
+      const conversationList = document.getElementById("conversation-list");
+      const userInitialsContainer = document.getElementById("user-initials-container");
+      conversationList.innerHTML = "";
+      userInitialsContainer.innerHTML = "";
+  
+      data.users.forEach((user) => {
+        // Use the user initial template
+        const userInitialTemplate = document.getElementById("user-initial-template");
+        if (!userInitialTemplate) {
+          throw new Error("User Initial template not found");
+        }
+        const userInitial = document.importNode(userInitialTemplate.content, true);
+        const userInitialElement = userInitial.querySelector(".user-initial");
+        if (!userInitialElement) {
+          throw new Error("User Initial element not found in template");
+        }
+        userInitialElement.id = `user-initial-${user.username}`;
+        userInitialElement.textContent = user.username.charAt(0).toUpperCase();
+        userInitialsContainer.appendChild(userInitial);
+  
+        // Use the user list item template
+        const conversationListItemTemplate = document.getElementById("user-list-item-template");
+        if (!conversationListItemTemplate) {
+          throw new Error("Conversation List Item template not found");
+        }
+        const conversationListItem = document.importNode(conversationListItemTemplate.content, true);
+        const conversationListItemElement = conversationListItem.querySelector(".chat-user-item");
+        if (!conversationListItemElement) {
+          throw new Error("User List Item element not found in template");
+        }
+        conversationListItemElement.textContent = user.username;
+        const chatButton = conversationListItem.querySelector(".chat-button-small");
+        if (!chatButton) {
+          throw new Error("Chat button element not found in template");
+        }
+        chatButton.id = `chat-button-${user.username}`;
+  
+        // Add event listener to open chat room
+        conversationListItemElement.addEventListener("click", () => {
+          loadChatRoom(user.username);
+        });
+  
+        conversationList.appendChild(conversationListItem);
+      });
+    } catch (error) {
+      console.error("Error loading user list:", error);
+    }
   }
-}
 
 async function handleBlockUser(username, isCurrentlyBlocked, button) {
   try {
