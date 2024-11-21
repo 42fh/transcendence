@@ -78,7 +78,7 @@ export class GameController {
     async directConnect(gameId, config = {}) {
         try {
             this.gameId = gameId;
-            this.playerId = config.playerId || 'player-' + Math.random().toString(36).substr(2, 9);
+            this.playerId = config.playerId || 'player-' + Math.random().toString(10).substring(2, 9);
 
             // Initialize WebSocket connection with all config parameters
             this.websocket = new GameWebSocket(
