@@ -1,9 +1,29 @@
 :root {
-  /* Colors */
-  --color-primary: white;
-  --color-background: black;
-  --color-error: red;
-  --color-overlay: rgba(255, 255, 255, 0.9);
+  /* Base Colors */
+  --color-background: #000000; /* Black - Main app background */
+  --color-surface: #1a1a1a; /* Dark gray - Used for cards, modals, containers */
+  --color-primary: #ffffff; /* White - Primary interactive elements */
+  --color-secondary: #cccccc; /* Light gray - Secondary elements */
+  --color-border: rgba(255, 255, 255, 0.3); /* Semi-transparent white for borders */
+
+  /* Text Colors */
+  --color-text-primary: var(--color-primary); /* White - Main text */
+  --color-text-secondary: #888888; /* Medium gray - Secondary text */
+  --color-text-error: #f44336; /* Red - Error messages */
+  --color-text-success: #4caf50; /* Green - Success messages */
+
+  /* Accent Colors */
+  --color-accent: #4caf50; /* Green - Highlights, success states */
+  --color-error: #f44336; /* Red - Error states */
+
+  /* Overlays and Opacities */
+  --color-overlay: rgba(255, 255, 255, 0.9); /* Light overlay for modals */
+  --color-overlay-dark: rgba(0, 0, 0, 0.5); /* Dark overlay for modals */
+  --color-surface-transparent: rgba(255, 255, 255, 0.1); /* Semi-transparent containers */
+
+  /* States */
+  --color-hover: rgba(255, 255, 255, 0.2); /* Hover state */
+  --color-active: rgba(255, 255, 255, 0.3); /* Active state */
 
   /* Typography */
   --font-family-primary: "Press Start 2P", cursive;
@@ -43,8 +63,8 @@
 }
 
 body {
-  background-color: black;
-  color: white;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
   font-family: "Press Start 2P", cursive;
   display: flex;
   justify-content: center;
@@ -57,7 +77,6 @@ h1 {
   letter-spacing: 10px;
   text-align: center; /* Center the title */
 }
-
 
 button {
   background: none;
@@ -119,7 +138,6 @@ button:hover {
 .chat-greeting {
   margin-bottom: var(--spacing-lg);
 }
-
 
 .chat-user-list {
   width: 25%;
@@ -194,7 +212,6 @@ button:hover {
 .chat-user-item {
   cursor: pointer;
 }
-
 
 .chat-user-item-container {
   display: flex;
@@ -445,7 +462,7 @@ button:hover {
   grid-template-columns: minmax(8em, 1fr) 2fr minmax(5em, 1fr);
   gap: 1rem;
   padding: 0.8rem 1.2rem;
-  border: 2px solid white;
+  border: 1px solid var(--color-border);
   border-radius: 10px;
   cursor: pointer;
   transition: background-color 0.3s, color 0.3s;
