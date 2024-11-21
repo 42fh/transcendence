@@ -80,6 +80,7 @@ async function handleFormSubmitSignupLogin(event, endpoint) {
       } else {
         console.warn("Element with id 'modal-message' not found in the DOM or result.message is undefined.");
       }
+      console.log("result", result);
       localStorage.setItem("username", result.username);
       localStorage.setItem("user_id", result.id);
       form.style.display = "none";

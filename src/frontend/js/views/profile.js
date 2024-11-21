@@ -24,7 +24,7 @@ export async function loadProfilePage(addToHistory = true) {
     mainContent.innerHTML = '<div class="loading">Loading profile...</div>';
 
     // Get current user's ID from localStorage
-    const userId = localStorage.getItem("userId");
+    const userId = localStorage.getItem("user_id");
     if (!userId) {
       throw new Error("User ID not found");
     }
@@ -68,5 +68,6 @@ export async function loadProfilePage(addToHistory = true) {
   } catch (error) {
     console.error("Error loading profile page:", error);
     showToast("Failed to load profile", true);
+    loadHomePage();
   }
 }
