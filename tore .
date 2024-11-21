@@ -87,7 +87,7 @@ Date:   Sat Nov 16 22:00:08 2024 +0100
 Author: lmangall <l.mangallon@gmail.com>
 Date:   Sat Nov 16 21:01:26 2024 +0100
 
-    Refactor(chat errors): use displayErrorMessageModalModal from modals.js
+    Refactor(chat errors): use displayModalError from modals.js
 
 [33mcommit 52c0c80bcc50dd80ed54612821f459f581cd94cc[m
 Author: lmangall <l.mangallon@gmail.com>
