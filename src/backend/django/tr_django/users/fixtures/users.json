@@ -1,0 +1,208 @@
+[
+  {
+    "model": "users.customuser",
+    "pk": "123e4567-e89b-12d3-a456-426614174000",
+    "fields": {
+      "password": "pbkdf2_sha256$600000$hash_here",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "testuser1",
+      "first_name": "",
+      "last_name": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2024-01-01T10:00:00Z",
+      "email": "test1@example.com",
+      "email_verified": false,
+      "avatar": null,
+      "bio": "Test user 1 bio",
+      "telephone_number": "+1234567890",
+      "pronoun": "they/them",
+      "two_factor_enabled": false,
+      "visibility_online_status": "everyone",
+      "visibility_user_profile": "everyone"
+    }
+  },
+  {
+    "model": "users.customuser",
+    "pk": "223e4567-e89b-12d3-a456-426614174000",
+    "fields": {
+      "password": "pbkdf2_sha256$600000$hash_here",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "testuser2",
+      "first_name": "",
+      "last_name": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2024-01-01T10:00:00Z",
+      "email": "test2@example.com",
+      "email_verified": false,
+      "avatar": null,
+      "bio": "Test user 2 bio",
+      "telephone_number": "+2345678901",
+      "pronoun": "she/her",
+      "two_factor_enabled": false,
+      "visibility_online_status": "friends",
+      "visibility_user_profile": "everyone"
+    }
+  },
+  {
+    "model": "users.customuser",
+    "pk": "323e4567-e89b-12d3-a456-426614174000",
+    "fields": {
+      "password": "pbkdf2_sha256$600000$hash_here",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "testuser3",
+      "first_name": "",
+      "last_name": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2024-01-01T10:00:00Z",
+      "email": "test3@example.com",
+      "email_verified": false,
+      "avatar": null,
+      "bio": "Test user 3 bio",
+      "telephone_number": "+3456789012",
+      "pronoun": "he/him",
+      "two_factor_enabled": false,
+      "visibility_online_status": "everyone",
+      "visibility_user_profile": "everyone"
+    }
+  },
+  {
+    "model": "game.gamemode",
+    "pk": 1,
+    "fields": {
+      "name": "Classic",
+      "description": "Classic Pong mode"
+    }
+  },
+  {
+    "model": "game.player",
+    "pk": 1,
+    "fields": {
+      "user": "123e4567-e89b-12d3-a456-426614174000",
+      "display_name": "Player1",
+      "wins": 3,
+      "losses": 2
+    }
+  },
+  {
+    "model": "game.player",
+    "pk": 2,
+    "fields": {
+      "user": "223e4567-e89b-12d3-a456-426614174000",
+      "display_name": "Player2",
+      "wins": 2,
+      "losses": 3
+    }
+  },
+  {
+    "model": "game.player",
+    "pk": 3,
+    "fields": {
+      "user": "323e4567-e89b-12d3-a456-426614174000",
+      "display_name": "Player3",
+      "wins": 4,
+      "losses": 1
+    }
+  },
+  {
+    "model": "game.singlegame",
+    "pk": "423e4567-e89b-12d3-a456-426614174000",
+    "fields": {
+      "status": "finished",
+      "mode": 1,
+      "winner": 1,
+      "created_at": "2024-01-01T10:00:00Z",
+      "start_date": "2024-01-01T10:01:00Z",
+      "finished_at": "2024-01-01T10:10:00Z"
+    }
+  },
+  {
+    "model": "game.singlegame",
+    "pk": "523e4567-e89b-12d3-a456-426614174000",
+    "fields": {
+      "status": "finished",
+      "mode": 1,
+      "winner": 2,
+      "created_at": "2024-01-01T11:00:00Z",
+      "start_date": "2024-01-01T11:01:00Z",
+      "finished_at": "2024-01-01T11:10:00Z"
+    }
+  },
+  {
+    "model": "game.singlegame",
+    "pk": "623e4567-e89b-12d3-a456-426614174000",
+    "fields": {
+      "status": "finished",
+      "mode": 1,
+      "winner": 3,
+      "created_at": "2024-01-01T12:00:00Z",
+      "start_date": "2024-01-01T12:01:00Z",
+      "finished_at": "2024-01-01T12:10:00Z"
+    }
+  },
+  {
+    "model": "game.playergamestats",
+    "pk": 1,
+    "fields": {
+      "single_game": "423e4567-e89b-12d3-a456-426614174000",
+      "player": 1,
+      "joined_at": "2024-01-01T10:00:00Z",
+      "score": 11
+    }
+  },
+  {
+    "model": "game.playergamestats",
+    "pk": 2,
+    "fields": {
+      "single_game": "423e4567-e89b-12d3-a456-426614174000",
+      "player": 2,
+      "joined_at": "2024-01-01T10:00:00Z",
+      "score": 9
+    }
+  },
+  {
+    "model": "game.playergamestats",
+    "pk": 3,
+    "fields": {
+      "single_game": "523e4567-e89b-12d3-a456-426614174000",
+      "player": 2,
+      "joined_at": "2024-01-01T11:00:00Z",
+      "score": 11
+    }
+  },
+  {
+    "model": "game.playergamestats",
+    "pk": 4,
+    "fields": {
+      "single_game": "523e4567-e89b-12d3-a456-426614174000",
+      "player": 3,
+      "joined_at": "2024-01-01T11:00:00Z",
+      "score": 8
+    }
+  },
+  {
+    "model": "game.playergamestats",
+    "pk": 5,
+    "fields": {
+      "single_game": "623e4567-e89b-12d3-a456-426614174000",
+      "player": 3,
+      "joined_at": "2024-01-01T12:00:00Z",
+      "score": 11
+    }
+  },
+  {
+    "model": "game.playergamestats",
+    "pk": 6,
+    "fields": {
+      "single_game": "623e4567-e89b-12d3-a456-426614174000",
+      "player": 1,
+      "joined_at": "2024-01-01T12:00:00Z",
+      "score": 7
+    }
+  }
+]

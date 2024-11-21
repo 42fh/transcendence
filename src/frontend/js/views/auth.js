@@ -6,14 +6,14 @@ import { loadHomePage } from "./home.js";
 export function initAuthListeners() {
   document.getElementById("login-button").addEventListener("click", () => {
     fillModalContent("login-template", {
-      submitHandler: (event) => handleFormSubmitSignupLogin(event, "/api/users/login/"),
+      submitHandler: (event) => handleFormSubmitSignupLogin(event, "/api/users/auth/login/"),
     });
     openModal();
   });
 
   document.getElementById("signup-button").addEventListener("click", () => {
     fillModalContent("signup-template", {
-      submitHandler: (event) => handleFormSubmitSignupLogin(event, "/api/users/signup/"),
+      submitHandler: (event) => handleFormSubmitSignupLogin(event, "/api/users/auth/signup/"),
     });
     openModal();
   });
@@ -81,6 +81,7 @@ async function handleFormSubmitSignupLogin(event, endpoint) {
         console.warn("Element with id 'modal-message' not found in the DOM or result.message is undefined.");
       }
       localStorage.setItem("username", result.username);
+      localStorage.setItem("user_id", result.id);
       form.style.display = "none";
       setTimeout(() => {
         closeModal();
@@ -100,7 +101,7 @@ async function handleFormSubmitSignupLogin(event, endpoint) {
 export async function handleLogout() {
   console.log("Attempting to log out...");
   try {
-    const response = await fetch("/api/users/logout/", {
+    const response = await fetch("/api/users/auth/logout/", {
       method: "POST",
       cache: "no-store",
     });
@@ -108,6 +109,7 @@ export async function handleLogout() {
 
     if (response.ok) {
       localStorage.removeItem("username");
+      localStorage.removeItem("user_id");
       history.pushState({ view: "auth" }, "");
       loadAuthPage();
     } else {

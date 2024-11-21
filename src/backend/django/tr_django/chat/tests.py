@@ -96,7 +96,7 @@ class MessageTestCase(ChatTestCase):
         initial_last_message = self.chat_room.last_message_at
 
         # Wait a moment to ensure different timestamp
-        message = Message.objects.create(room=self.chat_room, sender=self.user1, content="New message")
+        Message.objects.create(room=self.chat_room, sender=self.user1, content="New message")
 
         self.chat_room.refresh_from_db()
         self.assertGreater(self.chat_room.last_message_at, initial_last_message)
