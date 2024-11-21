@@ -21,12 +21,10 @@ class CustomUser(AbstractUser):
         null=True,
         blank=True,
         error_messages={
-            "unique": "A user with that email already exists.",  # Can be removed until unique=True
+            "unique": "A user with that email already exists.",
         },
     )
-
     email_verified = models.BooleanField(default=False)  # Verification status
-
     avatar = models.ImageField(upload_to="avatars/", null=True, blank=True)
     bio = models.TextField(null=True, blank=True)
     telephone_number = models.CharField(max_length=20, null=True, blank=True)
@@ -38,7 +36,6 @@ class CustomUser(AbstractUser):
 
     # Field to enable or disable 2FA for the user.
     two_factor_enabled = models.BooleanField(default=False)
-
     two_factor_method = models.CharField(
         max_length=20,
         choices=[
@@ -52,7 +49,6 @@ class CustomUser(AbstractUser):
         ],
         default="TOTP",
     )
-
     # Stores the user's secret key for generating 2FA codes,
     # typically used in TOTP (Time-based One-Time Password) algorithms.
     # This key is unique to the user and is used to create time-based codes.
@@ -81,8 +77,6 @@ class CustomUser(AbstractUser):
     # ensures that sensitive data is not stored directly in the database.
     refresh_token_hash = models.CharField(max_length=64, null=True, blank=True)
 
-    # Status fields
-
     STATUS_OFFLINE = "offline"
     STATUS_ONLINE = "online"
     STATUS_BUSY = "busy"
@@ -91,6 +85,7 @@ class CustomUser(AbstractUser):
     ONLINE_STATUS_CHOICES = [
         (status, status.capitalize()) for status in [STATUS_OFFLINE, STATUS_ONLINE, STATUS_BUSY, STATUS_AWAY]
     ]
+
     # TODO: Remove this, cause it's transitient. It's not something that needs to be stored in the database.
     online_status = models.CharField(max_length=10, choices=ONLINE_STATUS_CHOICES, default=STATUS_OFFLINE)
 
@@ -121,7 +116,6 @@ class CustomUser(AbstractUser):
 
     visibility_user_profile = models.CharField(max_length=10, choices=VISIBILITY_CHOICES, default=VISIBILITY_EVERYONE)
 
-    # This will not be implemented first: we can just stick with the friends list for the beginning.
     custom_visibility_group = models.ForeignKey(
         to="users.VisibilityGroup",
         on_delete=models.SET_NULL,
@@ -132,7 +126,7 @@ class CustomUser(AbstractUser):
 
     groups = models.ManyToManyField(
         "auth.Group",
-        related_name="members",  # Changed from classic `custom_user_set` to `members` for readability
+        related_name="members",
         blank=True,
         verbose_name="groups",
         help_text="The groups this user belongs to.",
@@ -140,13 +134,12 @@ class CustomUser(AbstractUser):
 
     user_permissions = models.ManyToManyField(
         "auth.Permission",
-        related_name="permitted_users",  # Changed from `custom_user_set` to `permitted_users` for readability
+        related_name="permitted_users",
         blank=True,
         verbose_name="user permissions",
         help_text="Specific permissions for this user.",
     )
 
-    # Friendship
     friends = models.ManyToManyField("self", blank=True, symmetrical=True)
     friend_requests_sent = models.ManyToManyField(
         "self", blank=True, symmetrical=False, related_name="friend_requests_received"

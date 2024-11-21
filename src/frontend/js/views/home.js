@@ -1,6 +1,7 @@
 import { handleLogout } from "./auth.js";
 import { displayLogoutError } from "../utils/errors.js";
 import { loadTournamentsPage } from "./tournaments.js";
+import { loadChatPage } from "./chats.js";
 
 export function loadHomePage(addToHistory = true) {
   try {
@@ -58,30 +59,13 @@ export function loadHomePage(addToHistory = true) {
     const playButton = document.getElementById("play");
     if (playButton) {
       playButton.addEventListener("click", function () {
-        const baseUrl = window.location.origin;
-        fetch(`${baseUrl}/play.html`)
-          .then((response) => response.text())
-          .then((html) => {
-            mainContent.innerHTML = html;
-            const script = document.createElement("script");
-            script.src = "play.js";
-            document.body.appendChild(script);
-          })
-          .catch((err) => console.warn("Failed to load play.html", err));
+        mainContent.innerHTML = "<h2>A beautiful game is built here</h2>";
       });
     }
 
-    const threejsButton = document.getElementById("threejs");
-    if (threejsButton) {
-      threejsButton.addEventListener("click", function () {
-        const baseUrl = window.location.origin;
-        fetch(`${baseUrl}/threejs_11.html`)
-          .then((response) => response.text())
-          .then((html) => {
-            mainContent.innerHTML = html;
-          })
-          .catch((err) => console.warn("Failed to load threejs_11.html", err));
-      });
+    const chatsButton = document.getElementById("chats");
+    if (chatsButton) {
+      chatsButton.addEventListener("click", loadChatPage);
     }
 
     const tournamentsButton = document.getElementById("tournaments");

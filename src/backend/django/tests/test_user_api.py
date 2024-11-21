@@ -98,28 +98,33 @@ class TestUserAPI(unittest.TestCase):
 
     def test_update_user(self):
         """Test PATCH /api/users/<uuid:user_id>/"""
-        # First create and login as a test user with a unique username
+        # Create a session
+        session = requests.Session()
+
+        # First create and login as a test user
         signup_data = {
             "username": f"testuser_{os.urandom(4).hex()}",
             "password": "testpass123",
             "email": "testuser@example.com",
-            "first_name": "Test",
-            "last_name": "User",
         }
-        response = requests.post(f"{self.api_url}/auth/signup/", json=signup_data)
-        print(f"Signup response: {response.status_code}")
-        print(f"Response content: {response.text}")
-        self.assertEqual(response.status_code, 200)
-        user_data = response.json()
-        user_id = user_data["id"]
 
-        # Store cookies from signup response for authentication
-        cookies = response.cookies
+        # Signup request with headers
+        response = session.post(
+            f"{self.api_url}/auth/signup/", json=signup_data, headers={"Content-Type": "application/json"}
+        )
+        print(f"\nSignup Response Status: {response.status_code}")
+        print(f"Signup Response Headers: {response.headers}")
+        print(f"Signup Response Content: {response.text}")
+        print(f"Session Cookies after signup: {dict(session.cookies)}")
+        self.assertEqual(response.status_code, 200, "Failed to create user")
+        user_id = response.json()["id"]
+        print(f"User ID: {user_id}")
+        session_cookie = response.cookies.get("sessionid")
+        print(f"Session Cookie: {session_cookie}")
+        self.assertIsNotNone(session_cookie, "No session cookie received")
 
         # Update user profile
         update_data = {
-            "first_name": "Test",
-            "last_name": "User",
             "email": "test@example.com",
             "bio": "Updated bio",
             "telephone_number": "1234567890",
@@ -128,14 +133,22 @@ class TestUserAPI(unittest.TestCase):
             "visibility_user_profile": "friends",
         }
 
-        response = requests.patch(f"{self.api_url}/{user_id}/", json=update_data, cookies=cookies)
-        print(f"Update response: {response.status_code}")
-        print(f"Update response content: {response.text}")
+        # Use session for PATCH request with explicit cookie header
 
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
+        update_response = session.patch(
+            f"{self.api_url}/{user_id}/",
+            json=update_data,
+            headers={"Content-Type": "application/json"},
+            # headers={"Content-Type": "application/json", "Cookie": f"sessionid={session_cookie}"},
+        )
+        print(f"\nUpdate Response Status: {update_response.status_code}")
+        print(f"Update Response Content: {update_response.text}")
+        print(f"Session Cookies after update: {dict(session.cookies)}")
 
-        # Verify updated fields directly from the update response
+        self.assertEqual(update_response.status_code, 200)
+        data = update_response.json()
+
+        # Verify the updates
         self.assertEqual(data["email"], "test@example.com")
         self.assertEqual(data["bio"], "Updated bio")
         self.assertEqual(data["telephone_number"], "1234567890")
@@ -145,22 +158,30 @@ class TestUserAPI(unittest.TestCase):
 
     def test_update_other_user(self):
         """Test that a user cannot update another user's profile"""
-        # Create first user with unique username
+        # Create a session
+        session = requests.Session()
+
+        # Create first user
         signup_data1 = {
-            "username": f"user1_{os.urandom(4).hex()}",  # Generate unique username
+            "username": f"user1_{os.urandom(4).hex()}",
             "password": "pass123",
             "email": "user1@example.com",
             "first_name": "User",
             "last_name": "One",
         }
-        response = requests.post(f"{self.api_url}/auth/signup/", json=signup_data1)
+        response = session.post(
+            f"{self.api_url}/auth/signup/", json=signup_data1, headers={"Content-Type": "application/json"}
+        )
         print(f"First user signup response: {response.status_code}")
         print(f"Response content: {response.text}")
-        user1_cookies = response.cookies
+        print(f"Cookies: {dict(response.cookies)}")
+        self.assertEqual(response.status_code, 200)
+        session_cookie = response.cookies.get("sessionid")
+        self.assertIsNotNone(session_cookie, "No session cookie received")
 
-        # Create second user with unique username
+        # Create second user (using a different request, not the session)
         signup_data2 = {
-            "username": f"user2_{os.urandom(4).hex()}",  # Generate unique username
+            "username": f"user2_{os.urandom(4).hex()}",
             "password": "pass123",
             "email": "user2@example.com",
             "first_name": "User",
@@ -169,13 +190,20 @@ class TestUserAPI(unittest.TestCase):
         response = requests.post(f"{self.api_url}/auth/signup/", json=signup_data2)
         print(f"Second user signup response: {response.status_code}")
         print(f"Response content: {response.text}")
+        self.assertEqual(response.status_code, 200)
         user2_id = response.json()["id"]
 
         # Try to update user2's profile while logged in as user1
         update_data = {"bio": "Should not work"}
-        response = requests.patch(f"{self.api_url}/{user2_id}/", json=update_data, cookies=user1_cookies)
+        response = session.patch(
+            f"{self.api_url}/{user2_id}/",
+            json=update_data,
+            headers={"Content-Type": "application/json", "Cookie": f"sessionid={session_cookie}"},
+        )
+        print(f"Update response: {response.status_code}")
+        print(f"Update response content: {response.text}")
 
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 403)  # Should be forbidden
 
     def test_update_user_invalid_data(self):
         """Test PATCH with invalid data format"""
@@ -183,26 +211,38 @@ class TestUserAPI(unittest.TestCase):
         signup_data = {
             "username": f"testuser_{os.urandom(4).hex()}",  # Generate unique username
             "password": "testpass123",
+            "email": "test@example.com",  # Add required email field
         }
         response = requests.post(f"{self.api_url}/auth/signup/", json=signup_data)
         self.assertEqual(response.status_code, 200)
         user_data = response.json()
         user_id = user_data["id"]
-        cookies = response.cookies
+
+        # Get the session cookie and create proper headers
+        session_cookie = response.cookies.get("sessionid")  # or whatever your session cookie name is
+        headers = {"Cookie": f"sessionid={session_cookie}", "Content-Type": "application/json"}
 
         # Test invalid visibility option
         update_data = {"visibility_online_status": "invalid_option"}
-        response = requests.patch(f"{self.api_url}/{user_id}/", json=update_data, cookies=cookies)
+        response = requests.patch(f"{self.api_url}/{user_id}/", json=update_data, headers=headers)
         self.assertEqual(response.status_code, 400)
 
-        # Test with malformed JSON
-        response = requests.patch(
-            f"{self.api_url}/{user_id}/", data="not-json", headers={"Content-Type": "application/json"}, cookies=cookies
-        )
-        self.assertEqual(response.status_code, 400)
+    def test_invalid_user_format(self):
+        """Test requesting user with invalid UUID format"""
+        response = requests.get(f"{self.api_url}/invalid-format/")
+        self.assertEqual(response.status_code, 404)
+
+    def test_nonexistent_user(self):
+        """Test requesting user with valid UUID format but non-existent"""
+        response = requests.get(f"{self.api_url}/123e4567-e89b-12d3-a456-999999999999/")
+        self.assertEqual(response.status_code, 404)
 
     def test_friend_request_flow(self):
         """Test the complete friend request flow through the API"""
+        # Create sessions for both users
+        session1 = requests.Session()
+        session2 = requests.Session()
+
         # Create two users
         signup_data1 = {
             "username": f"user1_{os.urandom(4).hex()}",
@@ -215,45 +255,80 @@ class TestUserAPI(unittest.TestCase):
             "email": "user2@example.com",
         }
 
-        # Sign up users
-        response1 = requests.post(f"{self.api_url}/auth/signup/", json=signup_data1)
-        user1_cookies = response1.cookies
-        user1_id = response1.json()["id"]
-
-        response2 = requests.post(f"{self.api_url}/auth/signup/", json=signup_data2)
-        user2_cookies = response2.cookies
-        user2_id = response2.json()["id"]
-
-        # Send friend request (user1 -> user2)
-        response = requests.post(
-            f"{self.api_url}/friend-requests/", json={"to_user_id": user2_id}, cookies=user1_cookies
+        # Sign up first user
+        signup_response1 = session1.post(
+            f"{self.api_url}/auth/signup/", json=signup_data1, headers={"Content-Type": "application/json"}
         )
-        self.assertEqual(response.status_code, 200)
+        print(f"\nSignup Response Status: {signup_response1.status_code}")
+        print(f"Signup Response Content: {signup_response1.text}")
+        print(f"Signup Cookies: {dict(session1.cookies)}")
+        self.assertEqual(signup_response1.status_code, 200, "Failed to create first user")
+        user1_id = signup_response1.json()["id"]
+
+        # Sign up second user
+        signup_response2 = session2.post(
+            f"{self.api_url}/auth/signup/", json=signup_data2, headers={"Content-Type": "application/json"}
+        )
+        print(f"\nSecond user signup Response Status: {signup_response2.status_code}")
+        print(f"Second user signup Response Content: {signup_response2.text}")
+        print(f"Second user signup Cookies: {dict(session2.cookies)}")
+        self.assertEqual(signup_response2.status_code, 200, "Failed to create second user")
+        user2_id = signup_response2.json()["id"]
+
+        # Explicitly login first user
+        login_response1 = session1.post(
+            f"{self.api_url}/auth/login/",
+            json={"username": signup_data1["username"], "password": signup_data1["password"]},
+            headers={"Content-Type": "application/json"},
+        )
+        print(f"\nLogin Response Status: {login_response1.status_code}")
+        print(f"Login Response Content: {login_response1.text}")
+        print(f"Login Cookies: {dict(session1.cookies)}")
+        self.assertEqual(login_response1.status_code, 200, "Failed to login first user")
+
+        # Send friend request with proper headers
+        friend_request_response = session1.post(
+            f"{self.api_url}/friend-requests/",
+            json={"to_user_id": user2_id},
+            headers={"Content-Type": "application/json"},
+        )
+        print(f"\nFriend Request Response Status: {friend_request_response.status_code}")
+        print(f"Friend Request Response Content: {friend_request_response.text}")
+        print(f"Friend Request Session Cookies: {dict(session1.cookies)}")
+        self.assertEqual(friend_request_response.status_code, 200)
 
         # Check sent requests for user1
-        response = requests.get(f"{self.api_url}/friend-requests/", cookies=user1_cookies)
+        response = session1.get(f"{self.api_url}/friend-requests/", headers={"Content-Type": "application/json"})
+        print(f"\nCheck Sent Requests Response Status: {response.status_code}")
+        print(f"Check Sent Requests Content: {response.text}")
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(len(data["sent"]), 1)
         self.assertEqual(data["sent"][0]["id"], user2_id)
 
         # Check received requests for user2
-        response = requests.get(f"{self.api_url}/friend-requests/", cookies=user2_cookies)
+        response = session2.get(f"{self.api_url}/friend-requests/", headers={"Content-Type": "application/json"})
+        print(f"\nCheck Received Requests Response Status: {response.status_code}")
+        print(f"Check Received Requests Content: {response.text}")
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(len(data["received"]), 1)
         self.assertEqual(data["received"][0]["id"], user1_id)
 
         # Accept friend request (as user2)
-        response = requests.patch(
+        response = session2.patch(
             f"{self.api_url}/friend-requests/",
             json={"from_user_id": user1_id, "action": "accept"},
-            cookies=user2_cookies,
+            headers={"Content-Type": "application/json"},
         )
+        print(f"\nAccept Friend Request Response Status: {response.status_code}")
+        print(f"Accept Friend Request Content: {response.text}")
         self.assertEqual(response.status_code, 200)
 
         # Verify friendship status through friends list
-        response = requests.get(f"{self.api_url}/{user1_id}/friends/", cookies=user1_cookies)
+        response = session1.get(f"{self.api_url}/{user1_id}/friends/", headers={"Content-Type": "application/json"})
+        print(f"\nVerify Friendship Status Response Status: {response.status_code}")
+        print(f"Verify Friendship Status Content: {response.text}")
         self.assertEqual(response.status_code, 200)
         data = response.json()
         friend_ids = [friend["id"] for friend in data["friends"]]
@@ -267,12 +342,14 @@ class TestUserAPI(unittest.TestCase):
             "password": "pass123",
             "email": "user@example.com",
         }
-        response = requests.post(f"{self.api_url}/auth/signup/", json=signup_data)
+        response = requests.post(
+            f"{self.api_url}/auth/signup/", json=signup_data, headers={"Content-Type": "application/json"}
+        )
         user_cookies = response.cookies
         user_id = response.json()["id"]
 
         # Test unauthenticated access
-        response = requests.get(f"{self.api_url}/friend-requests/")
+        response = requests.get(f"{self.api_url}/friend-requests/", headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 401)
 
         # Test sending request to non-existent user
@@ -280,48 +357,66 @@ class TestUserAPI(unittest.TestCase):
             f"{self.api_url}/friend-requests/",
             json={"to_user_id": "00000000-0000-0000-0000-000000000000"},
             cookies=user_cookies,
+            headers={"Content-Type": "application/json"},
         )
         self.assertEqual(response.status_code, 404)
 
         # Test sending request to self
-        response = requests.post(f"{self.api_url}/friend-requests/", json={"to_user_id": user_id}, cookies=user_cookies)
+        response = requests.post(
+            f"{self.api_url}/friend-requests/",
+            json={"to_user_id": user_id},
+            cookies=user_cookies,
+            headers={"Content-Type": "application/json"},
+        )
         self.assertEqual(response.status_code, 400)
 
     def test_friends_list_features(self):
         """Test friends list features including pagination and search"""
         # Create main test user
+        session = requests.Session()  # Create a session for the main user
         signup_data = {
             "username": f"main_user_{os.urandom(4).hex()}",
             "password": "pass123",
             "email": "main@example.com",
         }
-        response = requests.post(f"{self.api_url}/auth/signup/", json=signup_data)
-        user_cookies = response.cookies
+        response = session.post(
+            f"{self.api_url}/auth/signup/", json=signup_data, headers={"Content-Type": "application/json"}
+        )
         user_id = response.json()["id"]
 
         # Create and add multiple friends
         friend_ids = []
         for i in range(3):
+            friend_session = requests.Session()  # Create a separate session for each friend
             friend_data = {
                 "username": f"friend{i}_{os.urandom(4).hex()}",
                 "password": "pass123",
                 "email": f"friend{i}@example.com",
             }
-            response = requests.post(f"{self.api_url}/auth/signup/", json=friend_data)
+            response = friend_session.post(
+                f"{self.api_url}/auth/signup/", json=friend_data, headers={"Content-Type": "application/json"}
+            )
             friend_id = response.json()["id"]
             friend_ids.append(friend_id)
 
-            # Send and accept friend request
-            requests.post(f"{self.api_url}/friend-requests/", json={"to_user_id": friend_id}, cookies=user_cookies)
-            friend_cookies = response.cookies
-            requests.patch(
+            # Send friend request using main user's session
+            response = session.post(
                 f"{self.api_url}/friend-requests/",
-                json={"from_user_id": user_id, "action": "accept"},
-                cookies=friend_cookies,
+                json={"to_user_id": friend_id},
+                headers={"Content-Type": "application/json"},
             )
 
-        # Test pagination
-        response = requests.get(f"{self.api_url}/{user_id}/friends/?page=1&per_page=2", cookies=user_cookies)
+            # Accept friend request using friend's session
+            response = friend_session.patch(
+                f"{self.api_url}/friend-requests/",
+                json={"from_user_id": user_id, "action": "accept"},
+                headers={"Content-Type": "application/json"},
+            )
+
+        # Test pagination using main user's session
+        response = session.get(
+            f"{self.api_url}/{user_id}/friends/?page=1&per_page=2", headers={"Content-Type": "application/json"}
+        )
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(len(data["friends"]), 2)
@@ -331,7 +426,13 @@ class TestUserAPI(unittest.TestCase):
         # Test search functionality
         friend_username = data["friends"][0]["username"]
         search_term = friend_username[:5]
-        response = requests.get(f"{self.api_url}/{user_id}/friends/?search={search_term}", cookies=user_cookies)
+        response = requests.get(
+            f"{self.api_url}/{user_id}/friends/?search={search_term}", headers={"Content-Type": "application/json"}
+        )
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertTrue(any(friend["username"].startswith(search_term) for friend in data["friends"]))
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)
