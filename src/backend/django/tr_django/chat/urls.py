@@ -5,6 +5,6 @@ from .views import (
 )
 
 urlpatterns = [
-    path("users/", users, name="users"),
+    path("users/", users, name="users"), # returns 
     path("blocked_user/", blocked_user, name="blocked_user"),
 ]

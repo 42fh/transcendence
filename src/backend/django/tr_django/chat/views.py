@@ -86,6 +86,18 @@ def mark_messages_read(request, room_id):
 @login_required
 def blocked_user(request):
     try:
+        if request.method == "GET":
+            # Get blocked users
+            blocked_users = set(
+                BlockedUser.objects.filter(user=request.user).values_list("blocked_user__username", flat=True)
+            )
+            blocked_by_users = set(
+                BlockedUser.objects.filter(blocked_user=request.user).values_list("user__username", flat=True)
+            )
+            all_blocked_users = blocked_users.union(blocked_by_users)
+
+            return JsonResponse({"status": "success", "blocked_users": list(all_blocked_users)})
+
         data = json.loads(request.body)
         username = data.get("username")
 

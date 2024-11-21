@@ -48,6 +48,37 @@ Retrieve a list of all users, along with their chat statuses and blocking inform
 
 ## **Blocked User Endpoint**
 
+### `GET /blocked_user/`
+
+Retrieve a list of users that the current user has blocked or who have blocked the current user.
+
+#### **Request**
+
+- **Headers**:
+  - `Authorization`: (required)
+
+#### **Response**
+
+- **Status**: `200 OK`
+
+```json
+{
+  "status": "success",
+  "blocked_users": [
+    "blocked_user1",
+    "blocked_user2"
+  ]
+}
+```
+
+- **Status**: `401 Unauthorized`
+  ```json
+  {
+    "status": "error",
+    "message": "User not authenticated"
+  }
+  ```
+
 ### `POST /blocked_user/`
 
 Block a user.
