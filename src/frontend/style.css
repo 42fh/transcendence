@@ -29,6 +29,10 @@
   /* Layout */
   --container-width: 80vw;
   --container-height: 80vh;
+
+  /* Define CSS variables */
+  --bottom-nav-height: 3.5rem; /* Base height for bottom nav */
+  --bottom-nav-padding: 0.5rem;
 }
 
 * {
@@ -218,6 +222,7 @@ button:hover {
   height: 80vh; /* Adjust height as needed */
   width: 80vw; /* Adjust width as needed */
   align-items: center; /* Center items vertically */
+  min-height: calc(100vh - var(--bottom-nav-height));
 }
 
 .button-container-home {
@@ -899,4 +904,52 @@ button:hover {
   position: absolute;
   top: 0%;
   left: 50%;
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--bottom-nav-height);
+  background: #1a1a1a;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: var(--bottom-nav-padding) 0;
+  box-shadow: 0 -0.125rem 0.625rem rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+}
+
+.bottom-nav__item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  transition: color 0.3s;
+  padding: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.bottom-nav__item--active {
+  color: #fff;
+}
+
+.bottom-nav__icon {
+  font-size: 1.75rem;
+}
+
+/* Material Icons Configuration */
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  font-size: inherit;
+  line-height: 1;
+}
+
+/* Active state variations */
+.bottom-nav__item--active .bottom-nav__icon {
+  font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
 }

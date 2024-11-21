@@ -7,6 +7,11 @@
     <!-- <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" /> -->
     <link rel="stylesheet" href="css/fonts.css" />
     <link rel="stylesheet" href="style.css" />
+    <!-- <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=home,account_circle,chat_bubble,more_vert,settings,trophy,add_circle,search"
+    /> -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
   </head>
   <body>
     <div id="container" class="container-index">
@@ -32,6 +37,7 @@
 
     <!-- Main content area where other views will load -->
     <div id="main-content" style="display: none"></div>
+    <div id="bottom-nav-container"></div>
     <!-- Hidden templates for modal content -->
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template -->
     <!-- Login Form Template -->
@@ -318,56 +324,116 @@
       </div>
     </template>
 
-<!-- Chat Template -->
-<template id="chat-template">
-    <div id="notification-container"></div>
+    <!-- Chat Template -->
+    <template id="chat-template">
+      <div id="notification-container"></div>
 
-    <h3 class="chat-greeting">Hello, <span id="current-username-display"></span>!</h3>
-        <input type="hidden" id="current-username" />
-    
-    <div class="chat-container">
-      <div>
-        <h3 >Users</h3>
-        <div id="error-container"></div>
-        <ul id="users-list" class="chat-user-list-ul"></ul>
-      </div>
+      <h3 class="chat-greeting">Hello, <span id="current-username-display"></span>!</h3>
+      <input type="hidden" id="current-username" />
 
-      <div class="chat-window-messages">
-        <div id="chat-messages"></div>
-
-      <!-- Input area for chat messages -->
-      <div class="chat-input-area">
-        <input 
-          type="text" 
-          id="chat-message-input" 
-          class="chat-input-retro" 
-          placeholder="Type your message..." 
-        />
-      </div>
-
-      <template id="user-list-item-template">
-        <li>
-          <div class="chat-user-item-container">
-            <span class="chat-user-item"></span>
-            <button class="chat-button-small"></button>
-          </div>
-        </li>
-      </template>
-
-      <template id="chat-message-template">
-        <div class="chat-message">
-          <strong class="chat-message-username"></strong>
-          <span class="chat-message-text"></span>
+      <div class="chat-container">
+        <div>
+          <h3>Users</h3>
+          <div id="error-container"></div>
+          <ul id="users-list" class="chat-user-list-ul"></ul>
         </div>
-      </template>
-      
-          <div>
+
+        <div class="chat-window-messages">
+          <div id="chat-messages"></div>
+
+          <!-- Input area for chat messages -->
+          <div class="chat-input-area">
+            <input type="text" id="chat-message-input" class="chat-input-retro" placeholder="Type your message..." />
             <button id="chat-message-submit">Send</button>
           </div>
         </div>
       </div>
-    </div>
-</template>
+    </template>
+
+    <!-- Chat User List Item Template -->
+    <template id="user-list-item-template">
+      <li>
+        <div class="chat-user-item-container">
+          <span class="chat-user-item"></span>
+          <button class="chat-button-small"></button>
+        </div>
+      </li>
+    </template>
+
+    <!-- Chat Message Template -->
+    <template id="chat-message-template">
+      <div class="chat-message">
+        <strong class="chat-message-username"></strong>
+        <span class="chat-message-text"></span>
+      </div>
+    </template>
+
+    <!-- Bottom Navigation Template -->
+    <template id="bottom-nav-template">
+      <nav class="bottom-nav">
+        <button class="bottom-nav__item" data-page="home">
+          <span class="bottom-nav__icon material-symbols-outlined">home</span>
+        </button>
+        <button class="bottom-nav__item" data-page="tournaments">
+          <span class="bottom-nav__icon material-symbols-outlined">trophy</span>
+        </button>
+        <button class="bottom-nav__item" data-page="profile">
+          <span class="bottom-nav__icon material-symbols-outlined">account_circle</span>
+        </button>
+        <button class="bottom-nav__item" data-page="chat">
+          <span class="bottom-nav__icon material-symbols-outlined">chat_bubble</span>
+        </button>
+      </nav>
+    </template>
+
+    <!-- Profile Template -->
+    <template id="profile-template">
+      <div class="profile">
+        <div class="profile__header">
+          <div class="profile__avatar-container">
+            <img class="profile__avatar" src="" alt="Profile avatar" />
+          </div>
+          <div class="profile__info">
+            <h2 class="profile__username"></h2>
+            <p class="profile__name"></p>
+            <p class="profile__email"></p>
+            <p class="profile__phone"></p>
+          </div>
+        </div>
+
+        <div class="profile__stats">
+          <div class="profile__stats-item">
+            <span class="profile__stats-label">Wins</span>
+            <span class="profile__stats-value profile__stats-wins"></span>
+          </div>
+          <div class="profile__stats-item">
+            <span class="profile__stats-label">Losses</span>
+            <span class="profile__stats-value profile__stats-losses"></span>
+          </div>
+          <div class="profile__stats-item">
+            <span class="profile__stats-label">Win Ratio</span>
+            <span class="profile__stats-value profile__stats-ratio"></span>
+          </div>
+        </div>
+
+        <div class="profile__bio">
+          <h3>Bio</h3>
+          <p class="profile__bio-text"></p>
+        </div>
+
+        <div class="profile__matches">
+          <h3>Recent Matches</h3>
+          <div class="profile__matches-list">
+            <!-- Match history will be inserted here -->
+          </div>
+        </div>
+
+        <!-- Add Edit Profile Button -->
+        <div class="profile__actions">
+          <button class="profile__edit-button">Edit Profile</button>
+        </div>
+      </div>
+    </template>
 
     <script type="module" src="js/main.js"></script>
   </body>
