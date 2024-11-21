@@ -239,3 +239,57 @@ class APIUserUpdateTests(TestCase):
         self.assertEqual(data["bio"], "This should update")
         self.assertNotEqual(data["username"], "should_not_change")
         self.assertFalse(data.get("is_staff", False))
+
+
+class FriendsListViewTests(TestCase):
+    def setUp(self):
+        # Create test users
+        self.user1 = CustomUser.objects.create_user(
+            id="123e4567-e89b-12d3-a456-426614174000", username="testuser1", password="test123"
+        )
+        self.user2 = CustomUser.objects.create_user(
+            id="223e4567-e89b-12d3-a456-426614174000", username="testuser2", password="test123"
+        )
+        self.user3 = CustomUser.objects.create_user(
+            id="323e4567-e89b-12d3-a456-426614174000", username="testuser3", password="test123"
+        )
+
+        # Add friends
+        self.user1.friends.add(self.user2, self.user3)
+
+        self.client = Client()
+        self.base_url = f"/api/users/{self.user1.id}/friends/"
+
+    def test_get_friends_list(self):
+        """Test basic friend list retrieval"""
+        response = self.client.get(self.base_url)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+
+        self.assertEqual(len(data["friends"]), 2)
+        friend_usernames = {friend["username"] for friend in data["friends"]}
+        self.assertEqual(friend_usernames, {"testuser2", "testuser3"})
+
+    def test_friends_list_pagination(self):
+        """Test pagination of friends list"""
+        response = self.client.get(f"{self.base_url}?page=1&per_page=1")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+
+        self.assertEqual(len(data["friends"]), 1)
+        self.assertEqual(data["pagination"]["total"], 2)
+        self.assertEqual(data["pagination"]["total_pages"], 2)
+
+    def test_friends_list_search(self):
+        """Test search functionality in friends list"""
+        response = self.client.get(f"{self.base_url}?search=user2")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+
+        self.assertEqual(len(data["friends"]), 1)
+        self.assertEqual(data["friends"][0]["username"], "testuser2")
+
+    def test_invalid_user_id(self):
+        """Test response for non-existent user"""
+        response = self.client.get("/api/users/nonexistent-id/friends/")
+        self.assertEqual(response.status_code, 404)

@@ -36,7 +36,7 @@ echo
 
 # Function to display usage instructions
 function usage() {
-    echo "Usage: $0 {1|2|3|4|5|6|7|8|9|A}"
+    echo "Usage: $0 {1|2|3|4|5|6|7|8|9|10|11|12|A}"
     echo "Options:"
     echo "  1  Run tests in test_api_auth.py (SignupTestCase)"
     echo "  2  Run tests in test_models.py (CustomUserModelTestCase)"
@@ -47,6 +47,9 @@ function usage() {
     echo "  7  Run tests in test_api_user.py (APIUserListGetTests)"
     echo "  8  Run tests in test_api_user.py (APIUserDetailGetTests)"
     echo "  9  Run tests in test_api_user.py (APIUserUpdateTests)"
+    echo "  10 Run tests in test_api_user.py (FriendsListViewTests)"
+    echo "  11 Run tests in test_api_friend_requests.py (FriendRequestsAPITests)"
+    echo "  12 Run tests in test_api_auth.py (DeleteUserTests)"
     echo "  A  Run all tests"
     exit 1
 }
@@ -90,6 +93,15 @@ case "$1" in
         ;;
     9)
         python "$MANAGE_PY" test users.tests.test_api_user.APIUserUpdateTests --settings=tr_django.test_settings
+        ;;
+    10)
+        python "$MANAGE_PY" test users.tests.test_api_user.FriendsListViewTests --settings=tr_django.test_settings
+        ;;
+    11)
+        python "$MANAGE_PY" test users.tests.test_api_friend_requests.FriendRequestsAPITests --settings=tr_django.test_settings
+        ;;
+    12)
+        python "$MANAGE_PY" test users.tests.test_api_auth.DeleteUserTests --settings=tr_django.test_settings
         ;;
     A)
         python "$MANAGE_PY" test users.tests --settings=tr_django.test_settings

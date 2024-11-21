@@ -47,7 +47,6 @@ INSTALLED_APPS = [
     "game",
     "chat",
     "users",
-    "blockchain",
     "channels",
 ]
 
@@ -72,6 +71,13 @@ SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
 SESSION_COOKIE_SECURE = True  # for HTTPS
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
+
+if ENVIRONMENT == "production":
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+else:
+    SESSION_COOKIE_SECURE = False
+    SESSION_COOKIE_HTTPONLY = False
 
 ROOT_URLCONF = "tr_django.urls"
 

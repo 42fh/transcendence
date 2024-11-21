@@ -197,10 +197,8 @@ class CustomUserRelationshipTestCase(TestCase):
         self.user2 = CustomUser.objects.create_user(username="user2", password="password123")
         self.user3 = CustomUser.objects.create_user(username="user3", password="password123")
 
-    # Test Friends
     def test_friends(self):
         """Test adding, removing, and checking friends."""
-
         # Add a friend
         self.user1.friends.add(self.user2)
         # Test is_friend_with method
@@ -261,9 +259,9 @@ class FriendRequestTests(TestCase):
         self.assertFalse(self.user2 in self.user1.friend_requests_sent.all())
         self.assertFalse(self.user1.is_friend_with(self.user2))
 
-        # Attempt to send friend request should raise ValueError
-        with self.assertRaises(ValueError):
-            self.user1.send_friend_request(self.user2)
+        # After rejection, user should be able to send another request
+        self.user1.send_friend_request(self.user2)
+        self.assertTrue(self.user2 in self.user1.friend_requests_sent.all())
 
     def test_duplicate_friend_request(self):
         """Test that duplicate friend requests are not created."""

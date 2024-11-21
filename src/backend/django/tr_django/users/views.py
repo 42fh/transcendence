@@ -14,6 +14,7 @@ from game.models import Player
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from uuid import UUID
 from django.core.exceptions import ValidationError
+import uuid
 
 
 logger = logging.getLogger(__name__)
@@ -54,7 +55,9 @@ class SignupView(View):
         if user is not None:
             login(request, user)  # This creates the session for the new user
             # Return success response with username
-            return JsonResponse(
+            print("Session Key After Login:", request.session.session_key)  # Should not be None
+            print("Session Data:", request.session.items())  # Debug session contents
+            response = JsonResponse(
                 {
                     "success": True,
                     "message": "User created and logged in successfully.",
@@ -63,6 +66,9 @@ class SignupView(View):
                     "action": "signup",
                 }
             )
+            print("Set-Cookie Header in SignupView Response:", response.get("Set-Cookie"))  # Debug
+            return response
+
         # In case authentication fails for some reason, which is rare
         return JsonResponse(
             {
@@ -135,19 +141,87 @@ class LogoutView(View):
 
 @method_decorator(csrf_exempt, name="dispatch")
 class DeleteUserView(View):
+    def _generate_unique_anon_username(self, user_id: str) -> str:
+        """
+        Generate a unique anonymous username.
+        Adds an incremental suffix if the base username already exists.
+        """
+        base_username = f"user_{user_id[:8]}"
+        username = base_username
+        counter = 1
+
+        while CustomUser.objects.filter(username=username).exists():
+            username = f"{base_username}_{counter}"
+            counter += 1
+
+        return username
+
     def post(self, request):
+        """Handle user account deletion by anonymizing personal data"""
         if not request.user.is_authenticated:
-            return JsonResponse({"success": False, "message": "User not authenticated."}, status=401)
+            return JsonResponse({"error": "Authentication required"}, status=401)
 
-        request.user.is_active = False
-        request.user.save()
-        logout(request)
+        try:
+            data = json.loads(request.body)
+            password = data.get("password")
 
-        return JsonResponse({"success": True, "message": "User account deactivated."})
+            if not password:
+                return JsonResponse({"error": "Password is required to delete account"}, status=400)
+
+            # Verify password
+            if not request.user.check_password(password):
+                return JsonResponse({"error": "Invalid password"}, status=403)
+
+            # Store IDs for logging
+            user_id = str(request.user.id)
+            original_username = request.user.username
+
+            # Generate unique anonymous username
+            anon_username = self._generate_unique_anon_username(user_id)
+
+            # Anonymize personal data
+            request.user.username = anon_username
+            request.user.email = None
+            request.user.first_name = ""
+            request.user.last_name = ""
+            request.user.bio = ""
+            request.user.telephone_number = ""
+            request.user.pronoun = ""
+            request.user.avatar = None
+            request.user.is_active = False
+            request.user.password = make_password(None)
+            request.user.email_verified = False
+
+            # Clear social connections
+            request.user.friends.clear()
+            request.user.friend_requests_sent.clear()
+            request.user.friend_requests_received.clear()
+
+            # Set visibility to private
+            request.user.visibility_online_status = "nobody"
+            request.user.visibility_user_profile = "nobody"
+
+            request.user.save()
+
+            # Log the anonymization
+            logger.info(f"User {original_username} (ID: {user_id}) successfully anonymized to {anon_username}")
+
+            # Logout the user
+            logout(request)
+
+            return JsonResponse(
+                {"message": "User account successfully deleted and data anonymized", "user_id": user_id}
+            )
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid request format"}, status=400)
+        except Exception as e:
+            logger.error(f"Error anonymizing user account: {str(e)}")
+            return JsonResponse({"error": "Failed to delete account"}, status=500)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
-class UserListView(View):
+class UsersListView(View):
     """View for listing users with basic information"""
 
     def get(self, request):
@@ -201,7 +275,10 @@ class UserListView(View):
 
 @method_decorator(csrf_exempt, name="dispatch")
 class UserDetailView(View):
-    """View for getting detailed user information including game stats and match history"""
+    """
+    GET: View for getting detailed user information including game stats and match history
+    PATCH: View for updating user details
+    """
 
     def get(self, request, user_id):
         try:
@@ -338,3 +415,227 @@ class UserDetailView(View):
             return JsonResponse({"error": "Invalid JSON"}, status=400)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class FriendsListView(View):
+    """View for listing a user's friends with pagination and search capabilities"""
+
+    def get(self, request, user_id):
+        try:
+            user = CustomUser.objects.get(id=user_id)
+
+            # Get query parameters
+            search = request.GET.get("search", "")
+            page = request.GET.get("page", 1)
+            per_page = request.GET.get("per_page", 10)
+
+            try:
+                page = int(page)
+                per_page = int(per_page)
+                if page <= 0 or per_page <= 0:
+                    raise ValueError
+            except ValueError:
+                return JsonResponse({"error": "Invalid pagination parameters"}, status=400)
+
+            # Get friends with search filter
+            friends = user.friends.filter(Q(username__icontains=search)).order_by("username")
+
+            # Paginate results
+            paginator = Paginator(friends, per_page)
+
+            try:
+                friends_page = paginator.page(page)
+            except EmptyPage:
+                return JsonResponse({"error": "Page not found"}, status=404)
+            except PageNotAnInteger:
+                return JsonResponse({"error": "Invalid page number"}, status=400)
+
+            # Format friend data with minimal information
+            friends_data = [
+                {
+                    "id": str(friend.id),
+                    "username": friend.username,
+                    "avatar": friend.avatar.url if friend.avatar else None,
+                }
+                for friend in friends_page
+            ]
+
+            return JsonResponse(
+                {
+                    "friends": friends_data,
+                    "pagination": {
+                        "total": paginator.count,
+                        "page": page,
+                        "per_page": per_page,
+                        "total_pages": paginator.num_pages,
+                    },
+                }
+            )
+
+        except CustomUser.DoesNotExist:
+            return JsonResponse({"error": "User not found"}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class FriendRequestsView(View):
+    """
+    Handle friend requests
+
+    Expected request body formats:
+    POST: {"to_user_id": "<uuid>"}
+    PATCH: {"from_user_id": "<uuid>", "action": "accept" | "reject"}
+    DELETE: {"to_user_id": "<uuid>"}
+    """
+
+    def get(self, request):
+        """List friend requests (both sent and received)"""
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Authentication required"}, status=401)
+
+        sent_requests = [
+            {
+                "id": str(user.id),
+                "username": user.username,
+                "avatar": user.avatar.url if user.avatar else None,
+                "status": "sent",
+            }
+            for user in request.user.friend_requests_sent.all()
+        ]
+
+        received_requests = [
+            {
+                "id": str(user.id),
+                "username": user.username,
+                "avatar": user.avatar.url if user.avatar else None,
+                "status": "received",
+            }
+            for user in request.user.friend_requests_received.all()
+        ]
+
+        return JsonResponse({"sent": sent_requests, "received": received_requests})
+
+    def post(self, request):
+        """Send a friend request"""
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Authentication required"}, status=401)
+
+        try:
+            data = json.loads(request.body)
+            to_user_id = data.get("to_user_id")
+
+            if not to_user_id:
+                return JsonResponse(
+                    {"error": "Please specify the user you want to send a friend request to"}, status=400
+                )
+
+            # Add validation for sending request to self
+            if str(to_user_id) == str(request.user.id):
+                return JsonResponse({"error": "Cannot send friend request to yourself"}, status=400)
+
+            # First validate UUID format
+            try:
+                uuid_obj = uuid.UUID(str(to_user_id))
+            except ValueError:
+                return JsonResponse({"error": "User not found"}, status=404)
+
+            # Then try to get the user
+            try:
+                to_user = CustomUser.objects.get(id=uuid_obj)
+            except CustomUser.DoesNotExist:
+                return JsonResponse({"error": "User not found"}, status=404)
+
+            # Check if already friends
+            if request.user.is_friend_with(to_user):
+                return JsonResponse({"error": "You are already friends with this user"}, status=400)
+
+            # Check if request already sent
+            if to_user in request.user.friend_requests_sent.all():
+                return JsonResponse({"error": "You have already sent a friend request to this user"}, status=400)
+
+            request.user.send_friend_request(to_user)
+            return JsonResponse(
+                {
+                    "message": "Friend request sent successfully",
+                    "to_user": {"id": str(to_user.id), "username": to_user.username},
+                }
+            )
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid request format"}, status=400)
+
+    def patch(self, request):
+        """Accept/reject friend request"""
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Authentication required"}, status=401)
+
+        try:
+            data = json.loads(request.body)
+            from_user_id = data.get("from_user_id")
+            action = data.get("action")
+
+            if not from_user_id:
+                return JsonResponse(
+                    {"error": "Please specify the user whose friend request you want to respond to"}, status=400
+                )
+
+            if action not in ["accept", "reject"]:
+                return JsonResponse(
+                    {"error": "Please specify whether you want to accept or reject the friend request"}, status=400
+                )
+
+            try:
+                from_user = CustomUser.objects.get(id=from_user_id)
+            except CustomUser.DoesNotExist:
+                return JsonResponse({"error": "User not found"}, status=404)
+
+            # Check if there's a pending request
+            if from_user not in request.user.friend_requests_received.all():
+                return JsonResponse({"error": "No pending friend request from this user"}, status=404)
+
+            if action == "accept":
+                request.user.accept_friend_request(from_user)
+                message = "Friend request accepted successfully"
+            else:
+                request.user.reject_friend_request(from_user)
+                message = "Friend request rejected"
+
+            return JsonResponse({"message": message})
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid request format"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    def delete(self, request):
+        """Cancel friend request"""
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Authentication required"}, status=401)
+
+        try:
+            data = json.loads(request.body)
+            to_user_id = data.get("to_user_id")
+
+            if not to_user_id:
+                return JsonResponse(
+                    {"error": "Please specify the user whose friend request you want to cancel"}, status=400
+                )
+
+            try:
+                to_user = CustomUser.objects.get(id=to_user_id)
+            except CustomUser.DoesNotExist:
+                return JsonResponse({"error": "User not found"}, status=404)
+
+            # Check if there's a pending request
+            if to_user not in request.user.friend_requests_sent.all():
+                return JsonResponse({"error": "No pending friend request to this user"}, status=404)
+
+            request.user.cancel_friend_request(to_user)
+            return JsonResponse({"message": "Friend request cancelled successfully"})
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid request format"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
