@@ -279,7 +279,7 @@ export class PongInterface {
             const success = await this.controller.directConnect(gameId, {
                 ...gameConfig,
                 onMessage: (data) => {
-                    this.logEvent(JSON.stringify(data));
+                    console.log(JSON.stringify(data));
                 }
             });
 
@@ -289,7 +289,7 @@ export class PongInterface {
                 document.getElementById('gameContainer').style.display = 'block';
                 
                 this.updateGameInfo(gameConfig);
-                this.logEvent('Game started successfully');
+                console.log('Game started successfully');
                 this.showStatus(`Connected to game ${gameId} as player ${playerId}`);
                 
                 if (debug) {
@@ -360,7 +360,7 @@ export class PongInterface {
             const stateObserver = {
                 updateState: (newState) => {
                     if (this.debugEnabled) {
-                        this.logEvent(`State update: ${JSON.stringify(newState)}`, 'debug');
+                        console.log(`State update: ${JSON.stringify(newState)}`, 'debug');
                     }
                 }
             };
