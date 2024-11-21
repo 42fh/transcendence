@@ -7,6 +7,7 @@ import { initBottomNav } from "./components/bottom-nav.js";
 
 // Initialize all listeners and data
 document.addEventListener("DOMContentLoaded", () => {
+  console.log("DOMContentLoaded");
   initModalListeners();
   initAuthListeners();
   initializeTournaments(CONFIG.CURRENT_SOURCE);

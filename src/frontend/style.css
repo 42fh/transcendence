@@ -81,6 +81,8 @@ button:hover {
   width: 80vw; /* Adjust width as needed */
   align-items: center; /* Center items vertically */
   min-height: calc(100vh - var(--bottom-nav-height));
+  padding-bottom: var(--bottom-nav-height);
+  position: relative;
 }
 
 .button-container-home {
@@ -927,6 +929,11 @@ button:hover {
   background: rgba(0, 0, 0, 0.3);
   border-radius: 5px;
   font-size: 0.8rem;
+  transition: transform 0.2s ease;
+}
+
+.profile__match-item:hover {
+  transform: translateX(5px);
 }
 
 .profile__match-item--won {
@@ -977,4 +984,27 @@ button:hover {
     gap: 0.5rem;
     text-align: center;
   }
+}
+
+.profile__error {
+  text-align: center;
+  color: #f44336;
+  padding: 2rem;
+  font-family: "Press Start 2P", cursive;
+}
+
+/* Make sure the bottom nav container is always visible */
+#bottom-nav-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: #1a1a1a;
+}
+
+/* Ensure main content doesn't overlap with bottom nav */
+#main-content {
+  padding-bottom: var(--bottom-nav-height);
+  min-height: 100vh;
 }

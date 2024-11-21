@@ -20,6 +20,9 @@ export async function loadProfilePage(addToHistory = true) {
     mainContent.style.display = "block";
     mainContent.innerHTML = ""; // Clear existing content
 
+    // Add loading state
+    mainContent.innerHTML = '<div class="loading">Loading profile...</div>';
+
     // Get current user's ID from localStorage
     const userId = localStorage.getItem("userId");
     if (!userId) {
