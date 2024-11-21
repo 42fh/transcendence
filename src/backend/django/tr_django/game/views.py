@@ -51,7 +51,6 @@ async def create_new_game(request):
                 status=400
             )
 
-        # Convert string to enum
         try:
             game_mode = EnumGameMode(game_mode)
         except ValueError:
@@ -64,6 +63,14 @@ async def create_new_game(request):
             )
 
         game_id = await GameCordinator.create_new_game(data)
+        if not game_id:
+                return JsonResponse(
+                    {
+                        "error": "Game Creation Failed",
+                        "message": "Unable to create new game. Please try again."
+                    },
+                    status=500  # Service Unavailable
+                )
 
         return JsonResponse(
             {
