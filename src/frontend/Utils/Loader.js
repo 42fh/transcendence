@@ -42,9 +42,10 @@ export default class Loader {
 
     // check if all files are loaded
     this.length--;
+    console.log("Files left: ", this.length);
     if (this.length == 0) {
       console.log("All files loaded");
-      window.dispatchEvent(new Event("resourcesLoaded"));
+      this.game.setupResources();
     }
   }
 }

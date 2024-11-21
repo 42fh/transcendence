@@ -9,8 +9,10 @@ import Drawer from "../Utils/Drawer.js";
 import GameUI from "../Utils/GameUI.js";
 
 export default class GameConstructor {
-  constructor() {
+  constructor(type) {
     this.world = new World(document.querySelector(".webgl"), false);
+
+    this.type = type;
 
     // Objects group
     this.gameGroup = new THREE.Group();
@@ -34,6 +36,7 @@ export default class GameConstructor {
     this.balls = [];
 
     this.paddles = new Map();
+    this.fin1 = null;
 
     // UI
     this.ui = new GameUI(this);
@@ -107,70 +110,57 @@ export default class GameConstructor {
     this.gameLoop = loop;
   }
 
-  loadResources(sources) {
+  loadResources(sources, setupResources) {
+    console.log("loading...");
     this.loader = new Loader(sources, this);
-
-    window.addEventListener("resourcesLoaded", () => {
-      this.loader.items["floorColorTexture"].colorSpace = THREE.SRGBColorSpace;
-      this.loader.items["floorColorTexture"].repeat.set(4, 4);
-      this.loader.items["floorNormalTexture"].repeat.set(4, 4);
-      this.loader.items["floorDisplacementTexture"].repeat.set(4, 4);
-      this.loader.items["floorARMTexture"].repeat.set(4, 4);
-      this.loader.items["floorColorTexture"].wrapS = THREE.RepeatWrapping;
-      this.loader.items["floorColorTexture"].wrapT = THREE.RepeatWrapping;
-      this.loader.items["floorNormalTexture"].wrapS = THREE.RepeatWrapping;
-      this.loader.items["floorNormalTexture"].wrapT = THREE.RepeatWrapping;
-      this.loader.items["floorDisplacementTexture"].wrapS =
-        THREE.RepeatWrapping;
-      this.loader.items["floorDisplacementTexture"].wrapT =
-        THREE.RepeatWrapping;
-      this.loader.items["floorARMTexture"].wrapS = THREE.RepeatWrapping;
-      this.loader.items["floorARMTexture"].wrapT = THREE.RepeatWrapping;
-    });
+    this.setupResources = setupResources;
   }
 
   connectToWebsockets() {
-    document.querySelector(".joinGame").addEventListener("click", async () => {
-      const gameId = document.getElementById("gameId").value;
-      const playerId = this.generateRandomId();
-      const gameType = "circular";
-      const numPlayers = document.getElementById("playerCount").value;
-      console.log("numPlayers: ", numPlayers);
-      const numBalls = 1;
-      const debug = true;
+    // document.querySelector(".joinGame").addEventListener("click", async () => {
+    //   const gameId = document.getElementById("gameId").value;
+    //   const playerId = this.generateRandomId();
+    //   const gameType = "circular";
+    //   const numPlayers = document.getElementById("playerCount").value;
+    //   console.log("numPlayers: ", numPlayers);
+    //   const numBalls = 1;
+    //   const debug = true;
 
-      try {
-        this.config = {
-          playerId,
-          type: gameType,
-          players: numPlayers,
-          balls: numBalls,
-          debug,
-        };
+    //   try {
+    //     this.config = {
+    //       playerId,
+    //       type: gameType,
+    //       players: numPlayers,
+    //       balls: numBalls,
+    //       debug,
+    //     };
 
-        this.websocket = new GameWebSocket(
-          gameId,
-          playerId,
-          this.handleMessage.bind(this),
-          this.config
-        );
-        this.websocket.connect();
+    //     this.websocket = new GameWebSocket(
+    //       gameId,
+    //       playerId,
+    //       this.handleMessage.bind(this),
+    //       this.config
+    //     );
+    //     this.websocket.connect();
 
-        console.log(`Connected to game ${gameId} as player ${playerId}`);
-      } catch (error) {
-        console.error("Game initialization error:", error);
-      }
-    });
+    //     console.log(`Connected to game ${gameId} as player ${playerId}`);
+    //   } catch (error) {
+    //     console.error("Game initialization error:", error);
+    //   }
+    // });
+    if (this.type == "regular") {
+      this.createGame("123", this);
+    }
   }
 
   createGame(initialState) {
     this.drawer = new Drawer(initialState, this);
     this.ui.createSelector();
 
-    this.scores = new Map();
-    for (let i = 0; i < initialState.paddles.length; i++) {
-      this.scores.set(i, 0);
-    }
+    // this.scores = new Map();
+    // for (let i = 0; i < initialState.paddles.length; i++) {
+    //   this.scores.set(i, 0);
+    // }
     this.world.audio.addAmbientSound("static/music/sea.mp3");
   }
 

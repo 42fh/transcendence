@@ -21,14 +21,15 @@ export default class Drawer {
     this.radius = 1;
     this.field = new THREE.Group();
 
-    this.generatePaddles(this.config.paddles.length, this.radius);
-    this.createGameField(this.radius);
-    this.createBalls(this.config.balls);
-
-    this.game.scene.add(this.field);
+    if (this.game.type == "circular") {
+      this.generatePaddlesCircular(this.config.paddles.length, this.radius);
+      this.createGameFieldCircular(this.radius);
+      this.createBallsCircular(this.config.balls);
+      this.game.scene.add(this.field);
+    }
   }
 
-  generatePaddles(player_count, radius) {
+  generatePaddlesCircular(player_count, radius) {
     const playerGeometry = new THREE.BoxGeometry(
       this.config.dimensions.paddle_length,
       this.config.dimensions.paddle_width,
@@ -52,7 +53,7 @@ export default class Drawer {
       this.field.add(this.game.paddles.get(i));
 
       const sectorAngle = (2 * Math.PI) / player_count;
-      const startAngle = ((i + 1 - 0.5) / player_count) * Math.PI * 2; // Added +1 to shift rings one position
+      const startAngle = ((i + 1 - 0.5) / player_count) * Math.PI * 2;
       const ringGeometry = new THREE.RingGeometry(
         radius - 0.05,
         radius,
@@ -74,7 +75,8 @@ export default class Drawer {
       this.field.add(ringMesh);
     }
   }
-  createGameField(radius) {
+
+  createGameFieldCircular(radius) {
     const fieldGeometry = new THREE.CircleGeometry(radius + 0.5, 64);
     const fieldMaterial = new THREE.MeshStandardMaterial({
       map: this.game.loader.items["floorColorTexture"],
@@ -95,7 +97,7 @@ export default class Drawer {
     this.field.add(field);
   }
 
-  createBalls(ballsConfig) {
+  createBallsCircular(ballsConfig) {
     const ballGeometry = new THREE.SphereGeometry(ballsConfig[0].size, 32, 32);
     const ballMaterial = new THREE.MeshMatcapMaterial({ color: 0xffffff });
 
@@ -115,43 +117,46 @@ export default class Drawer {
     }
     this.game.ui.updateScoreTable(gameState.scores);
 
-    // update balls
-    for (let i = 0; i < gameState.balls.length; i++) {
-      this.game.balls[i].position.set(
-        gameState.balls[i].x,
-        0.08,
-        gameState.balls[i].y
-      );
-    }
+    if (this.game.type == "circular") {
+      // update balls
+      for (let i = 0; i < gameState.balls.length; i++) {
+        this.game.balls[i].position.set(
+          gameState.balls[i].x,
+          0.08,
+          gameState.balls[i].y
+        );
+      }
 
-    // update paddles
-    const totalSides = gameState.paddles.length;
-    const radius = 0.9;
+      // update paddles
+      const totalSides = gameState.paddles.length;
+      const radius = 0.9;
 
-    const paddleArcLength = this.config.dimensions.paddle_length / radius;
-    const sectorAngle = (2 * Math.PI) / totalSides;
-    const availableRange = sectorAngle - paddleArcLength;
+      const paddleArcLength = this.config.dimensions.paddle_length / radius;
+      const sectorAngle = (2 * Math.PI) / totalSides;
+      const availableRange = sectorAngle - paddleArcLength;
 
-    for (let i = 0; i < totalSides; i++) {
-      const paddle = this.game.paddles.get(i);
-      if (!paddle) continue;
+      for (let i = 0; i < totalSides; i++) {
+        const paddle = this.game.paddles.get(i);
+        if (!paddle) continue;
 
-      const sideIndex = gameState.paddles[i].side_index;
-      const position = gameState.paddles[i].position;
+        const sideIndex = gameState.paddles[i].side_index;
+        const position = gameState.paddles[i].position;
 
-      const clampedPosition = position * availableRange;
-      const startAngle = (sideIndex - 0.5) * sectorAngle;
-      const angle = startAngle + paddleArcLength / 2 + clampedPosition;
+        const clampedPosition = position * availableRange;
+        const startAngle = (sideIndex - 0.5) * sectorAngle;
+        const angle = startAngle + paddleArcLength / 2 + clampedPosition;
 
-      const x = radius * Math.cos(angle);
-      const z = radius * Math.sin(angle);
+        const x = radius * Math.cos(angle);
+        const z = radius * Math.sin(angle);
 
-      paddle.position.set(x, 0.11, z);
+        paddle.position.set(x, 0.11, z);
 
-      paddle.lookAt(0, -0.29, 0);
-      paddle.rotateY(Math.PI);
+        paddle.lookAt(0, -0.29, 0);
+        paddle.rotateY(Math.PI);
+      }
     }
   }
+
   movePaddle(direction) {
     this.game.websocket.sendMessage({
       action: "move_paddle",

@@ -1,0 +1,160 @@
+{
+  "asset": {
+    "generator": "Khronos glTF Blender I/O v4.2.60",
+    "version": "2.0"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "mesh": 0,
+      "name": "dead_quiver_trunk_LOD0"
+    }
+  ],
+  "materials": [
+    {
+      "doubleSided": true,
+      "name": "dead_quiver_trunk",
+      "normalTexture": {
+        "index": 0
+      },
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 1
+        },
+        "metallicFactor": 0,
+        "metallicRoughnessTexture": {
+          "index": 2
+        }
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "realCap_Model_1",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1,
+            "TEXCOORD_0": 2
+          },
+          "indices": 3,
+          "material": 0
+        }
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    },
+    {
+      "sampler": 0,
+      "source": 1
+    },
+    {
+      "sampler": 0,
+      "source": 2
+    }
+  ],
+  "images": [
+    {
+      "mimeType": "image/webp",
+      "name": "dead_quiver_trunk_nor_gl",
+      "uri": "textures/dead_quiver_trunk_nor_gl_1k.webp"
+    },
+    {
+      "mimeType": "image/webp",
+      "name": "dead_quiver_trunk_diff",
+      "uri": "textures/dead_quiver_trunk_diff_1k.webp"
+    },
+    {
+      "mimeType": "image/webp",
+      "name": "dead_quiver_trunk_rough",
+      "uri": "textures/dead_quiver_trunk_arm_1k.webp"
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 9485,
+      "max": [
+        0.13597384095191956,
+        2.005944013595581,
+        0.1370227038860321
+      ],
+      "min": [
+        -0.17049916088581085,
+        0.011838450096547604,
+        -0.13106369972229004
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 9485,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 9485,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5123,
+      "count": 53934,
+      "type": "SCALAR"
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 113820,
+      "byteOffset": 0,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 113820,
+      "byteOffset": 113820,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 75880,
+      "byteOffset": 227640,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 107868,
+      "byteOffset": 303520,
+      "target": 34963
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 411388,
+      "uri": "dead_quiver_trunk.bin"
+    }
+  ]
+}

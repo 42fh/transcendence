@@ -112,9 +112,6 @@ export default class World {
   }
 
   addGame(newGame, isASCII = false) {
-    if (this.game) {
-      return "Game already added";
-    }
     this.game = newGame;
 
     // if (!isASCII) {
@@ -177,16 +174,22 @@ export default class World {
     this.controls = new OrbitControls(this.camera, this.canvas);
     this.controls.enableDamping = true; // makes controls smoother
 
-    // Game loop
-    this.renderer.setAnimationLoop(() => {
-      this.gameLoop();
-    });
+    this.time = Date.now();
+    if (this.game.type == "circular") {
+      this.renderer.setAnimationLoop(() => {
+        this.circularGameLoop();
+      });
+    } else {
+      this.renderer.setAnimationLoop(() => {
+        this.regularGameLoop();
+      });
+    }
 
     // Event listeners
     this.addEventListeners();
   }
 
-  gameLoop() {
+  circularGameLoop() {
     this.game.water.material.uniforms["time"].value += 1.0 / 240.0;
 
     // move paddle
@@ -197,6 +200,59 @@ export default class World {
       this.game.drawer.movePaddle("right");
     }
 
+    if (this.game.ui.isActive) {
+      this.raycaster.setFromCamera(this.mouse, this.camera);
+      const objectsToTest = [this.game.ui.leftArrow, this.game.ui.rightArrow];
+      const intersects = this.raycaster.intersectObjects(objectsToTest);
+
+      // set to red if intersected
+      if (intersects.length) {
+        intersects[0].object.material.color.set("red");
+        this.currentIntersect = intersects[0].object;
+      } else {
+        if (this.currentIntersect) {
+          this.currentIntersect.material.color.set(
+            objectsToTest[0].originalColor
+          );
+          this.currentIntersect = null;
+        }
+      }
+    }
+
+    this.controls.update();
+    this.renderer.render(this.game.scene, this.camera);
+  }
+
+  regularGameLoop() {
+    const deltaTime = this.time - Date.now();
+
+    this.game.water.material.uniforms["time"].value += 1.0 / 60.0;
+
+    // shark animation
+    const sharkAngle = 0.0003 * deltaTime;
+    if (this.game.fin1) {
+      this.game.fin1.position.x = Math.cos(sharkAngle) * 25 + 6;
+      this.game.fin1.position.z = Math.sin(sharkAngle) * 25 + 6;
+      this.game.fin1.rotation.y = Math.PI - sharkAngle;
+
+      this.game.fin2.position.x = Math.cos(-sharkAngle) * 30 + 6;
+      this.game.fin2.position.z = Math.sin(-sharkAngle) * 30 + 6;
+      this.game.fin2.rotation.y = Math.PI - sharkAngle;
+
+      this.game.fin3.position.x = Math.cos(sharkAngle) * 45 + 6;
+      this.game.fin3.position.z = Math.sin(sharkAngle) * 45 + 6;
+      this.game.fin3.rotation.y = sharkAngle;
+    }
+
+    // move paddle
+    if (this.moveDown && this.game.websocket) {
+      this.game.drawer.movePaddle("left");
+    }
+    if (this.moveUp && this.game.websocket) {
+      this.game.drawer.movePaddle("right");
+    }
+
+    // UI
     if (this.game.ui.isActive) {
       this.raycaster.setFromCamera(this.mouse, this.camera);
       const objectsToTest = [this.game.ui.leftArrow, this.game.ui.rightArrow];
@@ -266,7 +322,7 @@ export default class World {
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(window.innerWidth, window.innerHeight);
       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      this.composer.setSize(window.innerWidth, window.innerHeight);
+      // this.composer.setSize(window.innerWidth, window.innerHeight);
     });
   }
 }
