@@ -1,7 +1,7 @@
 import { handleLogout } from "./auth.js";
 import { displayLogoutError } from "../utils/errors.js";
 import { loadTournamentsPage } from "./tournaments.js";
-import { loadChatPage } from "./chats.js";
+import { loadChatPage } from "./chat-home.js";
 import { showNotification } from "../utils/notification.js";
 
 export function loadHomePage(addToHistory = true) {
