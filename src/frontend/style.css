@@ -33,6 +33,7 @@
   /* Define CSS variables */
   --bottom-nav-height: 3.5rem; /* Base height for bottom nav */
   --bottom-nav-padding: 0.5rem;
+  --avatar-size: 7.5rem; /* Instead of 120px */
 }
 
 * {
@@ -830,16 +831,23 @@ button:hover {
 }
 
 .profile__avatar-container {
-  flex-shrink: 0;
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #1a1a1a;
 }
 
 .profile__avatar {
-  width: 120px;
-  height: 120px;
+  width: var(--avatar-size);
+  height: var(--avatar-size);
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid white;
-  background: rgba(255, 255, 255, 0.1);
+  background: #1a1a1a;
+  border: 0.125rem solid white;
 }
 
 .profile__info {

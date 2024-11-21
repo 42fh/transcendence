@@ -1,6 +1,7 @@
 import { displayLogoutError } from "../utils/errors.js";
 import { fillModalContent, openModal, closeModal, initModalListeners } from "../utils/modals.js";
 import { loadHomePage } from "./home.js";
+import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 
 // Event listeners initialization
 export function initAuthListeners() {

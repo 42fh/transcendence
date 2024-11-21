@@ -1,5 +1,6 @@
 import { fetchUserProfile, formatWinRatio, renderMatchHistory } from "../services/usersService.js";
 import { showToast } from "../utils/toast.js";
+import { ASSETS, LOCAL_STORAGE_KEYS } from "../config/constants.js";
 
 export async function loadProfilePage(addToHistory = true) {
   try {
@@ -38,7 +39,7 @@ export async function loadProfilePage(addToHistory = true) {
     const content = document.importNode(template.content, true);
 
     // Populate user data
-    content.querySelector(".profile__avatar").src = userData.avatar || "/static/images/default-avatar.png";
+    content.querySelector(".profile__avatar").src = userData.avatar || ASSETS.IMAGES.DEFAULT_AVATAR;
     content.querySelector(".profile__username").textContent = userData.username;
     content.querySelector(".profile__name").textContent =
       `${userData.first_name || ""} ${userData.last_name || ""}`.trim() || "No name set";
@@ -55,6 +56,7 @@ export async function loadProfilePage(addToHistory = true) {
     );
 
     // Add content to main container
+    mainContent.innerHTML = "";
     mainContent.appendChild(content);
 
     // Render match history

@@ -1,4 +1,4 @@
-import { CONFIG } from "../config/constants.js";
+import { CONFIG, LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { tournaments } from "../config/tournaments.js";
 import { showToast } from "../utils/toast.js";
 import { loadTournamentsPage } from "../views/tournaments.js";

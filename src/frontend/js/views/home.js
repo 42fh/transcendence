@@ -1,6 +1,7 @@
 import { handleLogout } from "./auth.js";
 import { displayLogoutError } from "../utils/errors.js";
 import { loadTournamentsPage } from "./tournaments.js";
+import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 
 export function loadHomePage(addToHistory = true) {
   try {

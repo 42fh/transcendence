@@ -16,3 +16,9 @@ export const LOCAL_STORAGE_KEYS = {
   USERNAME: "pongUsername",
   THEME: "pongTheme",
 };
+
+export const ASSETS = {
+  IMAGES: {
+    DEFAULT_AVATAR: "../../static/images/default-avatar.jpeg",
+  },
+};
