@@ -7,13 +7,12 @@ from .models import ChatRoom, Message, BlockedUser
 from django.views.decorators.csrf import csrf_exempt
 from users.models import CustomUser
 import json
-from django.middleware.csrf import get_token
 from django.utils import timezone
 from channels.db import database_sync_to_async
 
 
 @login_required
-def users(request):
+def rooms(request):
     try:
         if not request.user.is_authenticated:
             return JsonResponse({"status": "error", "message": "User not authenticated"}, status=401)
