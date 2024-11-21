@@ -1,5 +1,5 @@
 import { displayLogoutError } from "../utils/errors.js";
-import { closeModal } from "../components/modal.js";
+import { renderModal, closeModal, displayModalError } from "../components/modal.js";
 import { loadHomePage } from "./home.js";
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { updateActiveNavItem } from "../components/bottom-nav.js";
@@ -87,7 +87,6 @@ async function handleAuth(form, authFunction) {
     messageElement.style.color = "var(--color-text-error)";
     messageElement.innerText = error.message;
     console.error("Error submitting form:", error);
-    displayModalError("There was an issue submitting the form. Please try again.");
   }
 }
 

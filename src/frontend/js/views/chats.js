@@ -1,6 +1,7 @@
 import { displayModalError } from "../components/modal.js";
 import { fetchUserList, toggleBlockUser } from "../services/chatService.js";
 import { initializeChatWebSocket } from "../services/chatSocketService.js";
+import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 
 const chatState = {
   currentUsername: "",
@@ -19,7 +20,7 @@ const chatState = {
 export function loadChatPage(addToHistory = true) {
   try {
     // Check if user is logged in
-    const username = localStorage.getItem("username");
+    const username = localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME);
     if (!username) {
       window.location.href = "/accounts/login/";
       return;

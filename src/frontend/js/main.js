@@ -2,7 +2,7 @@ import { loadAuthPage } from "./views/auth.js";
 import { loadHomePage } from "./views/home.js";
 import { initializeTournaments } from "./config/tournaments.js";
 import { initializeHistory } from "./utils/history.js";
-import { CONFIG } from "./config/constants.js";
+import { CONFIG, LOCAL_STORAGE_KEYS } from "./config/constants.js";
 import { initBottomNav } from "./components/bottom-nav.js";
 
 // Initialize all listeners and data
