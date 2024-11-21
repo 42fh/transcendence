@@ -22,3 +22,7 @@ export const ASSETS = {
     DEFAULT_AVATAR: "../../static/images/default-avatar.jpeg",
   },
 };
+
+export const NAVIGATION = {
+  VIEWS_WITH_TAB: ["home", "tournaments", "profile", "chat"],
+};

@@ -2,7 +2,7 @@ import { displayLogoutError } from "../utils/errors.js";
 import { fillModalContent, openModal, closeModal, initModalListeners } from "../utils/modals.js";
 import { loadHomePage } from "./home.js";
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
-
+import { updateActiveNavItem } from "../components/bottom-nav.js";
 // Event listeners initialization
 export function initAuthListeners() {
   document.getElementById("login-button").addEventListener("click", () => {
@@ -29,6 +29,7 @@ export async function loadAuthPage(addToHistory = true) {
         },
         ""
       );
+      updateActiveNavItem("auth");
     }
 
     const response = await fetch("/index.html");

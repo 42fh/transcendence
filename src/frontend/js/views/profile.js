@@ -1,6 +1,7 @@
 import { fetchUserProfile, formatWinRatio, renderMatchHistory } from "../services/usersService.js";
 import { showToast } from "../utils/toast.js";
 import { ASSETS, LOCAL_STORAGE_KEYS } from "../config/constants.js";
+import { updateActiveNavItem } from "../components/bottom-nav.js";
 
 export async function loadProfilePage(addToHistory = true) {
   try {
@@ -11,6 +12,7 @@ export async function loadProfilePage(addToHistory = true) {
         },
         ""
       );
+      updateActiveNavItem("profile");
     }
 
     const mainContent = document.getElementById("main-content");

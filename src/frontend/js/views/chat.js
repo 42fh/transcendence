@@ -1,3 +1,5 @@
+import { updateActiveNavItem } from "../components/bottom-nav.js";
+
 export function loadChatPage(addToHistory = true) {
   try {
     if (addToHistory) {
@@ -7,6 +9,7 @@ export function loadChatPage(addToHistory = true) {
         },
         ""
       );
+      updateActiveNavItem("chat");
     }
 
     const mainContent = document.getElementById("main-content");

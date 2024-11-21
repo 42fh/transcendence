@@ -2,6 +2,7 @@ import { handleLogout } from "./auth.js";
 import { displayLogoutError } from "../utils/errors.js";
 import { loadTournamentsPage } from "./tournaments.js";
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
+import { updateActiveNavItem } from "../components/bottom-nav.js";
 
 export function loadHomePage(addToHistory = true) {
   try {
@@ -12,6 +13,7 @@ export function loadHomePage(addToHistory = true) {
         },
         ""
       );
+      updateActiveNavItem("home");
     }
 
     // Hide the initial container

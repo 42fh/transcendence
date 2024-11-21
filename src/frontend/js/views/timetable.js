@@ -2,6 +2,7 @@ import { showToast } from "../utils/toast.js";
 import { CONFIG, LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { getGlobalTournaments } from "../store/globals.js";
 import { tournaments } from "../config/tournaments.js";
+import { updateActiveNavItem } from "../components/bottom-nav.js";
 
 export async function loadTimetablePage(tournamentName, addToHistory = true) {
   try {
@@ -13,6 +14,7 @@ export async function loadTimetablePage(tournamentName, addToHistory = true) {
         },
         ""
       );
+      updateActiveNavItem("timetable");
     }
 
     // Find tournament with timetable based on data source

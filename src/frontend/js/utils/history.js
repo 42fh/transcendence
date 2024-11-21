@@ -6,6 +6,7 @@ import { loadCreateTournamentPage } from "../views/tournament-create.js";
 import { loadTimetablePage } from "../views/timetable.js";
 import { loadProfilePage } from "../views/profile.js";
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
+import { updateActiveNavItem } from "../components/bottom-nav.js";
 
 // TODO: Implement state management system to cache API responses
 // Consider using:
@@ -42,48 +43,55 @@ export function initializeHistory() {
     if (event.state) {
       // TODO: Check cache before making API calls in each case
       // If cached data exists and is not stale, use it instead of making new API calls
-      switch (event.state.view) {
-        case "auth":
-          loadAuthPage(false);
-          break;
-        case "home":
-          loadHomePage(false);
-          break;
-        case "tournaments":
-          // TODO: Consider caching tournament list with timestamp
-          loadTournamentsPage(false);
-          break;
-        case "tournament-detail":
-          // TODO: Cache tournament details by ID
-          if (event.state.tournament) {
-            loadTournamentDetailsPage(event.state.tournament, false);
-          } else {
-            console.error("No tournament data in state");
-            loadTournamentsPage(false);
-          }
-          break;
-        case "create-tournament":
-          loadCreateTournamentPage(false);
-          break;
-        case "timetable":
-          // TODO: Cache timetable data with invalidation on tournament updates
-          if (event.state.tournamentName) {
-            loadTimetablePage(event.state.tournamentName, false);
-          } else {
-            console.error("No tournament name in state");
-            loadTournamentsPage(false);
-          }
-          break;
-        case "profile":
-          // TODO: Implement profile data caching
-          // Cache user profiles with timestamp for invalidation
-          // Consider different cache durations for own profile vs other users
-          const userId = event.state.userId || localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
 
-          loadProfilePage(userId, false);
-          break;
-        default:
-          loadHomePage(false);
+      const state = event.state;
+      if (state && state.view) {
+        // Update active nav state
+        updateActiveNavItem(state.view);
+
+        switch (state.view) {
+          case "auth":
+            loadAuthPage(false);
+            break;
+          case "home":
+            loadHomePage(false);
+            break;
+          case "tournaments":
+            // TODO: Consider caching tournament list with timestamp
+            loadTournamentsPage(false);
+            break;
+          case "tournament-detail":
+            // TODO: Cache tournament details by ID
+            if (state.tournament) {
+              loadTournamentDetailsPage(state.tournament, false);
+            } else {
+              console.error("No tournament data in state");
+              loadTournamentsPage(false);
+            }
+            break;
+          case "create-tournament":
+            loadCreateTournamentPage(false);
+            break;
+          case "timetable":
+            // TODO: Cache timetable data with invalidation on tournament updates
+            if (state.tournamentName) {
+              loadTimetablePage(state.tournamentName, false);
+            } else {
+              console.error("No tournament name in state");
+              loadTournamentsPage(false);
+            }
+            break;
+          case "profile":
+            // TODO: Implement profile data caching
+            // Cache user profiles with timestamp for invalidation
+            // Consider different cache durations for own profile vs other users
+            const userId = state.userId || localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
+
+            loadProfilePage(userId, false);
+            break;
+          default:
+            loadHomePage(false);
+        }
       }
     } else {
       const username = localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME);
