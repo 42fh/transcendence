@@ -1,7 +1,7 @@
 import { handleLogout } from "./auth.js";
 import { displayLogoutError } from "../utils/errors.js";
 import { loadTournamentsPage } from "./tournaments.js";
-import { loadGamePage } from "./game.js";
+import { loadGamePage } from "./game-2d.js";
 
 export function loadHomePage(addToHistory = true) {
   try {
