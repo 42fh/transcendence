@@ -1,6 +1,6 @@
 function ws_url(player_id, game_id)
 {
-    const url = `ws://localhost:8000/ws/pong/4/?player=6&gameId=${game_id}&playerId=${player_id}&type=polygon&pongType=irregular&players=2&balls=1&debug=false&sides=6&shape=regular&scoreMode=classic`
+    const url = `ws://localhost:8000/ws/pong/${game_id}/?player=${player_id}&gameId=${game_id}&playerId=${player_id}&type=polygon&pongType=classic&players=2&balls=1&debug=false&sides=4&shape=undefined&scoreMode=classic`;
     return url
 }
 
