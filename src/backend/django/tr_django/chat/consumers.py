@@ -3,8 +3,9 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
-from chat.models import ChatRoom, Message
+from chat.models import ChatRoom, Message, BlockedUser
 from users.models import CustomUser
+from django.db import models
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -128,12 +129,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
             user1 = CustomUser.objects.get(username=usernames[0])
             user2 = CustomUser.objects.get(username=usernames[1])
 
-            chat_room = ChatRoom.objects.create_room(user1, user2)[0]
+            chat_room, created = ChatRoom.objects.create_room(user1, user2)
 
             if chat_room:
                 chat_room.last_message_at = timezone.now()
                 chat_room.save(update_fields=["last_message_at"])
 
+            print(f"DEBUG: Chat room {'created' if created else 'retrieved'}: {chat_room}")
             return chat_room
 
         except CustomUser.DoesNotExist as e:
@@ -155,10 +157,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         try:
             text_data_json = json.loads(text_data)
-            message = text_data_json.get("message", "").strip()
+            message = text_data_json["message"]
+
+            # Get the other user in the chat
+            other_user = self.chat_room.user2 if self.chat_room.user1 == self.scope["user"] else self.chat_room.user1
 
             if not message:
                 await self.send(text_data=json.dumps({"type": "error", "message": "Empty messages are not allowed"}))
+                return
+
+            # Check if either user has blocked the other
+            if await self.is_blocked(self.scope["user"], other_user):
+                await self.send(
+                    text_data=json.dumps({"type": "error", "message": "Cannot send message: User is blocked"})
+                )
                 return
 
             timestamp = await self.save_message(message)
@@ -200,3 +212,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 }
             )
         )
+
+    @database_sync_to_async
+    def is_blocked(self, sender, recipient):
+        """Check if either user has blocked the other"""
+        return BlockedUser.objects.filter(
+            models.Q(user=sender, blocked_user=recipient) | models.Q(user=recipient, blocked_user=sender)
+        ).exists()

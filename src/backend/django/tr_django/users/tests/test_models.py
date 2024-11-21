@@ -230,3 +230,55 @@ class CustomUserRelationshipTestCase(TestCase):
         visibility_group.delete()
         self.user1.refresh_from_db()
         self.assertIsNone(self.user1.custom_visibility_group)
+
+
+class FriendRequestTests(TestCase):
+    def setUp(self):
+        # Create test users
+        self.user1 = CustomUser.objects.create_user(username="user1", password="test123")
+        self.user2 = CustomUser.objects.create_user(username="user2", password="test123")
+        self.user3 = CustomUser.objects.create_user(username="user3", password="test123")
+
+    def test_friend_request_flow(self):
+        """Test sending and accepting a friend request."""
+        # Send friend request
+        self.user1.send_friend_request(self.user2)
+        self.assertTrue(self.user2 in self.user1.friend_requests_sent.all())
+        self.assertTrue(self.user1 in self.user2.friend_requests_received.all())
+
+        # Accept friend request
+        self.user2.accept_friend_request(self.user1)
+        self.assertTrue(self.user1.is_friend_with(self.user2))
+        self.assertTrue(self.user2.is_friend_with(self.user1))
+        self.assertFalse(self.user2 in self.user1.friend_requests_sent.all())
+
+    def test_reject_friend_request(self):
+        """Test rejecting a friend request."""
+        self.user1.send_friend_request(self.user2)
+        self.user2.reject_friend_request(self.user1)
+        self.assertFalse(self.user2 in self.user1.friend_requests_sent.all())
+        self.assertFalse(self.user1.is_friend_with(self.user2))
+
+        # After rejection, user should be able to send another request
+        self.user1.send_friend_request(self.user2)
+        self.assertTrue(self.user2 in self.user1.friend_requests_sent.all())
+
+    def test_duplicate_friend_request(self):
+        """Test that duplicate friend requests are not created."""
+        self.user1.send_friend_request(self.user2)
+        self.user1.send_friend_request(self.user2)  # Send duplicate request
+        self.assertEqual(self.user1.friend_requests_sent.filter(id=self.user2.id).count(), 1)
+
+    def test_cancel_friend_request(self):
+        """Test canceling a friend request."""
+        self.user1.send_friend_request(self.user2)
+        self.user1.cancel_friend_request(self.user2)
+        self.assertFalse(self.user2 in self.user1.friend_requests_sent.all())
+        self.assertFalse(self.user1 in self.user2.friend_requests_received.all())
+
+    def test_friendship_symmetry(self):
+        """Test that friendships are symmetric."""
+        self.user1.send_friend_request(self.user2)
+        self.user2.accept_friend_request(self.user1)
+        self.assertTrue(self.user1.is_friend_with(self.user2))
+        self.assertTrue(self.user2.is_friend_with(self.user1))
