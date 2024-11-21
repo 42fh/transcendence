@@ -218,7 +218,7 @@ export class PongInterface {
     }
 
     generateRandomId() {
-        return Math.random().toString(36).substring(2, 15);
+        return Math.random().toString(10).substring(2, 7);
     }
 
     async startGame() {
@@ -227,7 +227,7 @@ export class PongInterface {
             this.showStatus('Invalid game type selected', true);
             return;
         }
- const gameId = document.getElementById('gameId').value || this.generateRandomId();
+        const gameId = document.getElementById('gameId').value || this.generateRandomId();
         const playerId = document.getElementById('playerId').value || this.generateRandomId();
         const numPlayers = parseInt(document.getElementById('numPlayers').value);
         const numSides = parseInt(document.getElementById('numSides').value);
