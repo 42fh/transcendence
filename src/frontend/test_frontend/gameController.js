@@ -1,20 +1,21 @@
 // gameController.js
 import { CONFIG } from './config.js';
 import { GameAPI } from './api.js';
-import { GameState } from './gamestate.js';
+import { GameState } from './gameState.js';
 import { GameWebSocket } from './websocket.js';
-import { PolygonRenderer } from './pong-renderers.js'
-import {  CircularRenderer} from './pong-renderers.js'
-
+// gameController.js
+import { PolygonRenderer } from './PolygonRenderer.js';
+import { CircularRenderer } from './CircularRenderer.js';
 
 
 export class GameController {
-    constructor(renderer) {
+    constructor(renderer, onEvent=null) {
         this.gameState = new GameState();
         this.renderer = renderer;
         this.websocket = null;
         this.gameId = null;
         this.playerId = null;
+	this.onEvent = onEvent;
     }
 
     async initializeGame(gameSettings) {
@@ -100,34 +101,68 @@ export class GameController {
         try {
             switch (message.type) {
                 case 'initial_state':
-                    this.handleInitialState(message);
+                    console.log('Initial State received:', message);
+			this.handleInitialState(message);
+			if (this.onEvent) {
+                        this.onEvent({
+                            type: 'info',
+                            message: 'Game initialized',
+                            details: `Player ${this.playerId} joined game ${this.gameId}`
+                        });
+                    }
                     break;
 
                 case 'game_state':
-			console.log(message);
+			// console.log(message);
                     this.gameState.updateState(message.game_state);
                     if (this.renderer) {
                         this.renderer.update(message.game_state);
                     }
                     break;
+		
+		case 'game_event':
+			if (this.onEvent) {
+                        	this.onEvent({
+                            	type: 'game',
+                            	message: `Game Event: ${message.game_state.type}`,
+                            	details: "not set"
+                        });
+                    }
+                    break;
+
 
                 case 'game_finished':
                     console.log(message);
                     this.handleGameFinished(message);
-                    break;
+                    if (this.onEvent) {
+                        this.onEvent({
+                            type: 'info',
+                            message: 'Game finished',
+                            details: `Winner: ${message.winner}`
+                        });
+                    }
+		    break;
 
                 case 'error':
                     console.log(message);
+		    if (this.onEvent) {
+                        this.onEvent({
+                            type: 'error',
+                            message: message.message || 'Unknown error',
+                            details: message.details || ''
+                        });
+                    }
+                    break;
                     // Simply pass the error message to the renderer
-                    if (this.renderer) {
-                        this.renderer.showError({
+                   // if (this.renderer) {
+                        /*this.renderer.showError({
                             	type: 'backend',
 			 	error: message.error || 'Unknown error',
             			details: message.details || '',
             			timestamp: new Date().toISOString()
-                        });
-                    }
-                    break;
+                        });*/
+                    //}
+                    //break;
             }
         } catch (error) {
             console.error('Error handling message:', error);
@@ -146,6 +181,13 @@ export class GameController {
         
         if (this.renderer) {
             this.renderer.playerIndex = message?.player_index;
+		const vertices = message.game_setup.vertices || message.game_state?.vertices;
+        console.log('Setting initial vertices:', vertices);
+		 if (vertices) {
+            this.renderer.vertices = vertices;
+        } else {
+            console.warn('No vertices found in initial state message');
+        }	
 	    this.renderer.initialize(message.game_state);
         }
     }
@@ -183,3 +225,4 @@ export class GameController {
         });
     }
 }
+

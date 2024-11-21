@@ -38,6 +38,5 @@ txaio==23.1.1
 typing_extensions==4.12.2
 zipp==3.15.0
 zope.interface==6.4.post2
-# Added for PostgreSQL connection in local development
 psycopg2-binary==2.9.10 
 python-dotenv==1.0.1 
