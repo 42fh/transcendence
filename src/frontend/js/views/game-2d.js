@@ -20,8 +20,8 @@ function render_socket_message(ev) {
 
             // Draw each ball
             balls.forEach(ball => {
-                const ballX = ball.x * canvas.width;
-                const ballY = ball.y * canvas.height;
+                const ballX = (ball.x + 1) / 2 * canvas.width;
+                const ballY = (ball.y + 1) / 2 * canvas.height;
                 const ballRadius = ball.size * canvas.width / 2; // Assuming size is relative to width
 
                 context.beginPath();
