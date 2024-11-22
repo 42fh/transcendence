@@ -54,7 +54,7 @@ export function loadHomePage(addToHistory = true) {
       logoutButton.addEventListener("click", handleLogout);
     }
 
-    const playButton = document.getElementById("play");
+    const playButton = document.getElementById("home__button-play");
     if (playButton) {
       playButton.addEventListener("click", function () {
         mainContent.innerHTML = "<h2>A beautiful game is built here</h2>";
