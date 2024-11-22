@@ -78,3 +78,18 @@ def ensure_room_id(sender, instance, **kwargs):
     if not instance.room_id:
         usernames = sorted([instance.user1.username, instance.user2.username])
         instance.room_id = f"{usernames[0]}_{usernames[1]}"
+
+
+class BlockedUser(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="blocked_users")
+    blocked_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="blocking_users")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "blocked_user")
+        indexes = [
+            models.Index(fields=["user", "blocked_user"]),
+        ]
+
+    def __str__(self):
+        return f"{self.user.username} blocked {self.blocked_user.username}"

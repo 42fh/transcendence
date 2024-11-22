@@ -1,8 +1,10 @@
 from django.test import TestCase
 from unittest.mock import patch
 from users.models import CustomUser
-from .models import ChatRoom, Message
+from .models import ChatRoom, Message, BlockedUser
 from django.utils import timezone
+from django.db import IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 from datetime import timedelta
 from django.db.models import Q
 
@@ -94,7 +96,7 @@ class MessageTestCase(ChatTestCase):
         initial_last_message = self.chat_room.last_message_at
 
         # Wait a moment to ensure different timestamp
-        message = Message.objects.create(room=self.chat_room, sender=self.user1, content="New message")
+        Message.objects.create(room=self.chat_room, sender=self.user1, content="New message")
 
         self.chat_room.refresh_from_db()
         self.assertGreater(self.chat_room.last_message_at, initial_last_message)
@@ -155,3 +157,64 @@ class ChatModelUserTest(ChatTestCase):
         # Test message creation with CustomUser
         message = Message.objects.create(room=chat_room, sender=self.user1, content="Test message")
         self.assertIsInstance(message.sender, CustomUser)
+
+
+class BlockedUserTestCase(ChatTestCase):
+    def test_block_user_creation(self):
+        """Test creating a blocked user relationship"""
+        block = BlockedUser.objects.create(user=self.user1, blocked_user=self.user2)
+        self.assertEqual(block.user, self.user1)
+        self.assertEqual(block.blocked_user, self.user2)
+        self.assertIsNotNone(block.created_at)
+
+    def test_unique_block_constraint(self):
+        """Test that a user cannot block another user multiple times"""
+        BlockedUser.objects.create(user=self.user1, blocked_user=self.user2)
+
+        # Attempt to create duplicate block
+        with self.assertRaises(IntegrityError):
+            BlockedUser.objects.create(user=self.user1, blocked_user=self.user2)
+
+    def test_multiple_blocks(self):
+        """Test that a user can block multiple users"""
+        block1 = BlockedUser.objects.create(user=self.user1, blocked_user=self.user2)
+        block2 = BlockedUser.objects.create(user=self.user1, blocked_user=self.user3)
+
+        blocked_users = BlockedUser.objects.filter(user=self.user1)
+        self.assertEqual(blocked_users.count(), 2)
+
+    def test_bidirectional_blocking(self):
+        """Test that two users can block each other"""
+        block1 = BlockedUser.objects.create(user=self.user1, blocked_user=self.user2)
+        block2 = BlockedUser.objects.create(user=self.user2, blocked_user=self.user1)
+
+        self.assertTrue(BlockedUser.objects.filter(user=self.user1, blocked_user=self.user2).exists())
+        self.assertTrue(BlockedUser.objects.filter(user=self.user2, blocked_user=self.user1).exists())
+
+    def test_str_representation(self):
+        """Test the string representation of BlockedUser"""
+        block = BlockedUser.objects.create(user=self.user1, blocked_user=self.user2)
+        expected_str = f"{self.user1.username} blocked {self.user2.username}"
+        self.assertEqual(str(block), expected_str)
+
+    def test_cascade_deletion(self):
+        """Test that blocked user entries are deleted when a user is deleted"""
+        block = BlockedUser.objects.create(user=self.user1, blocked_user=self.user2)
+        self.user1.delete()
+
+        with self.assertRaises(ObjectDoesNotExist):
+            BlockedUser.objects.get(id=block.id)
+
+    def test_blocked_users_query(self):
+        """Test querying blocked users for a specific user"""
+        BlockedUser.objects.create(user=self.user1, blocked_user=self.user2)
+        BlockedUser.objects.create(user=self.user1, blocked_user=self.user3)
+
+        # Test blocked_users related name
+        blocked_users = self.user1.blocked_users.all()
+        self.assertEqual(blocked_users.count(), 2)
+
+        # Test blocking_users related name
+        blocking_users = self.user2.blocking_users.all()
+        self.assertEqual(blocking_users.count(), 1)
+        self.assertEqual(blocking_users.first().user, self.user1)
