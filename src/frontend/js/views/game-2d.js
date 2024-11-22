@@ -4,21 +4,37 @@ function ws_url(player_id, game_id)
     return url
 }
 
-function render_socket_message(ev)
-{
+function render_socket_message(ev) {
     const canvas = document.getElementById("game-2d-canvas");
-    if (canvas)
-    {
-        const context = canvas.getContext("2d");
-        context.fillStyle = "cyan";
-        // Add a rectangle at (10, 10) with size 100x100 pixels
-        context.fillRect(10, 10, 300, 300);
-    }
+    if (!canvas) return;
+
+    const context = canvas.getContext("2d");
 
     try {
+        const data = JSON.parse(ev.data);
+        if (data.type === "game_state" && data.game_state) {
+            const { balls } = data.game_state;
+
+            // Clear the canvas
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw each ball
+            balls.forEach(ball => {
+                const ballX = ball.x * canvas.width;
+                const ballY = ball.y * canvas.height;
+                const ballRadius = ball.size * canvas.width / 2; // Assuming size is relative to width
+
+                context.beginPath();
+                context.arc(ballX, ballY, ballRadius, 0, 2 * Math.PI);
+                context.fillStyle = "cyan";
+                context.fill();
+                context.closePath();
+            });
+        }
+
         console.log(ev.data);
     } catch (error) {
-        console.log("failed to render_socket_message");
+        console.error("Failed to render_socket_message", error);
     }
 }
 
