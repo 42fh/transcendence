@@ -17,7 +17,7 @@ export default class GameWebSocket {
       player: this.playerId,
       ...this.options,
     }).toString();
-
+    // ws://localhost:8000/ws/pong/1234/?player=12&gameId=1234&playerId=12&type=polygon&pongType=classic&players=2&balls=1&debug=false&sides=4&shape=undefined&scoreMode=classic
     const url = `${CONFIG.WS_BASE_URL}/pong/${this.gameId}/?${queryParams}`;
     this.ws = new WebSocket(url);
     this.ws.onopen = () => {

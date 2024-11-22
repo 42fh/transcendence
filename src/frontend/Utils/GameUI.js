@@ -94,15 +94,20 @@ export default class GameUI {
     this.selector.add(this.rightArrow);
 
     this.selector.rotation.y = 0;
-    this.selector.position.set(0.12, 0.5, -1.5);
 
     this.isActive = true;
+    if (this.game.type == "regular") {
+      this.selector.scale.setScalar(7);
+      this.selector.position.set(6.5, 5.5, -1.5);
+    } else {
+      this.selector.position.set(0.12, 0.5, -1.5);
+    }
     this.game.scene.add(this.selector);
   }
 
   createButton(width, height, x, y, z, text) {
     const geometry = new THREE.PlaneGeometry(width, height);
-    const material = new THREE.MeshBasicMaterial({ color: 0x666666 });
+    const material = new THREE.MeshBasicMaterial({ color: 0x2b2a28 });
     const button = new THREE.Mesh(geometry, material);
     button.position.set(x, y, z);
 

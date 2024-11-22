@@ -78,6 +78,7 @@ game.loadResources(
   ],
   function setupResources() {
     // this.loader.items["floorColorTexture"].colorSpace = THREE.SRGBColorSpace;
+    this.loader.items["42berlin"].colorSpace = THREE.SRGBColorSpace;
     this.loader.items["floorColorTexture"].repeat.set(4, 4);
     this.loader.items["floorNormalTexture"].repeat.set(4, 4);
     this.loader.items["floorDisplacementTexture"].repeat.set(4, 4);
@@ -184,7 +185,7 @@ game.loadResources(
     floor.position.z = 12;
 
     // Paddles
-    const paddle1Geometry = new THREE.BoxGeometry(3, 1, 1);
+    const paddle1Geometry = new THREE.BoxGeometry(3, 2, 1);
     paddle1Geometry.center();
     const player1 = new THREE.Mesh(
       paddle1Geometry,
@@ -192,10 +193,10 @@ game.loadResources(
         map: this.loader.items["42berlin"],
       })
     );
-    player1.position.set(GAME_WIDTH / 2, 0.63, GAME_HEIGHT);
+    player1.position.set(GAME_WIDTH / 2, 0.83, GAME_HEIGHT);
     player1.name = "player1";
 
-    const paddle2Geometry = new THREE.BoxGeometry(3, 1, 1);
+    const paddle2Geometry = new THREE.BoxGeometry(3, 2, 1);
     paddle2Geometry.center();
     const player2 = new THREE.Mesh(
       paddle2Geometry,
@@ -204,7 +205,7 @@ game.loadResources(
       })
     );
     player2.name = "player2";
-    player2.position.set(GAME_WIDTH / 2, 0.63, GAME_HEIGHT - GAME_HEIGHT);
+    player2.position.set(GAME_WIDTH / 2, 0.83, GAME_HEIGHT - GAME_HEIGHT);
 
     this.paddles.set(0, player1);
     this.paddles.set(1, player2);

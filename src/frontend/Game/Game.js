@@ -117,37 +117,38 @@ export default class GameConstructor {
   }
 
   connectToWebsockets() {
-    // document.querySelector(".joinGame").addEventListener("click", async () => {
-    //   const gameId = document.getElementById("gameId").value;
-    //   const playerId = this.generateRandomId();
-    //   const gameType = "circular";
-    //   const numPlayers = document.getElementById("playerCount").value;
-    //   console.log("numPlayers: ", numPlayers);
-    //   const numBalls = 1;
-    //   const debug = true;
+    document.querySelector(".joinGame").addEventListener("click", async () => {
+      const gameId = document.getElementById("gameId").value;
+      const playerId = this.generateRandomId();
+      const gameType = "circular";
+      const numPlayers = document.getElementById("playerCount").value;
+      console.log("numPlayers: ", numPlayers);
+      const numBalls = 1;
+      const debug = true;
 
-    //   try {
-    //     this.config = {
-    //       playerId,
-    //       type: gameType,
-    //       players: numPlayers,
-    //       balls: numBalls,
-    //       debug,
-    //     };
+      try {
+        this.config = {
+          playerId,
+          type: gameType,
+          players: numPlayers,
+          balls: numBalls,
+          debug,
+        };
 
-    //     this.websocket = new GameWebSocket(
-    //       gameId,
-    //       playerId,
-    //       this.handleMessage.bind(this),
-    //       this.config
-    //     );
-    //     this.websocket.connect();
+        this.websocket = new GameWebSocket(
+          gameId,
+          playerId,
+          this.handleMessage.bind(this),
+          this.config
+        );
+        this.websocket.connect();
 
-    //     console.log(`Connected to game ${gameId} as player ${playerId}`);
-    //   } catch (error) {
-    //     console.error("Game initialization error:", error);
-    //   }
-    // });
+        console.log(`Connected to game ${gameId} as player ${playerId}`);
+      } catch (error) {
+        console.error("Game initialization error:", error);
+      }
+    });
+
     if (this.type == "regular") {
       this.createGame("123", this);
     }
