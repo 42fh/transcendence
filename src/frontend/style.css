@@ -280,18 +280,7 @@ button:hover {
 }
 
 /* Home Page  */
-
-/* 
-.home {
-  display: grid;
-  grid-template-rows: 1fr 2fr; 
-  height: 80vh; 
-  width: 80vw; 
-  align-items: center; 
-  min-height: calc(100vh - var(--bottom-nav-height));
-  padding-bottom: var(--bottom-nav-height);
-  position: relative;
-} */
+/* TODO: Move Home Page section to the top before Chat */
 
 .page-container--home {
   /* This together with page-container is replacing the home rule */
