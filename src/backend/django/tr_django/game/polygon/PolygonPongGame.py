@@ -6,6 +6,7 @@ import time
 
 
 from .method_decorators import (
+    add_cls_methods,
     add_abstract_implementations,
     add_overwriten_methods,
     add_setup,
@@ -15,6 +16,7 @@ from .method_decorators import (
 )
 
 
+@add_cls_methods
 @add_ball_movement_tracking  # Tracks ball movement data
 @add_collision_candidate_phase
 @add_collision_verification_phase

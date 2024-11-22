@@ -1,22 +1,37 @@
 
-from typing import List, Dict, Optional 
+from typing import List, Dict, Optional, Any 
 import math
 
 
-@classmethos
-def calculate_vertices(cls, settings: Dict[str, Any]) -> dict:
-    raise NotImplementedError("Subclasses must implement this: calculate_vertices!")
+@classmethod
+def calculate_inner(cls, settings: Dict[str, Any]) -> dict:
+    """Calculate inner boundary using true perpendicular distances for any polygon"""
+    if not self.vertices or not self.side_normals:
+        raise ValueError("Vertices and normals must be calculated before inner boundary")
 
-    raise NotImplementedError("Subclasses must implement this: sides_normals!")
+    # Calculate perpendicular distances from center to each side
+    min_distance = float('inf')
+    
+    for i in range(self.num_sides):
+        # Get start vertex of the side and its normal
+        vertex = self.vertices[i]
+        normal = self.side_normals[i]
+        
+        # Calculate perpendicular distance using the dot product
+        # Distance = dot product of any point on the line (vertex) with the normal
+        distance = abs(vertex["x"] * normal["x"] + vertex["y"] * normal["y"])
+        
+        print(f"Side {i} perpendicular distance: {distance}")
+        min_distance = min(min_distance, distance)
+    
+    self.inner_boundary = float(min_distance)
+    print(f"Final inner boundary: {self.inner_boundary}")
+    
+    return self.inner_boundary
 
-@classmethos
-def calculate_inner_boundaries(cls, settings: Dict[str, Any]) -> dict:
-    raise NotImplementedError("Subclasses must implement this: inner_boundaries!")
 
 
-
-
-@classmethos
+@classmethod
 def calculate_sides_normals(cls, settings: Dict[str, Any]) -> dict:
     """
     Calculate normal vectors for each side of the polygon.
@@ -25,7 +40,7 @@ def calculate_sides_normals(cls, settings: Dict[str, Any]) -> dict:
     Uses epsilon for float comparisons.
     """
     vertices = settings.get("vertices")  
-    num_sides =  settings.get("vertices") 
+    num_sides =  settings.get("sides") 
     player_sides =  settings.get("player_sides") 
 
     if not vertices:
@@ -34,10 +49,10 @@ def calculate_sides_normals(cls, settings: Dict[str, Any]) -> dict:
     EPSILON = 1e-10  # Small value for float comparisons
     side_normals = []
 
-    for i in range(self.num_sides):
+    for i in range(num_sides):
         # Get current side vertices
-        start = self.vertices[i]
-        end = self.vertices[(i + 1) % self.num_sides]
+        start = vertices[i]
+        end = vertices[(i + 1) % num_sides]
 
         # Calculate side vector (explicitly convert to float)
         side_vector_x = float(end["x"] - start["x"])
@@ -77,7 +92,7 @@ def calculate_sides_normals(cls, settings: Dict[str, Any]) -> dict:
             normal_y = float(-normal_y)
             dot_product = float(-dot_product)  # Update dot product after flip
 
-        self.side_normals.append(
+        side_normals.append(
             {
                 "x": float(normal_x),
                 "y": float(normal_y),
@@ -93,33 +108,35 @@ def calculate_sides_normals(cls, settings: Dict[str, Any]) -> dict:
             + (" (Player Side)" if i in player_sides else "")
             + f" length: {length:.6f}, dot: {dot_product:.6f}"
         )
-
+    return {"normals": side_normals}
 
 #
-def calculate_polygon_vertices(self):
+@classmethod
+def calculate_vertices(cls, settings: Dict[str, Any]) -> dict:
     """Calculate vertices based on number of sides and player distribution"""
-    if not self.active_sides:
+
+    active_sides = settings.get("players_sides")
+    game_mode = settings.get("mode")
+    num_sides = settings.get("sides")
+    
+    if not active_sides:
         raise ValueError("Active sides must be determined before calculating vertices")
 
     vertices = []
     base_radius = 1.0
 
-    if self.game_mode == "regular":
-        print("regular")
+    if game_mode == "regular":
         # Perfect regular polygon: all sides equal, evenly spaced
-        angle_step = (2 * math.pi) / self.num_sides
-        # start_angle = -math.pi / 2  # Start from top
+        angle_step = (2 * math.pi) / num_sides
 
-        for i in range(self.num_sides):
-            # angle = start_angle + (i * angle_step)
+        for i in range(num_sides):
             angle = i * angle_step
             vertices.append(
                 {"x": base_radius * math.cos(angle), "y": base_radius * math.sin(angle)}
             )
-    elif self.game_mode == "classic":
-        print("classic")
-        width = 1.0  # Base width
-        height = width * (9/16)  # Height based on 16:9 ratio
+    elif game_mode == "classic":
+        width = 1.0 
+        height = width * (9/16) 
     
         # Create rectangle vertices in clockwise order starting from top-left
         vertices = [
@@ -130,15 +147,14 @@ def calculate_polygon_vertices(self):
     ]     
 
 
-    else:  # irregular modes
-        print("irregular")
+    elif game_mode ==  "irregular":  # irregular modes
         # Get ratios and adjustments based on specific irregular mode
-        ratios, angle_adjustments = self._calculate_side_ratios()
+        ratios, angle_adjustments = cls.calculate_side_ratios()
 
         # start_angle = -math.pi / 2
-        angle_step = (2 * math.pi) / self.num_sides
+        angle_step = (2 * math.pi) / num_sides
 
-        for i in range(self.num_sides):
+        for i in range(num_sides):
             # angle = start_angle + (i * angle_step) + angle_adjustments[i]
             angle = (i * angle_step) + angle_adjustments[i]
             radius = base_radius * ratios[i]
@@ -151,13 +167,120 @@ def calculate_polygon_vertices(self):
         max(abs(v["x"]) for v in vertices), max(abs(v["y"]) for v in vertices)
     )
 
-    self.scale = 1.0 / max_coord
+    scale = 1.0 / max_coord
     for vertex in vertices:
-        vertex["x"] *= self.scale
-        vertex["y"] *= self.scale
-    print("scale: ", self.scale)
-    self.vertices = vertices
+        vertex["x"] *= scale
+        vertex["y"] *= scale
+    return {"vertices" : vertices, "scale" : scale}  
+
+# calculate_side_ratios
+import random
 
 
-#
-def get_player_side_indices(self):
+def calculate_base_deformation(self):
+    """Calculate deformation based on game mode"""
+    player_density = self.num_paddles / self.num_sides
+
+    if self.game_shape == "irregular":
+        # Original balanced ratios
+        if self.num_sides == 4:
+            return 4 / 3 if self.num_paddles == 2 else 1.0
+        else:
+            if player_density <= 0.5:
+                return 1.0 + (player_density * 0.5)
+            else:
+                return 1.25 - (player_density * 0.25)
+
+    elif self.game_shape == "crazy":
+        # Extreme deformation
+        if self.num_sides == 4:
+            return 4 / 3 if self.num_paddles == 2 else 1.0
+        else:
+            return 1.8 if player_density <= 0.5 else 1.5
+
+    elif self.game_shape == "star":
+        # Alternating long and short sides
+        return 2.2 if player_density <= 0.3 else 1.8
+
+    return 1.0  # Default if mode not recognized
+
+
+def calculate_side_ratios(self):
+    """Calculate ratios based on game mode"""
+    base_deform = self._calculate_base_deformation()
+
+    if self.game_shape == "irregular":
+        return self._calculate_regular_ratios(
+            base_deform
+        )  # This is now our irregular mode
+    elif self.game_shape == "crazy":
+        return self._calculate_crazy_ratios(base_deform)
+    elif self.game_shape == "star":
+        return self._calculate_star_ratios(base_deform)
+    else:
+        return self._calculate_regular_ratios(base_deform)  # Default
+
+
+def calculate_regular_ratios(self, base_deform):
+    """Original balanced ratio calculation"""
+    ratios = [1.0] * self.num_sides
+    angle_adjustments = [0] * self.num_sides
+
+    if self.num_sides == 4:
+        if self.num_paddles == 2:
+            # Special handling for rectangle
+            if 0 in self.active_sides and 2 in self.active_sides:
+                ratios[0] = ratios[2] = base_deform
+                ratios[1] = ratios[3] = 1.0
+            elif 1 in self.active_sides and 3 in self.active_sides:
+                ratios[0] = ratios[2] = 1.0
+                ratios[1] = ratios[3] = base_deform
+        else:
+            # More square-like for more players
+            for i in self.active_sides:
+                ratios[i] = base_deform
+    else:
+        # General polygon case
+        for side in self.active_sides:
+            ratios[side] = base_deform
+            prev_side = (side - 1) % self.num_sides
+            next_side = (side + 1) % self.num_sides
+            ratios[prev_side] = 1.0 + (base_deform - 1.0) * 0.5
+            ratios[next_side] = 1.0 + (base_deform - 1.0) * 0.5
+
+        # Smooth out the ratios
+        smoothed_ratios = ratios.copy()
+        for i in range(self.num_sides):
+            prev_ratio = ratios[(i - 1) % self.num_sides]
+            next_ratio = ratios[(i + 1) % self.num_sides]
+            smoothed_ratios[i] = (prev_ratio + 2 * ratios[i] + next_ratio) / 4
+        ratios = smoothed_ratios
+
+    return ratios, angle_adjustments
+
+
+def _calculate_crazy_ratios(self, base_deform):
+    """Extreme ratio calculation with sharp transitions"""
+    ratios = [0.6] * self.num_sides  # Compressed non-player sides
+    angle_adjustments = [0] * self.num_sides
+
+    # Set player sides
+    for side in self.active_sides:
+        ratios[side] = base_deform
+        if (side + 1) % self.num_sides not in self.active_sides:
+            angle_adjustments[side] = random.uniform(-0.26, 0.26)
+
+    return ratios, angle_adjustments
+
+
+def _calculate_star_ratios(self, base_deform):
+    """Star-like shape with alternating long and short sides"""
+    ratios = [0.4 if i % 2 == 0 else 1.2 for i in range(self.num_sides)]
+    angle_adjustments = [0] * self.num_sides
+
+    # Ensure player sides are equal
+    for side in self.active_sides:
+        ratios[side] = base_deform
+
+    return ratios, angle_adjustments
+

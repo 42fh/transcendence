@@ -5,7 +5,7 @@ from typing import List, Dict, Optional
 import os
 import uuid
 import asyncio  
-
+from .GameSettingManager import GameSettingsManager
 #os.getenv('REDIS_URL', 'redis://redis:6379/1')
 
 
@@ -121,8 +121,9 @@ class GameCordinator:
 
         #          
         print(settings)
-        game_settings = await cls.create_game_settings(redis_conn, settings, game_id)        
-        pass
+        a = GameSettingsManager()
+        game_settings = await a.create_game_settings(settings, game_id)
+        print(game_settings) 
 
     @classmethod
     async def create_game_settings(cls, redis_conn: redis.Redis, settings:Dict, game_id):

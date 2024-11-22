@@ -1,28 +1,28 @@
 
-from typing import List, Dict, Optional 
+from typing import List, Dict, Optional, Any 
 import math
 
 @classmethod
 def setup_game(cls, settings: Dict[str, Any]) -> dict:
 
     try:
-        settings.update(cls.calculate_player_side_indices(settings)
+        settings.update(cls.calculate_player_side_indices(settings))
         setting.update(cls.calculate_vertices(settings))                                                                                                  
         settings.update(cls.calculate_sides_normals(settings))                                                                                                                                              
-        settings.update(cls.calculate_inner_boundaries(settings))
+        settings.update(cls.calculate_inner(settings))
         return settings  
     except Exception as e:
         print("FOOO") 
 
-@classmethos
+@classmethod
 def calculate_vertices(cls, settings: Dict[str, Any]) -> dict:
     raise NotImplementedError("Subclasses must implement this: calculate_vertices!")
 
-@classmethos
+@classmethod
 def calculate_sides_normals(cls, settings: Dict[str, Any]) -> dict:
     raise NotImplementedError("Subclasses must implement this: sides_normals!")
 
-@classmethos
+@classmethod
 def calculate_inner_boundaries(cls, settings: Dict[str, Any]) -> dict:
     raise NotImplementedError("Subclasses must implement this: inner_boundaries!")
 
@@ -95,6 +95,6 @@ def calculate_player_side_indices(cls, settings: Dict[str, Any]) -> dict:
     print(
         f"Sides: {num_sides}, Players: {num_paddles}, Distribution: {player_sides}" # debug
     )
-    return {"players_sides": player_sides)
+    return {"players_sides": player_sides}
 
 

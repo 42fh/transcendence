@@ -25,6 +25,7 @@ class GameStateError(Exception):
 @add_game_physics  # Physics engine
 @add_game_logic  # Core game rules
 @add_game_flow  # Game state management
+@add_cls_methods
 class AGameManager(ABC):
 
     _game_types = {}
