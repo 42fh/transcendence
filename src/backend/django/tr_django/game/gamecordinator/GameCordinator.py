@@ -56,35 +56,30 @@ class GameCordinator:
     """ creates new games and manages all waiting and running games """
     
     REDIS_URL = "redis://redis:6379/2"
-    ALL_GAMES = "all_games"  # Set containing all game IDs
+    ALL_GAMES = "all_games"  
+    WAITING_GAMES = "waiting_games"
+    RUNNING_GAMES = "running_games"
+    FINISHED_GAMES = "finished_games"  
     LOCK_KEYS = {"game_id": "game_id"}
 
-
-
-    def __init__(self):
         
-        # redis
-        self.redis_conn = None # set by initialize
-        # each redis dervice its own index self.redis_url = os.getenv('REDIS_URL', 'redis://redis:6379') + "/2" 
-        self.redis_url = "redis://redis:6379" + "/2"        
-        
-        # logic
-        self.waiting_games_timeout = 300 # 5 min timeout only for waiting games tournament game stay open till the tournament close it. 
+    # logic
+    #self.waiting_games_timeout = 300 # 5 min timeout only for waiting games tournament game stay open till the tournament close it. 
 
-        # games_key 
-        self.all_games_key = f"all_games" # Game creation timestamp
-        self.waiting_tournament_games_key  = f"waiting_tournament_games" # tournament games has fixed players not pubblic 
-        self.waiting_games_key = "waiting_games" 
-        self.running_games_key = "running_games"
-        self.running_tournament_games_key  = "running_tournament_game"  
-        self.finished_games_key = "finised_games" 
-        self.finished_tournament_games_key = "finished_tournament_games"
-        self.recordet_games_key = "recordet_games"
-        
-        # performance logging
-        self.total_users_key = "total_users" 
-        self.total_spectators_key = "total_spectators"
-        self.total_players_key = "total_players"
+    # games_key 
+    #self.all_games_key = f"all_games" # Game creation timestamp
+    #self.waiting_tournament_games_key  = f"waiting_tournament_games" # tournament games has fixed players not pubblic 
+    #self.waiting_games_key = "waiting_games" 
+    #self.running_games_key = "running_games"
+    #self.running_tournament_games_key  = "running_tournament_game"  
+    #self.finished_games_key = "finised_games" 
+    #self.finished_tournament_games_key = "finished_tournament_games"
+    #self.recordet_games_key = "recordet_games"
+    
+    # performance logging
+    #self.total_users_key = "total_users" 
+    #self.total_spectators_key = "total_spectators"
+    #self.total_players_key = "total_players"
 
     @classmethod
     async def get_redis(cls) -> redis.Redis:
@@ -95,7 +90,7 @@ class GameCordinator:
 
     # create_game
     @classmethod
-    async def create_new_game(cls, settings:Dict=None) -> str:  
+    async def create_new_game(cls, settings:Dict) -> str:  
         """ """ 
         # calculate all data
         try:

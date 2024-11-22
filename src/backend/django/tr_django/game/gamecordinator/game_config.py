@@ -8,6 +8,19 @@ class EnumGameMode(Enum):
 
 
 
+DEFAULT_PLAYER = {
+    "player_values": {
+        "move_cooldown": float(0.1),
+        "move_speed": float(0.05),
+        "move_speed_boost": float(1.0),
+        "reverse_controls": False,
+        "paddle_length": float(0.3)
+    }
+}
+
+
+
+
 REGULAR_FIXED={
         "type": "polygon",
         "mode": "regular",

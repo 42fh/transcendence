@@ -1,48 +1,74 @@
 # settings
-
+settings =
+    {
     # Game Settsngs from the user
-    "settings_fields": {
-        "type": "str"  # Game type -> polygon or circular
-        "num_players": "int",  # Number of players
-        "num_balls": "int",  # Number of balls
-        "min_players": "int",  # Minimum players required
-        "sides": "int",  # Number of sides in polygon/sectors in circle
-        "paddle_length": "float",  # Default paddle length
-        "paddle_width": "float",  # Default paddle width
-        "ball_size": "float",  # Default ball size
-        "initial_ball_speed": "float",  # Initial ball speed
-        "scoreMode": "str",  # Scoring mode (first 11, timed, survival)
-
+    "settings_fields": 
+    {
+        "type": "str"  # Game type -> polygon or circular -> will choose with subclass will be used
 
         # 
-        "mode": "str",  # Game mode (regular, classic, circular, irregular)
-        "pongType": "str",  # Type of polygon (regular, irregular) for optimization
+        "num_players": "int",  # Number of players -> 1 - 12, default 2, 
+        "num_balls": "int",  # Number of balls -> default 1
+        "min_players": "int",  # Minimum players required -> default num_players
+        "sides": "int",  # Number of sides in polygon/sectors in circle -> default num_player || if sides < num_players ? sides = num_players
+
+
+        
+        # all value between 0-1, this number can be scaled by scale
+        "paddle_length": "float",  # lenght of the paddle value is to be seen in relation to its corresponding rectangular side / circle sector
+        "paddle_width": "float",  # paddle width value is to be seen in relation to the radius of the “outer_boundary” 
+        "ball_size": "float",  # ball size value is to be seen in relation to the radius of the “outer_boundary” 
+        "initial_ball_speed": "float",  # Initial ball speed value is to be seen in relation to the radius of the “outer_boundary” 
+
+        # score mode
+        "scoreMode": "str",  # Scoring mode (first 11 (numplayer > 1), timed, survival)
+
+
+        # presettings choise
+        "mode": "str",  # Game mode (regular, classic, circular, irregular) to select specific settings,                                                                                                    
 
         # you can do everything mode irregular
-        "shape": "str",  # Shape of field (regular, irregular, star, crazy)
+        "shape": "str",  # Shape of field (regular, irregular, star, crazyi, [classic])
     },
+    # Game settings CCordinator
+    "set_backend": 
+    {
+        # set from backend
+        "gameId": "int",  # Game ID generated from GameCordinator
+        "playerId": "int",  # Player ID form Users
+        "pongType": "str",  # Type of polygon (regular, irregular) for optimization
+    },
+    # Game settings caclulated from backend 
+    "calculate_backend":
+    {
+        # Game Physics Constants
+        "physics_constants": 
+        {
+            "outer_boundary": "float",  # Outer game boundary,  default 1.0
+            "inner_boundary": "float",  # Inner game boundary (calculated)
+            "scale": "float",  # the scaling we need to normalize the calculated vertices again, default 1.0
+            "combo_timeout": "float"  # Time window for combos (1.5 seconds)
+        },
+        
+    }
+    
 
 
-# 
-    "gameId": "int",  # Game ID generated from GameCordinator
-    "playerId": "int",  # Player ID form Users
------------------------
-"mode": "classic"=
-        "type": "polygon"
-        "num_players": 2,  
-        "num_balls": 1,  
-        "min_players": 2,
-        "sides": 4, 
-        "paddle_length": float(0.1),  
-        "paddle_width": float(0.05),
-        "ball_size": float 0.1,  # Default ball size
-        "initial_ball_speed": "float",  # Initial ball speed
-        "scoreMode": "first11" ,  # Scoring mode (first 11, timed, survival)
+
+default = DEFAULT_POLYGON
+
+client_settings = json.load(data)
+default.update(client_settings)
 
 
 
 
-
+#presettings
+#-----------------------
+# default regular/polygon
+# ChainMap
+# mutable_settings
+------------------------
 
 
 
@@ -105,14 +131,13 @@ game_state_fields = {
         "paddle_size": "float"  # Paddle size
     },
     
-    # Game Physics Constants
-    "physics_constants": {
-        "outer_boundary": "float",  # Outer game boundary (default 1.0)
-        "inner_boundary": "float",  # Inner game boundary (calculated)
-        "scale": "float",  # Game scale factor (default 1.0)
-        "combo_timeout": "float"  # Time window for combos (1.5 seconds)
-    },
-    
+
+
+
+
+
+# other data in AGameManager / PolygonPong / CircularPong
+
     # Movement Tracking
     "movement_tracking": {
         "sides": {
@@ -142,18 +167,6 @@ game_state_fields = {
         "vertices_key": "str"  # Game vertices
     },
     
-    # Vertex Structure (for polygon/circular games)
-    "vertex_fields": {
-        "x": "float",  # X coordinate
-        "y": "float",  # Y coordinate
-        "angle": "float",  # Angle (for circular)
-        "is_player": "bool",  # Whether vertex is player side
-        "arc_start": "float",  # Start angle of arc (circular)
-        "arc_end": "float",  # End angle of arc (circular)
-        "arc_center": "float",  # Center angle of arc (circular)
-        "arc_length": "float",  # Length of arc (circular)
-        "radius": "float"  # Radius (circular)
-    },
     
     # Cycle Data (for event tracking)
     "cycle_data": {
