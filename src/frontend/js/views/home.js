@@ -17,12 +17,6 @@ export function loadHomePage(addToHistory = true) {
       if (!addToHistory) updateActiveNavItem("home");
     }
 
-    // Hide the initial container
-    const container = document.getElementById("container");
-    if (container) {
-      container.style.display = "none";
-    }
-
     // Show main-content and load the home template
     const mainContent = document.getElementById("main-content");
     if (!mainContent) {
@@ -49,10 +43,10 @@ export function loadHomePage(addToHistory = true) {
     // Get the username from localStorage and set the greeting message
     const username = localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME);
 
-    const greetingElement = document.getElementById("greeting");
-    if (greetingElement && username) {
-      greetingElement.innerHTML = `Hello ${username}! 👋`;
-    }
+    // const greetingElement = document.getElementById("greeting");
+    // if (greetingElement && username) {
+    //   greetingElement.innerHTML = `Hello ${username}! 👋`;
+    // }
 
     // Add event listeners only if elements exist
     const logoutButton = document.getElementById("logout-button");

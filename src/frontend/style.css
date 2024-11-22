@@ -234,7 +234,7 @@ button:hover {
 
 /* Home Page */
 
-.home-container {
+.home {
   display: grid;
   grid-template-rows: 1fr 2fr; /* 1/3 for title, 2/3 for buttons */
   height: 80vh; /* Adjust height as needed */
