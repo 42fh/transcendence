@@ -26,7 +26,7 @@ def calculate_inner_boundaries(self):
 
 
 # Movement Phase
-
+# no movement here
 # Boundary Phase
 
 
