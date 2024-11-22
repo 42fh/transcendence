@@ -927,40 +927,75 @@ button:hover {
 }
 
 /* Bottom Navigation */
-.bottom-nav {
+#bottom-nav-container {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
+  z-index: 1000;
+  /* background-color: var(--color-background); */
+  background-color: black;
   height: var(--bottom-nav-height);
-  background: #1a1a1a;
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.bottom-nav {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: var(--bottom-nav-padding) 0;
-  box-shadow: 0 -0.125rem 0.625rem rgba(0, 0, 0, 0.3);
-  z-index: 1000;
+  height: 100%;
+  padding: var(--bottom-nav-padding);
 }
 
 .bottom-nav__item {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #888;
-  transition: color 0.3s;
-  padding: 0.5rem;
-  background: none;
-  border: none;
+  flex: 1;
+  height: 100%;
   cursor: pointer;
+  /* transition: all var(--transition-duration) var(--transition-timing); */
+  background: transparent; /* Changed from none to transparent */
+  color: white;
+  border: none;
+}
+
+/* .bottom-nav__item svg {
+  width: 24px;
+  height: 24px;
+  fill: var(--color-text-secondary);
+  transition: all var(--transition-duration) var(--transition-timing);
+} */
+
+.bottom-nav__item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 100%;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  color: white; /* Default icon color */
 }
 
 .bottom-nav__item--active {
-  color: #fff;
+  background-color: white;
+  color: black;
 }
 
-.bottom-nav__icon {
-  font-size: 1.75rem;
+/* .bottom-nav__item--active svg {
+  fill: black;
+} */
+
+/* Hover states */
+/* .bottom-nav__item:hover:not(.bottom-nav__item--active) {
+  background-color: var(--color-hover);
 }
+
+.bottom-nav__item:hover:not(.bottom-nav__item--active) svg {
+  fill: var(--color-text-primary);
+} */
 
 /* Material Icons Configuration */
 .material-symbols-outlined {

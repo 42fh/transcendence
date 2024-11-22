@@ -14,7 +14,7 @@ export function loadHomePage(addToHistory = true) {
         },
         ""
       );
-      updateActiveNavItem("home");
+      if (!addToHistory) updateActiveNavItem("home");
     }
 
     // Hide the initial container

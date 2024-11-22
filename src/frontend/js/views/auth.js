@@ -31,9 +31,8 @@ export async function loadAuthPage(addToHistory = true) {
         },
         ""
       );
-      updateActiveNavItem("auth");
     }
-
+    if (!addToHistory) updateActiveNavItem("auth");
     const mainContent = document.getElementById("main-content");
 
     mainContent.innerHTML = "";

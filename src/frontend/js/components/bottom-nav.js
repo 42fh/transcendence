@@ -35,10 +35,14 @@ function handleNavClick(e) {
   e.preventDefault();
   const page = this.dataset.page;
 
-  // Update active states
-  const navItems = document.querySelectorAll(".bottom-nav__item");
-  navItems.forEach((nav) => nav.classList.remove("bottom-nav__item--active"));
-  this.classList.add("bottom-nav__item--active");
+  if (!NAVIGATION.VIEWS_WITH_TAB.includes(page)) {
+    return;
+  }
+  // Push state first
+  history.pushState({ view: page }, "");
+
+  // Then update nav and load page
+  updateActiveNavItem(page);
 
   // Navigate to the selected view
   const pageLoaders = {
@@ -49,7 +53,7 @@ function handleNavClick(e) {
   };
 
   if (pageLoaders[page]) {
-    pageLoaders[page]();
+    pageLoaders[page](false); // Pass false to prevent another history push
   }
 }
 
@@ -69,14 +73,20 @@ function handleNavClick(e) {
 
 export function updateActiveNavItem(view) {
   requestAnimationFrame(() => {
-    console.log("Updating active nav item for view:", view);
     const navItems = document.querySelectorAll(".bottom-nav__item");
-    console.log("Found nav items:", navItems.length);
+
+    // If it's auth view, remove all active states
+    if (view === "auth") {
+      navItems.forEach((nav) => nav.classList.remove("bottom-nav__item--active"));
+      return;
+    }
 
     navItems.forEach((nav) => {
+      // Remove active class from all items
       nav.classList.remove("bottom-nav__item--active");
+
+      // Add active class to the selected item
       if (NAVIGATION.VIEWS_WITH_TAB.includes(view) && nav.dataset.page === view) {
-        console.log("Setting active:", nav.dataset.page);
         nav.classList.add("bottom-nav__item--active");
       }
     });

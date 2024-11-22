@@ -15,6 +15,7 @@ export function loadTournamentDetailsPage(tournament, addToHistory = true) {
       );
       updateActiveNavItem("tournament-detail");
     }
+    if (!addToHistory) updateActiveNavItem("tournament-detail");
 
     const template = document.getElementById("tournament-detail-template");
     if (!template) {

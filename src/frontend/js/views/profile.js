@@ -14,6 +14,7 @@ export async function loadProfilePage(addToHistory = true) {
       );
       updateActiveNavItem("profile");
     }
+    if (!addToHistory) updateActiveNavItem("profile");
 
     const mainContent = document.getElementById("main-content");
     if (!mainContent) {

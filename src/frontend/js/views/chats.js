@@ -33,6 +33,7 @@ export function loadChatPage(addToHistory = true) {
         },
         ""
       );
+      updateActiveNavItem("chat");
     }
 
     // Get and clone the template
