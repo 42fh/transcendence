@@ -48,8 +48,8 @@ class PongConsumer(AsyncWebsocketConsumer):
                     "shape": query_params.get("shape", "regular"),         # Shape of the pong field (e.g., regular, polygon)
                     "scoreMode": query_params.get("scoreMode", "classic"), # Scoring mode (e.g., classic, modern)
                     "debug": query_params.get("debug", "false").lower() == "true",  # Debug mode (true or false)
-                    "playerId": int(query_params.get("playerId", "1")),    # ID of the player
-                    "gameId": int(query_params.get("gameId", "1")),        # ID of the game session
+                    "playerId": query_params.get("playerId", "1"),    # ID of the player
+                    "gameId": query_params.get("gameId", "1"),        # ID of the game session
                     "type": query_params.get("type", "polygon"),           # Type of game (e.g., polygon, other modes)
                 },
             )
