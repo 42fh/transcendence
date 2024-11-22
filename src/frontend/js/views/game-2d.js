@@ -34,7 +34,7 @@ function render_socket_message(ev) {
             const ball = gameState.balls[0];
             const ballX = (ball.x + 0.5) * width; // Map from game space (-0.5 to 0.5) to canvas space
             const ballY = (0.5 - ball.y) * height; // Invert Y-axis for canvas
-            const ballRadius = ball.size * width; // Ball size relative to width
+            const ballRadius = ball.size * width / 4; // Ball size relative to width
 
             context.fillStyle = "blue";
             context.beginPath();
