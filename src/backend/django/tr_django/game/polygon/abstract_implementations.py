@@ -290,4 +290,5 @@ def handle_wall(self, ball, collision_candidate, new_state):
         },
     }
 
-    # Impact Processing Phase
+# Impact Processing Phase
+# no method    
