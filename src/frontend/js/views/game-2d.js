@@ -9,34 +9,43 @@ function render_socket_message(ev) {
     if (!canvas) return;
 
     const context = canvas.getContext("2d");
+    context.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas for new frame rendering
 
     try {
-        const data = JSON.parse(ev.data);
-        if (data.type === "game_state" && data.game_state) {
-            const { balls } = data.game_state;
+        const message = JSON.parse(ev.data);
+        if (message.type === "game_state" && message.game_state) {
+            const gameState = message.game_state;
 
-            // Clear the canvas
-            context.clearRect(0, 0, canvas.width, canvas.height);
+            // Dimensions of the bounding rectangle
+            const width = canvas.width;
+            const height = canvas.height * 9 / 16;
 
-            // Draw each ball
-            balls.forEach(ball => {
-                const ballX = (ball.x + 1) / 2 * canvas.width;
-                const ballY = (ball.y + 1) / 2 * canvas.height;
-                const ballRadius = ball.size * canvas.width / 2; // Assuming size is relative to width
+            // Draw bounding rectangle
+            context.strokeStyle = "red";
+            context.lineWidth = 2;
+            context.strokeRect(
+                (width / 2) - (width / 2),
+                (height / 2) - (height / 2),
+                width,
+                height
+            );
 
-                context.beginPath();
-                context.arc(ballX, ballY, ballRadius, 0, 2 * Math.PI);
-                context.fillStyle = "cyan";
-                context.fill();
-                context.closePath();
-            });
+            // Draw ball
+            const ball = gameState.balls[0];
+            const ballX = (ball.x + 0.5) * width; // Map from game space (-0.5 to 0.5) to canvas space
+            const ballY = (0.5 - ball.y) * height; // Invert Y-axis for canvas
+            const ballRadius = ball.size * width; // Ball size relative to width
+
+            context.fillStyle = "blue";
+            context.beginPath();
+            context.arc(ballX, ballY, ballRadius, 0, 2 * Math.PI);
+            context.fill();
         }
-
-        console.log(ev.data);
     } catch (error) {
-        console.error("Failed to render_socket_message", error);
+        console.error("Failed to parse and render game state:", error);
     }
 }
+
 
 function add_websocksocket_events(socket)
 {
