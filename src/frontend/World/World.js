@@ -1,16 +1,15 @@
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
-import { RenderPixelatedPass } from "three/addons/postprocessing/RenderPixelatedPass.js";
-import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
-import { AsciiEffect } from "three/addons/effects/AsciiEffect.js";
 import * as THREE from "three";
 import Debug from "../Utils/Debug.js";
 import Audio from "../Utils/Audio.js";
+import gsap from "gsap";
 
 export default class World {
-  constructor(canvas, isPerspectiveCamera = true) {
+  constructor(canvas, isPerspectiveCamera = true, game) {
     // Canvas
     this.canvas = canvas;
+
+    this.game = game;
 
     // GUI
     this.gui = new Debug();
@@ -38,17 +37,10 @@ export default class World {
     // Renderer
     this.addRenderer(canvas);
 
-    this.game = null;
-
     this.moveUp = false;
     this.moveDown = false;
 
     this.mouse = new THREE.Vector2();
-
-    window.addEventListener("mousemove", (event) => {
-      this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-      this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-    });
   }
 
   addOrthographicCamera() {
@@ -73,25 +65,32 @@ export default class World {
       0.1,
       1000
     );
-    this.camera.position.set(0.22, 1, 2);
+
+    if (this.game.type == "circular") {
+      this.camera.position.set(0.22, 1, 2);
+    } else {
+      this.camera.position.set(6, 7, 35);
+      this.camera.lookAt(10, -4, 10);
+      this.cameraAnimation = this.animateCamera();
+    }
 
     if (this.gui.debug) {
       this.gui.gui
         .add(this.camera.position, "y")
         .min(-115)
-        .max(20)
+        .max(40)
         .step(0.01)
         .name("Camera y");
       this.gui.gui
         .add(this.camera.position, "z")
         .min(-15)
-        .max(20)
+        .max(40)
         .step(0.01)
         .name("Camera z");
       this.gui.gui
         .add(this.camera.position, "x")
         .min(-15)
-        .max(20)
+        .max(40)
         .step(0.01)
         .name("Camera xx");
     }
@@ -114,63 +113,6 @@ export default class World {
   addGame(newGame, isASCII = false) {
     this.game = newGame;
 
-    // if (!isASCII) {
-    //   // Pixelated rendering
-    //   this.composer = new EffectComposer(this.renderer);
-    //   const outputPass = new OutputPass();
-    //   this.composer.addPass(outputPass);
-    //   const renderPixelatedPass = new RenderPixelatedPass(
-    //     1,
-    //     this.game.scene,
-    //     this.camera
-    //   );
-    //   this.composer.addPass(renderPixelatedPass);
-    //   let params = {
-    //     pixelSize: 1,
-    //     normalEdgeStrength: 0.1,
-    //     depthEdgeStrength: 0.1,
-    //     pixelAlignedPanning: true,
-    //   };
-    //   if (this.gui.debug) {
-    //     this.gui.gui
-    //       .add(params, "pixelSize")
-    //       .min(1)
-    //       .max(16)
-    //       .step(1)
-    //       .onChange(() => {
-    //         renderPixelatedPass.setPixelSize(params.pixelSize);
-    //       });
-    //     this.gui.gui
-    //       .add(renderPixelatedPass, "normalEdgeStrength")
-    //       .min(0)
-    //       .max(2)
-    //       .step(0.05);
-    //     this.gui.gui
-    //       .add(renderPixelatedPass, "depthEdgeStrength")
-    //       .min(0)
-    //       .max(1)
-    //       .step(0.05);
-    //   }
-
-    //   this.controls = new OrbitControls(this.camera, this.canvas);
-    //   this.controls.enableDamping = true; // makes controls smoother
-    // } else {
-    //   // ASCII rendering
-    //   this.addRenderer(null); // replace renderer
-    //   // hide old canvas
-    //   this.canvas.style.display = "none";
-
-    //   this.composer = new AsciiEffect(this.renderer, " .:-+*=%@#", {
-    //     invert: true,
-    //   });
-    //   this.composer.setSize(window.innerWidth, window.innerHeight);
-    //   this.composer.domElement.style.color = "white";
-    //   this.composer.domElement.style.backgroundColor = "black";
-    //   document.body.appendChild(this.composer.domElement);
-
-    //   this.controls = new OrbitControls(this.camera, this.composer.domElement);
-    //   this.controls.enableDamping = true; // makes controls smoother
-    // }
     this.controls = new OrbitControls(this.camera, this.canvas);
     this.controls.enableDamping = true; // makes controls smoother
 
@@ -276,6 +218,45 @@ export default class World {
     this.renderer.render(this.game.scene, this.camera);
   }
 
+  animateCamera() {
+    this.cameraTarget = new THREE.Vector3(4, -4, 4);
+    this.cameraRotation = { angle: 0 };
+    const radius = 30;
+    const height = 20;
+    const centerX = 12;
+    const centerZ = 12;
+
+    return gsap.to(this.cameraRotation, {
+      angle: Math.PI * 2,
+      duration: 30,
+      repeat: -1,
+      ease: "none",
+      onUpdate: () => {
+        const angle = this.cameraRotation.angle;
+        this.camera.position.x = Math.cos(angle) * radius + centerX;
+        this.camera.position.z = Math.sin(angle) * radius + centerZ;
+        this.camera.position.y = height;
+        this.camera.lookAt(this.cameraTarget);
+      },
+    });
+  }
+
+  zoomToPlayer() {
+    this.cameraAnimation.pause();
+    gsap.killTweensOf(this.cameraAnimation);
+
+    gsap.to(this.camera.position, {
+      duration: 2,
+      x: 6,
+      y: 7,
+      z: 35,
+      ease: "power2.inOut",
+      onUpdate: () => {
+        this.camera.lookAt(1, 1, 1);
+      },
+    });
+  }
+
   addEventListeners() {
     // Move paddle
     document.addEventListener("keydown", (event) => {
@@ -287,6 +268,8 @@ export default class World {
         case "ArrowRight":
         case "KeyD":
           this.moveDown = true;
+          this.zoomToPlayer();
+          this.game.ui.createSelector();
           break;
       }
     });
@@ -322,7 +305,11 @@ export default class World {
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(window.innerWidth, window.innerHeight);
       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      // this.composer.setSize(window.innerWidth, window.innerHeight);
+    });
+    // Mouse position
+    window.addEventListener("mousemove", (event) => {
+      this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
     });
   }
 }

@@ -63,23 +63,23 @@ export default class Audio {
         });
     }
 
-    document.querySelector(".stopMusic").addEventListener("click", (event) => {
-      this.stopBackgroundMusic(this.currentSongIndex);
-    });
+    // document.querySelector(".stopMusic").addEventListener("click", (event) => {
+    //   this.stopBackgroundMusic(this.currentSongIndex);
+    // });
 
-    document.querySelector(".startMusic").addEventListener("click", (event) => {
-      this.startBackgroundMusic(this.currentSongIndex, false);
-    });
+    // document.querySelector(".startMusic").addEventListener("click", (event) => {
+    //   this.startBackgroundMusic(this.currentSongIndex, false);
+    // });
 
-    document
-      .querySelector(".previousSong")
-      .addEventListener("click", (event) => {
-        this.previousSong();
-      });
+    // document
+    //   .querySelector(".previousSong")
+    //   .addEventListener("click", (event) => {
+    //     this.previousSong();
+    //   });
 
-    document.querySelector(".nextSong").addEventListener("click", (event) => {
-      this.nextSong();
-    });
+    // document.querySelector(".nextSong").addEventListener("click", (event) => {
+    //   this.nextSong();
+    // });
   }
 
   stopBackgroundMusic(index) {

@@ -10,9 +10,9 @@ import GameUI from "../Utils/GameUI.js";
 
 export default class GameConstructor {
   constructor(type) {
-    this.world = new World(document.querySelector(".webgl"), false);
-
     this.type = type;
+
+    this.world = new World(document.querySelector(".webgl"), false, this);
 
     // Objects group
     this.gameGroup = new THREE.Group();
@@ -117,37 +117,38 @@ export default class GameConstructor {
   }
 
   connectToWebsockets() {
-    document.querySelector(".joinGame").addEventListener("click", async () => {
-      const gameId = document.getElementById("gameId").value;
-      const playerId = this.generateRandomId();
-      const gameType = "circular";
-      const numPlayers = document.getElementById("playerCount").value;
-      console.log("numPlayers: ", numPlayers);
-      const numBalls = 1;
-      const debug = true;
+    // TODO: implement this after Florian does frontend
+    // document.querySelector(".joinGame").addEventListener("click", async () => {
+    //   const gameId = document.getElementById("gameId").value;
+    //   const playerId = this.generateRandomId();
+    //   const gameType = "circular";
+    //   const numPlayers = document.getElementById("playerCount").value;
+    //   console.log("numPlayers: ", numPlayers);
+    //   const numBalls = 1;
+    //   const debug = true;
 
-      try {
-        this.config = {
-          playerId,
-          type: gameType,
-          players: numPlayers,
-          balls: numBalls,
-          debug,
-        };
+    //   try {
+    //     this.config = {
+    //       playerId,
+    //       type: gameType,
+    //       players: numPlayers,
+    //       balls: numBalls,
+    //       debug,
+    //     };
 
-        this.websocket = new GameWebSocket(
-          gameId,
-          playerId,
-          this.handleMessage.bind(this),
-          this.config
-        );
-        this.websocket.connect();
+    //     this.websocket = new GameWebSocket(
+    //       gameId,
+    //       playerId,
+    //       this.handleMessage.bind(this),
+    //       this.config
+    //     );
+    //     this.websocket.connect();
 
-        console.log(`Connected to game ${gameId} as player ${playerId}`);
-      } catch (error) {
-        console.error("Game initialization error:", error);
-      }
-    });
+    //     console.log(`Connected to game ${gameId} as player ${playerId}`);
+    //   } catch (error) {
+    //     console.error("Game initialization error:", error);
+    //   }
+    // });
 
     if (this.type == "regular") {
       this.createGame("123", this);
@@ -156,7 +157,7 @@ export default class GameConstructor {
 
   createGame(initialState) {
     this.drawer = new Drawer(initialState, this);
-    this.ui.createSelector();
+    // this.ui.createSelector();
 
     // this.scores = new Map();
     // for (let i = 0; i < initialState.paddles.length; i++) {

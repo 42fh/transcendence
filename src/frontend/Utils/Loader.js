@@ -4,17 +4,38 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 export default class Loader {
   constructor(sources, game) {
     this.game = game;
-
     this.sources = sources;
-
-    // this.loader = new THREE.LoadingManager();
     this.textureLoader = new THREE.TextureLoader();
     this.gltfLoader = new GLTFLoader();
-
     this.items = {};
     this.length = this.sources.length;
+    this.loaded = 0;
 
+    // Create loading bar elements
+    this.createLoadingScreen();
     this.startLoad();
+  }
+
+  createLoadingScreen() {
+    this.loadingBar = document.createElement("div");
+    this.loadingBar.className = "loading-bar";
+
+    this.loadingBarFill = document.createElement("div");
+    this.loadingBarFill.className = "loading-bar-fill";
+
+    this.loadingText = document.createElement("div");
+    this.loadingText.className = "loading-text";
+    this.loadingText.textContent = "Loading... 0%";
+
+    this.loadingBar.appendChild(this.loadingBarFill);
+    this.loadingBar.appendChild(this.loadingText);
+    document.body.appendChild(this.loadingBar);
+  }
+
+  updateLoadingBar() {
+    const progress = (this.loaded / this.sources.length) * 100;
+    this.loadingBarFill.style.width = `${progress}%`;
+    this.loadingText.textContent = `Loading... ${Math.round(progress)}%`;
   }
 
   startLoad() {
@@ -32,7 +53,6 @@ export default class Loader {
   }
 
   resourseLoaded(source, file) {
-    // save the loaded file
     this.items[source.name] = file;
 
     if (source.isSkin) {
@@ -40,12 +60,15 @@ export default class Loader {
       this.game.skins.push(file);
     }
 
-    // check if all files are loaded
-    this.length--;
-    console.log("Files left: ", this.length);
-    if (this.length == 0) {
+    this.loaded++;
+    this.updateLoadingBar();
+
+    if (this.loaded === this.sources.length) {
       console.log("All files loaded");
-      this.game.setupResources();
+      setTimeout(() => {
+        document.body.removeChild(this.loadingBar);
+        this.game.setupResources();
+      }, 500);
     }
   }
 }

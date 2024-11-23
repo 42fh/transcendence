@@ -25,36 +25,56 @@
 
 <body>
     <canvas class="webgl"></canvas>
-    <div class="myform container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <form id="joinGameForm">
-                    <div class="form-group">
-                        <label for="gameId">Game ID</label>
-                        <input type="text" class="form-control" id="gameId" placeholder="Enter Game ID">
-                    </div>
-                    <div class="form-group">
-                        <label for="playerId">Player ID</label>
-                        <input type="text" class="form-control" id="playerId" placeholder="Enter Player ID">
-                    </div>
-                    <div class="form-group">
-                        <label for="playerId">Player count</label>
-                        <input type="text" class="form-control" id="playerCount" placeholder="Enter player count">
-                    </div>
-                    <div class="text-center">
-                        <div class="joinGame btn btn-primary" onclick="joinGame()">Join</div>
-                    </div>
-                </form>
+
+    <div class="game-menu-overlay">
+        <div class="game-menu-container">
+            <div class="card bg-dark text-light">
+                <div class="card-header">
+                    <h2 class="text-center mb-0">Game Setup</h2>
+                </div>
+                <div class="card-body">
+                    <form id="gameSetupForm">
+                        <div class="mb-4">
+                            <h5>Game Mode</h5>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="gameMode" id="modeSurvival" checked>
+                                    <label class="form-check-label" for="modeSurvival">
+                                        Regular
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="gameMode" id="modeStory">
+                                    <label class="form-check-label" for="modeStory">
+                                        Circular
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="gameMode" id="modePvP">
+                                    <label class="form-check-label" for="modePvP">
+                                        Crazy
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h5>Players</h5>
+                            <select class="form-select bg-dark text-light" id="playerCount">
+                                <option value="2">2 Players</option>
+                                <option value="3">3 Players</option>
+                                <option value="4">4 Players</option>
+                            </select>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg px-5">Start Game</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-    <div class="score1">0</div>
-    <div class="score2">0</div>
-
-    <div class="stopMusic">STOP MUSIC</div>
-    <div class="previousSong">PREVIOUS SONG</div>
-    <div class="nextSong">NEXT SONG</div>
-    <div class="startMusic">START MUSIC</div>
 </body>
 
 </html>
