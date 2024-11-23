@@ -130,6 +130,21 @@ button:hover {
   transition: all 0.3s ease;
 }
 
+.chat-user-card {
+  border: 2px solid var(--color-primary);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-sm);
+  margin: var(--spacing-xs) 0;
+  display: flex;
+  align-items: center;
+  background-color: var(--color-active);
+  transition: background-color var(--transition-duration) var(--transition-timing);
+}
+
+.chat-user-card:hover {
+  background-color: var(--color-hover);
+}
+
 .chat-input-retro:focus {
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
   background-color: rgba(255, 255, 255, 0.1);

@@ -67,11 +67,11 @@ export async function loadChatPage(addToHistory = true) {
           throw new Error("User List Item element not found in template");
         }
         conversationListItemElement.textContent = user.username;
-        const chatButton = conversationListItem.querySelector(".chat-button-small");
-        if (!chatButton) {
-          throw new Error("Chat button element not found in template");
+  
+        const avatarElement = conversationListItem.querySelector(".profile__avatar");
+        if (avatarElement) {
+          avatarElement.src = user.avatarUrl || "default-avatar.png"; // Set the avatar URL or a default image
         }
-        chatButton.id = `chat-button-${user.username}`;
   
         // Add event listener to open chat room
         conversationListItemElement.addEventListener("click", () => {

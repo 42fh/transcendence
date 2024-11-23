@@ -349,16 +349,19 @@
       <div class="user-initial"></div>
     </template>
     
-    <!-- User List Item Template -->
-    <template id="user-list-item-template">
-      <li>
-        <div class="chat-user-item-container">
-          <span class="chat-user-item"></span>
-          <button class="chat-button-small"></button>
-        </div>
-      </li>
-    </template>
     
+        <template id="user-list-item-template">
+          <li class="chat-user-card">
+            <div class="chat-user-item-container">
+              <div class="profile__avatar-container">
+                <img class="profile__avatar" src="" alt="User avatar" />
+              </div>
+              <span class="chat-user-item"></span>
+            </div>
+          </li>
+        </template>
+    
+
     <template id="chat-room-template">
       <div>
         <h3>Chat Room</h3>
@@ -369,28 +372,12 @@
     </template>
 
 
-<template id="user-list-item-template">
-  <li>
-    <div class="chat-user-item-container">
-      <span class="chat-user-item"></span>
-      <button class="chat-button-small"></button>
-    </div>
-  </li>
-</template>
-
 <template id="chat-message-template">
   <div class="chat-message">
     <strong class="chat-message-username"></strong>
     <span class="chat-message-text"></span>
   </div>
 </template>
-    <!-- Chat Message Template -->
-    <template id="chat-message-template">
-      <div class="chat-message">
-        <strong class="chat-message-username"></strong>
-        <span class="chat-message-text"></span>
-      </div>
-    </template>
 
     <!-- Bottom Navigation Template -->
     <template id="bottom-nav-template">
