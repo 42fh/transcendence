@@ -1,0 +1,237 @@
+/* Existing base styles */
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: #f5f5f5;
+}
+
+/* Layout containers */
+.game-container {
+    display: none;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.setup-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Game layout */
+.game-layout {
+    display: flex;
+    gap: 20px;
+}
+
+.game-main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.game-sidebar {
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Component styles */
+.panel {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.panel-icon {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+.panel-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Game canvas */
+.game-canvas-container {
+    aspect-ratio: 1;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#pongSvg {
+    width: 100%;
+    height: 100%;
+    background: #fafafa;
+    border-radius: 4px;
+}
+
+/* Logs and Monitoring */
+.event-log {
+    height: 200px;
+    overflow-y: auto;
+    font-family: monospace;
+    font-size: 14px;
+}
+
+.error-log {
+    flex-grow: 1;
+    min-height: 200px;
+    overflow-y: auto;
+}
+
+.log-details {
+    margin-left: 20px;
+    font-size: 12px;
+    color: #adb5bd;
+    margin-top: 2px;
+    white-space: pre-wrap;
+    font-family: monospace;
+}
+
+
+.log-entry {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.log-entry:last-child {
+    border-bottom: none;
+}
+
+.log-timestamp {
+    color: #666;
+    font-size: 0.9em;
+}
+
+/* Setup Form */
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+input, select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+button {
+    background: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background: #45a049;
+}
+
+.settings-toggle {
+    background: none;
+    border: 1px solid #ddd;
+    color: #333;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 10px 0;
+    padding: 8px;
+}
+
+/* Status messages */
+.status {
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.error {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #ffcdd2;
+}
+
+.success {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+}
+
+/* Score Display */
+.score-display {
+    margin-top: 0;
+}
+
+.score-item {
+    padding: 8px;
+    margin: 4px 0;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.score-item.current-player {
+    background: #e3f2fd;
+    font-weight: bold;
+}
+
+/* Game Info Display */
+.game-info {
+    font-size: 14px;
+}
+
+.game-info-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+}
+
+.game-info-label {
+    font-weight: 600;
+    color: #666;
+}
+
+/* Controls Info */
+.controls-info {
+    background: #e3f2fd;
+    padding: 15px;
+    border-radius: 4px;
+    margin-top: 20px;
+}
+
+.controls-info ul {
+    margin: 10px 0;
+    padding-left: 20px;
+}
