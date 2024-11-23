@@ -9,8 +9,8 @@ import Drawer from "../Utils/Drawer.js";
 import GameUI from "../Utils/GameUI.js";
 
 export default class GameConstructor {
-  constructor(type) {
-    this.type = type;
+  constructor() {
+    this.type = null;
 
     this.world = new World(document.querySelector(".webgl"), false, this);
 
@@ -117,52 +117,70 @@ export default class GameConstructor {
   }
 
   connectToWebsockets() {
-    // TODO: implement this after Florian does frontend
-    // document.querySelector(".joinGame").addEventListener("click", async () => {
-    //   const gameId = document.getElementById("gameId").value;
-    //   const playerId = this.generateRandomId();
-    //   const gameType = "circular";
-    //   const numPlayers = document.getElementById("playerCount").value;
-    //   console.log("numPlayers: ", numPlayers);
-    //   const numBalls = 1;
-    //   const debug = true;
+    document.querySelector(".joinGame").addEventListener("click", async () => {
+      const gameId = document.getElementById("gameId").value;
+      const playerId = this.generateRandomId();
+      const gameType = document.getElementById("gameType").value;
+      const numPlayers = document.getElementById("playerCount").value;
+      const numBalls = 1;
+      const debug = true;
 
-    //   try {
-    //     this.config = {
-    //       playerId,
-    //       type: gameType,
-    //       players: numPlayers,
-    //       balls: numBalls,
-    //       debug,
-    //     };
+      this.type = gameType;
 
-    //     this.websocket = new GameWebSocket(
-    //       gameId,
-    //       playerId,
-    //       this.handleMessage.bind(this),
-    //       this.config
-    //     );
-    //     this.websocket.connect();
+      const gameConfig = {
+        gameId,
+        playerId,
+        type: gameType == "circular" ? "circular" : "polygon",
+        pongType: gameType,
+        players: numPlayers,
+        balls: numBalls,
+        debug,
+        sides: gameType == "circular" ? numPlayers : numPlayers * 2,
+        shape: undefined,
+        scoreMode: "classic",
+      };
+      console.log("Connecting to game", gameConfig);
 
-    //     console.log(`Connected to game ${gameId} as player ${playerId}`);
-    //   } catch (error) {
-    //     console.error("Game initialization error:", error);
-    //   }
-    // });
+      const success = await this.directConnect(gameId, {
+        ...gameConfig,
+        onMessage: (data) => {
+          console.log(JSON.stringify(data));
+        },
+      });
 
-    if (this.type == "regular") {
-      this.createGame("123", this);
+      console.log("Connected to game", success);
+    });
+  }
+
+  async directConnect(gameId, config = {}) {
+    try {
+      this.gameId = gameId;
+      this.playerId =
+        config.playerId || "player-" + Math.random().toString(36).substr(2, 9);
+
+      this.websocket = new GameWebSocket(
+        gameId,
+        this.playerId,
+        this.handleMessage.bind(this),
+        config
+      );
+      this.websocket.connect();
+
+      return true;
+    } catch (error) {
+      console.error("Failed to connect directly:", error);
+      return false;
     }
   }
 
   createGame(initialState) {
     this.drawer = new Drawer(initialState, this);
-    // this.ui.createSelector();
+    this.ui.createSelector();
 
-    // this.scores = new Map();
-    // for (let i = 0; i < initialState.paddles.length; i++) {
-    //   this.scores.set(i, 0);
-    // }
+    this.scores = new Map();
+    for (let i = 0; i < initialState.paddles.length; i++) {
+      this.scores.set(i, 0);
+    }
     this.world.audio.addAmbientSound("static/music/sea.mp3");
   }
 
@@ -175,15 +193,22 @@ export default class GameConstructor {
       switch (message.type) {
         case "initial_state":
           console.log("initial_state: ", message);
-          this.playerId = message.player_index;
-          console.log("playerId: ", this.playerId);
+          this.playerIndex = message.player_index;
           this.createGame(message.game_state);
 
-          const playerAngle =
-            (this.playerId / message.game_state.paddles.length) * Math.PI * 2;
+          const div = document.getElementById("menu");
+          div.style.display = "none";
 
-          this.drawer.field.rotation.y = -playerAngle - Math.PI / 2;
-          this.drawer.field.position.y = -0.4;
+          if (this.type == "circular") {
+            const playerAngle =
+              (this.playerIndex / message.game_state.paddles.length) *
+              Math.PI *
+              2;
+
+            this.drawer.field.rotation.y = -playerAngle - Math.PI / 2;
+            this.drawer.field.position.y = -0.4;
+          }
+          this.world.zoomToPlayer();
           break;
 
         case "game_state":

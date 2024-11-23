@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import GameConstructor from "./Game/Game.js";
 
-const game = new GameConstructor("regular");
+const game = new GameConstructor();
 game.addAmbientLight(1, 0xffffff);
 game.addDirectionalLight(1, 0xffffff, new THREE.Vector3(3, 7.5, 3));
 game.addSky(1000, 10, 1.3, 0.001, 0.7, new THREE.Vector3(0.3, 0.001, -0.95));
@@ -77,7 +77,6 @@ game.loadResources(
     },
   ],
   function setupResources() {
-    // this.loader.items["floorColorTexture"].colorSpace = THREE.SRGBColorSpace;
     this.loader.items["42berlin"].colorSpace = THREE.SRGBColorSpace;
     this.loader.items["floorColorTexture"].repeat.set(4, 4);
     this.loader.items["floorNormalTexture"].repeat.set(4, 4);
@@ -92,8 +91,8 @@ game.loadResources(
     this.loader.items["floorARMTexture"].wrapS = THREE.RepeatWrapping;
     this.loader.items["floorARMTexture"].wrapT = THREE.RepeatWrapping;
 
-    const GAME_HEIGHT = 24;
-    const GAME_WIDTH = 14;
+    const GAME_HEIGHT = 1;
+    const GAME_WIDTH = 0.5;
 
     // Palm trees
     const palmTree = this.loader.items["palmTree"].scene;
@@ -184,39 +183,6 @@ game.loadResources(
     floor.position.x = 6;
     floor.position.z = 12;
 
-    // Paddles
-    const paddle1Geometry = new THREE.BoxGeometry(3, 2, 1);
-    paddle1Geometry.center();
-    const player1 = new THREE.Mesh(
-      paddle1Geometry,
-      new THREE.MeshStandardMaterial({
-        map: this.loader.items["42berlin"],
-      })
-    );
-    player1.position.set(GAME_WIDTH / 2, 0.83, GAME_HEIGHT);
-    player1.name = "player1";
-
-    const paddle2Geometry = new THREE.BoxGeometry(3, 2, 1);
-    paddle2Geometry.center();
-    const player2 = new THREE.Mesh(
-      paddle2Geometry,
-      new THREE.MeshStandardMaterial({
-        map: this.loader.items["42berlin"],
-      })
-    );
-    player2.name = "player2";
-    player2.position.set(GAME_WIDTH / 2, 0.83, GAME_HEIGHT - GAME_HEIGHT);
-
-    this.paddles.set(0, player1);
-    this.paddles.set(1, player2);
-
-    // Ball
-    const gameBall = new THREE.Mesh(
-      new THREE.SphereGeometry(0.5, 32, 32),
-      new THREE.MeshStandardMaterial({ color: 0xffffff })
-    );
-    gameBall.position.set(GAME_WIDTH / 2, 0.7, GAME_HEIGHT / 2);
-
     // Fins
     const sharkFin1 = this.loader.items["fin"].scene;
     sharkFin1.name = "sharkFin1";
@@ -231,32 +197,29 @@ game.loadResources(
     sharkFin3.name = "sharkFin3";
 
     this.addObjects([
-      palmTree,
-      palmTree2,
-      bush,
-      coconut,
-      coconut2,
-      umbrella,
-      ball,
-      chair,
-      chair2,
-      chair3,
-      log,
-      floor,
-      log2,
-      duck,
-      glasses,
+      // palmTree,
+      // palmTree2,
+      // bush,
+      // coconut,
+      // coconut2,
+      // umbrella,
+      // ball,
+      // chair,
+      // chair2,
+      // chair3,
+      // log,
+      // floor,
+      // log2,
+      // duck,
+      // glasses,
       sharkFin1,
       sharkFin2,
       sharkFin3,
-      this.paddles.get(0),
-      this.paddles.get(1),
-      gameBall,
     ]);
 
-    this.fin1 = this.scene.children[0].getObjectByName("sharkFin1");
-    this.fin2 = this.scene.children[0].getObjectByName("sharkFin2");
-    this.fin3 = this.scene.children[0].getObjectByName("sharkFin3");
+    // this.fin1 = this.scene.children[0].getObjectByName("sharkFin1");
+    // this.fin2 = this.scene.children[0].getObjectByName("sharkFin2");
+    // this.fin3 = this.scene.children[0].getObjectByName("sharkFin3");
   }
 );
 game.connectToWebsockets();

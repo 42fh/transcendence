@@ -26,7 +26,7 @@
 <body>
     <canvas class="webgl"></canvas>
 
-    <div class="game-menu-overlay">
+    <div class="game-menu-overlay" id="menu">
         <div class="game-menu-container">
             <div class="card bg-dark text-light">
                 <div class="card-header">
@@ -35,40 +35,22 @@
                 <div class="card-body">
                     <form id="gameSetupForm">
                         <div class="mb-4">
-                            <h5>Game Mode</h5>
-                            <div class="d-flex gap-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="gameMode" id="modeSurvival" checked>
-                                    <label class="form-check-label" for="modeSurvival">
-                                        Regular
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="gameMode" id="modeStory">
-                                    <label class="form-check-label" for="modeStory">
-                                        Circular
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="gameMode" id="modePvP">
-                                    <label class="form-check-label" for="modePvP">
-                                        Crazy
-                                    </label>
-                                </div>
-                            </div>
+                            <label for="gameType">Game Type</label>
+                            <input type="text" id="gameType">
                         </div>
 
                         <div class="mb-4">
-                            <h5>Players</h5>
-                            <select class="form-select bg-dark text-light" id="playerCount">
-                                <option value="2">2 Players</option>
-                                <option value="3">3 Players</option>
-                                <option value="4">4 Players</option>
-                            </select>
+                            <label for="gameId">Game ID</label>
+                            <input type="text" id="gameId">
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="playerCount">Player count</label>
+                        <input type="text"  id="playerCount">
                         </div>
 
                         <div class="text-center">
-                            <button type="submit" class="btn btn-primary btn-lg px-5">Start Game</button>
+                            <div class="joinGame btn btn-primary">Join</div>
                         </div>
                     </form>
                 </div>
@@ -78,3 +60,7 @@
 </body>
 
 </html>
+<!-- <div class="stopMusic">STOP MUSIC</div>
+<div class="previousSong">PREVIOUS SONG</div>
+<div class="nextSong">NEXT SONG</div>
+<div class="startMusic">START MUSIC</div> -->

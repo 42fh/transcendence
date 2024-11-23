@@ -1,5 +1,8 @@
 import * as THREE from "three";
 
+const GAME_HEIGHT = 1;
+const GAME_WIDTH = 0.5;
+
 const sectorColors = [
   0xff0000, // Red
   0x00ff00, // Green
@@ -24,15 +27,57 @@ export default class Drawer {
     if (this.game.type == "circular") {
       this.generatePaddlesCircular(this.config.paddles.length, this.radius);
       this.createGameFieldCircular(this.radius);
-      this.createBallsCircular(this.config.balls);
-      this.game.scene.add(this.field);
+    } else {
+      this.generatePaddles(this.config.paddles.length);
+      this.createGameField();
     }
+    this.game.scene.add(this.field);
+    this.createBalls(this.config.balls);
   }
 
-  generatePaddlesCircular(player_count, radius) {
+  createGameField() {
+    // 2 walls
+    const wallGeometry = new THREE.BoxGeometry(0.05, 0.5, GAME_HEIGHT * 2);
+    const wallMaterial = new THREE.MeshStandardMaterial({
+      color: 0x000000,
+    });
+    const wall1 = new THREE.Mesh(wallGeometry, wallMaterial);
+    wall1.position.set(-GAME_WIDTH, 0.25, 0);
+    wall1.receiveShadow = true;
+    this.field.add(wall1);
+
+    const wall2 = wall1.clone();
+    wall2.position.set(GAME_WIDTH, 0.25, 0);
+    this.field.add(wall2);
+  }
+
+  generatePaddles(player_count) {
     const playerGeometry = new THREE.BoxGeometry(
       this.config.dimensions.paddle_length,
-      this.config.dimensions.paddle_width,
+      this.config.dimensions.paddle_width * 2.5,
+      this.config.dimensions.paddle_length / 2
+    );
+    playerGeometry.center();
+    const player1 = new THREE.Mesh(
+      playerGeometry,
+      new THREE.MeshStandardMaterial({
+        map: this.game.loader.items["42berlin"],
+      })
+    );
+    player1.position.set(0, 0.15, -GAME_HEIGHT);
+
+    const player2 = player1.clone();
+    player2.position.set(0, 0.15, GAME_HEIGHT);
+
+    this.game.paddles.set(0, player1);
+    this.game.paddles.set(1, player2);
+    this.field.add(this.game.paddles.get(0));
+    this.field.add(this.game.paddles.get(1));
+  }
+  generatePaddlesCircular(player_count, radius) {
+    const playerGeometry = new THREE.BoxGeometry(
+      this.config.dimensions.paddle_length * 2,
+      this.config.dimensions.paddle_width * 2.5,
       this.config.dimensions.paddle_length / 2
     );
 
@@ -44,7 +89,7 @@ export default class Drawer {
       const angle = (i / player_count) * Math.PI * 2;
       const x = 0.9 * Math.cos(angle);
       const z = 0.9 * Math.sin(angle);
-      paddle.position.set(x, 0.11, z);
+      paddle.position.set(x, 0.15, z);
       paddle.lookAt(0, 0.11, 0);
       paddle.castShadow = true;
       paddle.receiveShadow = true;
@@ -97,10 +142,11 @@ export default class Drawer {
     this.field.add(field);
   }
 
-  createBallsCircular(ballsConfig) {
+  createBalls(ballsConfig) {
     const ballGeometry = new THREE.SphereGeometry(ballsConfig[0].size, 32, 32);
     const ballMaterial = new THREE.MeshMatcapMaterial({ color: 0xffffff });
 
+    this.game.balls = [];
     for (const ballConfig of ballsConfig) {
       const ball = new THREE.Mesh(ballGeometry, ballMaterial);
       ball.position.set(ballConfig.x, ballConfig.size, ballConfig.y);
@@ -112,6 +158,7 @@ export default class Drawer {
   }
 
   updateGame(gameState) {
+    console.log("Updating game state", gameState);
     if (this.game.ui.isActive) {
       this.game.ui.createScoreTable(-2, 1, 0);
     }
@@ -121,15 +168,14 @@ export default class Drawer {
       // update balls
       for (let i = 0; i < gameState.balls.length; i++) {
         this.game.balls[i].position.set(
-          gameState.balls[i].x,
+          gameState.balls[i].y,
           0.08,
-          gameState.balls[i].y
+          gameState.balls[i].x
         );
       }
-
       // update paddles
       const totalSides = gameState.paddles.length;
-      const radius = 0.9;
+      const radius = 0.96;
 
       const paddleArcLength = this.config.dimensions.paddle_length / radius;
       const sectorAngle = (2 * Math.PI) / totalSides;
@@ -140,7 +186,7 @@ export default class Drawer {
         if (!paddle) continue;
 
         const sideIndex = gameState.paddles[i].side_index;
-        const position = gameState.paddles[i].position;
+        const position = 1 - gameState.paddles[i].position;
 
         const clampedPosition = position * availableRange;
         const startAngle = (sideIndex - 0.5) * sectorAngle;
@@ -149,10 +195,26 @@ export default class Drawer {
         const x = radius * Math.cos(angle);
         const z = radius * Math.sin(angle);
 
-        paddle.position.set(x, 0.11, z);
+        paddle.position.set(x, 0.15, z);
 
         paddle.lookAt(0, -0.29, 0);
         paddle.rotateY(Math.PI);
+      }
+    } else {
+      for (let i = 0; i < gameState.balls.length; i++) {
+        this.game.balls[i].position.set(
+          gameState.balls[i].y,
+          0.08,
+          gameState.balls[i].x
+        );
+      }
+      // update paddles
+      for (let i = 0; i < gameState.paddles.length; i++) {
+        const paddle = this.game.paddles.get(i);
+        if (!paddle) continue;
+
+        console.log(gameState.paddles[i].position);
+        paddle.position.x = gameState.paddles[i].position - GAME_WIDTH;
       }
     }
   }

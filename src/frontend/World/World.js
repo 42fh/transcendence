@@ -71,8 +71,8 @@ export default class World {
     } else {
       this.camera.position.set(6, 7, 35);
       this.camera.lookAt(10, -4, 10);
-      this.cameraAnimation = this.animateCamera();
     }
+    this.cameraAnimation = this.animateCamera();
 
     if (this.gui.debug) {
       this.gui.gui
@@ -117,58 +117,18 @@ export default class World {
     this.controls.enableDamping = true; // makes controls smoother
 
     this.time = Date.now();
-    if (this.game.type == "circular") {
-      this.renderer.setAnimationLoop(() => {
-        this.circularGameLoop();
-      });
-    } else {
-      this.renderer.setAnimationLoop(() => {
-        this.regularGameLoop();
-      });
-    }
+    this.renderer.setAnimationLoop(() => {
+      this.regularGameLoop();
+    });
 
     // Event listeners
     this.addEventListeners();
   }
 
-  circularGameLoop() {
-    this.game.water.material.uniforms["time"].value += 1.0 / 240.0;
-
-    // move paddle
-    if (this.moveDown && this.game.websocket) {
-      this.game.drawer.movePaddle("left");
-    }
-    if (this.moveUp && this.game.websocket) {
-      this.game.drawer.movePaddle("right");
-    }
-
-    if (this.game.ui.isActive) {
-      this.raycaster.setFromCamera(this.mouse, this.camera);
-      const objectsToTest = [this.game.ui.leftArrow, this.game.ui.rightArrow];
-      const intersects = this.raycaster.intersectObjects(objectsToTest);
-
-      // set to red if intersected
-      if (intersects.length) {
-        intersects[0].object.material.color.set("red");
-        this.currentIntersect = intersects[0].object;
-      } else {
-        if (this.currentIntersect) {
-          this.currentIntersect.material.color.set(
-            objectsToTest[0].originalColor
-          );
-          this.currentIntersect = null;
-        }
-      }
-    }
-
-    this.controls.update();
-    this.renderer.render(this.game.scene, this.camera);
-  }
-
   regularGameLoop() {
     const deltaTime = this.time - Date.now();
 
-    this.game.water.material.uniforms["time"].value += 1.0 / 60.0;
+    this.game.water.material.uniforms["time"].value += 1.0 / 240.0;
 
     // shark animation
     const sharkAngle = 0.0003 * deltaTime;
@@ -221,40 +181,75 @@ export default class World {
   animateCamera() {
     this.cameraTarget = new THREE.Vector3(4, -4, 4);
     this.cameraRotation = { angle: 0 };
-    const radius = 30;
-    const height = 20;
-    const centerX = 12;
-    const centerZ = 12;
 
-    return gsap.to(this.cameraRotation, {
-      angle: Math.PI * 2,
-      duration: 30,
-      repeat: -1,
-      ease: "none",
-      onUpdate: () => {
-        const angle = this.cameraRotation.angle;
-        this.camera.position.x = Math.cos(angle) * radius + centerX;
-        this.camera.position.z = Math.sin(angle) * radius + centerZ;
-        this.camera.position.y = height;
-        this.camera.lookAt(this.cameraTarget);
-      },
-    });
+    if (this.game.type == "circular") {
+      const radius = 1;
+      const height = 2;
+      const centerX = 1;
+      const centerZ = 1;
+
+      return gsap.to(this.cameraRotation, {
+        angle: Math.PI * 2,
+        duration: 30,
+        repeat: -1,
+        ease: "none",
+        onUpdate: () => {
+          const angle = this.cameraRotation.angle;
+          this.camera.position.x = Math.cos(angle) * radius + centerX;
+          this.camera.position.z = Math.sin(angle) * radius + centerZ;
+          this.camera.position.y = height;
+          this.camera.lookAt(this.cameraTarget);
+        },
+      });
+    } else {
+      const radius = 30;
+      const height = 20;
+      const centerX = 12;
+      const centerZ = 12;
+
+      return gsap.to(this.cameraRotation, {
+        angle: Math.PI * 2,
+        duration: 30,
+        repeat: -1,
+        ease: "none",
+        onUpdate: () => {
+          const angle = this.cameraRotation.angle;
+          this.camera.position.x = Math.cos(angle) * radius + centerX;
+          this.camera.position.z = Math.sin(angle) * radius + centerZ;
+          this.camera.position.y = height;
+          this.camera.lookAt(this.cameraTarget);
+        },
+      });
+    }
   }
 
   zoomToPlayer() {
     this.cameraAnimation.pause();
     gsap.killTweensOf(this.cameraAnimation);
 
-    gsap.to(this.camera.position, {
-      duration: 2,
-      x: 6,
-      y: 7,
-      z: 35,
-      ease: "power2.inOut",
-      onUpdate: () => {
-        this.camera.lookAt(1, 1, 1);
-      },
-    });
+    if (this.game.type == "circular") {
+      gsap.to(this.camera.position, {
+        duration: 2,
+        x: 0.22,
+        y: 1,
+        z: 2,
+        ease: "power2.inOut",
+        onUpdate: () => {
+          this.camera.lookAt(1, 1, 1);
+        },
+      });
+    } else {
+      gsap.to(this.camera.position, {
+        duration: 2,
+        x: 6,
+        y: 7,
+        z: 35,
+        ease: "power2.inOut",
+        onUpdate: () => {
+          this.camera.lookAt(1, 1, 1);
+        },
+      });
+    }
   }
 
   addEventListeners() {
@@ -268,8 +263,6 @@ export default class World {
         case "ArrowRight":
         case "KeyD":
           this.moveDown = true;
-          this.zoomToPlayer();
-          this.game.ui.createSelector();
           break;
       }
     });

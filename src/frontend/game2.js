@@ -47,7 +47,6 @@ game.loadResources(
     },
   ],
   function setupResources() {
-    this.loader.items["floorColorTexture"].colorSpace = THREE.SRGBColorSpace;
     this.loader.items["floorColorTexture"].repeat.set(4, 4);
     this.loader.items["floorNormalTexture"].repeat.set(4, 4);
     this.loader.items["floorDisplacementTexture"].repeat.set(4, 4);
