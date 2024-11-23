@@ -21,12 +21,10 @@ class CustomUser(AbstractUser):
         null=True,
         blank=True,
         error_messages={
-            "unique": "A user with that email already exists.",  # Can be removed until unique=True
+            "unique": "A user with that email already exists.",
         },
     )
-
     email_verified = models.BooleanField(default=False)  # Verification status
-
     avatar = models.ImageField(upload_to="avatars/", null=True, blank=True)
     bio = models.TextField(null=True, blank=True)
     telephone_number = models.CharField(max_length=20, null=True, blank=True)
@@ -38,7 +36,6 @@ class CustomUser(AbstractUser):
 
     # Field to enable or disable 2FA for the user.
     two_factor_enabled = models.BooleanField(default=False)
-
     two_factor_method = models.CharField(
         max_length=20,
         choices=[
@@ -52,7 +49,6 @@ class CustomUser(AbstractUser):
         ],
         default="TOTP",
     )
-
     # Stores the user's secret key for generating 2FA codes,
     # typically used in TOTP (Time-based One-Time Password) algorithms.
     # This key is unique to the user and is used to create time-based codes.
@@ -81,21 +77,17 @@ class CustomUser(AbstractUser):
     # ensures that sensitive data is not stored directly in the database.
     refresh_token_hash = models.CharField(max_length=64, null=True, blank=True)
 
-    # Status fields
-
     STATUS_OFFLINE = "offline"
     STATUS_ONLINE = "online"
     STATUS_BUSY = "busy"
     STATUS_AWAY = "away"
 
     ONLINE_STATUS_CHOICES = [
-        (status, status.capitalize())
-        for status in [STATUS_OFFLINE, STATUS_ONLINE, STATUS_BUSY, STATUS_AWAY]
+        (status, status.capitalize()) for status in [STATUS_OFFLINE, STATUS_ONLINE, STATUS_BUSY, STATUS_AWAY]
     ]
+
     # TODO: Remove this, cause it's transitient. It's not something that needs to be stored in the database.
-    online_status = models.CharField(
-        max_length=10, choices=ONLINE_STATUS_CHOICES, default=STATUS_OFFLINE
-    )
+    online_status = models.CharField(max_length=10, choices=ONLINE_STATUS_CHOICES, default=STATUS_OFFLINE)
 
     default_status = models.CharField(
         max_length=10,
@@ -120,15 +112,10 @@ class CustomUser(AbstractUser):
             VISIBILITY_CUSTOM,
         ]
     ]
-    visibility_online_status = models.CharField(
-        max_length=10, choices=VISIBILITY_CHOICES, default=VISIBILITY_FRIENDS
-    )
+    visibility_online_status = models.CharField(max_length=10, choices=VISIBILITY_CHOICES, default=VISIBILITY_FRIENDS)
 
-    visibility_user_profile = models.CharField(
-        max_length=10, choices=VISIBILITY_CHOICES, default=VISIBILITY_EVERYONE
-    )
+    visibility_user_profile = models.CharField(max_length=10, choices=VISIBILITY_CHOICES, default=VISIBILITY_EVERYONE)
 
-    # This will not be implemented first: we can just stick with the friends list for the beginning.
     custom_visibility_group = models.ForeignKey(
         to="users.VisibilityGroup",
         on_delete=models.SET_NULL,
@@ -139,7 +126,7 @@ class CustomUser(AbstractUser):
 
     groups = models.ManyToManyField(
         "auth.Group",
-        related_name="members",  # Changed from classic `custom_user_set` to `members` for readability
+        related_name="members",
         blank=True,
         verbose_name="groups",
         help_text="The groups this user belongs to.",
@@ -147,19 +134,13 @@ class CustomUser(AbstractUser):
 
     user_permissions = models.ManyToManyField(
         "auth.Permission",
-        related_name="permitted_users",  # Changed from `custom_user_set` to `permitted_users` for readability
+        related_name="permitted_users",
         blank=True,
         verbose_name="user permissions",
         help_text="Specific permissions for this user.",
     )
 
-    # Friendship and Blocking
     friends = models.ManyToManyField("self", blank=True, symmetrical=True)
-    blocked_users = models.ManyToManyField(
-        "self", blank=True, symmetrical=False, related_name="blocked_by"
-    )
-
-    # Friend Request System
     friend_requests_sent = models.ManyToManyField(
         "self", blank=True, symmetrical=False, related_name="friend_requests_received"
     )
@@ -167,8 +148,6 @@ class CustomUser(AbstractUser):
     def send_friend_request(self, user):
         """Sends a friend request to another user."""
         if user != self and not self.is_friend_with(user):
-            if self.is_blocked_by(user) or user in self.blocked_users.all():
-                raise ValueError("Cannot send friend request to/from blocked user")
             self.friend_requests_sent.add(user)
 
     def accept_friend_request(self, user):
@@ -192,9 +171,6 @@ class CustomUser(AbstractUser):
     def is_friend_with(self, user) -> bool:
         return self.friends.filter(id=user.id).exists()
 
-    def is_blocked_by(self, user) -> bool:
-        return user.blocked_users.filter(id=self.id).exists()
-
     def __str__(self):
         return str(self.username)
 
@@ -206,40 +182,28 @@ class VisibilityGroup(models.Model):
 
     name = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)
-    created_by = models.ForeignKey(
-        "CustomUser", on_delete=models.CASCADE, related_name="created_visibility_groups"
-    )
-    members = models.ManyToManyField(
-        "CustomUser", related_name="visibility_group_memberships", blank=True
-    )
+    created_by = models.ForeignKey("CustomUser", on_delete=models.CASCADE, related_name="created_visibility_groups")
+    members = models.ManyToManyField("CustomUser", related_name="visibility_group_memberships", blank=True)
 
     def __str__(self):
         return self.name
 
 
 class EmailVerificationToken(models.Model):
-    user = models.ForeignKey(
-        CustomUser, on_delete=models.CASCADE, related_name="verification_tokens"
-    )
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="verification_tokens")
     token = models.UUIDField(default=uuid.uuid4, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField(
-        default=timezone.now() + timedelta(days=1)
-    )  # 1-day expiry
+    expires_at = models.DateTimeField(default=timezone.now() + timedelta(days=1))  # 1-day expiry
 
     def is_expired(self):
         return timezone.now() > self.expires_at
 
 
 class PasswordResetToken(models.Model):
-    user = models.ForeignKey(
-        CustomUser, on_delete=models.CASCADE, related_name="password_reset_tokens"
-    )
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="password_reset_tokens")
     token = models.UUIDField(default=uuid.uuid4, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField(
-        default=timezone.now() + timedelta(hours=1)
-    )  # 1-hour expiry
+    expires_at = models.DateTimeField(default=timezone.now() + timedelta(hours=1))  # 1-hour expiry
 
     def is_expired(self):
         return timezone.now() > self.expires_at

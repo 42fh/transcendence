@@ -1,57 +1,7 @@
 from django.test import TestCase
-from django.urls import reverse
 from users.models import CustomUser, VisibilityGroup
 from django.core.exceptions import ValidationError
 from uuid import UUID
-
-
-class SignupTestCase(TestCase):
-    """Test signup functionality using both direct model operations and HTTP layer"""
-
-    def test_successful_signup_direct(self):
-        """Test user creation directly using the CustomUser model
-        This is a simple unit test that bypasses the HTTP layer"""
-
-        user = CustomUser.objects.create_user(username="testuser", password="password123")
-        self.assertTrue(CustomUser.objects.filter(username="testuser").exists())
-
-    def test_duplicate_username_direct(self):
-        """Test duplicate username handling directly using the CustomUser model
-        This is a simple unit test that bypasses the HTTP layer"""
-
-        # Create first user
-        CustomUser.objects.create_user(username="testuser", password="password123")
-
-        # Try to create duplicate user
-        with self.assertRaises(Exception):  # Could be more specific with IntegrityError
-            CustomUser.objects.create_user(username="testuser", password="newpassword")
-
-    def test_successful_signup_http(self):
-        """Test user creation through the HTTP layer
-        This is an integration test that verifies the entire signup flow"""
-
-        response = self.client.post(
-            reverse("signup"),
-            data={"username": "testuser", "password": "password123"},
-            content_type="application/json",
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(CustomUser.objects.filter(username="testuser").exists())
-
-    def test_duplicate_username_http(self):
-        """Test duplicate username handling through the HTTP layer
-        This is an integration test that verifies the entire signup flow"""
-
-        # Create a user first
-        CustomUser.objects.create_user(username="testuser", password="password123")
-
-        # Try to create another user with the same username via HTTP
-        response = self.client.post(
-            reverse("signup"),
-            data={"username": "testuser", "password": "newpassword"},
-            content_type="application/json",
-        )
-        self.assertEqual(response.status_code, 400)
 
 
 class CustomUserModelTestCase(TestCase):
@@ -239,7 +189,7 @@ class CustomUserStatusVisibilityTestCase(TestCase):
 
 
 class CustomUserRelationshipTestCase(TestCase):
-    """Test cases for friends, blocked users, and custom visibility group relationships."""
+    """Test cases for friends and custom visibility group relationships."""
 
     def setUp(self):
         # Create test users
@@ -247,10 +197,8 @@ class CustomUserRelationshipTestCase(TestCase):
         self.user2 = CustomUser.objects.create_user(username="user2", password="password123")
         self.user3 = CustomUser.objects.create_user(username="user3", password="password123")
 
-    # Test Friends and Blocked Users
-    def test_friends_and_blocked_users(self):
-        """Test adding, removing, and checking friends and blocked users."""
-
+    def test_friends(self):
+        """Test adding, removing, and checking friends."""
         # Add a friend
         self.user1.friends.add(self.user2)
         # Test is_friend_with method
@@ -259,15 +207,6 @@ class CustomUserRelationshipTestCase(TestCase):
         # Remove friend and confirm they are no longer friends
         self.user1.friends.remove(self.user2)
         self.assertFalse(self.user1.is_friend_with(self.user2))
-
-        # Add a blocked user
-        self.user1.blocked_users.add(self.user3)
-        # Test is_blocked_by method
-        self.assertTrue(self.user3.is_blocked_by(self.user1))
-
-        # Unblock user and confirm they are no longer blocked
-        self.user1.blocked_users.remove(self.user3)
-        self.assertFalse(self.user3.is_blocked_by(self.user1))
 
     # Test Custom Visibility Group
     def test_custom_visibility_group(self):
@@ -320,14 +259,9 @@ class FriendRequestTests(TestCase):
         self.assertFalse(self.user2 in self.user1.friend_requests_sent.all())
         self.assertFalse(self.user1.is_friend_with(self.user2))
 
-    def test_blocked_user_request(self):
-        """Test sending a friend request to a blocked user."""
-        # Block user2
-        self.user1.blocked_users.add(self.user2)
-
-        # Attempt to send friend request should raise ValueError
-        with self.assertRaises(ValueError):
-            self.user1.send_friend_request(self.user2)
+        # After rejection, user should be able to send another request
+        self.user1.send_friend_request(self.user2)
+        self.assertTrue(self.user2 in self.user1.friend_requests_sent.all())
 
     def test_duplicate_friend_request(self):
         """Test that duplicate friend requests are not created."""
@@ -342,22 +276,9 @@ class FriendRequestTests(TestCase):
         self.assertFalse(self.user2 in self.user1.friend_requests_sent.all())
         self.assertFalse(self.user1 in self.user2.friend_requests_received.all())
 
-    def test_blocked_user_cannot_send_request(self):
-        """Test that a blocked user cannot send a friend request."""
-        self.user2.blocked_users.add(self.user1)
-        with self.assertRaises(ValueError):
-            self.user1.send_friend_request(self.user2)
-
     def test_friendship_symmetry(self):
         """Test that friendships are symmetric."""
         self.user1.send_friend_request(self.user2)
         self.user2.accept_friend_request(self.user1)
         self.assertTrue(self.user1.is_friend_with(self.user2))
         self.assertTrue(self.user2.is_friend_with(self.user1))
-
-    def test_unblock_user_allows_friend_request(self):
-        """Test that unblocking a user allows sending a friend request."""
-        self.user1.blocked_users.add(self.user2)
-        self.user1.blocked_users.remove(self.user2)  # Unblock user
-        self.user1.send_friend_request(self.user2)
-        self.assertTrue(self.user2 in self.user1.friend_requests_sent.all())

@@ -47,7 +47,6 @@ INSTALLED_APPS = [
     "game",
     "chat",
     "users",
-    "blockchain",
     "channels",
 ]
 
@@ -63,11 +62,24 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
 ]
 
-ROOT_URLCONF = "tr_django.urls"
+# Add these to your Django settings.py
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
+SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
+SESSION_COOKIE_SECURE = True  # for HTTPS
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
 
-AUTH_USER_MODEL = "auth.User"
+if ENVIRONMENT == "production":
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+else:
+    SESSION_COOKIE_SECURE = False
+    SESSION_COOKIE_HTTPONLY = False
+
+ROOT_URLCONF = "tr_django.urls"
 
 TEMPLATES = [
     {
