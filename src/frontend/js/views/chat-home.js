@@ -1,6 +1,7 @@
 import { loadChatRoom } from "./chat-room.js";
 import { fetchUserList, toggleBlockUser } from "../services/chatService.js";
-import { displayErrorMessageModalModal } from "../utils/modals.js";
+import { displayModalError } from "../components/modal.js";
+
 
 export async function loadChatPage(addToHistory = true) {
     try {
@@ -90,6 +91,6 @@ async function handleBlockUser(username, isCurrentlyBlocked, button) {
     button.textContent = isCurrentlyBlocked ? "Block" : "Unblock";
     await populateUserList();
   } catch (error) {
-    displayErrorMessageModalModal(`Failed to block/unblock user: ${error.message}`);
+    displayModalError(`Failed to block/unblock user: ${error.message}`);
   }
 }

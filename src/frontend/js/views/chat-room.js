@@ -1,5 +1,5 @@
 import { initializeChatWebSocket } from "../services/chatSocketService.js";
-import { displayErrorMessageModalModal } from "../utils/modals.js";
+import { displayModalError } from "../components/modal.js";
 
 export function loadChatRoom(chatPartner) {
   history.pushState(
@@ -74,7 +74,7 @@ function initializeChatRoom(chatPartner) {
   
       initializeChatWebSocket(wsUrl, chatPartner, handlers);
     } catch (error) {
-      displayErrorMessageModalModal(`Failed to connect to chat: ${error.message}`);
+      displayModalError(`Failed to connect to chat: ${error.message}`);
     }
   
     // Add event listeners

@@ -10,3 +10,19 @@ export const CONFIG = {
     TOURNAMENTS: "/api/game/tournaments",
   },
 };
+
+export const LOCAL_STORAGE_KEYS = {
+  USER_ID: "pongUserId",
+  USERNAME: "pongUsername",
+  THEME: "pongTheme",
+};
+
+export const ASSETS = {
+  IMAGES: {
+    DEFAULT_AVATAR: "../../static/images/default-avatar.jpeg",
+  },
+};
+
+export const NAVIGATION = {
+  VIEWS_WITH_TAB: ["home", "tournaments", "profile", "chat"],
+};

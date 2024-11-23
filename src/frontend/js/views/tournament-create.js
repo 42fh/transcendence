@@ -1,6 +1,6 @@
 import { showToast } from "../utils/toast.js";
 import { handleCreateTournamentSubmit } from "../services/tournamentService.js";
-
+import { updateActiveNavItem } from "../components/bottom-nav.js";
 function setDefaultDates() {
   // Get current date and time
   const now = new Date();
@@ -36,6 +36,7 @@ export function loadCreateTournamentPage(addToHistory = true) {
         },
         ""
       );
+      updateActiveNavItem("create-tournament");
     }
 
     const template = document.getElementById("create-tournament-template");
