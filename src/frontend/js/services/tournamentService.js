@@ -1,4 +1,4 @@
-import { CONFIG } from "../config/constants.js";
+import { CONFIG, LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { tournaments } from "../config/tournaments.js";
 import { showToast } from "../utils/toast.js";
 import { loadTournamentsPage } from "../views/tournaments.js";
@@ -37,7 +37,8 @@ export async function fetchTournaments(source = CONFIG.CURRENT_SOURCE) {
 
 // Enhance a single tournament with derived data
 export function enhanceTournament(tournament) {
-  const username = localStorage.getItem("username");
+  const username = localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME);
+
   console.log(`Checking enrollment for tournament ${tournament.name}:`); // New log
   console.log("Current username:", username); // New log
   console.log("Tournament participants:", tournament.participants); // New log
@@ -46,7 +47,7 @@ export function enhanceTournament(tournament) {
     ...tournament,
     isRegistrationOpen: checkRegistrationOpen(tournament.closingRegistrationDate),
     timeLeftToRegistration: calculateTimeLeft(tournament.closingRegistrationDate),
-    isUserEnrolled: checkUserEnrollment(tournament.participants, localStorage.getItem("username")),
+    isUserEnrolled: checkUserEnrollment(tournament.participants, localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME)),
   };
 }
 
@@ -76,7 +77,7 @@ function checkUserEnrollment(participants, username) {
 
 export async function handleTournamentAction(tournament, isEnrolled) {
   try {
-    const username = localStorage.getItem("username");
+    const username = localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME);
     if (!username) {
       throw new Error("User not logged in");
     }

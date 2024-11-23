@@ -4,7 +4,7 @@ import { formatDate } from "../utils/date.js";
 import { showToast } from "../utils/toast.js";
 import { loadTournamentDetailsPage } from "./tournament-detail.js";
 import { loadCreateTournamentPage } from "./tournament-create.js";
-
+import { updateActiveNavItem } from "../components/bottom-nav.js";
 function renderTournamentCard(tournament) {
   const template = document.getElementById("tournament-card-template");
   const card = document.importNode(template.content, true);
@@ -39,8 +39,9 @@ export async function loadTournamentsPage(addToHistory = true) {
         },
         ""
       );
+      updateActiveNavItem("tournaments");
     }
-
+    if (!addToHistory) updateActiveNavItem("tournaments");
     const template = document.getElementById("tournament-template");
     const mainContent = document.getElementById("main-content");
     mainContent.innerHTML = "";
@@ -62,11 +63,6 @@ export async function loadTournamentsPage(addToHistory = true) {
     const enrolledTournaments = enhancedTournaments.filter((t) => t.isUserEnrolled);
     console.log("Open tournaments:", openTournaments); // New log
     console.log("Enrolled tournaments:", enrolledTournaments); // New log
-
-    // Add event listener for create tournament button
-    createTournamentButton.addEventListener("click", () => {
-      loadCreateTournamentPage();
-    });
 
     // Fill open tournaments container
     const openContainer = document.getElementById("open-tournaments");
