@@ -75,17 +75,29 @@ When creating a new page:
 2. Create specific modifiers for layout:
 
 ```css
+<<<<<<< Updated upstream
    .page-container--your-page {
    /_ Your specific layout rules _/
    }
+=======
+.page-container--your-page {
+  /* Your specific layout rules  */
+}
+>>>>>>> Stashed changes
 ```
 
 3. Use BEM for child elements:
 
 ```css
+<<<<<<< Updated upstream
    .page-container\_\_your-element {
    /_ Element styles _/
    }
+=======
+.page-container__your-element {
+  /* Element styles  */
+}
+>>>>>>> Stashed changes
 ```
 
 ### 4. Responsive Design
