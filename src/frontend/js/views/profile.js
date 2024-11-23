@@ -3,6 +3,7 @@ import { showToast } from "../utils/toast.js";
 import { ASSETS, LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { updateActiveNavItem } from "../components/bottom-nav.js";
 import { loadHomePage } from "./home.js";
+import { loadProfileEditPage } from "./profileEdit.js";
 
 export async function loadProfilePage(addToHistory = true) {
   try {
@@ -64,6 +65,12 @@ export async function loadProfilePage(addToHistory = true) {
     mainContent.appendChild(content);
     const matchesContainer = mainContent.querySelector(".profile__matches-list");
     renderMatchHistory(userData.recent_matches, matchesContainer);
+
+    // Add edit button handler
+    const editButton = mainContent.querySelector(".profile__button--edit");
+    editButton.addEventListener("click", () => {
+      loadProfileEditPage();
+    });
 
     // Make sure bottom nav is visible
     const bottomNavContainer = document.getElementById("bottom-nav-container");

@@ -45,3 +45,25 @@ export function renderMatchHistory(matches, container) {
     container.appendChild(matchElement);
   });
 }
+
+export async function updateUserProfile(userId, userData) {
+  try {
+    const response = await fetch(`${CONFIG.API_BASE_URL}/api/users/${userId}/`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(userData),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const updatedUser = await response.json();
+    return updatedUser;
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    throw error;
+  }
+}
