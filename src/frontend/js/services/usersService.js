@@ -67,3 +67,25 @@ export async function updateUserProfile(userId, userData) {
     throw error;
   }
 }
+
+export async function uploadUserAvatar(userId, avatarFile) {
+  try {
+    const formData = new FormData();
+    formData.append("avatar", avatarFile);
+
+    const response = await fetch(`${CONFIG.API_BASE_URL}/api/users/${userId}/avatar/`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error("Upload failed");
+    }
+
+    const data = await response.json();
+    return data.avatar_url;
+  } catch (error) {
+    console.error("Error uploading avatar:", error);
+    throw error;
+  }
+}
