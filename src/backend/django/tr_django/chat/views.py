@@ -18,22 +18,32 @@ def rooms(request):
             return JsonResponse({"status": "error", "message": "User not authenticated"}, status=401)
 
         users = CustomUser.objects.exclude(username=request.user.username).values("username")
-        print(f"DEBUG: Retrieved {len(users)} users")
+        # print(f"DEBUG: Retrieved {len(users)} users")
 
-        # Get blocked users
         blocked_users = set(
             BlockedUser.objects.filter(user=request.user).values_list("blocked_user__username", flat=True)
         )
         print(f"DEBUG: Blocked users: {blocked_users}")
-
-        # Get users who blocked current user
         blocked_by_users = set(
             BlockedUser.objects.filter(blocked_user=request.user).values_list("user__username", flat=True)
         )
         print(f"DEBUG: Blocked by users: {blocked_by_users}")
+        all_blocked_users = blocked_users.union(blocked_by_users)
+
+        # Exclude blocked users from the users queryset
+        users = (
+            CustomUser.objects.exclude(username=request.user.username)
+            .exclude(username__in=all_blocked_users)
+            .values("username")
+        )
+        print(f"DEBUG: Retrieved {len(users)} users after filtering blocked users")
 
         recent_chats = (
-            ChatRoom.objects.filter(models.Q(user1=request.user) | models.Q(user2=request.user))
+            ChatRoom.objects.filter(
+                (models.Q(user1=request.user) | models.Q(user2=request.user))
+                & ~models.Q(user1__username__in=all_blocked_users)
+                & ~models.Q(user2__username__in=all_blocked_users)
+            )
             .select_related("user1", "user2")
             .order_by("-last_message_at")
         )
