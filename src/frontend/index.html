@@ -370,50 +370,70 @@
       </nav>
     </template>
 
+    <!-- Profile Template -->
     <template id="profile-template">
-      <div class="profile">
-        <div class="profile__header">
-          <div class="profile__avatar-container">
-            <img class="profile__avatar" src="" alt="Profile avatar" />
-          </div>
-          <div class="profile__info">
+      <div class="page-container page-container--profile">
+        <!-- <div class="profile__header"> -->
+        <div class="profile">
+          <div class="profile__section profile__section--header">
+            <!-- <div class="profile__avatar-container"> -->
+            <div class="profile__avatar-wrapper">
+              <img class="profile__avatar" src="" alt="Profile avatar" />
+            </div>
+            <!-- <div class="profile__info">
             <h2 class="profile__username"></h2>
             <p class="profile__name"></p>
             <p class="profile__email"></p>
             <p class="profile__phone"></p>
+          </div> -->
+            <div class="profile__info">
+              <h2 class="profile__username"></h2>
+              <p class="profile__info-item profile__info-item--name"></p>
+              <p class="profile__info-item profile__info-item--location"></p>
+              <p class="profile__info-item profile__info-item--email"></p>
+              <p class="profile__info-item profile__info-item--phone"></p>
+            </div>
           </div>
-        </div>
 
-        <div class="profile__stats">
-          <div class="profile__stats-item">
-            <span class="profile__stats-label">Wins</span>
-            <span class="profile__stats-value profile__stats-wins"></span>
-          </div>
-          <div class="profile__stats-item">
-            <span class="profile__stats-label">Losses</span>
-            <span class="profile__stats-value profile__stats-losses"></span>
-          </div>
-          <div class="profile__stats-item">
-            <span class="profile__stats-label">Win Ratio</span>
-            <span class="profile__stats-value profile__stats-ratio"></span>
-          </div>
-        </div>
-
-        <div class="profile__bio">
+          <!-- <div class="profile__bio">
           <h3 class="profile__bio-title">Bio</h3>
           <p class="profile__bio-text"></p>
-        </div>
-
-        <div class="profile__matches">
-          <h3 class="profile__matches-title">Recent Matches</h3>
-          <div class="profile__matches-list">
-            <!-- Matches will be inserted here dynamically -->
+        </div> -->
+          <div class="profile__section profile__section--bio">
+            <h3 class="profile__section-title">Bio</h3>
+            <p class="profile__bio-text"></p>
           </div>
-        </div>
 
-        <!-- Add Edit Profile Button -->
-        <div class="profile__actions">
-          <button class="profile__edit-button">Edit Profile</button>
+          <!-- <div class="profile__stats"> -->
+          <div class="profile__section profile__section--stats">
+            <div class="profile__stats-item">
+              <span class="profile__stats-label">Wins</span>
+              <span class="profile__stats-value profile__stats-wins"></span>
+            </div>
+            <div class="profile__stats-item">
+              <span class="profile__stats-label">Losses</span>
+              <span class="profile__stats-value profile__stats-losses"></span>
+            </div>
+            <div class="profile__stats-item">
+              <span class="profile__stats-label">Win Ratio</span>
+              <span class="profile__stats-value profile__stats-ratio"></span>
+            </div>
+          </div>
+
+          <!-- <div class="profile__matches"> -->
+          <div class="profile__section profile__section--matches">
+            <h3 class="profile__section-title">Recent Matches</h3>
+            <div class="profile__matches-list">
+              <!-- Matches will be inserted here dynamically -->
+            </div>
+          </div>
+
+          <!-- <div class="profile__actions"> -->
+          <div class="profile__section profile__section--actions">
+            <!-- <button class="profile__edit-button">Edit Profile</button> -->
+            <button class="profile__button profile__button--edit">Edit Profile</button>
+            <!-- TODO: Add password change button if we decide to implement it -->
+          </div>
         </div>
       </div>
     </template>
@@ -423,6 +443,57 @@
         <span class="profile__match-date"></span>
         <span class="profile__match-result"></span>
         <span class="profile__match-opponent"></span>
+      </div>
+    </template>
+
+    <!-- Profile Edit Template -->
+    <template id="profile-edit-template">
+      <div class="profile-edit">
+        <h2 class="profile-edit__title">Edit Profile</h2>
+
+        <form class="profile-edit__form">
+          <div class="profile-edit__avatar-section">
+            <div class="profile-edit__avatar-wrapper">
+              <img class="profile-edit__avatar" src="" alt="Profile avatar" />
+            </div>
+            <button type="button" class="profile-edit__avatar-button">Change Avatar</button>
+          </div>
+
+          <div class="profile-edit__field">
+            <label class="profile-edit__label" for="first-name">First Name</label>
+            <input type="text" id="first-name" class="profile-edit__input" name="first_name" />
+          </div>
+
+          <div class="profile-edit__field">
+            <label class="profile-edit__label" for="last-name">Last Name</label>
+            <input type="text" id="last-name" class="profile-edit__input" name="last_name" />
+          </div>
+
+          <div class="profile-edit__field">
+            <label class="profile-edit__label" for="location">Location</label>
+            <input type="text" id="location" class="profile-edit__input" name="location" />
+          </div>
+
+          <div class="profile-edit__field">
+            <label class="profile-edit__label" for="email">Email</label>
+            <input type="email" id="email" class="profile-edit__input" name="email" />
+          </div>
+
+          <div class="profile-edit__field">
+            <label class="profile-edit__label" for="phone">Phone</label>
+            <input type="tel" id="phone" class="profile-edit__input" name="telephone_number" />
+          </div>
+
+          <div class="profile-edit__field">
+            <label class="profile-edit__label" for="bio">Bio</label>
+            <textarea id="bio" class="profile-edit__textarea" name="bio" rows="4"></textarea>
+          </div>
+
+          <div class="profile-edit__actions">
+            <button type="button" class="profile-edit__button profile-edit__button--cancel">Cancel</button>
+            <button type="submit" class="profile-edit__button profile-edit__button--save">Save Changes</button>
+          </div>
+        </form>
       </div>
     </template>
 
