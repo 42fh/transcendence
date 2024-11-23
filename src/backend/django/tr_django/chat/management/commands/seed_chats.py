@@ -9,8 +9,7 @@ class Command(BaseCommand):
     help = "Seeds the database with conversations (chatrooms and messages) between the 'dev' user and other users"
 
     def handle(self, *args, **options):
-        self.stdout.write("Seeding conversations between 'dev' user and other users...")
-
+        self.stdout.write(self.style.SUCCESS("Seeding conversations between 'dev' user and other users..."))
         dev_user = CustomUser.objects.get(username="dev")
 
         other_players = Player.objects.exclude(user=dev_user)
@@ -42,4 +41,8 @@ class Command(BaseCommand):
 
         for message_data in messages:
             message = Message.objects.create(room=room, sender=message_data["sender"], content=message_data["content"])
-            self.stdout.write(f"Created message from {message.sender.username}: {message.content}")
+            # self.stdout.write(f"Created message from {message.sender.username}: {message.content}")
+
+        self.stdout.write(
+            self.style.SUCCESS(f"Seeded {len(messages)} messages between {user1.username} and {user2.username}")
+        )
