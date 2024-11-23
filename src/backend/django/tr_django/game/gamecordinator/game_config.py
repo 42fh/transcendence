@@ -1,11 +1,11 @@
 from enum import Enum
 
+
 class EnumGameMode(Enum):
     REGULAR = "regular"
-    CLASSIC = "classic" 
+    CLASSIC = "classic"
     CIRCULAR = "circular"
     IRREGULAR = "irregular"
-
 
 
 DEFAULT_PLAYER = {
@@ -14,80 +14,68 @@ DEFAULT_PLAYER = {
         "move_speed": float(0.05),
         "move_speed_boost": float(1.0),
         "reverse_controls": False,
-        "paddle_length": float(0.3)
+        "paddle_length": float(0.3),
     }
 }
 
 
+REGULAR_FIXED = {"type": "polygon", "mode": "regular", "shape": "regular"}
 
+IRREGULAR_FIXED = {"type": "polygon", "mode": "regular"}
 
-REGULAR_FIXED={
-        "type": "polygon",
-        "mode": "regular",
-        "shape": "regular"
-    }
- 
-IRREGULAR_FIXED={
-        "type": "polygon",
-        "mode": "regular"
-    }
+DEFAULT_POLYGON = {
+    "num_players": int(2),
+    "num_balls": int(1),
+    "min_players": int(2),
+    "initial_ball_speed": float(0.006),
+    "score": "first11",
+}
 
-DEFAULT_POLYGON={
-        "num_players": int(2),  
-        "num_balls": int(1),  
-        "min_players": int(2),
-        "initial_ball_speed": float(0.006),
-        "score": "first11"
-    }
-
-DEFAULT_REGULAR ={
-        "sides": int(5), 
-        "paddle_length": float(0.3),  
-        "paddle_width": float(0.06),
-        "ball_size": float(0.05), 
-    }    
+DEFAULT_REGULAR = {
+    "sides": int(5),
+    "paddle_length": float(0.3),
+    "paddle_width": float(0.06),
+    "ball_size": float(0.05),
+}
 
 
 DEFAULT_IRREGULAR = {
-        "sides": int(5), 
-        "paddle_length": float(0.3),  
-        "paddle_width": float(0.06),
-        "ball_size": float(0.05), 
-        "shape" : "irregular"
-    }
+    "sides": int(5),
+    "paddle_length": float(0.3),
+    "paddle_width": float(0.06),
+    "ball_size": float(0.05),
+    "shape": "irregular",
+}
 
 CIRCULAR_FIXED = {
-        "type": "circular",
-        "mode": "circular",
-    }
+    "type": "circular",
+    "mode": "circular",
+}
 
 DEFAULT_CIRCULAR = {
-        "num_players": int(3),  
-        "num_balls": int(1),  
-        "min_players": int(3),
-        "initial_ball_speed": float(0.006),
-        "sides": int(3), 
-        "paddle_length": float(0.3),  
-        "paddle_width": float(0.06),
-        "ball_size": float(0.05), 
-    }        
+    "num_players": int(3),
+    "num_balls": int(1),
+    "min_players": int(3),
+    "initial_ball_speed": float(0.006),
+    "sides": int(3),
+    "paddle_length": float(0.3),
+    "paddle_width": float(0.06),
+    "ball_size": float(0.05),
+}
 
 CLASSIC_FIXED = {
-        "type": "polygon",
-        "mode": "classic",
-        "pongType": "irregular",
-        "num_players": int(2),  
-        "num_balls": int(1),  
-        "min_players": int(2),
-        "sides": int(4), 
-        "paddle_length": float(0.1),  
-        "paddle_width": float(0.015),
-        "ball_size": float(0.015), 
-        "initial_ball_speed": float(0.003),
-        "scale": float(2.0)
-    }
+    "type": "polygon",
+    "mode": "classic",
+    "pongType": "irregular",
+    "num_players": int(2),
+    "num_balls": int(1),
+    "min_players": int(2),
+    "sides": int(4),
+    "paddle_length": float(0.1),
+    "paddle_width": float(0.015),
+    "ball_size": float(0.015),
+    "initial_ball_speed": float(0.003),
+    "scale": float(2.0),
+}
 
-DEFAULT_CLASSIC = {
-        "score": "first11"
-    }
-
+DEFAULT_CLASSIC = {"score": "first11"}

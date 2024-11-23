@@ -7,13 +7,12 @@ def setup_game(cls, settings: Dict[str, Any]) -> dict:
 
     try:
         settings.update(cls.calculate_player_side_indices(settings))
-        setting.update(cls.calculate_vertices(settings))                                                                                                  
+        settings.update(cls.calculate_vertices(settings))                                                                                                  
         settings.update(cls.calculate_sides_normals(settings))                                                                                                                                              
         settings.update(cls.calculate_inner(settings))
         return settings  
     except Exception as e:
-        print("FOOO") 
-
+        print("AGameManager setup error: ", e)   
 @classmethod
 def calculate_vertices(cls, settings: Dict[str, Any]) -> dict:
     raise NotImplementedError("Subclasses must implement this: calculate_vertices!")
@@ -23,7 +22,7 @@ def calculate_sides_normals(cls, settings: Dict[str, Any]) -> dict:
     raise NotImplementedError("Subclasses must implement this: sides_normals!")
 
 @classmethod
-def calculate_inner_boundaries(cls, settings: Dict[str, Any]) -> dict:
+def calculate_inner(cls, settings: Dict[str, Any]) -> dict:
     raise NotImplementedError("Subclasses must implement this: inner_boundaries!")
 
 

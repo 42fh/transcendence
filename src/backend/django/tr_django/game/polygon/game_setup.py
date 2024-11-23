@@ -6,16 +6,20 @@ import math
 @classmethod
 def calculate_inner(cls, settings: Dict[str, Any]) -> dict:
     """Calculate inner boundary using true perpendicular distances for any polygon"""
-    if not self.vertices or not self.side_normals:
+    
+    vertices = settings.get("vertices")  
+    num_sides =  settings.get("sides") 
+    side_normals = settings.get("normals")
+    if not vertices or not side_normals:
         raise ValueError("Vertices and normals must be calculated before inner boundary")
 
     # Calculate perpendicular distances from center to each side
     min_distance = float('inf')
     
-    for i in range(self.num_sides):
+    for i in range(num_sides):
         # Get start vertex of the side and its normal
-        vertex = self.vertices[i]
-        normal = self.side_normals[i]
+        vertex = vertices[i]
+        normal = side_normals[i]
         
         # Calculate perpendicular distance using the dot product
         # Distance = dot product of any point on the line (vertex) with the normal
@@ -24,10 +28,10 @@ def calculate_inner(cls, settings: Dict[str, Any]) -> dict:
         print(f"Side {i} perpendicular distance: {distance}")
         min_distance = min(min_distance, distance)
     
-    self.inner_boundary = float(min_distance)
-    print(f"Final inner boundary: {self.inner_boundary}")
+    inner_boundary = float(min_distance)
+    print(f"Final inner boundary: {inner_boundary}")
     
-    return self.inner_boundary
+    return {"inner_boundary": inner_boundary}
 
 
 
@@ -41,7 +45,7 @@ def calculate_sides_normals(cls, settings: Dict[str, Any]) -> dict:
     """
     vertices = settings.get("vertices")  
     num_sides =  settings.get("sides") 
-    player_sides =  settings.get("player_sides") 
+    player_sides =  settings.get("players_sides") 
 
     if not vertices:
         raise ValueError("Vertices must be calculated before normals")
