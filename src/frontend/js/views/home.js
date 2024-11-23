@@ -39,18 +39,11 @@ export function loadHomePage(addToHistory = true) {
     const homeContent = document.importNode(template.content, true);
     mainContent.appendChild(homeContent);
 
-
-
-    // Add event listener for the test-notification button (AFTER content is added to the DOM)
-    const testNotificationButton = document.getElementById("test-notification");
-    if (testNotificationButton) {
-      testNotificationButton.addEventListener("click", () => {
-        showNotification("This is a test notification!", "info");
-      });
+    // Make sure bottom nav is visible
+    const bottomNavContainer = document.getElementById("bottom-nav-container");
+    if (bottomNavContainer) {
+      bottomNavContainer.style.display = "block";
     }
-
-
-
 
     // Get the username from localStorage and set the greeting message
     const username = localStorage.getItem("username");
@@ -68,29 +61,7 @@ export function loadHomePage(addToHistory = true) {
     const playButton = document.getElementById("play");
     if (playButton) {
       playButton.addEventListener("click", function () {
-        const baseUrl = window.location.origin;
-        fetch(`${baseUrl}/play.html`)
-          .then((response) => response.text())
-          .then((html) => {
-            mainContent.innerHTML = html;
-            const script = document.createElement("script");
-            script.src = "play.js";
-            document.body.appendChild(script);
-          })
-          .catch((err) => console.warn("Failed to load play.html", err));
-      });
-    }
-
-    const threejsButton = document.getElementById("threejs");
-    if (threejsButton) {
-      threejsButton.addEventListener("click", function () {
-        const baseUrl = window.location.origin;
-        fetch(`${baseUrl}/threejs_11.html`)
-          .then((response) => response.text())
-          .then((html) => {
-            mainContent.innerHTML = html;
-          })
-          .catch((err) => console.warn("Failed to load threejs_11.html", err));
+        mainContent.innerHTML = "<h2>A beautiful game is built here</h2>";
       });
     }
 
