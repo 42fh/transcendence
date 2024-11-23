@@ -26,7 +26,7 @@ def calculate_inner_boundaries(self):
 
 
 # Movement Phase
-
+# no movement here
 # Boundary Phase
 
 
@@ -290,4 +290,5 @@ def handle_wall(self, ball, collision_candidate, new_state):
         },
     }
 
-    # Impact Processing Phase
+# Impact Processing Phase
+# no method    

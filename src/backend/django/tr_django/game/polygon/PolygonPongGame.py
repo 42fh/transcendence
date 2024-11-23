@@ -79,20 +79,3 @@ class PolygonPongGame(AGameManager):
 
         return ball
 
-    """
-    # Explicitly declare abstract methods with pass to ensure they're recognized
-    def calculate_inner_boundaries(self):
-        pass
-
-    def find_collision_candidate(self, ball, ball_index, new_state, distance_from_center):
-        pass
-
-    def handle_paddle(self, ball, collision_candidate, new_state):
-        pass
-
-    def handle_tunneling(self, ball, current_sector, new_state):
-        pass
-
-    def handle_wall(self, ball, collision_candidate, new_state):
-        pass
-    """

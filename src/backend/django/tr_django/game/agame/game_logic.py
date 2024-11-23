@@ -147,20 +147,6 @@ def handle_distance_check(self, ball_index, ball, distance, state, cycle_data):
         result["skip_ball"] = True
 
     return result
-    """
-    if distance > self.outer_boundary:
-        collision = self.handle_outside_boundary(ball, state)
-        if collision:
-            collision_result = self.collision_handler(collision, ball, state, cycle_data)
-            result.update(collision_result)
-            result["skip_ball"] = True
-            
-            
-    elif distance < self.get_inner_boundary(state, ball):
-        result["skip_ball"] = True
-        
-    return result
-    """
 
 
 def handle_outside_boundary(self, ball, state):
@@ -529,21 +515,6 @@ def collision_miss(self, collision, ball, new_state, cycle_data, ball_index):
         return {"game_over": True}
 
     return {"game_over": False}
-
-
-# extras
-
-
-# def update_scores(self, current_scores, failed_player_index):
-#    """
-#    Update scores when a player fails to hit the ball
-#    Args:
-#        current_scores (list): Current scores
-#        failed_player_index (int): Index of player who missed
-#    Returns:
-#        list: Updated scores
-#    """
-#    return [score + (1 if i != failed_player_index else 0) for i, score in enumerate(current_scores)]
 
 
 # needed in collison_miss and game_update()
