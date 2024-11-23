@@ -1,4 +1,3 @@
-from abc import ABC, abstractmethod
 import json
 import asyncio
 import msgpack
@@ -25,7 +24,7 @@ class GameStateError(Exception):
 @add_game_physics  # Physics engine
 @add_game_logic  # Core game rules
 @add_game_flow  # Game state management
-class AGameManager(ABC):
+class AGameManager:
 
     _game_types = {}
 
@@ -161,61 +160,41 @@ class AGameManager(ABC):
 
 
 
-#  this is comment out, because when i use decorators and insert the abstract functions into decorators, then the abstract function request is evaluated before the decorators are added to the class. i decided to use the decorators so that the class would not be so huge. therefore, commenting out the abstract functions was the quickest solution.
-#    # setup
+    async  def apply_game_settings(self):
+        """Method to be implemented by subclasses"""
+        raise NotImplementedError("Subclasses must implement this method")
+
+    def get_game_type(self):
+        """Method to be implemented by subclasses"""
+        raise NotImplementedError("Subclasses must implement this method")
+
+    # game_logic
+
+    # Setup
+    def calculate_inner_boundaries(self):
+        """Method to be implemented by subclasses"""
+        raise NotImplementedError("Subclasses must implement this method")
+
+    # Movement Phase
+    # no method in Baseclass
+
+    # Boundary Phase
+    # no method in Baseclass
+
+    # Collision Candidate Phase
+    def  find_collision_candidate(ball, ball_index, new_state, distance_from_center):
+        """Method to be implemented by subclasses"""
+        raise NotImplementedError("Subclasses must implement this method")
+    # Collision Verification Phase
+
+    def handle_tunneling(self, ball, sector_info, state):
+        """Method to be implemented by subclasses"""
+        raise NotImplementedError("Subclasses must implement this method")
+
+    def handle_paddle(self, ball, current_sector, state):
+        """Method to be implemented by subclasses"""
+        raise NotImplementedError("Subclasses must implement this method")
 #
-#    @abstractmethod
-#    async  def apply_game_settings(self): pass
-#
-#    @abstractmethod
-#    def get_game_type(self): pass
-#
-#    # game_logic
-#
-#    # Setup
-#    @abstractmethod
-#    def calculate_inner_boundaries(self):
-#        """
-#        Calculate inner boundaries based on vertices or radius.
-#        """
-#        pass
-#
-#    # Movement Phase
-#
-#    # Boundary Phase
-#
-#    # Collision Candidate Phase
-#    @abstractmethod
-#    def  find_collision_candidate(ball, ball_index, new_state, distance_from_center):
-#        """Determine which sector the ball is in"""
-#        pass
-#
-#    # Collision Verification Phase
-#
-#    @abstractmethod
-#    def handle_tunneling(self, ball, sector_info, state):
-#        """Handle case where ball may have passed through a side"""
-#        pass
-#
-#
-#    @abstractmethod
-#    def handle_paddle(self, ball, current_sector, state):
-#        """Handle collision between ball and paddle"""
-#        pass
-#
-#    @abstractmethod
-#    def handle_wall(self, ball, current_sector, state):
-#        """Handle collision between ball and wall"""
-#        pass
-#
-#    # Impact Processing Phase
-#
-#
-#    # ?
-#    #@abstractmethod
-#    #def determine_winner(self, state):
-#    #    """Determine the winner of the game"""
-#    #    pass
-#
-#
-#
+    def handle_wall(self, ball, current_sector, state):
+        """Method to be implemented by subclasses"""
+        raise NotImplementedError("Subclasses must implement this method")
