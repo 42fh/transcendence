@@ -222,7 +222,9 @@ class DeleteUserView(View):
 
 @method_decorator(csrf_exempt, name="dispatch")
 class UsersListView(View):
-    """View for listing users with basic information"""
+    """
+    GET: List users with basic information
+    """
 
     def get(self, request):
         search = request.GET.get("search", "")

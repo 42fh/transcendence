@@ -2,7 +2,7 @@ import { formatDate } from "../utils/date.js";
 import { showToast } from "../utils/toast.js";
 import { loadTimetablePage } from "./timetable.js";
 import { handleTournamentAction } from "../services/tournamentService.js";
-
+import { updateActiveNavItem } from "../components/bottom-nav.js";
 export function loadTournamentDetailsPage(tournament, addToHistory = true) {
   try {
     if (addToHistory) {
@@ -13,7 +13,9 @@ export function loadTournamentDetailsPage(tournament, addToHistory = true) {
         },
         ""
       );
+      updateActiveNavItem("tournament-detail");
     }
+    if (!addToHistory) updateActiveNavItem("tournament-detail");
 
     const template = document.getElementById("tournament-detail-template");
     if (!template) {

@@ -1,6 +1,8 @@
 import { handleLogout } from "./auth.js";
 import { displayLogoutError } from "../utils/errors.js";
 import { loadTournamentsPage } from "./tournaments.js";
+import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
+import { updateActiveNavItem } from "../components/bottom-nav.js";
 import { loadChatPage } from "./chats.js";
 
 export function loadHomePage(addToHistory = true) {
@@ -12,6 +14,7 @@ export function loadHomePage(addToHistory = true) {
         },
         ""
       );
+      if (!addToHistory) updateActiveNavItem("home");
     }
 
     // Hide the initial container
@@ -44,7 +47,8 @@ export function loadHomePage(addToHistory = true) {
     }
 
     // Get the username from localStorage and set the greeting message
-    const username = localStorage.getItem("username");
+    const username = localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME);
+
     const greetingElement = document.getElementById("greeting");
     if (greetingElement && username) {
       greetingElement.innerHTML = `Hello ${username}! 👋`;
