@@ -50,19 +50,60 @@ export const VALIDATION_RULES = {
   },
 };
 
-export function validateField(fieldName, value) {
-  if (!value) return null; // Allow empty fields
+export function setupFormValidation(form, validationRules) {
+  form.querySelectorAll("input, textarea").forEach((input) => {
+    // Add HTML5 validation attributes based on rules
+    const rule = VALIDATION_RULES[input.name];
+    if (rule) {
+      if (rule.required) input.required = true;
+      if (rule.pattern) input.pattern = rule.pattern.source;
+      if (rule.maxLength) input.maxLength = rule.maxLength;
+    }
 
-  const rule = VALIDATION_RULES[fieldName];
+    // Add blur event for custom validation
+    input.addEventListener("blur", () => validateInputField(input, validationRules));
+  });
+}
+
+export function validateFormField(input) {
+  if (!input.value) return null; // Allow empty fields unless required
+
+  // First check HTML5 validation
+  const isHTML5Valid = input.checkValidity();
+  if (!isHTML5Valid) {
+    return input.validationMessage;
+  }
+
+  // Then check custom validation rules
+  const rule = VALIDATION_RULES[input.name];
   if (!rule) return null;
 
-  if (rule.pattern && !rule.pattern.test(value)) {
+  if (rule.pattern && !rule.pattern.test(input.value)) {
     return rule.message;
   }
 
-  if (rule.maxLength && value.length > rule.maxLength) {
+  if (rule.maxLength && input.value.length > rule.maxLength) {
     return rule.message;
   }
 
   return null;
+}
+
+export function updateFieldError(input, error) {
+  const errorTemplate = document.getElementById("form-error-template");
+  const existingError = input.parentElement.querySelector(".form-error");
+
+  if (error) {
+    if (!existingError) {
+      const errorNode = document.importNode(errorTemplate.content, true);
+      errorNode.querySelector(".form-error__message").textContent = error;
+      input.parentElement.appendChild(errorNode);
+    } else {
+      existingError.querySelector(".form-error__message").textContent = error;
+    }
+    input.classList.add("profile-edit__input--error");
+  } else {
+    if (existingError) existingError.remove();
+    input.classList.remove("profile-edit__input--error");
+  }
 }

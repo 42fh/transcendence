@@ -2,8 +2,9 @@ import { fetchUserProfile, updateUserProfile } from "../services/usersService.js
 import { showToast } from "../utils/toast.js";
 import { LOCAL_STORAGE_KEYS, ASSETS } from "../config/constants.js";
 import { loadProfilePage } from "./profile.js";
+import { setupFormValidation, validateFormField } from "../utils/formValidation.js";
 
-export async function loadProfileEditPage(userData = null) {
+export async function loadProfileEditPage() {
   try {
     history.pushState(
       {
@@ -24,14 +25,7 @@ export async function loadProfileEditPage(userData = null) {
       throw new Error("User ID not found");
     }
 
-    // Fetch current user data
-    if (!userData) {
-      userData = await fetchUserProfile(userId);
-      if (!userId) throw new Error("User ID not found");
-      userData = await fetchUserProfile(userId);
-    }
-
-    // Clone and populate template
+    const userData = await fetchUserProfile(userId);
     const profileEditTemplate = document.getElementById("profile-edit-template");
     const content = document.importNode(profileEditTemplate.content, true);
 
@@ -97,46 +91,6 @@ function setupAvatarUpload(content, userId) {
   avatarButton.addEventListener("click", () => avatarInput.click());
 }
 
-function setupFormValidation(form) {
-  // Add event listeners to all input and textarea fields
-  // TODO: consider renaming with something more specific
-  form.querySelectorAll("input, textarea").forEach((input) => {
-    // const field = input.name;
-    input.addEventListener("blur", () => validateInputField(input));
-  });
-}
-
-function validateInputField(input) {
-  // Note that the input could be also a textarea, or any other input type we search for in the from in the setupFormValidation function
-  const field = input.name;
-  // validateField in formValidation.js
-  const error = validateField(field, input.value);
-  // updateFieldError in this file
-  updateFieldError(input, error);
-  return !error;
-}
-
-function updateFieldError(input, error) {
-  // TODO: transform this nasty thing in a template
-
-  const errorElement = input.parentElement.querySelector(".profile-edit__error");
-
-  if (error) {
-    if (!errorElement) {
-      const errorDiv = document.createElement("div");
-      errorDiv.className = "profile-edit__error";
-      errorDiv.textContent = error;
-      input.parentElement.appendChild(errorDiv);
-    } else {
-      errorElement.textContent = error;
-    }
-    input.classList.add("profile-edit__input--error");
-  } else {
-    if (errorElement) errorElement.remove();
-    input.classList.remove("profile-edit__input--error");
-  }
-}
-
 function setFormLoading(form, isLoading) {
   const submitButton = form.querySelector('button[type="submit"]');
   const inputs = form.querySelectorAll("input, textarea");
@@ -159,7 +113,7 @@ function setupFormSubmission(form, userId) {
     // Validate all fields
     let hasErrors = false;
     form.querySelectorAll("input, textarea").forEach((input) => {
-      if (!validateInputField(input)) {
+      if (!validateFormField(input)) {
         hasErrors = true;
       }
     });
