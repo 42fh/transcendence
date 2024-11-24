@@ -74,12 +74,12 @@ export default class Drawer {
     this.field.add(this.game.paddles.get(1));
   }
   generatePaddlesCircular(player_count, radius) {
+    const sectorSize = (2 * Math.PI) / player_count;
     const playerGeometry = new THREE.BoxGeometry(
-      this.config.dimensions.paddle_length,
+      this.config.dimensions.paddle_length * sectorSize,
       this.config.dimensions.paddle_width * 2.5,
       this.config.dimensions.paddle_width
     );
-    console.log(this.config.dimensions);
 
     for (let i = 0; i < player_count; i++) {
       const playerMaterial = new THREE.MeshMatcapMaterial({
@@ -87,7 +87,6 @@ export default class Drawer {
       });
       const paddle = new THREE.Mesh(playerGeometry, playerMaterial);
 
-      const sectorSize = (2 * Math.PI) / player_count;
       const angle = -(i * sectorSize - Math.PI / 2 + sectorSize / 2);
 
       const x = 0.96 * Math.cos(angle);
