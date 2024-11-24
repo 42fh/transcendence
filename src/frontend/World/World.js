@@ -182,45 +182,24 @@ export default class World {
     this.cameraTarget = new THREE.Vector3(4, -4, 4);
     this.cameraRotation = { angle: 0 };
 
-    if (this.game.type == "circular") {
-      const radius = 1;
-      const height = 2;
-      const centerX = 1;
-      const centerZ = 1;
+    const radius = 1;
+    const height = 2;
+    const centerX = 1;
+    const centerZ = 1;
 
-      return gsap.to(this.cameraRotation, {
-        angle: Math.PI * 2,
-        duration: 30,
-        repeat: -1,
-        ease: "none",
-        onUpdate: () => {
-          const angle = this.cameraRotation.angle;
-          this.camera.position.x = Math.cos(angle) * radius + centerX;
-          this.camera.position.z = Math.sin(angle) * radius + centerZ;
-          this.camera.position.y = height;
-          this.camera.lookAt(this.cameraTarget);
-        },
-      });
-    } else {
-      const radius = 30;
-      const height = 20;
-      const centerX = 12;
-      const centerZ = 12;
-
-      return gsap.to(this.cameraRotation, {
-        angle: Math.PI * 2,
-        duration: 30,
-        repeat: -1,
-        ease: "none",
-        onUpdate: () => {
-          const angle = this.cameraRotation.angle;
-          this.camera.position.x = Math.cos(angle) * radius + centerX;
-          this.camera.position.z = Math.sin(angle) * radius + centerZ;
-          this.camera.position.y = height;
-          this.camera.lookAt(this.cameraTarget);
-        },
-      });
-    }
+    return gsap.to(this.cameraRotation, {
+      angle: Math.PI * 2,
+      duration: 30,
+      repeat: -1,
+      ease: "none",
+      onUpdate: () => {
+        const angle = this.cameraRotation.angle;
+        this.camera.position.x = Math.cos(angle) * radius + centerX;
+        this.camera.position.z = Math.sin(angle) * radius + centerZ;
+        this.camera.position.y = height;
+        this.camera.lookAt(this.cameraTarget);
+      },
+    });
   }
 
   zoomToPlayer() {
@@ -230,9 +209,9 @@ export default class World {
     if (this.game.type == "circular") {
       gsap.to(this.camera.position, {
         duration: 2,
-        x: 0.22,
+        x: 0,
         y: 1,
-        z: 2,
+        z: 1.8,
         ease: "power2.inOut",
         onUpdate: () => {
           this.camera.lookAt(1, 1, 1);

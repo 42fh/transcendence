@@ -36,7 +36,6 @@ export default class Drawer {
   }
 
   createGameField() {
-    // 2 walls
     const wallGeometry = new THREE.BoxGeometry(0.05, 0.5, GAME_HEIGHT * 2);
     const wallMaterial = new THREE.MeshStandardMaterial({
       color: 0x000000,
@@ -51,7 +50,7 @@ export default class Drawer {
     this.field.add(wall2);
   }
 
-  generatePaddles(player_count) {
+  generatePaddles(_player_count) {
     const playerGeometry = new THREE.BoxGeometry(
       this.config.dimensions.paddle_length,
       this.config.dimensions.paddle_width * 2.5,
@@ -76,19 +75,23 @@ export default class Drawer {
   }
   generatePaddlesCircular(player_count, radius) {
     const playerGeometry = new THREE.BoxGeometry(
-      this.config.dimensions.paddle_length * 2,
+      this.config.dimensions.paddle_length,
       this.config.dimensions.paddle_width * 2.5,
-      this.config.dimensions.paddle_length / 2
+      this.config.dimensions.paddle_width
     );
+    console.log(this.config.dimensions);
 
     for (let i = 0; i < player_count; i++) {
       const playerMaterial = new THREE.MeshMatcapMaterial({
         map: this.game.skins[0],
       });
       const paddle = new THREE.Mesh(playerGeometry, playerMaterial);
-      const angle = (i / player_count) * Math.PI * 2;
-      const x = 0.9 * Math.cos(angle);
-      const z = 0.9 * Math.sin(angle);
+
+      const sectorSize = (2 * Math.PI) / player_count;
+      const angle = -(i * sectorSize - Math.PI / 2 + sectorSize / 2);
+
+      const x = 0.96 * Math.cos(angle);
+      const z = 0.96 * Math.sin(angle);
       paddle.position.set(x, 0.15, z);
       paddle.lookAt(0, 0.11, 0);
       paddle.castShadow = true;
@@ -97,15 +100,14 @@ export default class Drawer {
       this.game.paddles.set(i, paddle);
       this.field.add(this.game.paddles.get(i));
 
-      const sectorAngle = (2 * Math.PI) / player_count;
-      const startAngle = ((i + 1 - 0.5) / player_count) * Math.PI * 2;
+      const ringAngle = i * sectorSize - Math.PI / 2;
       const ringGeometry = new THREE.RingGeometry(
         radius - 0.05,
         radius,
         32,
         1,
-        -startAngle,
-        sectorAngle
+        ringAngle,
+        sectorSize
       );
       const ringMaterial = new THREE.MeshMatcapMaterial({
         color: sectorColors[i],
@@ -188,17 +190,16 @@ export default class Drawer {
         const sideIndex = gameState.paddles[i].side_index;
         const position = 1 - gameState.paddles[i].position;
 
+        const sectorSize = (2 * Math.PI) / totalSides;
         const clampedPosition = position * availableRange;
-        const startAngle = (sideIndex - 0.5) * sectorAngle;
+        const startAngle = -(sideIndex * sectorSize - Math.PI / 2 + sectorSize);
         const angle = startAngle + paddleArcLength / 2 + clampedPosition;
 
         const x = radius * Math.cos(angle);
         const z = radius * Math.sin(angle);
 
         paddle.position.set(x, 0.15, z);
-
-        paddle.lookAt(0, -0.29, 0);
-        paddle.rotateY(Math.PI);
+        paddle.lookAt(0, -0.28, 0);
       }
     } else {
       for (let i = 0; i < gameState.balls.length; i++) {
@@ -214,7 +215,7 @@ export default class Drawer {
         if (!paddle) continue;
 
         console.log(gameState.paddles[i].position);
-        paddle.position.x = gameState.paddles[i].position - GAME_WIDTH;
+        paddle.position.x = (gameState.paddles[i].position - GAME_WIDTH) * -1;
       }
     }
   }

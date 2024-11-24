@@ -64,7 +64,8 @@ export default class GameUI {
       } else {
         this.currentSkin--;
       }
-      this.game.paddles.get(0).material.map = this.game.skins[this.currentSkin];
+      this.game.paddles.get(this.game.playerIndex).material.map =
+        this.game.skins[this.currentSkin];
 
       this.updateMainText(this.game.skins[this.currentSkin].name);
     };
@@ -86,7 +87,8 @@ export default class GameUI {
       } else {
         this.currentSkin++;
       }
-      this.game.paddles.get(0).material.map = this.game.skins[this.currentSkin];
+      this.game.paddles.get(this.game.playerIndex).material.map =
+        this.game.skins[this.currentSkin];
 
       this.updateMainText(this.game.skins[this.currentSkin].name);
     };

@@ -204,7 +204,6 @@ export default class GameConstructor {
               (this.playerIndex / message.game_state.paddles.length) *
               Math.PI *
               2;
-
             this.drawer.field.rotation.y = -playerAngle - Math.PI / 2;
             this.drawer.field.position.y = -0.4;
           }
@@ -222,6 +221,8 @@ export default class GameConstructor {
         case "error":
           console.error("Error:", message);
           break;
+        default:
+          console.log("Unknown message type:", message);
       }
     } catch (error) {
       console.error("Error handling message:", error);
