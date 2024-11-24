@@ -1,4 +1,8 @@
 export const VALIDATION_RULES = {
+  username: {
+    pattern: /^[a-zA-Z0-9_-]{3,20}$/,
+    message: "Username must be 3-20 characters and can contain letters, numbers, underscore, and hyphen",
+  },
   email: {
     // Regex breakdown for email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     // ^ - start of string
@@ -56,12 +60,28 @@ export function setupFormValidation(form, validationRules) {
     const rule = VALIDATION_RULES[input.name];
     if (rule) {
       if (rule.required) input.required = true;
+      if (rule.pattern) {
+        // Convert RegExp to string pattern by removing the leading/trailing slashes
+        input.pattern = rule.pattern.toString().slice(1, -1);
+      }
       if (rule.pattern) input.pattern = rule.pattern.source;
       if (rule.maxLength) input.maxLength = rule.maxLength;
+      // Add title attribute for validation message
+      if (rule.message) {
+        input.title = rule.message;
+      }
     }
 
     // Add blur event for custom validation
-    input.addEventListener("blur", () => validateInputField(input, validationRules));
+    input.addEventListener("blur", () => {
+      const error = validateFormField(input);
+      updateFieldError(input, error);
+    });
+
+    // Add input event to clear errors while typing
+    input.addEventListener("input", () => {
+      updateFieldError(input, null);
+    });
   });
 }
 

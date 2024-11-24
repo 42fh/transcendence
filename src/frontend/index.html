@@ -446,6 +446,14 @@
       </div>
     </template>
 
+    <!-- Error Message Template -->
+    <template id="form-error-template">
+      <div class="form-error">
+        <span class="form-error__icon material-symbols-outlined">error</span>
+        <span class="form-error__message"></span>
+      </div>
+    </template>
+
     <!-- Profile Edit Template -->
     <template id="profile-edit-template">
       <div class="profile-edit">
@@ -456,42 +464,83 @@
             <div class="profile-edit__avatar-wrapper">
               <img class="profile-edit__avatar" src="" alt="Profile avatar" />
             </div>
-            <button type="button" class="profile-edit__avatar-button">Change Avatar</button>
+            <button type="button" class="profile-edit__avatar-button">
+              <span class="material-symbols-outlined">photo_camera</span>
+              Change Avatar
+            </button>
           </div>
 
           <div class="profile-edit__field">
+            <label class="profile-edit__label" for="username">Username</label>
+            <input
+              type="text"
+              id="username"
+              class="profile-edit__input"
+              name="username"
+              minlength="3"
+              maxlength="20"
+              pattern="[a-zA-Z0-9_-]{3,20}"
+              title="Username can only contain letters, numbers, underscores and hyphens"
+              required
+            />
+          </div>
+          <div class="profile-edit__field">
             <label class="profile-edit__label" for="first-name">First Name</label>
-            <input type="text" id="first-name" class="profile-edit__input" name="first_name" />
+            <input
+              type="text"
+              id="first-name"
+              class="profile-edit__input"
+              name="first_name"
+              pattern="[a-zA-Z\s\-]{2,}"
+              title="Name should contain at least 2 letters"
+            />
           </div>
 
           <div class="profile-edit__field">
             <label class="profile-edit__label" for="last-name">Last Name</label>
-            <input type="text" id="last-name" class="profile-edit__input" name="last_name" />
-          </div>
-
-          <div class="profile-edit__field">
-            <label class="profile-edit__label" for="location">Location</label>
-            <input type="text" id="location" class="profile-edit__input" name="location" />
+            <input
+              type="text"
+              id="last-name"
+              class="profile-edit__input"
+              name="last_name"
+              pattern="[a-zA-Z\s\-]{2,}"
+              title="Name should contain at least 2 letters"
+            />
           </div>
 
           <div class="profile-edit__field">
             <label class="profile-edit__label" for="email">Email</label>
-            <input type="email" id="email" class="profile-edit__input" name="email" />
+            <input
+              type="email"
+              id="email"
+              class="profile-edit__input"
+              name="email"
+              pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
+              title="Please enter a valid email address"
+              required
+            />
           </div>
 
           <div class="profile-edit__field">
             <label class="profile-edit__label" for="phone">Phone</label>
-            <input type="tel" id="phone" class="profile-edit__input" name="telephone_number" />
+            <input
+              type="tel"
+              id="phone"
+              class="profile-edit__input"
+              name="telephone_number"
+              pattern="\+?[\d\s-]{10,}"
+              title="Please enter a valid phone number (minimum 10 digits)"
+            />
           </div>
 
           <div class="profile-edit__field">
             <label class="profile-edit__label" for="bio">Bio</label>
-            <textarea id="bio" class="profile-edit__textarea" name="bio" rows="4"></textarea>
+            <textarea id="bio" class="profile-edit__textarea" name="bio" rows="4" maxlength="500"></textarea>
           </div>
 
-          <div class="profile-edit__actions">
+          <div class="profile-edit__buttons">
             <button type="button" class="profile-edit__button profile-edit__button--cancel">Cancel</button>
-            <button type="submit" class="profile-edit__button profile-edit__button--save">Save Changes</button>
+            <button type="submit" class="profile-edit__button profile-edit__button--save">Save</button>
           </div>
         </form>
       </div>

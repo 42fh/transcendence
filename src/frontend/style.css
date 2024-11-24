@@ -1492,20 +1492,48 @@ button:hover {
 
 .profile-edit__buttons {
   display: flex;
-  gap: var(--spacing-sm);
-  justify-content: center;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  width: 100%;
   margin-top: var(--spacing-lg);
 }
 
-.profile-edit__button {
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-small);
-  padding: var(--spacing-sm) var(--spacing-md);
-  background: transparent;
-  border: var(--border-width) solid var(--color-border);
-  color: var(--color-text-primary);
+.profile-edit__form .profile-edit__button {
+  width: 100%;
+  font-family: "Press Start 2P", cursive;
+  font-size: 1rem;
+  padding: var(--spacing-md);
+  border: 2px solid var(--color-border);
+  background: none;
+  color: white;
   cursor: pointer;
-  transition: all var(--transition-duration) var(--transition-timing);
+  transition: all 0.3s;
+}
+
+.profile-edit__form .profile-edit__button--cancel {
+  background: none;
+  border: 2px solid var(--color-border);
+}
+
+.profile-edit__form .profile-edit__button--cancel:hover {
+  background-color: white;
+  color: black;
+}
+
+.profile-edit__form .profile-edit__button--save {
+  background: none;
+  border: 2px solid var(--color-border);
+}
+
+.profile-edit__form .profile-edit__button--save:hover {
+  background-color: white;
+  color: black;
+}
+
+/* Add disabled state styles */
+.profile-edit__button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Mobile Styles */
@@ -1593,4 +1621,51 @@ button:hover {
   background-color: white;
   color: black;
   transform: scale(1.05);
+}
+
+.form-error {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  color: var(--color-error);
+  font-size: var(--font-size-small);
+  margin-top: var(--spacing-xs);
+  font-family: var(--font-family-primary);
+}
+
+.form-error__icon {
+  font-size: 1.2em;
+}
+
+.profile-edit__form .profile-edit__button {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-small);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 2px solid var(--color-border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all var(--transition-duration) var(--transition-timing);
+  width: 100%;
+  max-width: 200px;
+  background: none;
+}
+
+.profile-edit__form .profile-edit__button--cancel {
+  background-color: transparent;
+  color: var(--color-text-primary);
+}
+
+.profile-edit__form .profile-edit__button--cancel:hover {
+  background-color: var(--color-background-secondary);
+}
+
+.profile-edit__form .profile-edit__button--save {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.profile-edit__form .profile-edit__button--save:hover {
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
 }
