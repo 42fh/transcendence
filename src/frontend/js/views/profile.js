@@ -69,7 +69,7 @@ export async function loadProfilePage(addToHistory = true) {
     // Add edit button handler
     const editButton = mainContent.querySelector(".profile__button--edit");
     editButton.addEventListener("click", () => {
-      loadProfileEditPage();
+      loadProfileEditPage(userData);
     });
 
     // Make sure bottom nav is visible

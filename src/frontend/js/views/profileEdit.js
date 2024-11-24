@@ -3,7 +3,7 @@ import { showToast } from "../utils/toast.js";
 import { LOCAL_STORAGE_KEYS, ASSETS } from "../config/constants.js";
 import { loadProfilePage } from "./profile.js";
 
-export async function loadProfileEditPage() {
+export async function loadProfileEditPage(userData = null) {
   try {
     history.pushState(
       {
@@ -25,7 +25,11 @@ export async function loadProfileEditPage() {
     }
 
     // Fetch current user data
-    const userData = await fetchUserProfile(userId);
+    if (!userData) {
+      userData = await fetchUserProfile(userId);
+      if (!userId) throw new Error("User ID not found");
+      userData = await fetchUserProfile(userId);
+    }
 
     // Clone and populate template
     const profileEditTemplate = document.getElementById("profile-edit-template");
