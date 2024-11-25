@@ -75,17 +75,17 @@ When creating a new page:
 2. Create specific modifiers for layout:
 
 ```css
-   .page-container--your-page {
-   /_ Your specific layout rules _/
-   }
+.page-container--your-page {
+  /* Your specific layout rules  */
+}
 ```
 
 3. Use BEM for child elements:
 
 ```css
-   .page-container\_\_your-element {
-   /_ Element styles _/
-   }
+.page-container__your-element {
+  /* Element styles  */
+}
 ```
 
 ### 4. Responsive Design
