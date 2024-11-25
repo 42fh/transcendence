@@ -4,7 +4,6 @@ import { loadTournamentsPage } from "./tournaments.js";
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { updateActiveNavItem } from "../components/bottom-nav.js";
 import { loadChatPage } from "./chat-home.js";
-import { showNotification } from "../utils/notification.js";
 
 export function loadHomePage(addToHistory = true) {
   try {
@@ -15,18 +14,7 @@ export function loadHomePage(addToHistory = true) {
         },
         ""
       );
-<<<<<<< HEAD
-      updateActiveNavItem("home");
-    }
-    
-
-    // Hide the initial container
-    const container = document.getElementById("container");
-    if (container) {
-      container.style.display = "none";
-=======
       if (!addToHistory) updateActiveNavItem("home");
->>>>>>> main
     }
 
     // Show main-content and load the home template
