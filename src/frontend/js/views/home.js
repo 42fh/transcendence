@@ -4,6 +4,7 @@ import { loadTournamentsPage } from "./tournaments.js";
 import { loadChatPage } from "./chats.js";
 import { gameHome } from "./game.js";
 
+
 export function loadHomePage(addToHistory = true) {
   try {
     if (addToHistory) {
