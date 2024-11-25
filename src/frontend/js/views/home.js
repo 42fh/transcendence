@@ -2,6 +2,7 @@ import { handleLogout } from "./auth.js";
 import { displayLogoutError } from "../utils/errors.js";
 import { loadTournamentsPage } from "./tournaments.js";
 import { loadChatPage } from "./chats.js";
+import { gameHome } from "./game.js";
 
 export function loadHomePage(addToHistory = true) {
   try {
@@ -58,10 +59,9 @@ export function loadHomePage(addToHistory = true) {
 
     const playButton = document.getElementById("play");
     if (playButton) {
-      playButton.addEventListener("click", function () {
-        mainContent.innerHTML = "<h2>A beautiful game is built here</h2>";
-      });
+      playButton.addEventListener("click", gameHome);
     }
+    
 
     const chatsButton = document.getElementById("chats");
     if (chatsButton) {
