@@ -76,43 +76,24 @@
 
     <!-- Home Page Template -->
     <template id="home-template">
-      <div id="container" class="home-container">
-        <h1>PONG</h1>
-        <div id="greeting" style="text-align: center; margin-top: 20px; font-size: 20px"></div>
-        <div id="notification-container"></div>
-    <button id="test-notification">Send Test Notification</button>
-        <!-- Logout Button -->
-        <div style="text-align: center; margin-top: 10px">
-          <button id="logout-button" style="font-size: 16px">Logout</button>
-        </div>
+      <div class="page-container page-container--home">
+        <h1 class="page-container__title page-container__title--home">PONG</h1>
 
-        <div class="button-container-home">
-          <div>
-            <div class="button-wrapper">
-              <button id="play">PLAY</button>
-            </div>
-            <div class="button-wrapper">
-              <button id="tournaments">TOURNAMENTS</button>
-            </div>
+        <div class="home__content">
+          <button id="home__button-play" class="home__button button--neon">PLAY</button>
+          <div class="home__net">
+            <div class="home__net-segment home__net-segment--black"></div>
+            <div class="home__net-segment home__net-segment--white"></div>
+            <div class="home__net-segment home__net-segment--black"></div>
+            <div class="home__net-segment home__net-segment--white"></div>
+            <div class="home__net-segment home__net-segment--black"></div>
+            <div class="home__net-segment home__net-segment--white"></div>
+            <div class="home__net-segment home__net-segment--black"></div>
+            <div class="home__net-segment home__net-segment--white"></div>
+            <div class="home__net-segment home__net-segment--black"></div>
+            <div class="home__net-segment home__net-segment--white"></div>
           </div>
-          <div class="net">
-            <div class="net-segment black"></div>
-            <div class="net-segment white"></div>
-            <div class="net-segment black"></div>
-            <div class="net-segment white"></div>
-            <div class="net-segment black"></div>
-            <div class="net-segment white"></div>
-            <div class="net-segment black"></div>
-            <div class="net-segment white"></div>
-            <div class="net-segment black"></div>
-            <div class="net-segment white"></div>
-          </div>
-          <div class="button-wrapper">
-            <button id="chats">CHATS</button>
-          </div>
-
-
-
+          <button id="home__button-cta" class="home__button button--gradient">CTA</button>
         </div>
       </div>
     </template>

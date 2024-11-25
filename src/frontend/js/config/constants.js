@@ -25,4 +25,5 @@ export const ASSETS = {
 
 export const NAVIGATION = {
   VIEWS_WITH_TAB: ["home", "tournaments", "profile", "chat"],
+  DEFAULT_VIEW: "home",
 };

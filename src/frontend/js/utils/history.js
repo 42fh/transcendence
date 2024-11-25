@@ -44,7 +44,7 @@ export function initializeHistory() {
       // TODO: Check cache before making API calls in each case
       // If cached data exists and is not stale, use it instead of making new API calls
 
-      const state = event.state;
+      const state = event.state || { view: "home" };
       if (state && state.view) {
         // Update active nav state
         updateActiveNavItem(state.view);
@@ -87,7 +87,8 @@ export function initializeHistory() {
             // Consider different cache durations for own profile vs other users
             const userId = state.userId || localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
 
-            loadProfilePage(userId, false);
+            // loadProfilePage(userId, false);
+            loadProfilePage(false);
             break;
           default:
             loadHomePage(false);
@@ -127,7 +128,8 @@ export function initializeHistory() {
         case "profile":
           const userId = event.target.dataset.userId || localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
 
-          loadProfilePage(userId);
+          // loadProfilePage(userId);
+          loadProfilePage();
           break;
         default:
           loadHomePage();

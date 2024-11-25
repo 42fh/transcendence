@@ -41,7 +41,7 @@ export async function loadTournamentsPage(addToHistory = true) {
       );
       updateActiveNavItem("tournaments");
     }
-
+    if (!addToHistory) updateActiveNavItem("tournaments");
     const template = document.getElementById("tournament-template");
     const mainContent = document.getElementById("main-content");
     mainContent.innerHTML = "";

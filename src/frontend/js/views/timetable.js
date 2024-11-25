@@ -16,6 +16,7 @@ export async function loadTimetablePage(tournamentName, addToHistory = true) {
       );
       updateActiveNavItem("timetable");
     }
+    if (!addToHistory) updateActiveNavItem("timetable");
 
     // Find tournament with timetable based on data source
     let tournament;

@@ -29,6 +29,9 @@ function setDefaultDates() {
 
 export function loadCreateTournamentPage(addToHistory = true) {
   try {
+    // Always update the active nav item, regardless of how we got here
+    updateActiveNavItem("create-tournament");
+
     if (addToHistory) {
       history.pushState(
         {
@@ -36,7 +39,6 @@ export function loadCreateTournamentPage(addToHistory = true) {
         },
         ""
       );
-      updateActiveNavItem("create-tournament");
     }
 
     const template = document.getElementById("create-tournament-template");
