@@ -130,6 +130,15 @@ function setupFormSubmission(form, userId) {
     return;
   }
 
+  // Debug form values
+  const formElements = form.elements;
+  for (let i = 0; i < formElements.length; i++) {
+    const element = formElements[i];
+    if (element.name) {
+      console.log(`${element.name}: ${element.value}`);
+    }
+  }
+
   const cancelButton = form.querySelector(".profile-edit__button--cancel");
 
   if (cancelButton) {
@@ -140,6 +149,7 @@ function setupFormSubmission(form, userId) {
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    console.log("Form submission triggered");
 
     // Validate all fields
     let hasErrors = false;
@@ -159,11 +169,28 @@ function setupFormSubmission(form, userId) {
     try {
       setFormLoading(form, true);
       const formData = new FormData(form);
-      const updatedData = Object.fromEntries(formData);
-      console.log("Form data to be submitted:", updatedData);
+      const updatedData = {};
+      //   const updatedData = Object.fromEntries(formData);
+      //   console.log("Form data to be submitted:", updatedData);
+      // Properly collect form data
+      formData.forEach((value, key) => {
+        if (value !== "") {
+          // Only include non-empty values
+          updatedData[key] = value;
+        }
+      });
 
-      await updateUserProfile(userId, updatedData);
-      console.log("Server response received");
+      console.log("Form data collected:", updatedData);
+
+      if (Object.keys(updatedData).length === 0) {
+        console.warn("No data to update");
+        showToast("No changes to save", "warning");
+        return;
+      }
+
+      const response = await updateUserProfile(userId, updatedData);
+      console.log("Server response:", response);
+
       showToast("Profile updated successfully!");
       loadProfilePage(false);
     } catch (error) {

@@ -472,7 +472,7 @@
 
           <div class="profile-edit__field">
             <label class="profile-edit__label" for="username">Username</label>
-            <input
+            <!-- <input
               type="text"
               id="username"
               class="profile-edit__input"
@@ -482,54 +482,59 @@
               pattern="[a-zA-Z0-9_-]{3,20}"
               title="Username can only contain letters, numbers, underscores and hyphens"
               required
-            />
+            /> -->
+            <input type="text" id="username" class="profile-edit__input" name="username" />
           </div>
           <div class="profile-edit__field">
             <label class="profile-edit__label" for="first-name">First Name</label>
-            <input
+            <!-- <input
               type="text"
               id="first-name"
               class="profile-edit__input"
               name="first_name"
               pattern="[a-zA-Z\s\-]{2,}"
               title="Name should contain at least 2 letters"
-            />
+            /> -->
+            <input type="text" id="first-name" class="profile-edit__input" name="first_name" />
           </div>
 
           <div class="profile-edit__field">
             <label class="profile-edit__label" for="last-name">Last Name</label>
-            <input
+            <!-- <input
               type="text"
               id="last-name"
               class="profile-edit__input"
               name="last_name"
               pattern="[a-zA-Z\s\-]{2,}"
               title="Name should contain at least 2 letters"
-            />
+            /> -->
+            <input type="text" id="last-name" class="profile-edit__input" name="last_name" />
           </div>
 
           <div class="profile-edit__field">
             <label class="profile-edit__label" for="email">Email</label>
-            <input
+            <!-- <input
               type="email"
               id="email"
               class="profile-edit__input"
               name="email"
               pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
               title="Please enter a valid email address"
-            />
+            /> -->
+            <input type="email" id="email" class="profile-edit__input" name="email" />
           </div>
 
           <div class="profile-edit__field">
             <label class="profile-edit__label" for="phone">Phone</label>
-            <input
+            <!-- <input
               type="tel"
               id="phone"
               class="profile-edit__input"
               name="telephone_number"
               pattern="\+?[\d\s-]{10,}"
               title="Please enter a valid phone number (minimum 10 digits)"
-            />
+            /> -->
+            <input type="tel" id="phone" class="profile-edit__input" name="telephone_number" />
           </div>
 
           <div class="profile-edit__field">

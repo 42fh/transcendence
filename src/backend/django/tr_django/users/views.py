@@ -362,11 +362,29 @@ class UserDetailView(View):
             return JsonResponse({"error": "Cannot update other users' profiles"}, status=403)
 
         try:
+            # Get the user to update from database
+            user = CustomUser.objects.get(id=user_id)
+
+            # Log received data
             data = json.loads(request.body)
-            user = request.user
+            print("Received update data:", data)
+
+            print(
+                "Before update:",
+                {
+                    "username": user.username,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                    "email": user.email,
+                    "bio": user.bio,
+                    "telephone_number": user.telephone_number,
+                    "pronoun": user.pronoun,
+                },
+            )
 
             # Fields that can be updated
             updatable_fields = {
+                "username",  # Add username to updatable fields
                 "first_name",
                 "last_name",
                 "email",
@@ -377,18 +395,31 @@ class UserDetailView(View):
                 "visibility_user_profile",
             }
 
-            # Handle avatar separately if it's in request.FILES
-            if request.FILES.get("avatar"):
-                user.avatar = request.FILES["avatar"]
-
-            # Update other fields if they exist in the request
+            # Update fields if they exist in the request
             for field in updatable_fields:
                 if field in data:
                     setattr(user, field, data[field])
 
+            # Handle avatar separately if it's in request.FILES
+            if request.FILES.get("avatar"):
+                user.avatar = request.FILES["avatar"]
+
             user.save()
 
-            # Return the same format as your GET response
+            print(
+                "After update:",
+                {
+                    "username": user.username,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                    "email": user.email,
+                    "bio": user.bio,
+                    "telephone_number": user.telephone_number,
+                    "pronoun": user.pronoun,
+                },
+            )
+
+            # Return updated user data
             player = user.player
             user_data = {
                 "id": str(user.id),
@@ -410,12 +441,12 @@ class UserDetailView(View):
                     "display_name": player.get_display_name,
                 },
             }
-
             return JsonResponse(user_data)
 
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
         except Exception as e:
+            print("Error updating user:", str(e))
             return JsonResponse({"error": str(e)}, status=400)
 
 

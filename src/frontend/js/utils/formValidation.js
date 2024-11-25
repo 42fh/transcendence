@@ -60,14 +60,13 @@ export function setupFormValidation(form, validationRules) {
     const rule = VALIDATION_RULES[input.name];
     if (rule) {
       if (rule.required) input.required = true;
-      if (rule.pattern) {
-        // Convert RegExp to string pattern by removing the leading/trailing slashes
-        input.pattern = rule.pattern.toString().slice(1, -1);
+      // Don't override existing pattern attributes from HTML
+      if (rule.pattern && !input.hasAttribute("pattern")) {
+        input.pattern = rule.pattern.source;
       }
-      if (rule.pattern) input.pattern = rule.pattern.source;
       if (rule.maxLength) input.maxLength = rule.maxLength;
-      // Add title attribute for validation message
-      if (rule.message) {
+      // Add title attribute for validation message if not already set
+      if (rule.message && !input.hasAttribute("title")) {
         input.title = rule.message;
       }
     }
