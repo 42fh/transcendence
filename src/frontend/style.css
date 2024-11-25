@@ -60,6 +60,7 @@
   --bottom-nav-height: 3.5rem;
   --bottom-nav-padding: 0.5rem;
   --avatar-size: 7.5rem; /* Instead of 120px */
+  --avatar-size-small: 5.5rem;
 }
 
 * {
@@ -1181,6 +1182,11 @@ button:hover {
   justify-content: center;
   align-items: center;
   background: #1a1a1a;
+}
+
+.profile__avatar-container--small {
+  width: var(--avatar-size-small);
+  height: var(--avatar-size-small);
 }
 
 .profile__avatar {
