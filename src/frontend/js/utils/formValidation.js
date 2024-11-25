@@ -1,6 +1,6 @@
 export const VALIDATION_RULES = {
   username: {
-    pattern: /^[a-zA-Z0-9_-]{3,20}$/,
+    pattern: /^[a-zA-Z0-9_-s]{3,20}$/,
     message: "Username must be 3-20 characters and can contain letters, numbers, underscore, and hyphen",
   },
   email: {
