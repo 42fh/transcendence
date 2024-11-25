@@ -314,27 +314,29 @@
     <template id="chat-home-template">
       <div>
         <h3>Users:</h3>
-
-        <div id="user-initials-container" class="horizontal-scroll">
-          <!-- User initials will be appended here -->
+        <div id="chat-usernames" class="horizontal-scroll">
+          <!-- Space for list of avatars and usernames (x letters max) -->
         </div>
         <h3>Conversations:</h3>
         <ul id="conversation-list">
-          <!-- User list items will be appended here -->
+          <!-- conversation list -->
         </ul>
       </div>
     </template>
-    
-    <!-- User Initial Template -->
+
     <template id="user-initial-template">
-      <div class="user-initial"></div>
+      <div class="user-initial">
+        <div class="profile__avatar-container--small ">
+          <img class="user-avatar profile__avatar" src="default-avatar.png" alt="User avatar" />
+        </div>
+        <span class="user-username font-size-small"></span>
+      </div>
     </template>
-    
     
     <template id="user-list-item-template">
       <li class="chat-user-card">
         <div class="chat-user-item-container">
-          <div class="profile__avatar-container profile__avatar-container--small">
+          <div class=" profile__avatar-container--small">
             <img class="profile__avatar" src="" alt="User avatar" />
           </div>
           <span class="chat-user-item"></span>

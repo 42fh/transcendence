@@ -115,7 +115,7 @@ async function loadUserList() {
 
     data.users.forEach((user) => {
       const userElement = document.importNode(template.content, true);
-      const nameSpan = userElement.querySelector(".chat-user-item");
+      const nameSpan = userElement.querySelector(".chat-conversation-item");
       const blockButton = userElement.querySelector(".chat-button-small");
 
       nameSpan.textContent = user.username;
@@ -272,7 +272,7 @@ function updateUserList(users) {
     const existingItem = currentItems.find((item) => item.textContent === username);
     if (!existingItem) {
       const li = document.createElement("li");
-      li.className = "chat-user-item";
+      li.className = "chat-conversation-item";
       li.textContent = username;
       li.onclick = () => startChatWith(username);
       userList.appendChild(li);

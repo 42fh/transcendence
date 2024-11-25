@@ -37,12 +37,11 @@ export async function loadChatPage(addToHistory = true) {
     try {
       const data = await fetchUserList();
       const conversationList = document.getElementById("conversation-list");
-      const userInitialsContainer = document.getElementById("user-initials-container");
+      const userInitialsContainer = document.getElementById("chat-usernames");
       conversationList.innerHTML = "";
       userInitialsContainer.innerHTML = "";
   
       data.users.forEach((user) => {
-        // Use the user initial template
         const userInitialTemplate = document.getElementById("user-initial-template");
         if (!userInitialTemplate) {
           throw new Error("User Initial template not found");
@@ -53,10 +52,16 @@ export async function loadChatPage(addToHistory = true) {
           throw new Error("User Initial element not found in template");
         }
         userInitialElement.id = `user-initial-${user.username}`;
-        userInitialElement.textContent = user.username.charAt(0).toUpperCase();
+  
+        const avatarElement = userInitialElement.querySelector(".user-avatar");
+        avatarElement.src = user.avatarUrl || "default-avatar.png"; // Set the avatar URL or a default image
+        avatarElement.alt = user.username.charAt(0).toUpperCase(); // Fallback string
+  
+        const usernameElement = userInitialElement.querySelector(".user-username");
+        usernameElement.textContent = user.username.slice(0, 5); // Limit username to x characters
+  
         userInitialsContainer.appendChild(userInitial);
   
-        // Use the user list item template
         const conversationListItemTemplate = document.getElementById("user-list-item-template");
         if (!conversationListItemTemplate) {
           throw new Error("Conversation List Item template not found");
@@ -68,12 +73,12 @@ export async function loadChatPage(addToHistory = true) {
         }
         conversationListItemElement.textContent = user.username;
   
-        const avatarElement = conversationListItem.querySelector(".profile__avatar");
-        if (avatarElement) {
-          avatarElement.src = user.avatarUrl || "default-avatar.png"; // Set the avatar URL or a default image
+        const avatarElementList = conversationListItem.querySelector(".profile__avatar");
+        if (avatarElementList) {
+          avatarElementList.src = user.avatarUrl || "default-avatar.png"; // Set the avatar URL or a default image
+          avatarElementList.alt = user.username.charAt(0).toUpperCase(); // Fallback string
         }
   
-        // Add event listener to open chat room
         conversationListItemElement.addEventListener("click", () => {
           loadChatRoom(user.username);
         });
