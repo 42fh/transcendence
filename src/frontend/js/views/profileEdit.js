@@ -1,4 +1,4 @@
-import { fetchUserProfile, updateUserProfile } from "../services/usersService.js";
+import { fetchUserProfile, updateUserProfile, uploadUserAvatar } from "../services/usersService.js";
 import { showToast } from "../utils/toast.js";
 import { LOCAL_STORAGE_KEYS, ASSETS } from "../config/constants.js";
 import { loadProfilePage } from "./profile.js";
