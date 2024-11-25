@@ -16,6 +16,7 @@ export async function loadProfileEditPage() {
     const mainContent = document.getElementById("main-content");
     if (!mainContent) throw new Error("Main content element not found");
 
+    // TODO: fix this nasty thing
     mainContent.innerHTML = '<div class="loading">Loading profile editor...</div>';
 
     const profileEditTemplate = document.getElementById("profile-edit-template");
@@ -124,13 +125,125 @@ function setFormLoading(form, isLoading) {
   }
 }
 
+async function handleFormSubmission(form, userId) {
+  console.log("Handling form submission");
+
+  let hasErrors = false;
+  form.querySelectorAll("input, textarea").forEach((input) => {
+    const error = validateFormField(input);
+    if (error) {
+      console.log("Form field error:", error);
+      hasErrors = true;
+      updateFieldError(input, error);
+    }
+  });
+
+  if (hasErrors) {
+    showToast("Please fix the errors in the form", "error");
+    return;
+  }
+  try {
+    console.log("Starting form submission");
+    setFormLoading(form, true);
+    // Approach 1: querySelector
+    console.log("--- Approach 1: querySelector ---");
+
+    const formInputs = form.querySelectorAll("input, textarea");
+    const updatedDataFromInputs = {};
+
+    formInputs.forEach((input) => {
+      console.log(`Reading input ${input.name}:`, {
+        value: input.value,
+        name: input.name,
+        id: input.id,
+      });
+
+      if (input.value && input.value.trim() !== "") {
+        updatedDataFromInputs[input.name] = input.value.trim();
+      }
+    });
+    console.log("Data collected via querySelector:", updatedDataFromInputs);
+
+    // Approach 2: FormData
+    console.log("--- Approach 2: FormData ---");
+    console.log("Form being used:", form);
+    console.log("Form valid?", form.checkValidity());
+    console.log("Form elements count:", form.elements.length);
+    // Try both ways to create FormData
+    const formData = new FormData(form);
+    const manualFormData = new FormData();
+    form.querySelectorAll("input, textarea").forEach((input) => {
+      console.log(`Adding to manual FormData: ${input.name} = ${input.value}`);
+      manualFormData.append(input.name, input.value);
+    });
+    const updatedDataFromFormData = {};
+
+    // FormData don't have a .forEach method, so we need to iterate over its entries
+    // ... and it doesn't output directly to the console, so we need to log it separately
+    console.log("FormData:");
+    console.log(formData);
+    console.log("form.elements:");
+    console.log(form.elements);
+
+    console.log("Original FormData entries:");
+    for (let pair of formData.entries()) {
+      console.log(`${pair[0]}: '${pair[1]}'`);
+    }
+
+    console.log("Manual FormData entries:");
+    for (let pair of manualFormData.entries()) {
+      console.log(`${pair[0]}: '${pair[1]}'`);
+    }
+
+    console.log("Collecting form data");
+    formData.forEach((value, key) => {
+      console.log(`Field ${key}:`, {
+        value: value,
+        trimmed: value.trim(),
+        length: value.trim().length,
+      });
+      if (value.trim() !== "") {
+        updatedDataFromFormData[key] = value.trim();
+      }
+    });
+    console.log("Data collected via FormData:", updatedDataFromFormData);
+
+    // Compare results
+    console.log("--- Comparing Results ---");
+    console.log("querySelector approach:", updatedDataFromInputs);
+    console.log("FormData approach:", updatedDataFromFormData);
+
+    const dataToSend = updatedDataFromInputs;
+
+    if (Object.keys(dataToSend).length === 0) {
+      console.warn("No data to update");
+      showToast("No changes to save", "warning");
+      return;
+    }
+    const response = await updateUserProfile(userId, dataToSend);
+    console.log("Server response:", response);
+    showToast("Profile updated successfully!");
+    loadProfilePage(false);
+  } catch (error) {
+    console.error("Error during form submission:", error);
+    showToast("Failed to update profile", "error");
+  } finally {
+    setFormLoading(form, false);
+  }
+}
+
+// Setup event listeners for form submission
 function setupFormSubmission(form, userId) {
+  console.log("Setting up form submission");
   if (!form) {
     console.error("Form element not found");
     return;
   }
 
+  console.log("Form:", form);
+
   // Debug form values
+  console.log("Debugging form values");
   const formElements = form.elements;
   for (let i = 0; i < formElements.length; i++) {
     const element = formElements[i];
@@ -139,6 +252,7 @@ function setupFormSubmission(form, userId) {
     }
   }
 
+  // Add event listners to cancel button and save button
   const cancelButton = form.querySelector(".profile-edit__button--cancel");
 
   if (cancelButton) {
@@ -149,55 +263,6 @@ function setupFormSubmission(form, userId) {
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    console.log("Form submission triggered");
-
-    // Validate all fields
-    let hasErrors = false;
-    form.querySelectorAll("input, textarea").forEach((input) => {
-      const error = validateFormField(input);
-      if (error) {
-        hasErrors = true;
-        updateFieldError(input, error);
-      }
-    });
-
-    if (hasErrors) {
-      showToast("Please fix the errors in the form", "error");
-      return;
-    }
-
-    try {
-      setFormLoading(form, true);
-      const formData = new FormData(form);
-      const updatedData = {};
-      //   const updatedData = Object.fromEntries(formData);
-      //   console.log("Form data to be submitted:", updatedData);
-      // Properly collect form data
-      formData.forEach((value, key) => {
-        if (value !== "") {
-          // Only include non-empty values
-          updatedData[key] = value;
-        }
-      });
-
-      console.log("Form data collected:", updatedData);
-
-      if (Object.keys(updatedData).length === 0) {
-        console.warn("No data to update");
-        showToast("No changes to save", "warning");
-        return;
-      }
-
-      const response = await updateUserProfile(userId, updatedData);
-      console.log("Server response:", response);
-
-      showToast("Profile updated successfully!");
-      loadProfilePage(false);
-    } catch (error) {
-      console.error("Error during form submission:", error);
-      showToast("Failed to update profile", "error");
-    } finally {
-      setFormLoading(form, false);
-    }
+    handleFormSubmission(form, userId);
   });
 }
