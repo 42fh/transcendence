@@ -4,6 +4,7 @@ import { loadTournamentsPage } from "./tournaments.js";
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { updateActiveNavItem } from "../components/bottom-nav.js";
 import { loadChatPage } from "./chats.js";
+import { loadGame3D } from "./game3d.js";
 
 export function loadHomePage(addToHistory = true) {
   try {
@@ -62,9 +63,7 @@ export function loadHomePage(addToHistory = true) {
 
     const playButton = document.getElementById("play");
     if (playButton) {
-      playButton.addEventListener("click", function () {
-        mainContent.innerHTML = "<h2>A beautiful game is built here</h2>";
-      });
+      playButton.addEventListener("click", loadGame3D);
     }
 
     const chatsButton = document.getElementById("chats");

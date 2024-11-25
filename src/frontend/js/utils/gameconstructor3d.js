@@ -1,12 +1,12 @@
 import * as THREE from "three";
 import { Sky } from "three/addons/objects/Sky.js";
 import { Water } from "three/addons/objects/Water.js";
-import Loader from "../Utils/Loader.js";
-import World from "../World/World.js";
-import Debug from "../Utils/Debug.js";
-import GameWebSocket from "../Utils/Websocket.js";
-import Drawer from "../Utils/Drawer.js";
-import GameUI from "../Utils/GameUI.js";
+import Loader from "./loader3d.js";
+import World from "./world3d.js";
+import Debug from "./debug3d.js";
+import GameWebSocket from "./websocket3d.js";
+import Drawer from "./drawer3d.js";
+import GameUI from "./gameui3d.js";
 
 export default class GameConstructor {
   constructor() {

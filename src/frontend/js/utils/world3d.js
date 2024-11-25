@@ -1,7 +1,7 @@
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import * as THREE from "three";
-import Debug from "../Utils/Debug.js";
-import Audio from "../Utils/Audio.js";
+import Debug from "./debug3d.js";
+import Audio from "./audio3d.js";
 import gsap from "gsap";
 
 export default class World {
