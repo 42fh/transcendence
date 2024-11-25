@@ -70,7 +70,6 @@ export function displayModalError(message) {
 export function closeModal() {
   const modalOverlay = document.getElementById("modal-overlay");
   if (modalOverlay) {
-    modalOverlay.style.visibility = "hidden";
-    modalOverlay.style.opacity = "0";
+    modalOverlay.remove();
   }
 }
