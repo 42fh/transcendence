@@ -20,6 +20,16 @@ export default class Audio {
     this.masterVolume = this.listener.getMasterVolume();
   }
 
+  playSound(sound) {
+    const audio = new THREE.Audio(this.listener);
+    this.audioLoader.load(sound, (buffer) => {
+      audio.setBuffer(buffer);
+      audio.setVolume(0.5);
+      audio.setLoop(false);
+      audio.play();
+    });
+  }
+
   addAmbientSound(sound) {
     const audio = new THREE.Audio(this.listener);
     this.audioLoader.load(sound, (buffer) => {

@@ -214,13 +214,16 @@ export default class GameConstructor {
           this.drawer.updateGame(message.game_state);
           break;
 
+        case "game_event":
+          console.log("game_event", message);
+          if (message.game_state.type == "paddle_hit") {
+            this.world.audio.playSound("static/sounds/paddle.mp3");
+          }
+          break;
         case "game_finished":
           console.log("game_finished: ", message);
           break;
 
-        case "error":
-          console.error("Error:", message);
-          break;
         default:
           console.log("Unknown message type:", message);
       }

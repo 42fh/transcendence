@@ -159,7 +159,6 @@ export default class Drawer {
   }
 
   updateGame(gameState) {
-    console.log("Updating game state", gameState);
     if (this.game.ui.isActive) {
       this.game.ui.createScoreTable(-2, 1, 0);
     }
