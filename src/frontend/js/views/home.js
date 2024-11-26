@@ -4,8 +4,7 @@ import { loadTournamentsPage } from "./tournaments.js";
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { updateActiveNavItem } from "../components/bottom-nav.js";
 import { loadChatPage } from "./chats.js";
-
-// import modal
+import { loadGame2dPage } from "./game2d.js";
 import { renderModal, closeModal, displayModalError } from "../components/modal.js";
 
 export function loadHomePage(addToHistory = true) {
