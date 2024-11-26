@@ -1,8 +1,7 @@
-// gameSettings.js
 import { CONFIG } from './config.js';
-import { showToast } from '../utils/toast.js'; // Assuming you have a toast utility
+import { showToast } from '../utils/toast.js';
 
-export class PongInterface {
+export class gameSettings {
     constructor() {
         this.debugEnabled = false;
         this.gameType = 'polygon';
@@ -284,8 +283,8 @@ export class PongInterface {
 
             const gameConfig = {
                 playerId,
-                type: config.type,           // 'polygon' or 'circular'
-                pongType: this.gameType,     // actual game variant
+                type: config.type, 
+                pongType: this.gameType,
                 players: numPlayers,
                 balls: numBalls,
                 debug,
@@ -335,7 +334,7 @@ export class PongInterface {
     }
 }
 
-// Initialize when DOM is loaded
+
 document.addEventListener('DOMContentLoaded', () => {
-    new PongInterface();
+    new gameSettings();
 });

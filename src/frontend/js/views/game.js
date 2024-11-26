@@ -1,4 +1,5 @@
 import { CONFIG } from "../config/constants.js";
+import { gameSettings } from "./gameSettings.js";
 
 export async function gameHome() {
   try {
@@ -55,6 +56,12 @@ export async function gameHome() {
     });
 
     gamesContainer.style.display = "block";
+
+    
+    const settingsButton = document.getElementById("cta__button-settings");
+    if (settingsButton) {
+      settingsButton.addEventListener("click", gameSettings);
+    }
 
     window.addEventListener("beforeunload", () => {
       mainContent.innerHTML = ""; // clear content when navigating away
