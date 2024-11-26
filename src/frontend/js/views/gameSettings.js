@@ -1,13 +1,15 @@
 import { CONFIG } from "../config/constants.js";
 // import { showToast } from '../utils/toast.js';
 
-export class gameSettings {
-  constructor() {
-    this.debugEnabled = false;
-    this.gameType = "polygon";
-    this.showSettings = false;
-    this.eventLog = document.getElementById("eventLog");
-    this.formData = {
+export function gameSettings() {
+  console.log("print from gameSettings");
+  // Encapsulated state
+  const state = {
+    debugEnabled: false,
+    gameType: "polygon",
+    showSettings: false,
+    eventLog: document.getElementById("eventLog"),
+    formData: {
       playerId: "",
       numPlayers: 2,
       numSides: 4,
@@ -15,9 +17,8 @@ export class gameSettings {
       shape: "regular",
       scoreMode: "classic",
       pongType: "classic",
-    };
-    // Game type configurations
-    this.gameConfigs = {
+    },
+    gameConfigs: {
       classic: {
         type: "polygon",
         sides: 4,
@@ -32,7 +33,7 @@ export class gameSettings {
       },
       circular: {
         type: "circular",
-        sides: 8, // Default number of sides for circular
+        sides: 8,
         maxPlayers: 8,
         description: "Circular arena with curved paddles and sides",
       },
@@ -48,14 +49,15 @@ export class gameSettings {
           crazy: "Extreme deformation with sharp transitions",
         },
       },
-    };
-    this.setupEventListeners();
-    this.initializeInterface();
-  }
+    },
+  };
 
-  initializeInterface() {
+  initializeInterface();
+  setupEventListeners();
+
+  function initializeInterface() {
     // Set initial form values
-    Object.entries(this.formData).forEach(([key, value]) => {
+    Object.entries(state.formData).forEach(([key, value]) => {
       const element = document.getElementById(key);
       if (element) {
         element.value = value;
@@ -63,49 +65,64 @@ export class gameSettings {
     });
 
     // Initialize game type specific fields
-    this.updateGameTypeFields();
+    updateGameTypeFields();
 
     // Initialize shape description
-    this.updateShapeDescription();
+    updateShapeDescription();
   }
 
-  setupEventListeners() {
-    // Toggle settings visibility
-    document.getElementById("toggleSettings").addEventListener("click", () => {
-      this.showSettings = !this.showSettings;
-      const advancedSettings = document.getElementById("advancedSettings");
-      const toggleText = document.getElementById("toggleText");
-      const toggleIcon = document.getElementById("toggleIcon");
+  function setupEventListeners() {
+    // Ensure elements exist before adding event listeners
+    const toggleSettingsButton = document.getElementById("toggleSettings");
+    if (toggleSettingsButton) {
+      toggleSettingsButton.addEventListener("click", () => {
+        state.showSettings = !state.showSettings;
+        const advancedSettings = document.getElementById("advancedSettings");
+        const toggleText = document.getElementById("toggleText");
+        const toggleIcon = document.getElementById("toggleIcon");
 
-      advancedSettings.style.display = this.showSettings ? "block" : "none";
-      toggleText.textContent = this.showSettings
-        ? "Hide Settings"
-        : "Show Settings";
-      toggleIcon.textContent = this.showSettings ? "▼" : "▶";
-    });
+        advancedSettings.style.display = state.showSettings ? "block" : "none";
+        toggleText.textContent = state.showSettings
+          ? "Hide Settings"
+          : "Show Settings";
+        toggleIcon.textContent = state.showSettings ? "▼" : "▶";
+      });
+    }
 
     // Game type change handler
-    document.getElementById("gameType").addEventListener("change", (e) => {
-      this.gameType = e.target.value;
-      this.updateGameTypeFields();
-    });
+    const gameTypeSelect = document.getElementById("gameType");
+    if (gameTypeSelect) {
+      gameTypeSelect.addEventListener("change", (e) => {
+        state.gameType = e.target.value;
+        updateGameTypeFields();
+      });
+    }
 
     // Shape change handler
-    document.getElementById("shape").addEventListener("change", (e) => {
-      this.formData.shape = e.target.value;
-      this.updateShapeDescription();
-    });
+    const shapeSelect = document.getElementById("shape");
+    if (shapeSelect) {
+      shapeSelect.addEventListener("change", (e) => {
+        state.formData.shape = e.target.value;
+        updateShapeDescription();
+      });
+    }
 
     // Form submission
-    document.getElementById("gameForm").addEventListener("submit", (e) => {
-      e.preventDefault();
-      this.submitSettings();
-    });
+    const gameForm = document.getElementById("gameForm");
+    if (gameForm) {
+      gameForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        submitSettings();
+      });
+    }
 
     // Debug mode toggle
-    document.getElementById("debugMode").addEventListener("change", (e) => {
-      this.debugEnabled = e.target.checked;
-    });
+    const debugModeCheckbox = document.getElementById("debugMode");
+    if (debugModeCheckbox) {
+      debugModeCheckbox.addEventListener("change", (e) => {
+        state.debugEnabled = e.target.checked;
+      });
+    }
 
     // Form input change handlers
     [
@@ -119,7 +136,7 @@ export class gameSettings {
       const element = document.getElementById(fieldId);
       if (element) {
         element.addEventListener("change", (e) => {
-          this.formData[fieldId] =
+          state.formData[fieldId] =
             e.target.type === "number"
               ? parseInt(e.target.value)
               : e.target.value;
@@ -128,8 +145,8 @@ export class gameSettings {
     });
   }
 
-  updateGameTypeFields() {
-    const config = this.gameConfigs[this.gameType];
+  function updateGameTypeFields() {
+    const config = state.gameConfigs[state.gameType];
     if (!config) return;
 
     // Update number of players max value
@@ -138,7 +155,7 @@ export class gameSettings {
       numPlayersInput.max = config.maxPlayers;
       if (parseInt(numPlayersInput.value) > config.maxPlayers) {
         numPlayersInput.value = config.maxPlayers;
-        this.formData.numPlayers = config.maxPlayers;
+        state.formData.numPlayers = config.maxPlayers;
       }
     }
 
@@ -146,38 +163,39 @@ export class gameSettings {
     const numSidesInput = document.getElementById("numSides");
     if (numSidesInput) {
       numSidesInput.value = config.sides;
-      numSidesInput.disabled = this.gameType === "classic";
+      numSidesInput.disabled = state.gameType === "classic";
       // Update min/max based on game type
-      if (this.gameType === "circular") {
+      if (state.gameType === "circular") {
         numSidesInput.min = 4;
         numSidesInput.max = 12;
       } else {
         numSidesInput.min = 3;
         numSidesInput.max = 8;
       }
-      this.formData.numSides = config.sides;
+      state.formData.numSides = config.sides;
     }
 
     // Show/hide shape fields
     const shapeFields = document.querySelectorAll(".shape-fields");
     shapeFields.forEach((field) => {
-      field.style.display = this.gameType === "irregular" ? "block" : "none";
+      field.style.display = state.gameType === "irregular" ? "block" : "none";
     });
 
     // Update sides field visibility
     const sidesField = document.getElementById("sidesField");
     if (sidesField) {
-      sidesField.style.display = this.gameType !== "classic" ? "block" : "none";
+      sidesField.style.display =
+        state.gameType !== "classic" ? "block" : "none";
     }
 
-    this.updateGameDescription();
+    updateGameDescription();
   }
 
-  updateGameDescription() {
+  function updateGameDescription() {
     const descElement = document.getElementById("gameDescription");
     if (!descElement) return;
 
-    const config = this.gameConfigs[this.gameType];
+    const config = state.gameConfigs[state.gameType];
     if (!config) return;
 
     descElement.innerHTML = `
@@ -186,7 +204,7 @@ export class gameSettings {
                 <ul>
                     <li>Game Type: ${config.type}</li>
                     <li>Number of Sides: ${config.sides} ${
-      this.gameType === "classic" ? "(2 paddles, 2 walls)" : ""
+      state.gameType === "classic" ? "(2 paddles, 2 walls)" : ""
     }</li>
                     <li>Maximum Players: ${config.maxPlayers}</li>
                 </ul>
@@ -194,7 +212,7 @@ export class gameSettings {
         `;
   }
 
-  updateShapeDescription() {
+  function updateShapeDescription() {
     const shapeDescElement = document.getElementById("shapeDescription");
     if (!shapeDescElement) return;
 
@@ -205,17 +223,17 @@ export class gameSettings {
       crazy: "Extreme deformation with sharp transitions",
     };
 
-    shapeDescElement.textContent = descriptions[this.formData.shape] || "";
+    shapeDescElement.textContent = descriptions[state.formData.shape] || "";
     shapeDescElement.style.display =
-      this.formData.shape === "regular" ? "none" : "block";
+      state.formData.shape === "regular" ? "none" : "block";
   }
 
-  generateRandomId() {
+  function generateRandomId() {
     return Math.random().toString(36).substring(2, 15);
   }
 
-  logEvent(event) {
-    if (!this.eventLog) return;
+  function logEvent(event) {
+    if (!state.eventLog) return;
 
     const logEntry = document.createElement("div");
     logEntry.className = `log-entry ${event.type}`;
@@ -233,27 +251,27 @@ export class gameSettings {
         `;
 
     // Add new entry at the top
-    if (this.eventLog.firstChild) {
-      this.eventLog.insertBefore(logEntry, this.eventLog.firstChild);
+    if (state.eventLog.firstChild) {
+      state.eventLog.insertBefore(logEntry, state.eventLog.firstChild);
     } else {
-      this.eventLog.appendChild(logEntry);
+      state.eventLog.appendChild(logEntry);
     }
 
     // Limit the number of log entries (optional)
-    while (this.eventLog.children.length > 50) {
-      this.eventLog.removeChild(this.eventLog.lastChild);
+    while (state.eventLog.children.length > 50) {
+      state.eventLog.removeChild(state.eventLog.lastChild);
     }
   }
 
-  async submitSettings() {
-    const config = this.gameConfigs[this.gameType];
+  async function submitSettings() {
+    const config = state.gameConfigs[state.gameType];
     if (!config) {
-      this.showStatus("Invalid game type selected", true);
+      showStatus("Invalid game type selected", true);
       return;
     }
 
     const playerId =
-      document.getElementById("playerId").value || this.generateRandomId();
+      document.getElementById("playerId").value || generateRandomId();
     const numPlayers = parseInt(document.getElementById("numPlayers").value);
     const numSides = parseInt(document.getElementById("numSides").value);
     const numBalls = parseInt(document.getElementById("numBalls").value);
@@ -263,7 +281,7 @@ export class gameSettings {
 
     // Validation
     if (numPlayers < 2 || numPlayers > config.maxPlayers) {
-      this.showStatus(
+      showStatus(
         `Number of players must be between 2 and ${config.maxPlayers}`,
         true
       );
@@ -271,14 +289,14 @@ export class gameSettings {
     }
 
     // Validate sides based on game type
-    if (this.gameType === "circular") {
+    if (state.gameType === "circular") {
       if (numSides < 4 || numSides > 12) {
-        this.showStatus("Circular mode requires between 4 and 12 sides", true);
+        showStatus("Circular mode requires between 4 and 12 sides", true);
         return;
       }
-    } else if (this.gameType !== "classic") {
+    } else if (state.gameType !== "classic") {
       if (numSides < 3 || numSides > 8) {
-        this.showStatus(
+        showStatus(
           "Number of sides must be between 3 and 8 for polygon modes",
           true
         );
@@ -287,14 +305,14 @@ export class gameSettings {
     }
 
     if (numBalls < 1 || numBalls > 4) {
-      this.showStatus("Number of balls must be between 1 and 4", true);
+      showStatus("Number of balls must be between 1 and 4", true);
       return;
     }
 
     try {
       const userId = localStorage.getItem("userId");
       if (!userId) {
-        this.showStatus("User ID not found in localStorage", true);
+        showStatus("User ID not found in localStorage", true);
         return;
       }
 
@@ -309,12 +327,12 @@ export class gameSettings {
       const gameConfig = {
         playerId,
         type: config.type,
-        pongType: this.gameType,
+        pongType: state.gameType,
         players: numPlayers,
         balls: numBalls,
         debug,
-        sides: this.gameType === "classic" ? 4 : numSides,
-        shape: this.gameType === "irregular" ? shape : undefined,
+        sides: state.gameType === "classic" ? 4 : numSides,
+        shape: state.gameType === "irregular" ? shape : undefined,
         scoreMode,
         userId,
       };
@@ -334,7 +352,7 @@ export class gameSettings {
         const data = await response.json();
         const gameId = data.gameId;
         mainContent.innerHTML = `<div class="success">Game created successfully with ID: ${gameId}</div>`;
-        this.logEvent({
+        logEvent({
           type: "info",
           message: "Game created",
           details: `Game ID: ${gameId}`,
@@ -342,19 +360,19 @@ export class gameSettings {
       } else {
         const errorData = await response.json();
         mainContent.innerHTML = `<div class="error">Error: ${errorData.message}</div>`;
-        this.showStatus(`Error: ${errorData.message}`, true);
+        showStatus(`Error: ${errorData.message}`, true);
       }
     } catch (error) {
       const mainContent = document.getElementById("main-content");
       if (mainContent) {
         mainContent.innerHTML = `<div class="error">Error: ${error.message}</div>`;
       }
-      this.showStatus(`Error: ${error.message}`, true);
+      showStatus(`Error: ${error.message}`, true);
       console.error("Game creation error:", error);
     }
   }
 
-  showStatus(message, isError = false) {
+  function showStatus(message, isError = false) {
     const status = document.getElementById("status");
     status.textContent = message;
     status.className = `status ${isError ? "error" : "success"}`;
@@ -362,6 +380,7 @@ export class gameSettings {
   }
 }
 
+// Update the instantiation
 document.addEventListener("DOMContentLoaded", () => {
-  new gameSettings();
+  gameSettings(); // Call the function directly
 });

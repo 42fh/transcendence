@@ -61,7 +61,22 @@ export async function gameHome() {
     if (games.length > 0) {
       const settingsButton = document.getElementById("cta__button-settings");
       settingsButton.style.display = "block"; // Show the button
-      settingsButton.addEventListener("click", gameSettings);
+      settingsButton.addEventListener("click", () => {
+        // Render the game settings template before calling gameSettings
+        const settingsTemplate = document.getElementById(
+          "game-settings-template"
+        );
+        const mainContent = document.getElementById("main-content");
+        if (settingsTemplate && mainContent) {
+          const settingsContent = document.importNode(
+            settingsTemplate.content,
+            true
+          );
+          mainContent.innerHTML = ""; // Clear existing content
+          mainContent.appendChild(settingsContent);
+          gameSettings(); // Now call gameSettings after rendering the template
+        }
+      });
     }
 
     gamesContainer.style.display = "block";
