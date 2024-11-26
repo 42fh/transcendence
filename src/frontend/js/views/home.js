@@ -71,7 +71,7 @@ export function loadHomePage(addToHistory = true) {
     if (playButton) {
       playButton.addEventListener("click", function () {
         renderModal("homeplay-modal-template", {
-          submitHandler: function () { console.log("homeplay-modal-template submitted")},
+          submitHandler: function () { console.log("homeplay-modal-template submitted"); },
         })
       });
     }
