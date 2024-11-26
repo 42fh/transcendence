@@ -52,6 +52,19 @@ export function gameSettings() {
     },
   };
 
+  // Clear existing content in main-content
+  const mainContent = document.getElementById("main-content");
+  if (mainContent) {
+    mainContent.innerHTML = ""; // Clear existing content
+  }
+
+  // Render the game settings template
+  const settingsTemplate = document.getElementById("game-settings-template");
+  if (settingsTemplate) {
+    const settingsContent = document.importNode(settingsTemplate.content, true);
+    mainContent.appendChild(settingsContent);
+  }
+
   initializeInterface();
   setupEventListeners();
 
@@ -143,6 +156,15 @@ export function gameSettings() {
         });
       }
     });
+
+    // Exit button to clear settings
+    const exitButton = document.createElement("button");
+    exitButton.textContent = "Exit Settings";
+    exitButton.id = "exit-settings-button";
+    exitButton.addEventListener("click", () => {
+      mainContent.innerHTML = ""; // Clear the settings when exiting
+    });
+    mainContent.appendChild(exitButton);
   }
 
   function updateGameTypeFields() {
