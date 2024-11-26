@@ -128,7 +128,7 @@ class GameCordinator:
         # step 1: generate game_settings
         settings = GameSettingsManager().create_game_settings(client_settings, game_id)
         # Step 2: Operations with redis_conn (String operations)
-        async with await cls.get_redis(cls.REDIS_URL) as redis_conn:
+        async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
             # Add game to appropriate sets
             pipeline = redis_conn.pipeline()
             
@@ -139,7 +139,7 @@ class GameCordinator:
             pipeline.set(f"game_is_tournament:{game_id}", "0")  # Not tournament
             
             # String values
-            pipeline.set(f"game_type:{game_id}", settings.get("type")
+            pipeline.set(f"game_type:{game_id}", settings.get("type"))
             pipeline.set(f"game_lock:{game_id}", "0")  # Initialize unlock state
             
             await pipeline.execute()
@@ -153,136 +153,36 @@ class GameCordinator:
             pipeline.set(f"game_settings:{game_id}", 
                         msgpack.packb(settings))
             # state
-            initial_state = cls.create_initial_state(settings)
-            pipeline.set(f"game_state:{game_id}", msgpack.packb(initial_state)) 
+            pipeline.set(f"game_state:{game_id}", msgpack.packb(settings.get("state"))) 
             
             pipeline.set(f"game_vertices:{game_id}", 
-                        msgpack.packb(settings.get("vertices", [])))
+                        msgpack.packb(settings.get("vertices")))
             
             pipeline.set(f"game_normals:{game_id}", 
-                        msgpack.packb(settings.get("normals", [])))
+                        msgpack.packb(settings.get("normals")))
             
             pipeline.set(f"game_players_sides:{game_id}", 
-                        msgpack.packb(settings.get("players_sides", [])))
+                        msgpack.packb(settings.get("players_sides")))
             
             # Hash Operations (paddle positions)
             paddle_positions = {
                 str(i): msgpack.packb({"position": 0.5})
-                for i in range(settings.get("num_players", 2))
+                for i in range(settings.get("num_players"))
             }
             if paddle_positions:
                 pipeline.hset(f"game_paddles:{game_id}", mapping=paddle_positions)
             
             # Initialize player values as msgpack
             pipeline.set(f"game_players_value:{game_id}",
-                        msgpack.packb(settings.get("player_values", {})))
+                        msgpack.packb(settings.get("player_values")))
             
             await pipeline.execute()
 
-        # Step 3: Initialize empty sets for player management
-        async with await cls.get_redis(cls.REDIS_URL) as redis_conn:
-            pipeline = redis_conn.pipeline()
-            
-            # Empty sets for players
-            pipeline.delete(f"game_players:{game_id}")         # Active players
-            pipeline.delete(f"game_booked_players:{game_id}")  # Booked players (for tournaments)
-            
-            await pipeline.execute()       
-
-
-
-
-
-
- 
-        # step 2: prepare redis for game
-        async with await cls.get_redis_binary(cls.REDIS_GAME_URL) as redis_game:
-            await redis_game.set(f"game_settings:{game_id}", msgpack.packb(game_settings))  # dict   
-            # game health keys
-            recorded_key = f"game_recorded:{game_id}"  # bool default False
-            running_key = f"game_running:{game_id}"  # bool default False
-            finished_key = f"game_finished:{game_id}"  # bool default False
-            
-
-            # setting keys
-            state_key = f"game_state:{game_id}" # mspack
-            paddles_key = f"game_paddles:{game_id}" # hashmap
-            """ this is the loic from the paddle in the old version
-                paddle_positions = {                                        
-                 str(i): msgpack.packb({"position": 0.5})            
-                  for i in range(self.settings["num_players"]) -> num_player is in settings
-                  }       
-                await self.redis_conn.hset(self.paddles_key, mapping=paddle_positions)   
-            """
-            vertices_key = f"game_vertices:{game_id}"  # list or dict
-            normals_key  =  f"game_vertices:{game_id}"  # list or dict
-            players_sides_key = f"game_vertices:{game_id}"  # list or dict
-
-
-
-            # game_logic
-            players_values = f"game_players_value:{game_id}" # dict 
-            booked_players_key = f"game_booked_players:{game_id}" # set -> for tournaments
-            is_tournament_key  = f"game_is_tournament:{game_id}" # bool
-
-    
-            # key only for game
-            lock_key = f"game_lock:{game_id}" # bool
-            type_key = f"game_type:{game_id}" # string
          
 
     @classmethod
     def create_initial_state(cls, settings: Dict) -> Dict:
         """Create initial game state based on settings"""
-        try:
-            scale = settings.get("scale")
-            num_balls = settings.get("num_balls")
-            ball_size = settings.get("ball_size") * scale
-            initial_speed = settings.get("initial_ball_speed") * scale
-            active_sides = settings.get("players_sides") 
-            num_sides = settings.get("sides")
-
-            # Initialize balls with random directions
-            balls = []
-            for _ in range(num_balls):
-                angle = random.uniform(0, 2 * math.pi)
-                balls.append({
-                    "x": float(0),
-                    "y": float(0),
-                    "velocity_x": float(initial_speed * math.cos(angle)),
-                    "velocity_y": float(initial_speed * math.sin(angle)),
-                    "size": float(ball_size)
-                })
-
-            # Initialize paddles
-            paddles = []
-            for side_index in range(num_sides):
-                paddles.append({
-                    "position": float(0.5),
-                    "active": side_index in active_sides,
-                    "side_index": side_index
-                })
-
-            # Create complete state object
-            state = {
-                "balls": balls,
-                "paddles": paddles,
-                "scores": [int(0)] * len(active_sides),
-                "dimensions": {
-                    "paddle_length": float(settings.get("paddle_length", 0.3)) * scale,
-                    "paddle_width": float(settings.get("paddle_width", 0.1)) * scale,
-                },
-                "game_type": settings.get("type", "polygon"),
-                "game_time": 0,  # Add game time tracking
-                "last_update": time.time()  # Add timestamp for game updates
-            }
-
-            return state
-
-        except Exception as e:
-            print(f"Error creating initial game state: {e}")
-            raise
-
 
 
 

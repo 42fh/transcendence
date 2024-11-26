@@ -3,14 +3,15 @@ def add_cls_methods(cls):
     Decorator that adds class methods to a class.
     Includes methods for setting up a game 
     """
-    from .game_setup import setup_game, calculate_vertices, calculate_sides_normals, calculate_inner, calculate_player_side_indices
+    from .game_setup import setup_game, calculate_vertices, calculate_sides_normals, calculate_inner, calculate_player_side_indices, set_initial_state
 
     methods = {
         "setup_game": setup_game,
         "calculate_vertices": calculate_vertices,
         "calculate_sides_normals": calculate_sides_normals,
         "calculate_inner" : calculate_inner,
-        "calculate_player_side_indices" : calculate_player_side_indices
+        "calculate_player_side_indices" : calculate_player_side_indices,
+        "set_initial_state": set_initial_state
     }
 
     for name, method in methods.items():
