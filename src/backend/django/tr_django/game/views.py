@@ -112,6 +112,22 @@ async def get_all_games(request):
     return JsonResponse({"message": "only GET requests are allowed"}, status=400)
 
 
+@csrf_exempt
+async def get_detail_from_game(request):
+    if request.method == "GET":      
+        param = request.GET.get('game_id')
+        settings = await GameCordinator.get_detail_from_game(param)
+        json_string = json.dumps(settings, cls=DjangoJSONEncoder)
+        return JsonResponse(
+            {
+                "game_id": param,
+                "settings": json_string,
+                "message": "this are the settings of the game",
+            }
+        )
+
+    return JsonResponse({"message": "only GET requests are allowed"}, status=400)
+
 
 @csrf_exempt
 def create_game(request):

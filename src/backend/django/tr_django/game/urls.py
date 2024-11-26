@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path("get_detail_from_game/", views.get_detail_from_game, name="get_detail_from_game"),
     path("create_new_game/", views.create_new_game, name="create_new_game"),
     path("get_all_games/", views.get_all_games, name="get_all_games"),
     path("", views.transcendance, name="transcendance_home"),

@@ -37,10 +37,8 @@ class GameSettingsManager:
         EnumGameMode.CLASSIC: {"default": DEFAULT_CLASSIC, "fixed": CLASSIC_FIXED},
     }
 
-    # def __init__(self, redis_conn):
-    #    self.redis_conn = redis_conn
 
-    async def create_game_settings(
+    def create_game_settings(
         self, user_settings: Dict[str, Any], game_id: str
     ) -> Dict[str, Any]:
         """ """
@@ -68,19 +66,15 @@ class GameSettingsManager:
             GameClass = AGameManager.get_game_class(game_type)
             # Calculate active sides for paddles using concrete class
             print("TYPE: ", GameClass)
-            GameClass.setup_game(settings)
-            print(settings)
+            settings = GameClass.setup_game(settings)
+            print("GM: ", settings)
+            return settings
+
         except Exception as e:
             print("creation settings error: ", e)
 
     # here we can add a second dict chain (e.g. min_values) and can then check against this
     def validate_settings(self, settings: Dict[str, Any]) -> None:
-        print(
-            settings.get("num_players"),
-            settings.get("min_players"),
-            settings.get("sides"),
-            settings.get("num_balls"),
-        )
 
         if settings.get("num_players") < 1:
             raise GameSettingsError("num_players must be at least 1")
