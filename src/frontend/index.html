@@ -115,12 +115,72 @@
         <p>Duration: <span class="game-duration"></span></p>
         <p>Winner: <span class="game-winner"></span></p>
       </div>
+      <button id="cta__button-settings">Settings</button>
+
     </template>
 
 
 
 
         <!-- Game Settings Template-->
+    <template id="game-settings-template">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Pong Game Settings</title>
+      </head>
+      <body>
+          <div id="setupContainer">
+              <form id="gameForm">
+                  <div>
+                      <label for="playerId">Player ID:</label>
+                      <input type="text" id="playerId" name="playerId">
+                  </div>
+                  <div>
+                      <label for="numPlayers">Number of Players:</label>
+                      <input type="number" id="numPlayers" name="numPlayers" min="2" max="8">
+                  </div>
+                  <div>
+                      <label for="numSides">Number of Sides:</label>
+                      <input type="number" id="numSides" name="numSides" min="3" max="12">
+                  </div>
+                  <div>
+                      <label for="numBalls">Number of Balls:</label>
+                      <input type="number" id="numBalls" name="numBalls" min="1" max="4">
+                  </div>
+                  <div>
+                      <label for="shape">Shape:</label>
+                      <select id="shape" name="shape">
+                          <option value="regular">Regular</option>
+                          <option value="irregular">Irregular</option>
+                          <option value="star">Star</option>
+                          <option value="crazy">Crazy</option>
+                      </select>
+                  </div>
+                  <div>
+                      <label for="scoreMode">Score Mode:</label>
+                      <select id="scoreMode" name="scoreMode">
+                          <option value="classic">Classic</option>
+                          <option value="modern">Modern</option>
+                      </select>
+                  </div>
+                  <div>
+                      <label for="debugMode">Debug Mode:</label>
+                      <input type="checkbox" id="debugMode" name="debugMode">
+                  </div>
+                  <div>
+                      <button type="submit">Create Game</button>
+                  </div>
+              </form>
+              <div id="status" class="status"></div>
+              <div id="eventLog"></div>
+          </div>
+          <div id="main-content"></div>
+          <script type="module" src="gameSettings.js"></script>
+      </body>
+    </template>
+    
+
 
 
 
