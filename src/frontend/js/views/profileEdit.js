@@ -73,17 +73,33 @@ function populateFormFields(content, userData) {
 // Helper function for setupAvatarUpload
 function handleAvatarUpload(file, avatarButton, avatarImg, userId) {
   if (!file) return;
+  const MAX_SIZE = 2 * 1024 * 1024; // 2MB in bytes
+
+  if (file.size > MAX_SIZE) {
+    showToast("Image size must be less than 2MB", "error");
+    return;
+  }
 
   return new Promise(async (resolve, reject) => {
     try {
+      console.log("DEBUG: Starting avatar upload");
+      console.log("DEBUG: File details:", {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+      });
       avatarButton.textContent = "Uploading...";
       avatarButton.disabled = true;
 
       const avatarUrl = await uploadUserAvatar(userId, file);
+      console.log("DEBUG: Avatar upload successful. New URL:", avatarUrl);
+
       avatarImg.src = avatarUrl;
       showToast("Avatar updated successfully!");
       resolve(avatarUrl);
     } catch (error) {
+      console.error("DEBUG: Avatar upload failed:", error);
+
       showToast("Failed to upload avatar", "error");
       reject(error);
     } finally {
