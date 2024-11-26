@@ -63,9 +63,9 @@ export function loadHomePage(addToHistory = true) {
     //   });
     // }
 
-
-
-    // click makes modal pop
+    
+    
+    // Home play selector modal
     const playButton = document.getElementById("home__button-play");
     if (playButton) {
       playButton.addEventListener("click", function () {
@@ -73,6 +73,12 @@ export function loadHomePage(addToHistory = true) {
           submitHandler: function () { console.log("homeplay-modal-template submitted"); },
         })
       });
+    }
+    
+    // <button id="play2d-button" class="play-button" onclick="loadGame2dPage();">Play 2D</button>
+    const play2dButton = document.getElementById("play2d-button");
+    if (play2dButton) {
+      play2dButton.addEventListener("click", loadGame2dPage);
     }
 
     const chatsButton = document.getElementById("chats");
