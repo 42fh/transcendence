@@ -46,6 +46,7 @@ services:
       - POSTGRES_PORT=5432
     networks:
       - transcendence_network
+    stop_grace_period: 0m3s
   nginx:
     build:
       # we need the context to be ./src instad of ./src/nginx to so that it can see easily the frontend folder
