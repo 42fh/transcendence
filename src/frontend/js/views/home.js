@@ -5,6 +5,9 @@ import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { updateActiveNavItem } from "../components/bottom-nav.js";
 import { loadChatPage } from "./chats.js";
 
+// import modal
+import { renderModal, closeModal, displayModalError } from "../components/modal.js";
+
 export function loadHomePage(addToHistory = true) {
   try {
     if (addToHistory) {
@@ -54,10 +57,22 @@ export function loadHomePage(addToHistory = true) {
       logoutButton.addEventListener("click", handleLogout);
     }
 
+    // const playButton = document.getElementById("home__button-play");
+    // if (playButton) {
+    //   playButton.addEventListener("click", function () {
+    //     mainContent.innerHTML = "<h2>A first game is built here</h2>";
+    //   });
+    // }
+
+
+
+    // click makes modal pop
     const playButton = document.getElementById("home__button-play");
     if (playButton) {
       playButton.addEventListener("click", function () {
-        mainContent.innerHTML = "<h2>A first game is built here</h2>";
+        renderModal("homeplay-modal-template", {
+          submitHandler: function () { console.log("homeplay-modal-template submitted")},
+        })
       });
     }
 
