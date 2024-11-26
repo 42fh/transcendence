@@ -201,6 +201,74 @@ export default class GameUI {
     return tableGroup;
   }
 
+  createEndScreen(data) {
+    if (!data) return;
+
+    const template = document.getElementById("3d-game-template");
+    const endScreen = template.content.cloneNode(true);
+
+    // Style the container
+    const container = endScreen.querySelector(".end-screen");
+    container.style.cssText = `
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background-color: rgba(0, 0, 0, 0.9);
+          padding: 2rem;
+          border-radius: 10px;
+          text-align: center;
+          color: white;
+          font-family: Arial, sans-serif;
+          min-width: 300px;
+      `;
+
+    // Set title
+    const title = endScreen.querySelector(".title");
+    title.textContent = data.winner === "you" ? "You Win!" : "Game Over";
+    title.style.cssText = `
+          font-size: 3rem;
+          margin-bottom: 1rem;
+          color: ${data.winner === "you" ? "#4CAF50" : "#f44336"};
+      `;
+
+    // Add scores
+    const scoresContainer = endScreen.querySelector(".scores");
+    scoresContainer.style.cssText = `
+          font-size: 1.5rem;
+          margin: 1rem 0;
+      `;
+
+    if (data.game_state.scores) {
+      data.game_state.scores.forEach((score, index) => {
+        const playerScore = document.createElement("p");
+        playerScore.textContent = `Player ${index + 1}: ${score}`;
+        scoresContainer.appendChild(playerScore);
+      });
+    }
+
+    // Style exit button
+    const exitButton = endScreen.querySelector(".exit-button");
+    exitButton.style.cssText = `
+          background-color: #4CAF50;
+          border: none;
+          color: white;
+          padding: 15px 32px;
+          text-align: center;
+          text-decoration: none;
+          display: inline-block;
+          font-size: 16px;
+          margin: 4px 2px;
+          cursor: pointer;
+          border-radius: 4px;
+      `;
+    exitButton.onclick = () => {
+      container.remove();
+    };
+
+    return endScreen;
+  }
+
   updateScoreTable(scores) {
     scores.forEach((score, index) => {
       if (score !== this.game.scores[index] && score !== 0) {

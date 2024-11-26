@@ -222,6 +222,7 @@ export default class GameConstructor {
           break;
         case "game_finished":
           console.log("game_finished: ", message);
+          this.ui.createEndScreen(message);
           break;
 
         default:
