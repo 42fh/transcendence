@@ -284,12 +284,6 @@ class UserDetailView(View):
 
     def get(self, request, user_id):
         try:
-            # Validate UUID format
-            try:
-                UUID(str(user_id))
-            except ValueError:
-                return JsonResponse({"error": "Invalid user ID format"}, status=400)
-
             user = CustomUser.objects.get(id=user_id)
 
             try:
@@ -343,31 +337,53 @@ class UserDetailView(View):
                     },
                     "recent_matches": recent_matches,
                 }
-
                 return JsonResponse(user_data)
-
             except Player.DoesNotExist:
                 return JsonResponse({"error": "Player profile not found"}, status=404)
-
         except CustomUser.DoesNotExist:
             return JsonResponse({"error": "User not found"}, status=404)
 
     def patch(self, request, user_id):
-        """Handle PATCH request to update user details"""
+        """Update user details (besides avatar)"""
         if not request.user.is_authenticated:
             return JsonResponse({"error": "Not authenticated"}, status=401)
 
-        # Check if user is updating their own profile
         if str(request.user.id) != str(user_id):
             return JsonResponse({"error": "Cannot update other users' profiles"}, status=403)
 
         try:
-            # Get the user to update from database
             user = CustomUser.objects.get(id=user_id)
+        except CustomUser.DoesNotExist:
+            return JsonResponse({"error": "User not found"}, status=404)
 
-            # Log received data
+        # print("DEBUG: Raw request META:", request.META)
+        # print("DEBUG: Raw request body:", request.body[:1000])  # First 1000 bytes to avoid huge output
+        # print("DEBUG: Request Content-Type:", request.content_type)
+        # print("DEBUG: Request FILES:", request.FILES)
+
+        try:
+            # Handle file upload (like the user changing avatar)
+            # MAX_AVATAR_SIZE = 2 * 1024 * 1024  # 2MB in bytes
+            # if request.FILES.get("avatar"):
+            # if "avatar" in request.FILES:
+            # print("DEBUG: Processing avatar upload")
+            # old_avatar = user.avatar.path if user.avatar else "No previous avatar"
+            # print(f"DEBUG: Old avatar path: {old_avatar}")
+
+            # user.avatar = request.FILES["avatar"]
+
+            # if user.avatar.size > MAX_AVATAR_SIZE:
+            #     print(f"DEBUG: Avatar size exceeds the limit of {MAX_AVATAR_SIZE} bytes")
+            #     error = f"Avatar size exceeds the limit of {MAX_AVATAR_SIZE} bytes"
+            #     return JsonResponse({"error": error}, status=400)
+            # user.save()
+            # print(f"DEBUG: New avatar saved. Path: {user.avatar.path}")
+            # print(f"DEBUG: New avatar URL: {user.avatar.url}")
+
+            # Handle other fields (JSON body)
+            # elif request.content_type == "application/json":
+
             data = json.loads(request.body)
-            print("Received update data:", data)
 
             print(
                 "Before update:",
@@ -384,7 +400,7 @@ class UserDetailView(View):
 
             # Fields that can be updated
             updatable_fields = {
-                "username",  # Add username to updatable fields
+                "username",
                 "first_name",
                 "last_name",
                 "email",
@@ -399,10 +415,6 @@ class UserDetailView(View):
             for field in updatable_fields:
                 if field in data:
                     setattr(user, field, data[field])
-
-            # Handle avatar separately if it's in request.FILES
-            if request.FILES.get("avatar"):
-                user.avatar = request.FILES["avatar"]
 
             user.save()
 
@@ -448,6 +460,41 @@ class UserDetailView(View):
         except Exception as e:
             print("Error updating user:", str(e))
             return JsonResponse({"error": str(e)}, status=400)
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class UserAvatarView(View):
+    """Handle user avatar uploads"""
+
+    MAX_AVATAR_SIZE = 2 * 1024 * 1024  # 2MB in bytes
+
+    def post(self, request, user_id):
+        """Upload a new avatar"""
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Not authenticated"}, status=401)
+
+        if str(request.user.id) != str(user_id):
+            return JsonResponse({"error": "Cannot update other users' avatars"}, status=403)
+
+        try:
+            user = CustomUser.objects.get(id=user_id)
+        except CustomUser.DoesNotExist:
+            return JsonResponse({"error": "User not found"}, status=404)
+
+        if "avatar" not in request.FILES:
+            return JsonResponse({"error": "No avatar file provided"}, status=400)
+
+        avatar_file = request.FILES["avatar"]
+
+        # Validate file size
+        if avatar_file.size > self.MAX_AVATAR_SIZE:
+            return JsonResponse({"error": f"Avatar size exceeds the limit of {self.MAX_AVATAR_SIZE} bytes"}, status=400)
+
+        # Save the new avatar
+        user.avatar = avatar_file
+        user.save()
+
+        return JsonResponse({"message": "Avatar updated successfully", "avatar": user.avatar.url})
 
 
 @method_decorator(csrf_exempt, name="dispatch")
