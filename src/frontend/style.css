@@ -1,3 +1,23 @@
+#games-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+#games-list li {
+  margin-bottom: 10px;
+}
+
+#cta__button-settings {
+  display: block;
+  margin-top: 20px;
+}
+
+
+
+
+
+
 :root {
   /* Base Colors */
   --color-background: #000000; /* Black - Main app background */

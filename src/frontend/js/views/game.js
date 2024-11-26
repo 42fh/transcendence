@@ -35,12 +35,11 @@ export async function gameHome() {
     const data = await response.json();
     console.log("Available games:", data);
 
-    // Parse and render games
     const gamesContainer = document.getElementById("games-container");
     if (!gamesContainer) {
       throw new Error("#games-container element not found");
     }
-    gamesContainer.innerHTML = "";
+    gamesContainer.innerHTML = ""; // Clear existing content
 
     const games = JSON.parse(data.games);
     games.forEach((gameId) => {
@@ -55,19 +54,26 @@ export async function gameHome() {
       gamesContainer.appendChild(gameItem);
     });
 
+    // Only add settings button if there are games
+    if (games.length > 0) {
+      const settingsButton = document.createElement('button');
+      settingsButton.id = 'cta__button-settings';
+      settingsButton.textContent = 'Settings';
+      settingsButton.addEventListener("click", gameSettings);
+      gamesContainer.appendChild(settingsButton);
+    }
+
     gamesContainer.style.display = "block";
 
     
-    const settingsButton = document.getElementById("cta__button-settings");
-    if (settingsButton) {
-      settingsButton.addEventListener("click", gameSettings);
-    }
+    const settingsButton = document.createElement('button');
+    settingsButton.id = 'cta__button-settings';
+    settingsButton.textContent = 'Settings';
+    gamesContainer.appendChild(settingsButton);
 
-    window.addEventListener("beforeunload", () => {
-      mainContent.innerHTML = ""; // clear content when navigating away
-    });
+    settingsButton.addEventListener("click", gameSettings);
 
-    return data;
+    // ... rest of the code ...
   } catch (error) {
     console.error("Error fetching available games:", error);
     throw error;

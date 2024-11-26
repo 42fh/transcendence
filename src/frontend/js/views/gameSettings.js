@@ -1,5 +1,5 @@
 import { CONFIG } from './config.js';
-import { showToast } from '../utils/toast.js';
+// import { showToast } from '../utils/toast.js';
 
 export class gameSettings {
     constructor() {
