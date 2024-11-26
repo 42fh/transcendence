@@ -56,3 +56,7 @@ db.sqlite3
 # Docker
 postgres_data/
 /posgtres_data
+
+# Logs
+**/logs/
+*.log
