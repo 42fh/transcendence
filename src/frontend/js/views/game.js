@@ -62,20 +62,11 @@ export async function gameHome() {
       const settingsButton = document.getElementById("cta__button-settings");
       settingsButton.style.display = "block"; // Show the button
       settingsButton.addEventListener("click", () => {
-        // Render the game settings template before calling gameSettings
-        const settingsTemplate = document.getElementById(
-          "game-settings-template"
-        );
-        const mainContent = document.getElementById("main-content");
-        if (settingsTemplate && mainContent) {
-          const settingsContent = document.importNode(
-            settingsTemplate.content,
-            true
-          );
-          mainContent.innerHTML = ""; // Clear existing content
-          mainContent.appendChild(settingsContent);
-          gameSettings(); // Now call gameSettings after rendering the template
-        }
+        // Clear the main content before rendering settings
+        mainContent.innerHTML = ""; // Clear existing content
+        gamesContainer.innerHTML = ""; // Clear games container
+        settingsButton.style.display = "none"; // Hide the settings button
+        gameSettings(); // Call gameSettings to render the settings
       });
     }
 
