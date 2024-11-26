@@ -4,12 +4,15 @@ import { gameSettings } from "./gameSettings.js";
 export async function gameHome() {
   try {
     console.log("gameHome");
-    const response = await fetch(`${CONFIG.API_BASE_URL}/api/game/get_all_games/`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await fetch(
+      `${CONFIG.API_BASE_URL}/api/game/get_all_games/`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     console.log("received -->", response);
 
@@ -54,24 +57,14 @@ export async function gameHome() {
       gamesContainer.appendChild(gameItem);
     });
 
-    // Only add settings button if there are games
+    // Only show the settings button if there are games
     if (games.length > 0) {
-      const settingsButton = document.createElement('button');
-      settingsButton.id = 'cta__button-settings';
-      settingsButton.textContent = 'Settings';
+      const settingsButton = document.getElementById("cta__button-settings");
+      settingsButton.style.display = "block"; // Show the button
       settingsButton.addEventListener("click", gameSettings);
-      gamesContainer.appendChild(settingsButton);
     }
 
     gamesContainer.style.display = "block";
-
-    
-    const settingsButton = document.createElement('button');
-    settingsButton.id = 'cta__button-settings';
-    settingsButton.textContent = 'Settings';
-    gamesContainer.appendChild(settingsButton);
-
-    settingsButton.addEventListener("click", gameSettings);
 
     // ... rest of the code ...
   } catch (error) {

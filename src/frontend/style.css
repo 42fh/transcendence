@@ -13,6 +13,21 @@
   margin-top: 20px;
 }
 
+.game-item {
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
+  padding: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--border-radius);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-base);
+  transition: background-color var(--transition-duration) var(--transition-timing);
+}
+
+.game-item:hover {
+  background-color: var(--color-hover);
+}
 
 
 
