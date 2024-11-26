@@ -1,6 +1,8 @@
 import { handleLogout } from "./auth.js";
 import { displayLogoutError } from "../utils/errors.js";
 import { loadTournamentsPage } from "./tournaments.js";
+import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
+import { updateActiveNavItem } from "../components/bottom-nav.js";
 import { loadChatPage } from "./chats.js";
 import { gameHome } from "./game.js";
 
@@ -14,12 +16,7 @@ export function loadHomePage(addToHistory = true) {
         },
         ""
       );
-    }
-
-    // Hide the initial container
-    const container = document.getElementById("container");
-    if (container) {
-      container.style.display = "none";
+      if (!addToHistory) updateActiveNavItem("home");
     }
 
     // Show main-content and load the home template
@@ -45,20 +42,13 @@ export function loadHomePage(addToHistory = true) {
       bottomNavContainer.style.display = "block";
     }
 
-    // Get the username from localStorage and set the greeting message
-    const username = localStorage.getItem("username");
-    const greetingElement = document.getElementById("greeting");
-    if (greetingElement && username) {
-      greetingElement.innerHTML = `Hello ${username}! 👋`;
-    }
-
     // Add event listeners only if elements exist
     const logoutButton = document.getElementById("logout-button");
     if (logoutButton) {
       logoutButton.addEventListener("click", handleLogout);
     }
 
-    const playButton = document.getElementById("play");
+    const playButton = document.getElementById("home__button-play");
     if (playButton) {
       playButton.addEventListener("click", gameHome);
     }

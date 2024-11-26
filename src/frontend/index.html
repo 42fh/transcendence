@@ -4,42 +4,40 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pong Game - Welcome</title>
-    <!-- <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" /> -->
     <link rel="stylesheet" href="css/fonts.css" />
     <link rel="stylesheet" href="style.css" />
-    <!-- <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=home,account_circle,chat_bubble,more_vert,settings,trophy,add_circle,search"
-    /> -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
   </head>
   <body>
-    <div id="container" class="container-index">
-      <h1 class="title-index">PONG</h1>
-      <div class="button-container-index">
-        <!-- Buttons have an event listener that will open the modal -->
-        <button class="button-index" id="signup-button">SIGN UP</button>
-        <button class="button-index" id="login-button">LOG IN</button>
-      </div>
-    </div>
+    <!-- Main content area where other views will load -->
+    <div id="main-content"></div>
+    <div id="bottom-nav-container"></div>
 
-    <!-- Modal HTML (Initially hidden) -->
-    <div id="modal-overlay" class="modal-overlay">
-      <div id="modal" class="modal">
-        <span id="close-modal" class="close-btn">&times;</span>
-        <div id="modal-content" class="modal-content">
-          <h2 id="modal-title">Modal Title</h2>
-          <p id="modal-text">This is a placeholder text in the modal.</p>
-          <!-- Form will be injected here later or in the modal itself in script.js -->
+    <!-- Modal Template -->
+    <template id="modal-template">
+      <div id="modal-overlay" class="modal-overlay">
+        <div id="modal" class="modal">
+          <span id="close-modal" class="close-btn">&times;</span>
+          <div id="modal-content" class="modal-content">
+            <h2 id="modal-title">Modal Title</h2>
+            <p id="modal-text">This is a placeholder text in the modal.</p>
+            <!-- Form will be injected here later or in the modal itself in script.js -->
+          </div>
         </div>
       </div>
-    </div>
+    </template>
 
-    <!-- Main content area where other views will load -->
-    <div id="main-content" style="display: none"></div>
-    <div id="bottom-nav-container"></div>
-    <!-- Hidden templates for modal content -->
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template -->
+    <!-- Auth Template -->
+    <template id="auth-template">
+      <div class="auth-container">
+        <h1>PONG</h1>
+        <div class="auth-buttons">
+          <button id="login-button" class="auth-button">Login</button>
+          <button id="signup-button" class="auth-button">Sign Up</button>
+        </div>
+      </div>
+    </template>
+
     <!-- Login Form Template -->
     <template id="login-template">
       <p id="modal-message" class="modal-message"></p>
@@ -77,38 +75,24 @@
 
     <!-- Home Page Template -->
     <template id="home-template">
-      <div id="container" class="home-container">
-        <h1>PONG</h1>
-        <div id="greeting" style="text-align: center; margin-top: 20px; font-size: 20px"></div>
-        <!-- Logout Button -->
-        <div style="text-align: center; margin-top: 10px">
-          <button id="logout-button" style="font-size: 16px">Logout</button>
-        </div>
+      <div class="page-container page-container--home">
+        <h1 class="page-container__title page-container__title--home">PONG</h1>
 
-        <div class="button-container-home">
-          <div>
-            <div class="button-wrapper">
-              <button id="play">PLAY</button>
-            </div>
-            <div class="button-wrapper">
-              <button id="tournaments">TOURNAMENTS</button>
-            </div>
+        <div class="home__content">
+          <button id="home__button-play" class="home__button button--neon">PLAY</button>
+          <div class="home__net">
+            <div class="home__net-segment home__net-segment--black"></div>
+            <div class="home__net-segment home__net-segment--white"></div>
+            <div class="home__net-segment home__net-segment--black"></div>
+            <div class="home__net-segment home__net-segment--white"></div>
+            <div class="home__net-segment home__net-segment--black"></div>
+            <div class="home__net-segment home__net-segment--white"></div>
+            <div class="home__net-segment home__net-segment--black"></div>
+            <div class="home__net-segment home__net-segment--white"></div>
+            <div class="home__net-segment home__net-segment--black"></div>
+            <div class="home__net-segment home__net-segment--white"></div>
           </div>
-          <div class="net">
-            <div class="net-segment black"></div>
-            <div class="net-segment white"></div>
-            <div class="net-segment black"></div>
-            <div class="net-segment white"></div>
-            <div class="net-segment black"></div>
-            <div class="net-segment white"></div>
-            <div class="net-segment black"></div>
-            <div class="net-segment white"></div>
-            <div class="net-segment black"></div>
-            <div class="net-segment white"></div>
-          </div>
-          <div class="button-wrapper">
-            <button id="chats">CHATS</button>
-          </div>
+          <button id="home__button-cta" class="home__button button--gradient">CTA</button>
         </div>
       </div>
     </template>
@@ -409,7 +393,6 @@
       </nav>
     </template>
 
-    <!-- Profile Template -->
     <template id="profile-template">
       <div class="profile">
         <div class="profile__header">
@@ -440,14 +423,14 @@
         </div>
 
         <div class="profile__bio">
-          <h3>Bio</h3>
+          <h3 class="profile__bio-title">Bio</h3>
           <p class="profile__bio-text"></p>
         </div>
 
         <div class="profile__matches">
-          <h3>Recent Matches</h3>
+          <h3 class="profile__matches-title">Recent Matches</h3>
           <div class="profile__matches-list">
-            <!-- Match history will be inserted here -->
+            <!-- Matches will be inserted here dynamically -->
           </div>
         </div>
 
@@ -455,6 +438,14 @@
         <div class="profile__actions">
           <button class="profile__edit-button">Edit Profile</button>
         </div>
+      </div>
+    </template>
+
+    <template id="profile-match-template">
+      <div class="profile__match-item">
+        <span class="profile__match-date"></span>
+        <span class="profile__match-result"></span>
+        <span class="profile__match-opponent"></span>
       </div>
     </template>
 
