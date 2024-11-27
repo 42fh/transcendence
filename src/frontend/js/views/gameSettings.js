@@ -1,4 +1,5 @@
 import { CONFIG } from "../config/constants.js";
+import { createNewGame } from "../services/gameSettingsService.js";
 
 export function gameSettings() {
   console.log("print from gameSettings");
@@ -76,15 +77,10 @@ export function gameSettings() {
       }
     });
 
-    // Initialize game type specific fields
     updateGameTypeFields();
-
-    // Initialize shape description
-    updateShapeDescription();
   }
 
   function setupEventListeners() {
-    // Ensure elements exist before adding event listeners
     const toggleSettingsButton = document.getElementById("toggleSettings");
     if (toggleSettingsButton) {
       toggleSettingsButton.addEventListener("click", () => {
@@ -208,64 +204,6 @@ export function gameSettings() {
       sidesField.style.display =
         state.gameType !== "classic" ? "block" : "none";
     }
-
-    updateGameDescription();
-  }
-
-  function updateGameDescription() {
-    const descElement = document.getElementById("gameDescription");
-    if (!descElement) return;
-
-    const config = state.gameConfigs[state.gameType];
-    if (!config) return;
-
-    descElement.innerHTML = `
-            <div class="game-description">
-                <p>${config.description}</p>
-                <ul>
-                    <li>Game Type: ${config.type}</li>
-                    <li>Number of Sides: ${config.sides} ${
-      state.gameType === "classic" ? "(2 paddles, 2 walls)" : ""
-    }</li>
-                    <li>Maximum Players: ${config.maxPlayers}</li>
-                </ul>
-            </div>
-        `;
-  }
-
-  function updateShapeDescription() {
-    const shapeDescElement = document.getElementById("shapeDescription");
-    if (!shapeDescElement) return;
-
-    const descriptions = {
-      regular: "",
-      irregular: "Slightly deformed polygon with balanced sides",
-      star: "Star-like shape with alternating long and short sides",
-      crazy: "Extreme deformation with sharp transitions",
-    };
-
-    shapeDescElement.textContent = descriptions[state.formData.shape] || "";
-    shapeDescElement.style.display =
-      state.formData.shape === "regular" ? "none" : "block";
-  }
-
-  function updateModeDescription() {
-    const modeDescElement = document.getElementById("modeDescription");
-    if (!modeDescElement) return;
-
-    const descriptions = {
-      regular: "Standard mode with balanced gameplay for all players.",
-      classic: "Traditional pong mode with a focus on simplicity.",
-      circular: "Unique circular gameplay with curved paddles and sides.",
-      irregular: "Dynamic mode with customizable, irregular shapes.",
-    };
-
-    // Update the text content with the appropriate description
-    modeDescElement.textContent = descriptions[state.formData.mode] || "";
-
-    // Optionally control visibility of the description
-    modeDescElement.style.display =
-      state.formData.mode === "regular" ? "none" : "block";
   }
 
   function logEvent(event) {
@@ -378,37 +316,14 @@ export function gameSettings() {
         JSON.stringify(gameConfig, null, 2)
       );
 
-      //TODO: Export call to a dedicated service ?
-      const response = await fetch(
-        `${CONFIG.API_BASE_URL}/api/game/create_new_game/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(gameConfig),
-        }
-      );
-
-      if (response.ok) {
-        console.log("POST request successful");
-        const data = await response.json();
-        console.log("Data received: ", data);
-        const gameId = data.gameId;
-        mainContent.innerHTML = `<div class="success">Game created successfully with ID: ${gameId}</div>`;
-        logEvent({
-          type: "info",
-          message: "Game created",
-          details: `Game ID: ${gameId}`,
-        });
-      } else {
-        console.log("POST request unsuccesful");
-        console.log(gameConfig);
-
-        const errorData = await response.json();
-        mainContent.innerHTML = `<div class="error">Error: ${errorData.message}</div>`;
-        showStatus(`Error: ${errorData.message}`, true);
-      }
+      const data = await createNewGame(gameConfig);
+      const gameId = data.gameId;
+      mainContent.innerHTML = `<div class="success">Game created successfully with ID: ${gameId}</div>`;
+      logEvent({
+        type: "info",
+        message: "Game created",
+        details: `Game ID: ${gameId}`,
+      });
     } catch (error) {
       const mainContent = document.getElementById("main-content");
       if (mainContent) {
@@ -431,7 +346,6 @@ export function gameSettings() {
   }
 }
 
-// Update the instantiation
 document.addEventListener("DOMContentLoaded", () => {
-  gameSettings(); // Call the function directly
+  gameSettings();
 });
