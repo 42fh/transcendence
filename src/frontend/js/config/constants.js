@@ -19,7 +19,7 @@ export const LOCAL_STORAGE_KEYS = {
 
 export const ASSETS = {
   IMAGES: {
-    DEFAULT_AVATAR: "../../static/images/default-avatar.jpeg",
+    DEFAULT_AVATAR: "../../../../media/avatars/default/default.jpeg",
   },
 };
 
