@@ -54,10 +54,7 @@ function populateFormFields(content, userData) {
   // Add defensive check for avatar
   const avatarImg = content.querySelector(".profile-edit__avatar");
   if (avatarImg) {
-    // console.log("Avatar image found");
-    // console.log("Avatar URL from userData:", userData.avatar); // Add this log
     avatarImg.src = userData.avatar || ASSETS.IMAGES.DEFAULT_AVATAR; // Use the same constant as profile.js
-    // console.log("Set avatar src to:", avatarImg.src); // Add this log
   } else {
     console.log("Avatar image not found");
   }
@@ -111,6 +108,7 @@ function handleAvatarUpload(file, avatarButton, avatarImg, userId) {
 
 function setupAvatarUpload(content, userId) {
   // TODO: the Avatar button should be an icon from the Google Material Icons library
+  // Hidden File Input Pattern or "Custom File Upload Button" Pattern
   const avatarButton = content.querySelector(".profile-edit__avatar-button");
   const avatarImg = content.querySelector(".profile-edit__avatar");
   const avatarInput = document.createElement("input");
@@ -118,12 +116,22 @@ function setupAvatarUpload(content, userId) {
   avatarInput.accept = "image/*";
   avatarInput.style.display = "none";
 
-  avatarInput.addEventListener("change", (e) => {
+  avatarInput.addEventListener("change", async (e) => {
     const file = e.target.files[0];
+    if (!file) {
+      console.log("No file selected");
+      return;
+    }
+    console.log("Selected file:", file);
+
     handleAvatarUpload(file, avatarButton, avatarImg, userId);
   });
 
-  avatarButton.addEventListener("click", () => avatarInput.click());
+  avatarButton.addEventListener("click", () => {
+    avatarInput.click();
+  });
+
+  content.appendChild(avatarInput);
 }
 
 function setFormLoading(form, isLoading) {
@@ -142,8 +150,6 @@ function setFormLoading(form, isLoading) {
 }
 
 async function handleFormSubmission(form, userId) {
-  console.log("Handling form submission");
-
   let hasErrors = false;
   form.querySelectorAll("input, textarea").forEach((input) => {
     const error = validateFormField(input);
@@ -159,7 +165,6 @@ async function handleFormSubmission(form, userId) {
     return;
   }
   try {
-    console.log("Starting form submission");
     setFormLoading(form, true);
     // Approach 1: querySelector
     console.log("--- Approach 1: querySelector ---");
@@ -182,9 +187,6 @@ async function handleFormSubmission(form, userId) {
 
     // Approach 2: FormData
     console.log("--- Approach 2: FormData ---");
-    console.log("Form being used:", form);
-    console.log("Form valid?", form.checkValidity());
-    console.log("Form elements count:", form.elements.length);
     // Try both ways to create FormData
     const formData = new FormData(form);
     const manualFormData = new FormData();
