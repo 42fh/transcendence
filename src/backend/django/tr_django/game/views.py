@@ -124,7 +124,7 @@ async def join_game(request, game_id):
 
         resposne = await GameCordinator.join_game(request, game_id)
 
-        if response.get('available', False):          
+        if response.get('available', True):          
             return JsonResponse(
                 {'available': True, 
                 'ws_url': f'ws://localhost:8000/ws/game/{game_id}/',
