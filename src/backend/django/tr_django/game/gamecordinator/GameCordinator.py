@@ -53,6 +53,25 @@ class GameCordinator:
     WAITING_GAMES = "waiting_games"
     RUNNING_GAMES = "running_games"
     FINISHED_GAMES = "finished_games"
+
+    # Player Managment
+    TOTAL_USERS = "total_users" # all active users (PLAYING, RECORDED, SPECTATOR)
+    PLAYING_USERS = "playing_users"
+    BOOKED_USERS = "booked_users"
+
+
+
+
+
+    # invidual Player Managment
+    BOOKED_USER_PREFIX = "booked_"
+    PLAYING_USER_PREFIX = "playing_"
+    
+    
+    # user online
+    USER_ONLINE_PREFIX = "user_online_"
+    USER_ONLINE_EXPIRY = 60             
+
     # more possible key
     # waiting_tournament_games_key  = "waiting_tournament_games" # tournament games has fixed players not pubblic
     # running_tournament_games_key  = "running_tournament_game"
@@ -196,9 +215,24 @@ class GameCordinator:
 
     @classmethod
     async def is_player_playing(cls, user_id) -> bool:
-       """check in booked tournament and single games if player is in there"""
-    # check booekd player( plus delete old ones) and playeing players if in their return false else true     
+        """
+        Check if a player is currently booked or playing in any game.
+        Uses Redis EXISTS to check for presence of status keys.
+        Returns True if player is playing/booked, False if they're available.
+        """
+        try:
+            async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
+                # Check if either key exists using EXISTS command
+                booked_exists = await redis_conn.exists(f"{cls.BOOKED_USER_PREFIX}{user_id}")
+                playing_exists = await redis_conn.exists(f"{cls.PLAYING_USER_PREFIX}{user_id}")
+                return bool(booked_exists or playing_exists)
+        except Exception as e:
+            print(f"Error checking player status: {e}")
+            return False
+
     
+
+
 
     @classmethod
     async def join_game(cls, request, game_id) -> dict:
@@ -269,4 +303,39 @@ class GameCordinator:
     async def set_to_finished_game(cls, game_id):
         pass
     
+    # for user managment 
+    # is user online 
+    @classmethod
+    async def is_user_online(cls, user_id: str) -> bool:
+        try:
+            async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
+                return bool(await redis_conn.exists(f"{cls.USER_ONLINE_PREFIX}{user_id}"))
+        except Exception as e:
+            print(f"Error checking online status: {e}")
+            return False
 
+    @classmethod
+    async def set_user_online(cls, user_id: str):
+        """
+        Set or refresh user's online status.
+        Each call resets the expiry timer to USER_ONLINE_EXPIRY seconds.
+        """
+        try:
+            async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
+                await redis_conn.set(
+                    f"{cls.USER_ONLINE_PREFIX}{user_id}",
+                    "",  # Empty value since we just need the key
+                    ex=cls.USER_ONLINE_EXPIRY
+                )
+        except Exception as e:
+            print(f"Error setting online status: {e}")
+
+
+
+     @classmethod
+    async def set_user_offline(cls, user_id: str):
+        try:
+            async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
+                await redis_conn.delete(f"{cls.USER_ONLINE_PREFIX}{user_id}")
+        except Exception as e:
+            print(f"Error setting offline status: {e}")
