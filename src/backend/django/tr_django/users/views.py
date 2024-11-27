@@ -15,6 +15,8 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from uuid import UUID
 from django.core.exceptions import ValidationError
 import uuid
+from django.conf import settings
+import logging
 
 
 logger = logging.getLogger(__name__)
@@ -466,6 +468,8 @@ class UserDetailView(View):
 class UserAvatarView(View):
     """Handle user avatar uploads"""
 
+    ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/jpg"]
+
     MAX_AVATAR_SIZE = 2 * 1024 * 1024  # 2MB in bytes
 
     def post(self, request, user_id):
@@ -485,14 +489,25 @@ class UserAvatarView(View):
             return JsonResponse({"error": "No avatar file provided"}, status=400)
 
         avatar_file = request.FILES["avatar"]
+        # Validate file type
+        if avatar_file.content_type not in self.ALLOWED_TYPES:
+            return JsonResponse(
+                {"error": f"Invalid file type. Allowed types: {', '.join(self.ALLOWED_TYPES)}"}, status=400
+            )
 
         # Validate file size
         if avatar_file.size > self.MAX_AVATAR_SIZE:
             return JsonResponse({"error": f"Avatar size exceeds the limit of {self.MAX_AVATAR_SIZE} bytes"}, status=400)
 
+        # Add debug logging
+        logger.debug(f"Saving avatar to: {settings.MEDIA_ROOT}")
+        logger.debug(f"File name: {avatar_file.name}")
+
         # Save the new avatar
         user.avatar = avatar_file
         user.save()
+        logger.debug(f"Saved avatar path: {user.avatar.path}")
+        logger.debug(f"Saved avatar URL: {user.avatar.url}")
 
         return JsonResponse({"message": "Avatar updated successfully", "avatar": user.avatar.url})
 
