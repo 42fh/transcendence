@@ -91,7 +91,7 @@ async function initializegameHome() {
       }
 
       const gameItem = document.importNode(template.content, true);
-      gameItem.querySelector(".game-id").textContent = gameId;
+      gameItem.getElementById("game-id").textContent = gameId;
 
       gamesContainer.appendChild(gameItem);
     });

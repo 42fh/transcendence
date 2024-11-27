@@ -101,13 +101,13 @@
     <!-- Game Settings Template 
      (list of games and button to create new game)-->
     <template id="game-item-template">
-      <div id="games-container">
+      <div id="games-container" class="page-container--games">
         <div class="game-item">
-          <p>Game ID: <span class="game-id"></span></p>
-          <p>Mode: <span class="game-mode"></span></p>
-          <p>Date: <span class="game-date"></span></p>
-          <p>Duration: <span class="game-duration"></span></p>
-          <p>Winner: <span class="game-winner"></span></p>
+          <p>Game ID: <span id="game-id"></span></p>
+          <p>Mode: <span></span></p>
+          <p>Date: <span></span></p>
+          <p>Duration: <span></span></p>
+          <p>Winner: <span></span></p>
         </div>
       </div>
       <button id="cta__button-settings" style="display: none;">Settings</button>
@@ -115,73 +115,62 @@
 
 
         <!-- Game Settings Template-->
-    <template id="game-settings-template">
-      <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Pong Game Settings</title>
-      </head>
-      <body>
-          <div id="setupContainer">
-              <form id="gameForm">
-                  <div>
-                      <label for="playerId">Player ID:</label>
-                      <input type="text" id="playerId" name="playerId">
-                  </div>
-                  <div>
-                      <label for="numPlayers">Number of Players:</label>
-                      <input type="number" id="numPlayers" name="numPlayers" min="2" max="8">
-                  </div>
-                  <div>
-                      <label for="numSides">Number of Sides:</label>
-                      <input type="number" id="numSides" name="numSides" min="3" max="12">
-                  </div>
-                  <div>
-                      <label for="numBalls">Number of Balls:</label>
-                      <input type="number" id="numBalls" name="numBalls" min="1" max="4">
-                  </div>
-                  
-                    <div>
-                      <label for="mode">Select Mode:</label>
-                      <select id="mode" name="mode">
-                          <option value="regular">Regular</option>
-                          <option value="classic">Classic</option>
-                          <option value="circular">Circular</option>
-                          <option value="irregular">Irregular</option>
-                      </select>
-                  </div>
-                  <div>
-                      <label for="shape">Shape:</label>
-                      <select id="shape" name="shape">
-                          <option value="regular">Regular</option>
-                          <option value="irregular">Irregular</option>
-                          <option value="star">Star</option>
-                          <option value="crazy">Crazy</option>
-                      </select>
-                  </div>
-                  <div>
-                      <label for="scoreMode">Score Mode:</label>
-                      <select id="scoreMode" name="scoreMode">
-                          <option value="classic">Classic</option>
-                          <option value="modern">Modern</option>
-                      </select>
-                  </div>
-                  <div>
-                      <label for="debugMode">Debug Mode:</label>
-                      <input type="checkbox" id="debugMode" name="debugMode">
-                  </div>
-                  <div>
-                      <button type="submit">Create Game</button>
-                  </div>
+        <template id="game-settings-template">
+          <div class="tournament-container page-container--settings">
+            <h2>GAME SETTINGS</h2>
+            <div class="tournament-detail-container">
+              <form id="gameForm" class="tournament-detail-section">
+                <div class="game-setting-group">
+                  <label for="playerId">Player ID:</label>
+                  <input type="text" id="playerId" name="playerId" class="create-tournament-select">
+                </div>
+                <div class="game-setting-group">
+                  <label for="numPlayers">Number of Players:</label>
+                  <input type="number" id="numPlayers" name="numPlayers" min="2" max="8" class="create-tournament-select">
+                </div>
+                <div class="game-setting-group">
+                  <label for="numSides">Number of Sides:</label>
+                  <input type="number" id="numSides" name="numSides" min="3" max="12" class="create-tournament-select">
+                </div>
+                <div class="game-setting-group">
+                  <label for="numBalls">Number of Balls:</label>
+                  <input type="number" id="numBalls" name="numBalls" min="1" max="4" class="create-tournament-select">
+                </div>
+                
+                <div class="game-setting-group">
+                  <label for="mode">Select Mode:</label>
+                  <select id="mode" name="mode" class="create-tournament-select">
+                    <option value="regular">Regular</option>
+                    <option value="classic">Classic</option>
+                    <option value="circular">Circular</option>
+                    <option value="irregular">Irregular</option>
+                  </select>
+                </div>
+                <div class="game-setting-group">
+                  <label for="shape">Shape:</label>
+                  <select id="shape" name="shape" class="create-tournament-select">
+                    <option value="regular">Regular</option>
+                    <option value="irregular">Irregular</option>
+                    <option value="star">Star</option>
+                    <option value="crazy">Crazy</option>
+                  </select>
+                </div>
+                <div class="game-setting-group">
+                  <label for="scoreMode">Score Mode:</label>
+                  <select id="scoreMode" name="scoreMode" class="create-tournament-select">
+                    <option value="classic">Classic</option>
+                    <option value="modern">Modern</option>
+                  </select>
+                </div>
+                <div class="game-setting-group">
+                </div>
               </form>
-              <div id="status" class="status" style="display: none;"></div>
-              <div id="eventLog"></div>
+            </div>
+            
+            <div id="status" class="tournament-detail-timetable-status" style="display: none;"></div>
+            <div id="eventLog" class="tournament-detail-description"></div>
           </div>
-          <div id="main-content"></div>
-          <script type="module" src="gameSettings.js"></script>
-      </body>
-    </template>
-    
+        </template>
 
 
 
