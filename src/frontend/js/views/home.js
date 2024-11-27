@@ -18,14 +18,13 @@ export function loadHomePage(addToHistory = true) {
       updateActiveNavItem("home");
     }
 
-    // Show main-content and load the home template
     const mainContent = document.getElementById("main-content");
     if (!mainContent) {
       throw new Error("Main content element not found");
     }
 
     mainContent.style.display = "block";
-    mainContent.innerHTML = ""; // Clear any existing content
+    mainContent.innerHTML = "";
 
     const template = document.getElementById("home-template");
     if (!template) {
@@ -35,13 +34,11 @@ export function loadHomePage(addToHistory = true) {
     const homeContent = document.importNode(template.content, true);
     mainContent.appendChild(homeContent);
 
-    // Make sure bottom nav is visible
     const bottomNavContainer = document.getElementById("bottom-nav-container");
     if (bottomNavContainer) {
       bottomNavContainer.style.display = "block";
     }
 
-    // Add event listeners only if elements exist
     const logoutButton = document.getElementById("logout-button");
     if (logoutButton) {
       logoutButton.addEventListener("click", handleLogout);

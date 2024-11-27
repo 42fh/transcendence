@@ -3,7 +3,6 @@ import { createNewGame } from "../services/gameSettingsService.js";
 
 export function gameSettings() {
   console.log("print from gameSettings");
-  // Encapsulated state
   const state = {
     gameType: "classic",
     showSettings: false,
@@ -52,13 +51,11 @@ export function gameSettings() {
     },
   };
 
-  // Clear existing content in main-content
   const mainContent = document.getElementById("main-content");
   if (mainContent) {
-    mainContent.innerHTML = ""; // Clear existing content
+    mainContent.innerHTML = "";
   }
 
-  // Render the game settings template
   const settingsTemplate = document.getElementById("game-settings-template");
   if (settingsTemplate) {
     const settingsContent = document.importNode(settingsTemplate.content, true);
@@ -69,7 +66,6 @@ export function gameSettings() {
   setupEventListeners();
 
   function initializeInterface() {
-    // Set initial form values
     Object.entries(state.formData).forEach(([key, value]) => {
       const element = document.getElementById(key);
       if (element) {
@@ -97,7 +93,6 @@ export function gameSettings() {
       });
     }
 
-    // Game type change handler
     const gameTypeSelect = document.getElementById("gameType");
     if (gameTypeSelect) {
       gameTypeSelect.addEventListener("change", (e) => {
@@ -106,7 +101,6 @@ export function gameSettings() {
       });
     }
 
-    // Shape change handler
     const shapeSelect = document.getElementById("shape");
     if (shapeSelect) {
       shapeSelect.addEventListener("change", (e) => {
@@ -123,7 +117,6 @@ export function gameSettings() {
       });
     }
 
-    // Form submission
     const gameForm = document.getElementById("gameForm");
     if (gameForm) {
       gameForm.addEventListener("submit", (e) => {
@@ -132,7 +125,6 @@ export function gameSettings() {
       });
     }
 
-    // Form input change handlers
     [
       "playerId",
       "numPlayers",
@@ -152,12 +144,11 @@ export function gameSettings() {
       }
     });
 
-    // Exit button to clear settings
     const exitButton = document.createElement("button");
     exitButton.textContent = "Exit Settings";
     exitButton.id = "exit-settings-button";
     exitButton.addEventListener("click", () => {
-      mainContent.innerHTML = ""; // Clear the settings when exiting
+      mainContent.innerHTML = "";
     });
     mainContent.appendChild(exitButton);
   }
@@ -166,7 +157,6 @@ export function gameSettings() {
     const config = state.gameConfigs[state.gameType];
     if (!config) return;
 
-    // Update number of players max value
     const numPlayersInput = document.getElementById("numPlayers");
     if (numPlayersInput) {
       numPlayersInput.max = config.maxPlayers;
@@ -176,12 +166,10 @@ export function gameSettings() {
       }
     }
 
-    // Update number of sides based on game type
     const numSidesInput = document.getElementById("numSides");
     if (numSidesInput) {
       numSidesInput.value = config.sides;
       numSidesInput.disabled = state.gameType === "classic";
-      // Update min/max based on game type
       if (state.gameType === "circular") {
         numSidesInput.min = 4;
         numSidesInput.max = 12;
@@ -192,13 +180,11 @@ export function gameSettings() {
       state.formData.numSides = config.sides;
     }
 
-    // Show/hide shape fields
     const shapeFields = document.querySelectorAll(".shape-fields");
     shapeFields.forEach((field) => {
       field.style.display = state.gameType === "irregular" ? "block" : "none";
     });
 
-    // Update sides field visibility
     const sidesField = document.getElementById("sidesField");
     if (sidesField) {
       sidesField.style.display =
@@ -224,14 +210,12 @@ export function gameSettings() {
             }
         `;
 
-    // Add new entry at the top
     if (state.eventLog.firstChild) {
       state.eventLog.insertBefore(logEntry, state.eventLog.firstChild);
     } else {
       state.eventLog.appendChild(logEntry);
     }
 
-    // Limit the number of log entries (optional)
     while (state.eventLog.children.length > 50) {
       state.eventLog.removeChild(state.eventLog.lastChild);
     }
@@ -253,7 +237,6 @@ export function gameSettings() {
     const shape = document.getElementById("shape").value;
     const scoreMode = document.getElementById("scoreMode").value;
 
-    // Validation
     if (numPlayers < 2 || numPlayers > config.maxPlayers) {
       showStatus(
         `Number of players must be between 2 and ${config.maxPlayers}`,
@@ -262,7 +245,6 @@ export function gameSettings() {
       return;
     }
 
-    // Validate sides based on game type
     if (state.gameType === "circular") {
       if (numSides < 4 || numSides > 12) {
         showStatus("Circular mode requires between 4 and 12 sides", true);
@@ -295,7 +277,6 @@ export function gameSettings() {
         throw new Error("Main content element not found");
       }
 
-      // Clear existing content and show loading state
       mainContent.innerHTML = '<div class="loading">Creating game...</div>';
 
       const gameConfig = {
