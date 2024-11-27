@@ -57,8 +57,8 @@ export function initializeChatWebSocket(wsUrl, otherUser, handlers) {
 
   window.chatSocket.onerror = () => {
       handlers.state.isSwitchingRoom = false;
-      if (typeof displayErrorMessageModalModal === 'function') {
-          displayErrorMessageModalModal("Failed to connect to chat");
+      if (typeof displayModalError === 'function') {
+          displayModalError("Failed to connect to chat");
       }
   };
 }
