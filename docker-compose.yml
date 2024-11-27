@@ -28,6 +28,7 @@ services:
     volumes:
       # Probably we don't want to have a volume for the django app in production but just copy the files
       - ./src/backend/django:/app
+      - ./media:/app/media
     ports:
       - "8000"
     depends_on:
@@ -58,6 +59,8 @@ services:
       # - /etc/letsencrypt/archive/django.sldunit.xyz:/etc/letsencrypt/archive/django.sldunit.xyz
     volumes:
       - ./src/frontend/:/usr/share/nginx/html
+      - ./src/nginx/logs:/var/log/nginx
+      - ./media:/var/www/media
     ports:
       # - "80:80"
       # - "443:443"
@@ -66,6 +69,7 @@ services:
       - "8080:80"
     environment:
       - ENVIRONMENT=production
+      # - NGINX_ENTRYPOINT_QUIET_LOGS=0 # to enable more verbose logging
     depends_on:
       - django
     networks:
