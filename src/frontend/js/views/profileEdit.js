@@ -173,15 +173,7 @@ async function handleFormSubmission(form, userId) {
     const updatedDataFromInputs = {};
 
     formInputs.forEach((input) => {
-      console.log(`Reading input ${input.name}:`, {
-        value: input.value,
-        name: input.name,
-        id: input.id,
-      });
-
-      if (input.value && input.value.trim() !== "") {
-        updatedDataFromInputs[input.name] = input.value.trim();
-      }
+      updatedDataFromInputs[input.name] = input.value.trim();
     });
     console.log("Data collected via querySelector:", updatedDataFromInputs);
 
