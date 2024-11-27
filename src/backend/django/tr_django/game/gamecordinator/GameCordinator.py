@@ -178,14 +178,6 @@ class GameCordinator:
             
             await pipeline.execute()
 
-         
-
-    @classmethod
-    def create_initial_state(cls, settings: Dict) -> Dict:
-        """Create initial game state based on settings"""
-
-
-
     # view
 
     @classmethod
@@ -201,16 +193,27 @@ class GameCordinator:
         pass
 
     @classmethod
-    async def get_detail_from_game(cls, game_id: str) -> dict:
+    async def get_detail_from_game(cls, game_id) -> dict:
         async with await cls.get_redis_binary(cls.REDIS_GAME_URL) as redis_game:
             stored_values = await redis_game.get(f"game_settings:{game_id}")    
         return_value = msgpack.unpackb(stored_values)
-        print("hallo: ", return_value)
         return return_value
 
     # from AGameManager with signals
-    def join_game(self, game_id: int, player_id):
+    @classmethod
+    async def join_game(cls, game_id, player_id):
+        pass
+    @classmethod
+    async def leave_game(cls, game_id, player_id):
+        pass
+    @classmethod
+    async def set_to_waiting_game(cls, game_id):
+        pass
+    @classmethod
+    async def set_to_running_game(cls, game_id):
+        pass
+    @classmethod
+    async def set_to_finished_game(cls, game_id):
         pass
 
-    def leave_game(self, game_id: int, player_id):
-        pass
+

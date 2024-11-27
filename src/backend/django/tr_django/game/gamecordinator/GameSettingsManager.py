@@ -91,3 +91,7 @@ class GameSettingsManager:
             value = settings.get(field)
             if value is not None and not (float(0) < value <= float(1)):
                 raise GameSettingsError(f"{field} must be between 0 and 1")
+    # create selections for frontend 
+    
+    def create_selcetions_of_data(self, user_settings: Dict[str, Any]) -> Dict[str, Any]:
+        pass
