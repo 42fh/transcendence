@@ -3,6 +3,7 @@ import { gameSettings } from "./gameSettings.js";
 
 let currentView = "home"; // Track the current view, default is 'home'
 
+//TODO: Export call to a dedicated service ?
 export async function gameHome() {
   try {
     console.log("gameHome");
@@ -38,12 +39,12 @@ export async function gameHome() {
     }
 
     const data = await response.json();
-    console.log("Available games:", data);
+    // console.log("Available games:", data);
 
     const gamesContainer = document.getElementById("games-container");
     if (gamesContainer) {
-      gamesContainer.innerHTML = ""; // Clear existing game items
-      gamesContainer.style.display = "none"; // Hide the container
+      gamesContainer.innerHTML = "";
+      gamesContainer.style.display = "none";
     }
 
     const games = JSON.parse(data.games);
@@ -59,16 +60,14 @@ export async function gameHome() {
       gamesContainer.appendChild(gameItem);
     });
 
-    // Only show the settings button if there are games
-    if (games.length > 0) {
-      const settingsButton = document.getElementById("cta__button-settings");
-      settingsButton.style.display = "block"; // Show the button
-      settingsButton.addEventListener("click", () => {
-        // Transition to settings view
-        currentView = "settings"; // Set the current view to 'settings'
-        showSettings();
-      });
-    }
+    // TODO: separate return of get_all_games and settingsButton
+    const settingsButton = document.getElementById("cta__button-settings");
+    settingsButton.style.display = "block";
+    settingsButton.addEventListener("click", () => {
+      // Transition to settings view
+      currentView = "settings"; // Set the current view to 'settings'
+      showSettings();
+    });
 
     gamesContainer.style.display = "block";
   } catch (error) {

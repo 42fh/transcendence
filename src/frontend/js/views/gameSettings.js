@@ -378,6 +378,7 @@ export function gameSettings() {
         JSON.stringify(gameConfig, null, 2)
       );
 
+      //TODO: Export call to a dedicated service ?
       const response = await fetch(
         `${CONFIG.API_BASE_URL}/api/game/create_new_game/`,
         {
