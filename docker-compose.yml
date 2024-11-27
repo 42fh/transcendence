@@ -5,6 +5,8 @@ services:
       - "6380:6380"
     networks:
       - transcendence_network
+    sysctls:
+      vm.overcommit_memory: 1
   postgres:
     image: "postgres:16"
     environment:
