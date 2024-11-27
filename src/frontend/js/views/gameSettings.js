@@ -1,11 +1,9 @@
 import { CONFIG } from "../config/constants.js";
-// import { showToast } from '../utils/toast.js';
 
 export function gameSettings() {
   console.log("print from gameSettings");
   // Encapsulated state
   const state = {
-    debugEnabled: false,
     gameType: "classic",
     showSettings: false,
     eventLog: document.getElementById("eventLog"),
@@ -135,14 +133,6 @@ export function gameSettings() {
       gameForm.addEventListener("submit", (e) => {
         e.preventDefault();
         submitSettings();
-      });
-    }
-
-    // Debug mode toggle
-    const debugModeCheckbox = document.getElementById("debugMode");
-    if (debugModeCheckbox) {
-      debugModeCheckbox.addEventListener("change", (e) => {
-        state.debugEnabled = e.target.checked;
       });
     }
 
@@ -278,10 +268,6 @@ export function gameSettings() {
       state.formData.mode === "regular" ? "none" : "block";
   }
 
-  function generateRandomId() {
-    return Math.random().toString(36).substring(2, 15);
-  }
-
   function logEvent(event) {
     if (!state.eventLog) return;
 
@@ -316,23 +302,18 @@ export function gameSettings() {
   async function submitSettings() {
     const config = state.gameConfigs[state.gameType];
     if (!config) {
-      // Debugging information
       console.error("Invalid game type selected");
       console.log("Current game type:", state.gameType);
-      console.log("Available game types:", Object.keys(state.gameConfigs));
-
       showStatus("Invalid game type selected", true);
       return;
     }
 
-    const playerId =
-      document.getElementById("playerId").value || generateRandomId();
+    const playerId = document.getElementById("playerId").value;
     const numPlayers = parseInt(document.getElementById("numPlayers").value);
     const numSides = parseInt(document.getElementById("numSides").value);
     const numBalls = parseInt(document.getElementById("numBalls").value);
     const shape = document.getElementById("shape").value;
     const scoreMode = document.getElementById("scoreMode").value;
-    const debug = document.getElementById("debugMode").checked;
 
     // Validation
     if (numPlayers < 2 || numPlayers > config.maxPlayers) {
@@ -386,7 +367,6 @@ export function gameSettings() {
         pongType: state.gameType,
         players: numPlayers,
         balls: numBalls,
-        debug,
         sides: state.gameType === "classic" ? 4 : numSides,
         shape: state.gameType === "irregular" ? shape : undefined,
         scoreMode,

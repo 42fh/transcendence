@@ -1,6 +1,8 @@
 import { CONFIG } from "../config/constants.js";
 import { gameSettings } from "./gameSettings.js";
 
+let currentView = "home"; // Track the current view, default is 'home'
+
 export async function gameHome() {
   try {
     console.log("gameHome");
@@ -39,10 +41,10 @@ export async function gameHome() {
     console.log("Available games:", data);
 
     const gamesContainer = document.getElementById("games-container");
-    if (!gamesContainer) {
-      throw new Error("#games-container element not found");
+    if (gamesContainer) {
+      gamesContainer.innerHTML = ""; // Clear existing game items
+      gamesContainer.style.display = "none"; // Hide the container
     }
-    gamesContainer.innerHTML = ""; // Clear existing content
 
     const games = JSON.parse(data.games);
     games.forEach((gameId) => {
@@ -62,19 +64,46 @@ export async function gameHome() {
       const settingsButton = document.getElementById("cta__button-settings");
       settingsButton.style.display = "block"; // Show the button
       settingsButton.addEventListener("click", () => {
-        // Clear the main content before rendering settings
-        mainContent.innerHTML = ""; // Clear existing content
-        gamesContainer.innerHTML = ""; // Clear games container
-        settingsButton.style.display = "none"; // Hide the settings button
-        gameSettings(); // Call gameSettings to render the settings
+        // Transition to settings view
+        currentView = "settings"; // Set the current view to 'settings'
+        showSettings();
       });
     }
 
     gamesContainer.style.display = "block";
-
-    // ... rest of the code ...
   } catch (error) {
     console.error("Error fetching available games:", error);
     throw error;
+  }
+}
+
+function showSettings() {
+  const mainContent = document.getElementById("main-content");
+  const settingsButton = document.getElementById("cta__button-settings");
+  const gamesContainer = document.getElementById("games-container");
+
+  // Clear current content
+  mainContent.innerHTML = "";
+  gamesContainer.innerHTML = "";
+  settingsButton.style.display = "none"; // Hide the settings button
+
+  // Call gameSettings function to render the settings view
+  gameSettings();
+
+  // Now we are in the settings view, so hide the settings button
+  settingsButton.style.display = "none";
+}
+
+function showGameHome() {
+  // Reset to the game home view
+  currentView = "home";
+  gameHome();
+}
+
+// Optional: Handle navigation if you have a "Back" button or navigation mechanism
+function goBack() {
+  if (currentView === "settings") {
+    // If we are in settings, go back to the game home
+    showGameHome();
   }
 }
