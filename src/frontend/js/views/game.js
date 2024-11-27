@@ -4,7 +4,22 @@ import { updateActiveNavItem } from "../components/bottom-nav.js";
 
 let currentView = "home";
 
-//TODO: Export call to a dedicated service ?
+// Add a function to initialize the settings button
+function initializeSettingsButton() {
+  const settingsButton = document.getElementById("cta__button-settings");
+  if (settingsButton) {
+    // Remove any existing event listeners to prevent multiple bindings
+    settingsButton.removeEventListener("click", handleSettingsClick);
+    settingsButton.addEventListener("click", handleSettingsClick);
+    settingsButton.style.display = "block";
+  }
+}
+
+function handleSettingsClick() {
+  currentView = "settings";
+  showSettings();
+}
+
 export async function loadGameHome(addToHistory = true) {
   try {
     if (addToHistory) {
@@ -26,7 +41,10 @@ export async function loadGameHome(addToHistory = true) {
     mainContent.innerHTML = "";
     mainContent.appendChild(document.importNode(template.content, true));
 
-    initializegameHome();
+    // Initialize settings button before fetching games
+    initializeSettingsButton();
+
+    await initializegameHome();
   } catch (error) {
     console.error("Error loading game page", error);
   }
@@ -45,8 +63,6 @@ async function initializegameHome() {
       }
     );
 
-    console.log("received -->", response);
-
     if (!response.ok) {
       console.log("response not ok");
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -60,7 +76,6 @@ async function initializegameHome() {
     }
 
     const data = await response.json();
-    // console.log("Available games:", data);
 
     const gamesContainer = document.getElementById("games-container");
     if (gamesContainer) {
@@ -81,15 +96,6 @@ async function initializegameHome() {
       gamesContainer.appendChild(gameItem);
     });
 
-    // TODO: separate return of get_all_games and settingsButton
-    const settingsButton = document.getElementById("cta__button-settings");
-    settingsButton.style.display = "block";
-    settingsButton.addEventListener("click", () => {
-      // Transition to settings view
-      currentView = "settings"; // Set the current view to 'settings'
-      showSettings();
-    });
-
     gamesContainer.style.display = "block";
   } catch (error) {
     console.error("Error fetching available games:", error);
@@ -99,31 +105,12 @@ async function initializegameHome() {
 
 function showSettings() {
   const mainContent = document.getElementById("main-content");
-  const settingsButton = document.getElementById("cta__button-settings");
   const gamesContainer = document.getElementById("games-container");
+  const settingsButton = document.getElementById("cta__button-settings");
 
-  // Clear current content
   mainContent.innerHTML = "";
   gamesContainer.innerHTML = "";
-  settingsButton.style.display = "none"; // Hide the settings button
-
-  // Call gameSettings function to render the settings view
-  gameSettings();
-
-  // Now we are in the settings view, so hide the settings button
   settingsButton.style.display = "none";
-}
 
-function showGameHome() {
-  // Reset to the game home view
-  currentView = "home";
-  initializegameHome();
-}
-
-// Optional: Handle navigation if you have a "Back" button or navigation mechanism
-function goBack() {
-  if (currentView === "settings") {
-    // If we are in settings, go back to the game home
-    showGameHome();
-  }
+  gameSettings();
 }
