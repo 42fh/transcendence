@@ -17,6 +17,7 @@ export function gameSettings() {
       shape: "regular",
       scoreMode: "classic",
       pongType: "classic",
+      mode: "regular",
     },
     gameConfigs: {
       classic: {
@@ -117,6 +118,14 @@ export function gameSettings() {
       shapeSelect.addEventListener("change", (e) => {
         state.formData.shape = e.target.value;
         updateShapeDescription();
+      });
+    }
+
+    const modeSelect = document.getElementById("mode");
+    if (modeSelect) {
+      modeSelect.addEventListener("change", (e) => {
+        state.formData.mode = e.target.value;
+        updateModeDescription;
       });
     }
 
@@ -250,6 +259,25 @@ export function gameSettings() {
       state.formData.shape === "regular" ? "none" : "block";
   }
 
+  function updateModeDescription() {
+    const modeDescElement = document.getElementById("modeDescription");
+    if (!modeDescElement) return;
+
+    const descriptions = {
+      regular: "Standard mode with balanced gameplay for all players.",
+      classic: "Traditional pong mode with a focus on simplicity.",
+      circular: "Unique circular gameplay with curved paddles and sides.",
+      irregular: "Dynamic mode with customizable, irregular shapes.",
+    };
+
+    // Update the text content with the appropriate description
+    modeDescElement.textContent = descriptions[state.formData.mode] || "";
+
+    // Optionally control visibility of the description
+    modeDescElement.style.display =
+      state.formData.mode === "regular" ? "none" : "block";
+  }
+
   function generateRandomId() {
     return Math.random().toString(36).substring(2, 15);
   }
@@ -353,6 +381,7 @@ export function gameSettings() {
 
       const gameConfig = {
         playerId,
+        mode: state.formData.mode,
         type: config.type,
         pongType: state.gameType,
         players: numPlayers,
@@ -363,6 +392,11 @@ export function gameSettings() {
         scoreMode,
         userId,
       };
+
+      console.log(
+        "Submitting gameConfig:",
+        JSON.stringify(gameConfig, null, 2)
+      );
 
       const response = await fetch(
         `${CONFIG.API_BASE_URL}/api/game/create_new_game/`,
@@ -388,6 +422,8 @@ export function gameSettings() {
         });
       } else {
         console.log("POST request unsuccesful");
+        console.log(gameConfig);
+
         const errorData = await response.json();
         mainContent.innerHTML = `<div class="error">Error: ${errorData.message}</div>`;
         showStatus(`Error: ${errorData.message}`, true);
@@ -404,6 +440,10 @@ export function gameSettings() {
 
   function showStatus(message, isError = false) {
     const status = document.getElementById("status");
+    if (!status) {
+      console.warn("Status element not found, skipping status update.");
+      return;
+    }
     status.textContent = message;
     status.className = `status ${isError ? "error" : "success"}`;
     status.style.display = "block";

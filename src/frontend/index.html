@@ -144,6 +144,16 @@
                       <label for="numBalls">Number of Balls:</label>
                       <input type="number" id="numBalls" name="numBalls" min="1" max="4">
                   </div>
+                  
+                    <div>
+                      <label for="mode">Select Mode:</label>
+                      <select id="mode" name="mode">
+                          <option value="regular">Regular</option>
+                          <option value="classic">Classic</option>
+                          <option value="circular">Circular</option>
+                          <option value="irregular">Irregular</option>
+                      </select>
+                  </div>
                   <div>
                       <label for="shape">Shape:</label>
                       <select id="shape" name="shape">
@@ -168,7 +178,7 @@
                       <button type="submit">Create Game</button>
                   </div>
               </form>
-              <div id="status" class="status"></div>
+              <div id="status" class="status" style="display: none;"></div>
               <div id="eventLog"></div>
           </div>
           <div id="main-content"></div>
