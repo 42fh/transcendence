@@ -4,8 +4,7 @@ import { loadTournamentsPage } from "./tournaments.js";
 // import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { updateActiveNavItem } from "../components/bottom-nav.js";
 import { loadChatPage } from "./chats.js";
-import { gameHome } from "./game.js";
-
+import { loadGameHome } from "./game.js";
 
 export function loadHomePage(addToHistory = true) {
   try {
@@ -16,7 +15,7 @@ export function loadHomePage(addToHistory = true) {
         },
         ""
       );
-      if (!addToHistory) updateActiveNavItem("home");
+      updateActiveNavItem("home");
     }
 
     // Show main-content and load the home template
@@ -55,12 +54,10 @@ export function loadHomePage(addToHistory = true) {
       });
     }
 
-
     const ctaButton = document.getElementById("home__button-cta");
     if (ctaButton) {
-      ctaButton.addEventListener("click", gameHome);
+      ctaButton.addEventListener("click", loadGameHome);
     }
-    
 
     const chatsButton = document.getElementById("chats");
     if (chatsButton) {

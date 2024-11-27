@@ -99,23 +99,22 @@
 
 
 
-       <!-- Game/Play Template-->
-       <div id="games-container">
-        <!-- Dynamically populated game items -->
-      </div>
+ 
       
       <template id="game-item-template">
-        <div class="game-item">
-          <p>Game ID: <span class="game-id"></span></p>
-          <p>Mode: <span class="game-mode"></span></p>
-          <p>Date: <span class="game-date"></span></p>
-          <p>Duration: <span class="game-duration"></span></p>
-          <p>Winner: <span class="game-winner"></span></p>
+        <div id="games-container">
+
+          <div class="game-item">
+            <p>Game ID: <span class="game-id"></span></p>
+            <p>Mode: <span class="game-mode"></span></p>
+            <p>Date: <span class="game-date"></span></p>
+            <p>Duration: <span class="game-duration"></span></p>
+            <p>Winner: <span class="game-winner"></span></p>
+          </div>
         </div>
+        <button id="cta__button-settings" style="display: none;">Settings</button>
       </template>
 
-      <!-- Move the settings button outside of the template -->
-      <button id="cta__button-settings" style="display: none;">Settings</button>
 
 
         <!-- Game Settings Template-->

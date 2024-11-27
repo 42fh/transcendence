@@ -1,10 +1,38 @@
 import { CONFIG } from "../config/constants.js";
 import { gameSettings } from "./gameSettings.js";
+import { updateActiveNavItem } from "../components/bottom-nav.js";
 
-let currentView = "home"; // Track the current view, default is 'home'
+let currentView = "home";
 
 //TODO: Export call to a dedicated service ?
-export async function gameHome() {
+export async function loadGameHome(addToHistory = true) {
+  try {
+    if (addToHistory) {
+      history.pushState(
+        {
+          view: "chat",
+        },
+        ""
+      );
+      updateActiveNavItem("home");
+    }
+
+    const template = document.getElementById("game-item-template");
+    if (!template) {
+      throw new Error("Chat template not found");
+    }
+
+    const mainContent = document.getElementById("main-content");
+    mainContent.innerHTML = "";
+    mainContent.appendChild(document.importNode(template.content, true));
+
+    initializegameHome();
+  } catch (error) {
+    console.error("Error loading game page", error);
+  }
+}
+
+async function initializegameHome() {
   try {
     console.log("gameHome");
     const response = await fetch(
@@ -18,13 +46,6 @@ export async function gameHome() {
     );
 
     console.log("received -->", response);
-
-    const mainContent = document.getElementById("main-content");
-    if (!mainContent) {
-      throw new Error("Main content element not found");
-    }
-    mainContent.innerHTML = "";
-    mainContent.style.display = "block";
 
     if (!response.ok) {
       console.log("response not ok");
@@ -96,7 +117,7 @@ function showSettings() {
 function showGameHome() {
   // Reset to the game home view
   currentView = "home";
-  gameHome();
+  initializegameHome();
 }
 
 // Optional: Handle navigation if you have a "Back" button or navigation mechanism
