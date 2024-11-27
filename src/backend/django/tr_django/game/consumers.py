@@ -15,7 +15,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.current_pos = 0.5  # should be updated if game is loaded
 
         self.player_values = {
-            "move_cooldown": 0.1,
+            "move_cooldown": 0.02,
             "move_speed": 0.05,
             "move_speed_boost": 1.0,  # example for player own values
             "reverse_controls": False,  # example for player own values
