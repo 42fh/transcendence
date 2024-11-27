@@ -358,33 +358,7 @@ class UserDetailView(View):
         except CustomUser.DoesNotExist:
             return JsonResponse({"error": "User not found"}, status=404)
 
-        # print("DEBUG: Raw request META:", request.META)
-        # print("DEBUG: Raw request body:", request.body[:1000])  # First 1000 bytes to avoid huge output
-        # print("DEBUG: Request Content-Type:", request.content_type)
-        # print("DEBUG: Request FILES:", request.FILES)
-
         try:
-            # Handle file upload (like the user changing avatar)
-            # MAX_AVATAR_SIZE = 2 * 1024 * 1024  # 2MB in bytes
-            # if request.FILES.get("avatar"):
-            # if "avatar" in request.FILES:
-            # print("DEBUG: Processing avatar upload")
-            # old_avatar = user.avatar.path if user.avatar else "No previous avatar"
-            # print(f"DEBUG: Old avatar path: {old_avatar}")
-
-            # user.avatar = request.FILES["avatar"]
-
-            # if user.avatar.size > MAX_AVATAR_SIZE:
-            #     print(f"DEBUG: Avatar size exceeds the limit of {MAX_AVATAR_SIZE} bytes")
-            #     error = f"Avatar size exceeds the limit of {MAX_AVATAR_SIZE} bytes"
-            #     return JsonResponse({"error": error}, status=400)
-            # user.save()
-            # print(f"DEBUG: New avatar saved. Path: {user.avatar.path}")
-            # print(f"DEBUG: New avatar URL: {user.avatar.url}")
-
-            # Handle other fields (JSON body)
-            # elif request.content_type == "application/json":
-
             data = json.loads(request.body)
 
             print(
