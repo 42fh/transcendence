@@ -1384,3 +1384,463 @@ button:hover {
   color: black;
   transform: scale(1.05);
 }
+
+/* Bottom Navigation */
+#bottom-nav-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  /* background-color: var(--color-background); */
+  background-color: black;
+  height: var(--bottom-nav-height);
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.bottom-nav {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 100%;
+  padding: var(--bottom-nav-padding);
+}
+
+.bottom-nav__item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 100%;
+  cursor: pointer;
+  /* transition: all var(--transition-duration) var(--transition-timing); */
+  background: transparent; /* Changed from none to transparent */
+  color: white;
+  border: none;
+}
+
+/* .bottom-nav__item svg {
+  width: 24px;
+  height: 24px;
+  fill: var(--color-text-secondary);
+  transition: all var(--transition-duration) var(--transition-timing);
+} */
+
+.bottom-nav__item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 100%;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  color: white; /* Default icon color */
+}
+
+.bottom-nav__item--active {
+  background-color: white;
+  color: black;
+}
+
+/* .bottom-nav__item--active svg {
+  fill: black;
+} */
+
+/* Hover states */
+/* .bottom-nav__item:hover:not(.bottom-nav__item--active) {
+  background-color: var(--color-hover);
+}
+
+.bottom-nav__item:hover:not(.bottom-nav__item--active) svg {
+  fill: var(--color-text-primary);
+} */
+
+/* Material Icons Configuration */
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  font-size: inherit;
+  line-height: 1;
+}
+
+/* Active state variations */
+.bottom-nav__item--active .bottom-nav__icon {
+  font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+/* Profile Styles */
+.profile {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: "Press Start 2P", cursive;
+}
+
+.profile__header {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.profile__avatar-container {
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #1a1a1a;
+}
+
+.profile__avatar {
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  border-radius: 50%;
+  object-fit: cover;
+  background: #1a1a1a;
+  border: 0.125rem solid white;
+}
+
+.profile__info {
+  flex-grow: 1;
+}
+
+.profile__username {
+  margin: 0;
+  font-size: 1.8rem;
+  color: white;
+}
+
+.profile__name,
+.profile__email,
+.profile__phone {
+  margin: 0.5rem 0;
+  color: #888;
+  font-size: 0.8rem;
+}
+
+.profile__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2rem;
+  border-radius: 10px;
+  border: 2px solid white;
+}
+
+.profile__stats-item {
+  text-align: center;
+}
+
+.profile__stats-label {
+  display: block;
+  color: #888;
+  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.profile__stats-value {
+  font-size: 1.2rem;
+  color: white;
+}
+
+.profile__bio {
+  margin-bottom: 3rem;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  border: 2px solid white;
+}
+
+.profile__bio-title {
+  margin-top: 0;
+  color: white;
+  font-size: 1rem;
+}
+
+.profile__bio-text {
+  color: #888;
+  line-height: 1.5;
+  font-size: 0.8rem;
+}
+
+.profile__matches {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2rem;
+  border-radius: 10px;
+  border: 2px solid white;
+}
+
+.profile__matches-title {
+  margin-top: 0;
+  color: white;
+  font-size: 1rem;
+}
+
+.profile__match-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  margin: 0.5rem 0;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 5px;
+  font-size: 0.8rem;
+  transition: transform 0.2s ease;
+}
+
+.profile__match-item:hover {
+  transform: translateX(5px);
+}
+
+.profile__match-item--won {
+  border-left: 4px solid #4caf50;
+}
+
+.profile__match-item--lost {
+  border-left: 4px solid #f44336;
+}
+
+.profile__match-date {
+  color: #888;
+  font-size: 0.7rem;
+}
+
+.profile__match-result {
+  color: white;
+}
+
+.profile__match-opponent {
+  color: #888;
+}
+
+.profile__matches-empty {
+  text-align: center;
+  color: #888;
+  padding: 2rem;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 600px) {
+  .profile {
+    padding: 1rem;
+  }
+
+  .profile__header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .profile__stats {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .profile__match-item {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+}
+
+.profile__error {
+  text-align: center;
+  color: #f44336;
+  padding: 2rem;
+  font-family: "Press Start 2P", cursive;
+}
+
+/* Make sure the bottom nav container is always visible */
+#bottom-nav-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: #1a1a1a;
+}
+
+/* Ensure main content doesn't overlap with bottom nav */
+#main-content {
+  padding-bottom: var(--bottom-nav-height);
+  min-height: 100vh;
+}
+
+.auth-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.auth-container h1 {
+  font-size: 4rem; /* Smaller than the global 8em */
+  letter-spacing: 5px;
+  margin-bottom: 3rem;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-direction: column;
+  width: 100%;
+  max-width: 300px;
+}
+
+/* More specific selector to override global button styles */
+.auth-container .auth-button {
+  background: none;
+  color: white;
+  font-size: 1.5rem; /* Smaller than global 30px */
+  padding: 1rem 2rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-family: "Press Start 2P", cursive;
+  border: 2px solid white;
+}
+
+.auth-container .auth-button:hover {
+  background-color: white;
+  color: black;
+  transform: scale(1.05);
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--bottom-nav-height);
+  background: #1a1a1a;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: var(--bottom-nav-padding) 0;
+  box-shadow: 0 -0.125rem 0.625rem rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+}
+
+.bottom-nav__item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  transition: color 0.3s;
+  padding: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.bottom-nav__item--active {
+  color: #fff;
+}
+
+.bottom-nav__icon {
+  font-size: 1.75rem;
+}
+
+/* Material Icons Configuration */
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  font-size: inherit;
+  line-height: 1;
+}
+
+/* Active state variations */
+.bottom-nav__item--active .bottom-nav__icon {
+  font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+.webgl {
+  position: fixed;
+  top: 0;
+  left: 0;
+  outline: none;
+  z-index: 1;
+}
+
+.game-menu-overlay {
+  position: fixed;
+  top: 00;
+  left: 0;
+  width: 100%;
+  height: 160%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.game-menu-container {
+  width: 100%;
+  max-width: 500px;
+  padding: 20px;
+}
+
+.card {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.form-select {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.form-select option {
+  background-color: #212529;
+}
+
+.btn-primary {
+  background-color: #0d6efd;
+  border: none;
+  padding: 10px 30px;
+}
+
+.btn-primary:hover {
+  background-color: #0b5ed7;
+}
+
+.form-check-input:checked {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.loading-bar {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  height: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 10px;
+  overflow: hidden;
+  z-index: 999;
+}
+
+.loading-bar-fill {
+  width: 0%;
+  height: 100%;
+  background: #0066ff;
+  transition: width 0.3s ease-in-out;
+}
+
+.loading-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  text-align: center;
+  white-space: nowrap;
+}

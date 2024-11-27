@@ -7,6 +7,15 @@
     <link rel="stylesheet" href="css/fonts.css" />
     <link rel="stylesheet" href="style.css" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <script type="importmap">
+      {
+        "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/",
+        "gsap": "https://cdn.jsdelivr.net/npm/gsap@3.10.4/index.js"
+        }
+      }
+      </script>
   </head>
   <body>
     <!-- Main content area where other views will load -->
@@ -423,6 +432,47 @@
         <span class="profile__match-date"></span>
         <span class="profile__match-result"></span>
         <span class="profile__match-opponent"></span>
+      </div>
+    </template>
+
+    <!-- 3D Game -->
+    <template id="3d-game-template">
+      <canvas class="webgl"></canvas>
+      <div class="end-screen">
+        <h1 class="title"></h1>
+        <div class="scores"></div>
+        <button class="exit-button">Exit Game</button>
+      </div>
+      <div class="game-menu-overlay" id="menu">
+          <div class="game-menu-container">
+              <div class="card bg-dark text-light">
+                  <div class="card-header">
+                      <h2 class="text-center mb-0">Game Setup</h2>
+                  </div>
+                  <div class="card-body">
+                      <form id="gameSetupForm">
+                          <div class="mb-4">
+                              <label for="gameType">Game Type</label>
+                              <input type="text" id="gameType">
+                          </div>
+
+                          <div class="mb-4">
+                              <label for="gameId">Game ID</label>
+                              <input type="text" id="gameId">
+                          </div>
+
+                          <div class="mb-4">
+                              <label for="playerCount">Player count</label>
+                          <input type="text"  id="playerCount">
+                          </div>
+
+                          <div class="text-center">
+                              <div class="joinGame btn btn-primary">Join</div>
+                          </div>
+                      </form>
+                  </div>
+              </div>
+          </div>
       </div>
     </template>
 
