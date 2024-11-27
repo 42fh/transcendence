@@ -6,7 +6,7 @@ export function gameSettings() {
   // Encapsulated state
   const state = {
     debugEnabled: false,
-    gameType: "polygon",
+    gameType: "classic",
     showSettings: false,
     eventLog: document.getElementById("eventLog"),
     formData: {
@@ -20,13 +20,13 @@ export function gameSettings() {
     },
     gameConfigs: {
       classic: {
-        type: "polygon",
+        type: "classic",
         sides: 4,
         maxPlayers: 2,
         description: "Classic 2-player pong with 2 paddles and 2 walls",
       },
       regular: {
-        type: "polygon",
+        type: "classic",
         sides: 4,
         maxPlayers: 4,
         description: "Regular polygon with all sides playable",
@@ -38,7 +38,7 @@ export function gameSettings() {
         description: "Circular arena with curved paddles and sides",
       },
       irregular: {
-        type: "polygon",
+        type: "classic",
         sides: 6,
         maxPlayers: 6,
         description: "Irregular polygon shape with customizable sides",
@@ -288,6 +288,11 @@ export function gameSettings() {
   async function submitSettings() {
     const config = state.gameConfigs[state.gameType];
     if (!config) {
+      // Debugging information
+      console.error("Invalid game type selected");
+      console.log("Current game type:", state.gameType);
+      console.log("Available game types:", Object.keys(state.gameConfigs));
+
       showStatus("Invalid game type selected", true);
       return;
     }
@@ -332,7 +337,7 @@ export function gameSettings() {
     }
 
     try {
-      const userId = localStorage.getItem("userId");
+      const userId = localStorage.getItem("pongUserId");
       if (!userId) {
         showStatus("User ID not found in localStorage", true);
         return;
@@ -371,7 +376,9 @@ export function gameSettings() {
       );
 
       if (response.ok) {
+        console.log("POST request successful");
         const data = await response.json();
+        console.log("Data received: ", data);
         const gameId = data.gameId;
         mainContent.innerHTML = `<div class="success">Game created successfully with ID: ${gameId}</div>`;
         logEvent({
@@ -380,6 +387,7 @@ export function gameSettings() {
           details: `Game ID: ${gameId}`,
         });
       } else {
+        console.log("POST request unsuccesful");
         const errorData = await response.json();
         mainContent.innerHTML = `<div class="error">Error: ${errorData.message}</div>`;
         showStatus(`Error: ${errorData.message}`, true);
