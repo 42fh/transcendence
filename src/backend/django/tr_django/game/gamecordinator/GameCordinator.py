@@ -15,17 +15,7 @@ import math
 
 class Game:
     def __init__(self):
-        # game health keys
-        self.recordet_key = f"game_recordet:{game_id}"  # bool default False
-        self.running_key = f"game_running:{game_id}"  # bool default False
-        self.finished_key = f"game_finished:{game_id}"  # bool default False
 
-        # setting keys
-        self.state_key = f"game_state:{game_id}"
-        self.paddles_key = f"game_paddles:{game_id}"
-        self.vertices_key = f"game_vertices:{game_id}"  # New key for vertices
-
-        # game_logic
         self.players_key = f"game_players:{game_id}"
         self.booked_players_key = f"game_booked_players:{game_id}"
 
@@ -58,30 +48,35 @@ class GameCordinator:
 
     REDIS_URL = "redis://redis:6379/2"
     REDIS_GAME_URL = "redis://redis:6379/1"
+    # KEYS for Redis
     ALL_GAMES = "all_games"
     WAITING_GAMES = "waiting_games"
     RUNNING_GAMES = "running_games"
     FINISHED_GAMES = "finished_games"
-    LOCK_KEYS = {"game_id": "game_id"}
+    # more possible key
+    # waiting_tournament_games_key  = "waiting_tournament_games" # tournament games has fixed players not pubblic
+    # running_tournament_games_key  = "running_tournament_game"
+    # finished_tournament_games_key = "finished_tournament_games"
+    # recorded_games_key = "recorde_games"
+
+    # performance logging
+    # total_users_key = "total_users"
+    # total_spectators_key = "total_spectators"
+    # total_players_key = "total_players"
+
+    # KEYS for Redis Lock
+    LOCK_KEYS = {"game_id": "game_id",
+                "waiting": "waiting",
+                "running": "running",
+                "finished": "finised",       
+    
+    }
     
 
     # logic
     # self.waiting_games_timeout = 300 # 5 min timeout only for waiting games tournament game stay open till the tournament close it.
 
     # games_key
-    # self.all_games_key = f"all_games" # Game creation timestamp
-    # self.waiting_tournament_games_key  = f"waiting_tournament_games" # tournament games has fixed players not pubblic
-    # self.waiting_games_key = "waiting_games"
-    # self.running_games_key = "running_games"
-    # self.running_tournament_games_key  = "running_tournament_game"
-    # self.finished_games_key = "finised_games"
-    # self.finished_tournament_games_key = "finished_tournament_games"
-    # self.recordet_games_key = "recordet_games"
-
-    # performance logging
-    # self.total_users_key = "total_users"
-    # self.total_spectators_key = "total_spectators"
-    # self.total_players_key = "total_players"
 
     @classmethod
     async def get_redis(cls, url: str) -> redis.Redis:
@@ -199,10 +194,68 @@ class GameCordinator:
         return_value = msgpack.unpackb(stored_values)
         return return_value
 
-    # from AGameManager with signals
     @classmethod
-    async def join_game(cls, game_id, player_id):
-        pass
+    async def is_player_playing(cls, user_id) -> bool:
+       """check in booked tournament and single games if player is in there"""
+    # check booekd player( plus delete old ones) and playeing players if in their return false else true     
+    
+
+    @classmethod
+    async def join_game(cls, request, game_id) -> dict:
+        session = request.session
+        user = request.user
+        # check if game is already full 
+        # i would need from wettings number of players 
+        # full: 
+        # 1. persons in the reserv coocki list  are eqal to num_players
+        # 2. persons in active waiting is full 
+        # to 1. this needs a expiricion time so that then this reserved user is kicked out -> shoukd only be reserve in normal game to injured that if you joun the game that then nobody else can join if the gae is already full .. but if you have a crasch in betwenn youspot should be availible after reserbávtion time
+    try:
+        # Get game settings to check player limits
+        async with await cls.get_redis_binary(cls.REDIS_GAME_URL) as redis_game:
+            settings_data = await redis_game.get(f"game_settings:{game_id}")
+            if not settings_data:
+                return False
+            settings = msgpack.unpackb(settings_data)
+            max_players = settings.get("num_players", 0)
+
+        async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
+            # Check active players
+            current_players = await redis_conn.scard(f"game_players:{game_id}")
+            
+            # Check reserved spots
+            reserved_players = await redis_conn.scard(f"game_booked_players:{game_id}")
+            
+            total_players = current_players + reserved_players
+            
+            if total_players >= max_players:
+                return False
+                
+            # Create reservation for the player
+            reservation_data = msgpack.packb({
+                'user_id': request.user.id,
+                'session_key': request.session.session_key,
+                'timestamp': int(time.time())
+            })
+            
+            # Set reservation with 5 minute expiry
+            await redis_conn.setex(
+                f"player_reservation:{request.user.id}:{game_id}",
+                300,  # 5 minutes
+                reservation_data
+            )
+            
+            # Add to booked players set
+            await redis_conn.sadd(f"game_booked_players:{game_id}", request.user.id)
+            
+            return {"available": True}
+            
+    except Exception as e:
+        print(f"Error in join_game: {e}")
+        return {"available": False, "message": f"Error in join_game: {e}", "status": 500 }
+
+
+    # from AGameManager with signals
     @classmethod
     async def leave_game(cls, game_id, player_id):
         pass
@@ -215,5 +268,5 @@ class GameCordinator:
     @classmethod
     async def set_to_finished_game(cls, game_id):
         pass
-
+    
 

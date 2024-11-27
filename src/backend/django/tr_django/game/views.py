@@ -22,6 +22,22 @@ def transcendance(request):
 @csrf_exempt
 async def create_new_game(request):
     if request.method == "POST":      
+        if not request.user.is_authenticated:
+            return JsonResponse(
+                {
+                    "error": "Unauthorized - missing authentication",
+                    "message": "only login users can create new game"
+                },
+                status=401
+            )
+        if await GameCordinator.is_player_playing(request.user.id):
+            return JsonResponse(
+                {
+                    "error": "Double booking",
+                    "message": "Player already in active game"
+                },
+                status=409
+            )
         if request.content_type != 'application/json':
             return JsonResponse(
                 {
@@ -71,19 +87,62 @@ async def create_new_game(request):
                     },
                     status=500  # Service Unavailable
                 )
-
-        return JsonResponse(
-            {
-                "game_id": game_id,
-                "message": "Game created successfully!",
-            },
-            status=200
-        )
+        
+        request.message = "NEW Game created successfully! Joined Gaime."
+        request.method = 'GET'
+        response = await join_game(request, game_id) 
+        return resposne
 
     return JsonResponse(
         {
             "error": "Method Not Allowed",
             "message": "only POST requests are allowed"
+        }, 
+        status=405
+    )
+
+@csrf_exempt
+async def join_game(request, game_id):
+        if not request.user.is_authenticated:
+            return JsonResponse(
+                {
+                    "error": "Unauthorized - missing authentication",
+                    "message": "only login users can create new game"
+                },
+                status=401
+            )
+        if await GameCordinator.is_player_playing(request.user.id):
+            return JsonResponse(
+                {
+                    "error": "Double booking",
+                    "message": "Player already in active game"
+                },
+                status=409
+
+     if request.method == "GET":
+        message = getattr(request, "message", "Joined Game! ")
+
+        resposne = await GameCordinator.join_game(request, game_id)
+
+        if response.get('available', False):          
+            return JsonResponse(
+                {'available': True, 
+                'ws_url': f'ws://localhost:8000/ws/game/{game_id}/',
+                "message": message     
+                },
+                status=200
+            )
+
+        return  JsonResponse(
+            {'available': False, 
+            'message': response.get("message", "NOT SET ERROR"
+            },
+            status=response.get("status", 500)
+    ) 
+    return JsonResponse(
+        {
+            "error": "Method Not Allowed",
+            "message": "only GET requests are allowed"
         }, 
         status=405
     )
