@@ -239,7 +239,6 @@ async function handleFormSubmission(form, userId) {
       return;
     }
     const response = await updateUserProfile(userId, dataToSend);
-    console.log("Server response:", response);
     showToast("Profile updated successfully!");
     loadProfilePage(false);
   } catch (error) {
@@ -252,22 +251,9 @@ async function handleFormSubmission(form, userId) {
 
 // Setup event listeners for form submission
 function setupFormSubmission(form, userId) {
-  console.log("Setting up form submission");
   if (!form) {
     console.error("Form element not found");
     return;
-  }
-
-  console.log("Form:", form);
-
-  // Debug form values
-  console.log("Debugging form values");
-  const formElements = form.elements;
-  for (let i = 0; i < formElements.length; i++) {
-    const element = formElements[i];
-    if (element.name) {
-      console.log(`${element.name}: ${element.value}`);
-    }
   }
 
   // Add event listners to cancel button and save button
