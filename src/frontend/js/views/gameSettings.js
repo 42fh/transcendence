@@ -105,7 +105,6 @@ export function gameSettings() {
     if (shapeSelect) {
       shapeSelect.addEventListener("change", (e) => {
         state.formData.shape = e.target.value;
-        updateShapeDescription();
       });
     }
 
@@ -113,7 +112,6 @@ export function gameSettings() {
     if (modeSelect) {
       modeSelect.addEventListener("change", (e) => {
         state.formData.mode = e.target.value;
-        updateModeDescription;
       });
     }
 
@@ -169,7 +167,6 @@ export function gameSettings() {
     const numSidesInput = document.getElementById("numSides");
     if (numSidesInput) {
       numSidesInput.value = config.sides;
-      numSidesInput.disabled = state.gameType === "classic";
       if (state.gameType === "circular") {
         numSidesInput.min = 4;
         numSidesInput.max = 12;

@@ -4,6 +4,7 @@ import { loadTournamentsPage } from "./tournaments.js";
 import { updateActiveNavItem } from "../components/bottom-nav.js";
 import { loadChatPage } from "./chats.js";
 import { loadGame3D } from "./game3d.js";
+import { loadGameHome } from "./game.js";
 
 export function loadHomePage(addToHistory = true) {
   try {
