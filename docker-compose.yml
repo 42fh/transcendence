@@ -63,7 +63,7 @@ services:
       # TODO: Overriding the port manually.
       # The override file doesn't work.
       # nginx is the https termination point
-      - "443:80"
+      - "443:443"
       # old version without https
       # - "8080:80"
     environment:

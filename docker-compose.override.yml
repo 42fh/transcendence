@@ -27,6 +27,7 @@ services:
     environment:
       - Debug=True
       - ENVIRONMENT=development
+    stop_grace_period: 1s  # SIGKILL after 1s
   nginx:
     build:
       context: ./src
@@ -37,6 +38,6 @@ services:
       - ./src/frontend/:/usr/share/nginx/html
       - ./media:/var/www/media
     ports:      
-      - "443:80"
+      - "443:443"
     environment:
       - ENVIRONMENT=development
