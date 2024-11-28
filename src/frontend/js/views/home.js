@@ -4,7 +4,7 @@ import { loadTournamentsPage } from "./tournaments.js";
 // import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { updateActiveNavItem } from "../components/bottom-nav.js";
 import { loadChatPage } from "./chats.js";
-import { loadGameHome } from "./game.js";
+import { loadGame3D } from "./game3d.js";
 
 export function loadHomePage(addToHistory = true) {
   try {
@@ -46,9 +46,7 @@ export function loadHomePage(addToHistory = true) {
 
     const playButton = document.getElementById("home__button-play");
     if (playButton) {
-      playButton.addEventListener("click", function () {
-        mainContent.innerHTML = "<h2>A first game is built here</h2>";
-      });
+      playButton.addEventListener("click", loadGame3D);
     }
 
     const ctaButton = document.getElementById("home__button-cta");
