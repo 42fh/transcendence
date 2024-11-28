@@ -1,0 +1,164 @@
+.page-container--tournament {
+  /* To be implemented */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Tournament Page */
+
+.tournament-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+}
+
+.tournament-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tournament-card {
+  display: grid;
+  grid-template-columns: minmax(8em, 1fr) 2fr minmax(5em, 1fr);
+  gap: 1rem;
+  padding: 0.8rem 1.2rem;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.tournament-card:hover {
+  background-color: white;
+  color: black;
+}
+
+.tournament-card-date {
+  text-align: left;
+  white-space: nowrap;
+}
+
+.tournament-card-name {
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tournament-card-status {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.tournament-card.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: default;
+  pointer-events: none;
+}
+
+.tournament-card.empty-state .tournament-card-date,
+.tournament-card.empty-state .tournament-card-status {
+  display: none;
+}
+
+.tournament-card.empty-state .tournament-card-name {
+  text-align: center;
+  width: 100%;
+}
+.tournament-button {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid white;
+  border-radius: 10px;
+  background: transparent;
+  color: white;
+  font-family: "Press Start 2P", cursive;
+  cursor: pointer;
+}
+
+.tournament-button:hover {
+  background: white;
+  color: black;
+}
+
+/* Add media queries for different screen sizes */
+@media (max-width: 600px) {
+  .tournament-card {
+    grid-template-columns: 1fr 1.5fr 0.8fr;
+    gap: 0.5rem;
+    padding: 0.6rem 0.8rem;
+  }
+}
+
+/* Detail view styles */
+.tournament-detail-container {
+  padding: 2rem;
+  font-family: "Press Start 2P", cursive;
+  text-align: center;
+}
+
+.tournament-detail-name {
+  font-size: 3rem;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+}
+
+.tournament-detail-description {
+  font-size: 1rem;
+  margin: 2rem 0;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.tournament-detail-section {
+  margin: 2rem 0;
+  text-align: left;
+}
+
+.tournament-detail-participants {
+  margin-top: 1rem;
+  line-height: 1.8;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-left: 1rem;
+}
+
+.tournament-detail-dates {
+  margin: 2rem 0;
+  text-align: left;
+  line-height: 2;
+}
+
+.tournament-detail-timetable-status {
+  margin: 1.5rem 0;
+  font-style: italic;
+}
+
+.tournament-detail-next-match {
+  margin: 2rem 0;
+  padding: 1rem;
+  border: 2px solid white;
+  border-radius: 10px;
+}
+
+.tournament-detail-action-btn {
+  margin-top: 2rem;
+  padding: 1rem 2rem;
+  font-family: "Press Start 2P", cursive;
+  font-size: 1.2rem;
+  background: transparent;
+  color: white;
+  border: 2px solid white;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.tournament-detail-action-btn:hover {
+  background: white;
+  color: black;
+}
