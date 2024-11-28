@@ -1,0 +1,117 @@
+button {
+  background: none;
+  color: white;
+  font-size: 30px; /* Increased button size */
+  padding: 15px 40px; /* Increased padding for larger buttons */
+  cursor: pointer;
+  transition: background 0.3s;
+  font-family: "Press Start 2P", cursive; /* Ensure font is applied */
+}
+
+button:hover {
+  background-color: white;
+  color: black;
+}
+
+.button--neon {
+  background: transparent;
+  color: #fff;
+  font-family: "Press Start 2P", cursive;
+  padding: 15px 40px;
+  border: 2px solid #fff;
+  border-radius: 5px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.5);
+  animation: neonPulse 1.5s infinite;
+}
+
+.button--neon:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgb(255, 166, 0);
+  border-color: rgb(255, 77, 0);
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5), 0 0 20px rgba(0, 255, 255, 0.3), 0 0 30px rgba(0, 255, 255, 0.1);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.5), inset 0 0 20px rgba(0, 255, 255, 0.5);
+}
+
+@keyframes neonPulse {
+  0%,
+  100% {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.5);
+  }
+  50% {
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.7), 0 0 30px rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.7), inset 0 0 20px rgba(255, 255, 255, 0.7);
+  }
+}
+
+.button--gradient {
+  background: transparent;
+  color: #fff;
+  font-family: "Press Start 2P", cursive;
+  padding: 15px 40px;
+  cursor: pointer;
+  position: relative;
+  border: none;
+  z-index: 1;
+}
+
+.button--gradient:hover {
+  background-color: transparent; /* Remove white background */
+  color: #000; /* Change text to black on hover */
+}
+
+.button--gradient:hover::before {
+  animation: gradientBorder 10s linear infinite;
+}
+
+.button--gradient::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+  border-radius: 5px;
+  z-index: -2;
+  animation: gradientBorder 20s linear infinite;
+  background-size: 400%;
+}
+
+.button--gradient::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  background: black;
+  border-radius: 3px;
+  z-index: -1;
+  transition: background-color 0.3s;
+}
+
+.button--gradient:hover::after {
+  background: white; /* Change inner background to white on hover */
+}
+
+.button--gradient:hover::before {
+  animation: gradientBorder 10s linear infinite;
+}
+
+@keyframes gradientBorder {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}

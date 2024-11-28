@@ -5,17 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pong Game - Welcome</title>
     <link rel="stylesheet" href="css/fonts.css" />
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="css/main.css" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <script type="importmap">
       {
         "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
-        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/",
-        "gsap": "https://cdn.jsdelivr.net/npm/gsap@3.10.4/index.js"
+          "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/",
+          "gsap": "https://cdn.jsdelivr.net/npm/gsap@3.10.4/index.js"
         }
       }
-      </script>
+    </script>
   </head>
   <body>
     <!-- Main content area where other views will load -->
@@ -26,7 +26,7 @@
     <template id="modal-template">
       <div id="modal-overlay" class="modal-overlay">
         <div id="modal" class="modal">
-          <span id="close-modal" class="close-btn">&times;</span>
+          <span id="close-modal" class="modal-close-btn">&times;</span>
           <div id="modal-content" class="modal-content">
             <h2 id="modal-title">Modal Title</h2>
             <p id="modal-text">This is a placeholder text in the modal.</p>
@@ -59,7 +59,7 @@
         <label for="password">Password</label>
         <input type="password" id="password" name="password" required />
 
-        <button type="submit" class="form-button">Log In</button>
+        <button type="submit" class="auth-form__button">Log In</button>
       </form>
     </template>
 
@@ -78,7 +78,7 @@
         <label for="confirm-password">Confirm Password</label>
         <input type="password" id="confirm-password" name="confirm-password" required />
 
-        <button type="submit" class="form-button">Sign Up</button>
+        <button type="submit" class="auth-form__button">Sign Up</button>
       </form>
     </template>
 
@@ -379,50 +379,70 @@
       </nav>
     </template>
 
+    <!-- Profile Template -->
     <template id="profile-template">
-      <div class="profile">
-        <div class="profile__header">
-          <div class="profile__avatar-container">
-            <img class="profile__avatar" src="" alt="Profile avatar" />
-          </div>
-          <div class="profile__info">
+      <div class="page-container page-container--profile">
+        <!-- <div class="profile__header"> -->
+        <div class="profile">
+          <div class="profile__section profile__section--header">
+            <!-- <div class="profile__avatar-container"> -->
+            <div class="profile__avatar-wrapper">
+              <img class="profile__avatar" src="" alt="Profile avatar" />
+            </div>
+            <!-- <div class="profile__info">
             <h2 class="profile__username"></h2>
             <p class="profile__name"></p>
             <p class="profile__email"></p>
             <p class="profile__phone"></p>
+          </div> -->
+            <div class="profile__info">
+              <h2 class="profile__username"></h2>
+              <p class="profile__info-item profile__info-item--name"></p>
+              <p class="profile__info-item profile__info-item--location"></p>
+              <p class="profile__info-item profile__info-item--email"></p>
+              <p class="profile__info-item profile__info-item--phone"></p>
+            </div>
           </div>
-        </div>
 
-        <div class="profile__stats">
-          <div class="profile__stats-item">
-            <span class="profile__stats-label">Wins</span>
-            <span class="profile__stats-value profile__stats-wins"></span>
-          </div>
-          <div class="profile__stats-item">
-            <span class="profile__stats-label">Losses</span>
-            <span class="profile__stats-value profile__stats-losses"></span>
-          </div>
-          <div class="profile__stats-item">
-            <span class="profile__stats-label">Win Ratio</span>
-            <span class="profile__stats-value profile__stats-ratio"></span>
-          </div>
-        </div>
-
-        <div class="profile__bio">
+          <!-- <div class="profile__bio">
           <h3 class="profile__bio-title">Bio</h3>
           <p class="profile__bio-text"></p>
-        </div>
-
-        <div class="profile__matches">
-          <h3 class="profile__matches-title">Recent Matches</h3>
-          <div class="profile__matches-list">
-            <!-- Matches will be inserted here dynamically -->
+        </div> -->
+          <div class="profile__section profile__section--bio">
+            <h3 class="profile__section-title">Bio</h3>
+            <p class="profile__bio-text"></p>
           </div>
-        </div>
 
-        <!-- Add Edit Profile Button -->
-        <div class="profile__actions">
-          <button class="profile__edit-button">Edit Profile</button>
+          <!-- <div class="profile__stats"> -->
+          <div class="profile__section profile__section--stats">
+            <div class="profile__stats-item">
+              <span class="profile__stats-label">Wins</span>
+              <span class="profile__stats-value profile__stats-wins"></span>
+            </div>
+            <div class="profile__stats-item">
+              <span class="profile__stats-label">Losses</span>
+              <span class="profile__stats-value profile__stats-losses"></span>
+            </div>
+            <div class="profile__stats-item">
+              <span class="profile__stats-label">Win Ratio</span>
+              <span class="profile__stats-value profile__stats-ratio"></span>
+            </div>
+          </div>
+
+          <!-- <div class="profile__matches"> -->
+          <div class="profile__section profile__section--matches">
+            <h3 class="profile__section-title">Recent Matches</h3>
+            <div class="profile__matches-list">
+              <!-- Matches will be inserted here dynamically -->
+            </div>
+          </div>
+
+          <!-- <div class="profile__actions"> -->
+          <div class="profile__section profile__section--actions">
+            <!-- <button class="profile__edit-button">Edit Profile</button> -->
+            <button class="profile__button profile__button--edit">Edit Profile</button>
+            <!-- TODO: Add password change button if we decide to implement it -->
+          </div>
         </div>
       </div>
     </template>
@@ -435,6 +455,67 @@
       </div>
     </template>
 
+    <!-- Error Message Template -->
+    <template id="form-error-template">
+      <div class="form-error">
+        <span class="form-error__icon material-symbols-outlined">error</span>
+        <span class="form-error__message"></span>
+      </div>
+    </template>
+
+    <!-- Profile Edit Template -->
+    <template id="profile-edit-template">
+      <div class="profile-edit">
+        <h2 class="profile-edit__title">Edit Profile</h2>
+
+        <form class="profile-edit__form">
+          <div class="profile-edit__avatar-section">
+            <div class="profile-edit__avatar-wrapper">
+              <img class="profile-edit__avatar" src="" alt="Profile avatar" />
+            </div>
+            <button type="button" class="profile-edit__avatar-button">
+              <span class="material-symbols-outlined">photo_camera</span>
+              Change Avatar
+            </button>
+          </div>
+
+          <div class="profile-edit__field form-field">
+            <label class="profile-edit__label form-label" for="username">Username</label>
+            <input type="text" id="username" class="profile-edit__input form-input" name="username" value="Mark" />
+          </div>
+          <div class="profile-edit__field form-field">
+            <label class="profile-edit__label form-label" for="first-name">First Name</label>
+            <input type="text" id="first-name" class="profile-edit__input form-input" name="first_name" />
+          </div>
+
+          <div class="profile-edit__field form-field">
+            <label class="profile-edit__label form-label" for="last-name">Last Name</label>
+            <input type="text" id="last-name" class="profile-edit__input form-input" name="last_name" />
+          </div>
+
+          <div class="profile-edit__field form-field">
+            <label class="profile-edit__label form-label" for="email">Email</label>
+            <input type="email" id="email" class="profile-edit__input form-input" name="email" />
+          </div>
+
+          <div class="profile-edit__field form-field">
+            <label class="profile-edit__label form-label" for="phone">Phone</label>
+            <input type="tel" id="phone" class="profile-edit__input form-input" name="telephone_number" />
+          </div>
+
+          <div class="profile-edit__field form-field">
+            <label class="profile-edit__label form-label" for="bio">Bio</label>
+            <textarea id="bio" class="profile-edit__textarea" name="bio" rows="4" maxlength="500"></textarea>
+          </div>
+
+          <div class="profile-edit__buttons">
+            <button type="button" class="profile-edit__button profile-edit__button--cancel">Cancel</button>
+            <button type="submit" class="profile-edit__button profile-edit__button--save">Save</button>
+          </div>
+        </form>
+      </div>
+    </template>
+
     <!-- 3D Game -->
     <template id="3d-game-template">
       <canvas class="webgl"></canvas>
@@ -444,35 +525,35 @@
         <button class="exit-button">Exit Game</button>
       </div>
       <div class="game-menu-overlay" id="menu">
-          <div class="game-menu-container">
-              <div class="card bg-dark text-light">
-                  <div class="card-header">
-                      <h2 class="text-center mb-0">Game Setup</h2>
-                  </div>
-                  <div class="card-body">
-                      <form id="gameSetupForm">
-                          <div class="mb-4">
-                              <label for="gameType">Game Type</label>
-                              <input type="text" id="gameType">
-                          </div>
+        <div class="game-menu-container">
+          <div class="card bg-dark text-light">
+            <div class="card-header">
+              <h2 class="text-center mb-0">Game Setup</h2>
+            </div>
+            <div class="card-body">
+              <form id="gameSetupForm">
+                <div class="mb-4">
+                  <label for="gameType">Game Type</label>
+                  <input type="text" id="gameType" />
+                </div>
 
-                          <div class="mb-4">
-                              <label for="gameId">Game ID</label>
-                              <input type="text" id="gameId">
-                          </div>
+                <div class="mb-4">
+                  <label for="gameId">Game ID</label>
+                  <input type="text" id="gameId" />
+                </div>
 
-                          <div class="mb-4">
-                              <label for="playerCount">Player count</label>
-                          <input type="text"  id="playerCount">
-                          </div>
+                <div class="mb-4">
+                  <label for="playerCount">Player count</label>
+                  <input type="text" id="playerCount" />
+                </div>
 
-                          <div class="text-center">
-                              <div class="joinGame btn btn-primary">Join</div>
-                          </div>
-                      </form>
-                  </div>
-              </div>
+                <div class="text-center">
+                  <div class="joinGame btn btn-primary">Join</div>
+                </div>
+              </form>
+            </div>
           </div>
+        </div>
       </div>
     </template>
 
