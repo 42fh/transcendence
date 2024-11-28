@@ -54,19 +54,18 @@ services:
       dockerfile: nginx/Dockerfile
       args:
         ENVIRONMENT: ${ENVIRONMENT} # Pass the environment as a build argument
-      # volumes:
-      # - /etc/letsencrypt/live/django.sldunit.xyz:/etc/ssl/certs/
-      # - /etc/letsencrypt/archive/django.sldunit.xyz:/etc/letsencrypt/archive/django.sldunit.xyz
     volumes:
       - ./src/frontend/:/usr/share/nginx/html
       - ./src/nginx/logs:/var/log/nginx
       - ./media:/var/www/media
+      - ./t.000031.xyz:/etc/letsencrypt/live/t.000031.xyz:ro
     ports:
-      # - "80:80"
-      # - "443:443"
-      # TODO: Let maybe Jonatahan fix this. Overriding the port manually.
+      # TODO: Overriding the port manually.
       # The override file doesn't work.
-      - "8080:80"
+      # nginx is the https termination point
+      - "443:80"
+      # old version without https
+      # - "8080:80"
     environment:
       - ENVIRONMENT=production
       # - NGINX_ENTRYPOINT_QUIET_LOGS=0 # to enable more verbose logging

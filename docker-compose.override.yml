@@ -36,7 +36,7 @@ services:
     volumes:
       - ./src/frontend/:/usr/share/nginx/html
       - ./media:/var/www/media
-    ports:
-      - "8080:80"
+    ports:      
+      - "443:80"
     environment:
       - ENVIRONMENT=development
