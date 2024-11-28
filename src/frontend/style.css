@@ -533,7 +533,7 @@ button:hover {
 }
 
 /* Close Button */
-.close-btn {
+.modal-close-btn {
   position: absolute;
   top: 0.5rem;
   right: 0.75rem;
@@ -1353,6 +1353,18 @@ button:hover {
 }
 
 .form-error {
+  /* display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  color: var(--color-error);
+  font-size: var(--font-size-small);
+  margin-top: var(--spacing-xs);
+  font-family: var(--font-family-primary); */
+  display: none;
+}
+
+/* Error only shows when input is invalid */
+.profile-edit__input:invalid + .form-error {
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
@@ -1360,6 +1372,8 @@ button:hover {
   font-size: var(--font-size-small);
   margin-top: var(--spacing-xs);
   font-family: var(--font-family-primary);
+  position: absolute;
+  bottom: calc(-1 * var(--spacing-md));
 }
 
 .form-error__icon {
@@ -1751,8 +1765,10 @@ button:hover {
   transition: all var(--transition-duration) var(--transition-timing);
 }
 
+/* Parent container needs relative positioning for absolute child */
 .profile-edit__field {
   margin-bottom: var(--spacing-md);
+  position: relative;
 }
 
 .profile-edit__label {
@@ -2027,4 +2043,46 @@ button:hover {
   font-size: 14px;
   text-align: center;
   white-space: nowrap;
+}
+
+/* Generic form classes */
+.form-field {
+  position: relative;
+  margin-bottom: var(--spacing-md);
+}
+
+.form-label {
+  display: block;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-small);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.form-input {
+  width: 100%;
+  padding: var(--spacing-xs);
+  background: var(--color-background-light);
+  border: var(--border-width) solid var(--color-border);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-small);
+}
+
+.form-input--error {
+  border-color: var(--color-error);
+}
+
+.form-error {
+  display: none;
+}
+
+.form-input:invalid + .form-error {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  color: var(--color-error);
+  font-size: var(--font-size-small);
+  margin-top: var(--spacing-xs);
+  font-family: var(--font-family-primary);
 }

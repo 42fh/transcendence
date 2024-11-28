@@ -1,0 +1,206 @@
+/* Base styles */
+@import "base/variables.css";
+@import "base/reset.css";
+@import "base/typography.css";
+
+/* Components */
+@import "components/buttons.css";
+@import "components/modals.css";
+@import "components/tournament-timetable.css";
+@import "components/forms.css";
+@import "components/navigation.css";
+
+/* Pages */
+@import "pages/layout.css";
+@import "pages/home.css";
+@import "pages/tournaments.css";
+@import "pages/profile.css";
+@import "pages/profileEdit.css";
+@import "pages/auth.css";
+@import "pages/game.css";
+@import "pages/chat.css";
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: "Press Start 2P", cursive;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Material Icons Configuration */
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  font-size: inherit;
+  line-height: 1;
+}
+
+/* Form Button Styling */
+/* TODO: These are two classes usee in the signup and signin templates */
+.form-button {
+  background-color: white;
+  color: black;
+  padding: 10px;
+  font-family: "Press Start 2P", cursive;
+  font-size: 0.8em;
+  cursor: pointer;
+  border: 2px solid white;
+  transition: background 0.3s;
+}
+
+.form-button:hover {
+  background-color: black;
+  color: white;
+  border: 2px solid white;
+}
+
+/* Modal and Toast Button Styling */
+/* TODO: solve this */
+
+.modal-button,
+.toast-button {
+  font-family: "Press Start 2P", cursive;
+  background: transparent;
+  color: white;
+  border: 2px solid white;
+  border-radius: 10px;
+  padding: 0.8rem 1.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.modal-button:hover,
+.toast-button:hover {
+  background: white;
+  color: black;
+}
+
+.modal-error,
+.toast-error {
+  color: red;
+  border-color: red;
+}
+
+/* Daniils */
+
+.myform {
+  position: absolute;
+  top: 0%;
+}
+
+.stopMusic {
+  position: absolute;
+  top: 0%;
+  left: 10%;
+}
+
+.startMusic {
+  position: absolute;
+  top: 0%;
+  right: 10%;
+}
+
+.previousSong {
+  position: absolute;
+  top: 0%;
+  left: 40%;
+}
+
+.nextSong {
+  position: absolute;
+  top: 0%;
+  left: 50%;
+}
+
+/* Ensure main content doesn't overlap with bottom nav */
+#main-content {
+  padding-bottom: var(--bottom-nav-height);
+  min-height: 100vh;
+}
+
+.webgl {
+  position: fixed;
+  top: 0;
+  left: 0;
+  outline: none;
+  z-index: 1;
+}
+
+.game-menu-overlay {
+  position: fixed;
+  top: 00;
+  left: 0;
+  width: 100%;
+  height: 160%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.game-menu-container {
+  width: 100%;
+  max-width: 500px;
+  padding: 20px;
+}
+
+.card {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.form-select {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.form-select option {
+  background-color: #212529;
+}
+
+.btn-primary {
+  background-color: #0d6efd;
+  border: none;
+  padding: 10px 30px;
+}
+
+.btn-primary:hover {
+  background-color: #0b5ed7;
+}
+
+.form-check-input:checked {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.loading-bar {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  height: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 10px;
+  overflow: hidden;
+  z-index: 999;
+}
+
+.loading-bar-fill {
+  width: 0%;
+  height: 100%;
+  background: #0066ff;
+  transition: width 0.3s ease-in-out;
+}
+
+.loading-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  text-align: center;
+  white-space: nowrap;
+}
