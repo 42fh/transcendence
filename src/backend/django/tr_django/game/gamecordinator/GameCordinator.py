@@ -27,7 +27,7 @@ class Game:
 class RedisLock:
     def __init__(self, redis_conn: redis.Redis, lock_key: str, timeout: int = 10):
         self.redis_conn = redis_conn
-        self.lock_key = f"lock:{lock_key}"
+        self.lock_key = lock_key
         self.timeout = timeout
 
     async def __aenter__(self):
@@ -190,7 +190,7 @@ class GameCordinator:
             pipeline.set(f"game_players_value:{game_id}",
                         msgpack.packb(settings.get("player_values")))
             
-            pipeline.set(f"{cls.NUM_PLAYERS_PREFIX}:{game_id}", msgpack.packb(settings.get("num_players"))
+            pipeline.set(f"{cls.NUM_PLAYERS_PREFIX}:{game_id}", str(settings.get("num_players")))
 
 
             await pipeline.execute()
@@ -268,7 +268,7 @@ class GameCordinator:
     async def player_situation(cls, game_id:str) -> dict :
         try:
             async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
-                async with RedisLock(redis_conn, cls.LOCK_KEYS[f"{game_id}_player_situation"]):
+                async with RedisLock(redis_conn, f"{game_id}_player_situation"):
                     cls.cleanup_invalid_bookings(redis_conn, game_id)
                     current_players = await redis_conn.scard(f"game_players:{game_id}")
                     reserved_players = await redis_conn.scard(f"game_booked_players:{game_id}")
@@ -283,31 +283,31 @@ class GameCordinator:
 
     @classmethod
     async def join_game(cls, request, game_id) -> dict:
-        session = request.session
-    try:
-        # Get game settings to check player limits
-        async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
-            num_players = await redis_conn.get(f"{cls.NUM_PLAYERS_PREFIX}:{game_id}")
-            if not num_players: 
-                return {"available": False, "message": "Game not found", "status": 404}
-            async with RedisLock(redis_conn, cls.LOCK_KEYS[f"{game_id}"]):
-               player_situation  = cls.player_situation(game_id)
-                total_players = player_situation["current_players"] + player_situation["reserved_players"]
-                if total_players >= max_players:
-                    return {"available": False, "message": "No available slots in this game", "status": 503}
-                async with RedisLock(redis_conn, cls.LOCK_KEYS[f"{game_id}_player_situation"]):
-                    # create 
-i                   await redis_conn.set(
-                        f"{cls.BOOKED_USER_PREFIX}{request.user.id}:{game_id}", 
-                        "",
-                        ex=5  # 5 sec
-                    )
-                    await redis_conn.sadd(f"game_booked_players:{game_id}", request.user.id)
-            return {"available": True}
-            
-    except Exception as e:
-        print(f"Error in join_game: {e}")
-        return {"available": False, "message": f"Error in join_game: {e}", "status": 500 }
+        #session = request.session
+        try:
+            # Get game settings to check player limits
+            async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
+                num_players = await redis_conn.get(f"{cls.NUM_PLAYERS_PREFIX}:{game_id}")
+                if not num_players: 
+                    return {"available": False, "message": "Game not found", "status": 404}
+                async with RedisLock(redis_conn, f"{game_id}"):
+                    player_situation  = await cls.player_situation(game_id)
+                    total_players = player_situation["current_players"] + player_situation["reserved_players"]
+                    if total_players >= int(num_players):
+                        return {"available": False, "message": "No available slots in this game", "status": 503}
+                    async with RedisLock(redis_conn, f"{game_id}_player_situation"):
+                        # create 
+                        await redis_conn.set(
+                            f"{cls.BOOKED_USER_PREFIX}{request.user.id}:{game_id}", 
+                            "",
+                            ex=5  # 5 sec
+                        )
+                        await redis_conn.sadd(f"game_booked_players:{game_id}", request.user.id)
+                return {"available": True}
+                
+        except Exception as e:
+            print(f"Error in join_game: {e}")
+            return {"available": False, "message": f"Error in join_game: {e}", "status": 500 }
 
 
     # from AGameManager with signals
@@ -356,7 +356,7 @@ i                   await redis_conn.set(
 
 
 
-     @classmethod
+    @classmethod
     async def set_user_offline(cls, user_id: str):
         try:
             async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:

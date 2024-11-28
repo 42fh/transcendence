@@ -18,18 +18,19 @@ from .gamecordinator.game_config import EnumGameMode
 def transcendance(request):
     return HttpResponse("Initial view for transcendance")
 
-
+import random
 @csrf_exempt
 async def create_new_game(request):
-    if request.method == "POST":      
-        if not request.user.is_authenticated:
-            return JsonResponse(
-                {
-                    "error": "Unauthorized - missing authentication",
-                    "message": "only login users can create new game"
-                },
-                status=401
-            )
+    if request.method == "POST":
+        request.user.id = random.randint(1000, 9999)      
+        #if not request.user.is_authenticated:
+        #    return JsonResponse(
+        #        {
+        #            "error": "Unauthorized - missing authentication",
+        #            "message": "only login users can create new game"
+        #        },
+        #        status=401
+        #    )
         if await GameCordinator.is_player_playing(request.user.id):
             return JsonResponse(
                 {
@@ -91,7 +92,7 @@ async def create_new_game(request):
         request.message = "NEW Game created successfully! Joined Gaime."
         request.method = 'GET'
         response = await join_game(request, game_id) 
-        return resposne
+        return response
 
     return JsonResponse(
         {
@@ -103,26 +104,27 @@ async def create_new_game(request):
 
 @csrf_exempt
 async def join_game(request, game_id):
-        if not request.user.is_authenticated:
-            return JsonResponse(
-                {
-                    "error": "Unauthorized - missing authentication",
-                    "message": "only login users can create new game"
-                },
-                status=401
-            )
-        if await GameCordinator.is_player_playing(request.user.id):
-            return JsonResponse(
-                {
-                    "error": "Double booking",
-                    "message": "Player already in active game"
-                },
-                status=409
+    #if not request.user.is_authenticated:
+    #    return JsonResponse(
+    #        {
+    #            "error": "Unauthorized - missing authentication",
+    #            "message": "only login users can create new game"
+    #        },
+    #        status=401
+    #    )
+    #if await GameCordinator.is_player_playing(request.user.id):
+    #    return JsonResponse(
+    #        {
+    #            "error": "Double booking",
+    #            "message": "Player already in active game"
+    #        },
+    #        status=409
+    #    )
 
-     if request.method == "GET":
+    if request.method == "GET":
         message = getattr(request, "message", "Joined Game! ")
-
-        resposne = await GameCordinator.join_game(request, game_id)
+        
+        response = await GameCordinator.join_game(request, game_id)
 
         if response.get('available', True):          
             return JsonResponse(
@@ -135,7 +137,7 @@ async def join_game(request, game_id):
 
         return  JsonResponse(
             {'available': False, 
-            'message': response.get("message", "NOT SET ERROR"
+            'message': response.get("message", "NOT SET ERROR")
             },
             status=response.get("status", 500)
     ) 
