@@ -5,7 +5,9 @@ export const CONFIG = {
     JS: "JS",
   },
   CURRENT_SOURCE: "API",
-  API_BASE_URL: "http://localhost:8080",
+  // API_BASE_URL: "http://localhost:8080",
+  // API depends on hostname, TODO: must become https
+  API_BASE_URL: `http://${window.location.hostname}:8000`
   API_ENDPOINTS: {
     TOURNAMENTS: "/api/game/tournaments",
   },
