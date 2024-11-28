@@ -36,25 +36,6 @@ body {
   line-height: 1;
 }
 
-/* Form Button Styling */
-/* TODO: These are two classes usee in the signup and signin templates */
-.form-button {
-  background-color: white;
-  color: black;
-  padding: 10px;
-  font-family: "Press Start 2P", cursive;
-  font-size: 0.8em;
-  cursor: pointer;
-  border: 2px solid white;
-  transition: background 0.3s;
-}
-
-.form-button:hover {
-  background-color: black;
-  color: white;
-  border: 2px solid white;
-}
-
 /* Modal and Toast Button Styling */
 /* TODO: solve this */
 

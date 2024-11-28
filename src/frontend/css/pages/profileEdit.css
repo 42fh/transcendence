@@ -146,7 +146,6 @@
   align-items: center;
   gap: var(--spacing-xs);
   color: var(--color-error);
-  font-size: var(--font-size-small);
   margin-top: var(--spacing-xs);
   font-family: var(--font-family-primary);
   position: absolute;

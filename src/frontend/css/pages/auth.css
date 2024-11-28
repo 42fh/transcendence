@@ -45,3 +45,37 @@
   color: black;
   transform: scale(1.05);
 }
+
+/* Form Buttons */
+.auth-form__button {
+  background-color: var(--color-primary);
+  color: var(--color-background);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-small);
+  cursor: pointer;
+  border: var(--border-width) solid var(--color-primary);
+  transition: all var(--transition-duration) var(--transition-timing);
+}
+
+.auth-form__button:hover {
+  background-color: var(--color-background);
+  color: var(--color-primary);
+}
+
+/* Form Button Styling */
+/* TODO: These are two classes usee in the signup and signin templates */
+.auth-form__button {
+  padding: 10px;
+  font-family: "Press Start 2P", cursive;
+  font-size: 0.8em;
+  cursor: pointer;
+  border: 2px solid white;
+  transition: background 0.3s;
+}
+
+.auth-form__button:hover {
+  background-color: black;
+  color: white;
+  border: 2px solid white;
+}
