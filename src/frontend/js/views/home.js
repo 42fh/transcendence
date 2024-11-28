@@ -1,7 +1,6 @@
 import { handleLogout } from "./auth.js";
 import { displayLogoutError } from "../utils/errors.js";
 import { loadTournamentsPage } from "./tournaments.js";
-// import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { updateActiveNavItem } from "../components/bottom-nav.js";
 import { loadChatPage } from "./chats.js";
 import { loadGame3D } from "./game3d.js";
@@ -15,7 +14,7 @@ export function loadHomePage(addToHistory = true) {
         },
         ""
       );
-      updateActiveNavItem("home");
+      if (!addToHistory) updateActiveNavItem("home");
     }
 
     const mainContent = document.getElementById("main-content");
