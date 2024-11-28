@@ -9,6 +9,7 @@
 @import "components/tournament-timetable.css";
 @import "components/forms.css";
 @import "components/navigation.css";
+@import "components/toast.css";
 
 /* Pages */
 @import "pages/layout.css";
