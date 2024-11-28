@@ -10,20 +10,20 @@ export const VALIDATION_RULES = {
     maxLength: 254,
     message: "Please enter a valid email address",
   },
-  phone: {
-    pattern: /^\+?[\d\s-]{10,15}$/, // Updated to include max length in pattern
+  telephone_number: {
+    pattern: /^\+?[0-9]{10,15}$/, // Updated to include max length in pattern
     maxLength: 15,
-    message: "Please enter a valid phone number (10-15 characters)",
+    message: "Please enter a valid phone number (10-15 digits, optional + prefix)",
   },
   first_name: {
     // Added specific rule for first name
-    pattern: /^[a-zA-Z\s-]{2,50}$/, // Updated to include max length in pattern
+    pattern: /^[a-zA-Z \-]{2,50}$/, // Only allow digits with leading +
     maxLength: 50,
     message: "First name should be 2-50 characters and can contain letters, spaces, and hyphens",
   },
   last_name: {
     // Added specific rule for last name
-    pattern: /^[a-zA-Z\s-]{2,50}$/, // Updated to include max length in pattern
+    pattern: /^[a-zA-Z \-]{2,50}$/, // Updated to include max length in pattern
     maxLength: 50,
     message: "Last name should be 2-50 characters and can contain letters, spaces, and hyphens",
   },
@@ -33,10 +33,11 @@ export const VALIDATION_RULES = {
   },
 };
 
-export function setupFormValidation(form, validationRules) {
+export function setupFormValidation(form) {
   form.querySelectorAll("input, textarea").forEach((input) => {
     // Add HTML5 validation attributes based on rules
     const rule = VALIDATION_RULES[input.name];
+    console.log(`Setting up validation for ${input.name}:`, rule);
     if (rule) {
       if (rule.required) input.required = true;
       // Don't override existing pattern attributes from HTML
@@ -66,13 +67,7 @@ export function setupFormValidation(form, validationRules) {
 export function validateFormField(input) {
   if (!input.value) return null; // Allow empty fields unless required
 
-  // First check HTML5 validation
-  const isHTML5Valid = input.checkValidity();
-  if (!isHTML5Valid) {
-    return input.validationMessage;
-  }
-
-  // Then check custom validation rules
+  // Check validation rules
   const rule = VALIDATION_RULES[input.name];
   if (!rule) return null;
 
@@ -87,21 +82,30 @@ export function validateFormField(input) {
   return null;
 }
 
-export function updateFieldError(input, error) {
+export function showFieldError(input, error) {
   const errorTemplate = document.getElementById("form-error-template");
   const existingError = input.parentElement.querySelector(".form-error");
 
-  if (error) {
-    if (!existingError) {
-      const errorNode = document.importNode(errorTemplate.content, true);
-      errorNode.querySelector(".form-error__message").textContent = error;
-      input.parentElement.appendChild(errorNode);
-    } else {
-      existingError.querySelector(".form-error__message").textContent = error;
-    }
-    input.classList.add("profile-edit__input--error");
+  if (!existingError) {
+    const errorNode = document.importNode(errorTemplate.content, true);
+    errorNode.querySelector(".form-error__message").textContent = error;
+    input.parentElement.appendChild(errorNode);
   } else {
-    if (existingError) existingError.remove();
-    input.classList.remove("profile-edit__input--error");
+    existingError.querySelector(".form-error__message").textContent = error;
+  }
+  input.classList.add("form-input--error");
+}
+
+export function clearFieldError(input) {
+  const existingError = input.parentElement.querySelector(".form-error");
+  if (existingError) existingError.remove();
+  input.classList.remove("form-input--error");
+}
+
+export function updateFieldError(input, error) {
+  if (error) {
+    showFieldError(input, error);
+  } else {
+    clearFieldError(input);
   }
 }
