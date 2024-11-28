@@ -6,8 +6,8 @@ export const CONFIG = {
   },
   CURRENT_SOURCE: "API",
   // API_BASE_URL: "http://localhost:8080",
-  // API depends on hostname
-  API_BASE_URL: `${window.location.origin.replace(/:\d+$/, '')}:8000`,
+  // API BASE URL needs to be empty to be relative
+  API_BASE_URL: "",
   API_ENDPOINTS: {
     TOURNAMENTS: "/api/game/tournaments",
   },
