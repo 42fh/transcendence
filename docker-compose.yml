@@ -47,6 +47,7 @@ services:
       - POSTGRES_PORT=5432
     networks:
       - transcendence_network
+    stop_grace_period: 1s  # SIGKILL after 1s
   nginx:
     build:
       # we need the context to be ./src instad of ./src/nginx to so that it can see easily the frontend folder
@@ -59,13 +60,10 @@ services:
       - ./src/nginx/logs:/var/log/nginx
       - ./media:/var/www/media
       - ./t.000031.xyz:/etc/letsencrypt/live/t.000031.xyz:ro
-    ports:
-      # TODO: Overriding the port manually.
-      # The override file doesn't work.
-      # nginx is the https termination point
-      - "443:443"
-      # old version without https
-      # - "8080:80"
+    # ports:
+      # due to the way multiple docker compose files are 
+      # merged (e.g. using docker-compose.override.yml) the
+      # ports are defined in the more concrete dev/prod files
     environment:
       - ENVIRONMENT=production
       # - NGINX_ENTRYPOINT_QUIET_LOGS=0 # to enable more verbose logging

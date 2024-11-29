@@ -22,13 +22,12 @@ services:
     volumes:
       - ./src/backend/django:/app
       - ./media:/app/media
-    ports:
-      - "8000:8000"
     environment:
       - Debug=True
       - ENVIRONMENT=development
-    stop_grace_period: 1s  # SIGKILL after 1s
   nginx:
+    ports:
+      - "8443:443"
     build:
       context: ./src
       dockerfile: ./nginx/Dockerfile
@@ -37,7 +36,5 @@ services:
     volumes:
       - ./src/frontend/:/usr/share/nginx/html
       - ./media:/var/www/media
-    ports:      
-      - "443:443"
     environment:
       - ENVIRONMENT=development
