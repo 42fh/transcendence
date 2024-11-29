@@ -226,9 +226,22 @@ class GameCordinator:
         try:
             async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
                 # Check if either key exists using EXISTS command
-                booked_exists = await redis_conn.exists(f"{cls.BOOKED_USER_PREFIX}{user_id}:*")
+                """booked_exists = await redis_conn.exists(f"{cls.BOOKED_USER_PREFIX}{user_id}:*")
+                print("player is booked: ", booked_exists)
                 playing_exists = await redis_conn.exists(f"{cls.PLAYING_USER_PREFIX}{user_id}:*")
-                return bool(booked_exists or playing_exists)
+                print("player is playing: ",playing_exists)
+                return bool(booked_exists or playing_exists)"""
+                async for key in redis_conn.scan_iter(f"{cls.BOOKED_USER_PREFIX}{user_id}:*"):
+                    print("player is booked: ", key)
+                    return True
+            
+                # Check for playing status
+                async for key in redis_conn.scan_iter(f"{cls.PLAYING_USER_PREFIX}{user_id}:*"):
+                    print("player is playing: ", key)
+                    return True
+                
+                return False
+        
         except Exception as e:
             print(f"Error checking player status: {e}")
             return False

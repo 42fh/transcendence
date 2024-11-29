@@ -1156,3 +1156,147 @@ class TournamentServiceTest(TestCase):
         data = build_tournament_data(tournament)
         self.assertFalse(data["isTimetableAvailable"])
         self.assertIsNone(data["timetable"])
+
+from django.test import TestCase, Client
+from django.urls import reverse
+from channels.testing import WebsocketCommunicator
+from channels.routing import URLRouter
+from django.urls import re_path
+from users.models import CustomUser
+from game.models import Player
+from game.consumers import PongConsumer
+from game.routing import websocket_urlpatterns
+import json
+import pytest
+
+@pytest.mark.asyncio
+class GameConnectionIntegrationTest(TestCase):
+    """
+    Integration test for game creation and connection flow.
+    Tests user creation, game creation, and WebSocket connection.
+    """
+    
+    def setUp(self):
+        """
+        Regular synchronous setup - runs before each test method.
+        Creates test users and their associated Player profiles will be automatically
+        created through the signal handler in game/signals.py
+        """
+        # Create test users - Player instances will be created automatically via signals
+        self.user1 = CustomUser.objects.create_user(
+            username="testplayer1",
+            password="testpass123"
+        )
+        self.user2 = CustomUser.objects.create_user(
+            username="testplayer2",
+            password="testpass123"
+        )
+        
+        # Get the automatically created Player instances
+        # These were created by the post_save signal in game/signals.py
+        self.player1 = Player.objects.get(user=self.user1)
+        self.player2 = Player.objects.get(user=self.user2)
+        
+        # Update display names if needed
+        self.player1.display_name = "TestPlayer1"
+        self.player1.save()
+        self.player2.display_name = "TestPlayer2"
+        self.player2.save()
+        
+        # Set up the HTTP test client
+        self.client = Client()
+        
+        # Set up the WebSocket application
+        self.application = URLRouter(websocket_urlpatterns)
+
+    async def test_game_creation_and_connection(self):
+        """Test the complete flow from game creation through WebSocket connection"""
+        print("Starting game creation and connection test")
+        
+        # Step 1: Login user1 who will create the game
+        login_success = self.client.login(username="testplayer1", password="testpass123")
+        self.assertTrue(login_success, "Failed to log in test user")
+        
+        # Step 2: Create a new game
+        game_settings = {
+            "mode": "regular",
+            "type": "polygon",
+            "num_players": 2,
+            "num_balls": 1,
+            "sides": 4
+        }
+        
+        print("Creating new game...")
+        response = self.client.post(
+            reverse('create_new_game'),
+            data=json.dumps(game_settings),
+            content_type='application/json'
+        )
+        
+        self.assertEqual(response.status_code, 200, f"Game creation failed with response: {response.content}")
+        game_data = response.json()
+        self.assertTrue('ws_url' in game_data, "WebSocket URL not found in response")
+        
+        # Extract game ID from WebSocket URL
+        game_id = game_data['ws_url'].split('/')[-2]
+        print(f"Game created with ID: {game_id}")
+        
+        # Step 3: Connect user1 to the game via WebSocket
+        communicator1 = WebsocketCommunicator(
+            self.application,
+            f"/ws/game/{game_id}/?type=polygon"
+        )
+        communicator1.scope["user"] = self.user1
+        print("Connecting first user...")
+        connected1, _ = await communicator1.connect()
+        self.assertTrue(connected1, "First user failed to connect")
+        
+        try:
+            # Step 4: Verify initial game state message
+            print("Waiting for initial game state...")
+            response1 = await communicator1.receive_json_from()
+            self.assertEqual(response1["type"], "initial_state", "Didn't receive initial state")
+            self.assertTrue("game_state" in response1, "Game state missing from response")
+            
+            # Step 5: Connect user2 to the game
+            print("Connecting second user...")
+            communicator2 = WebsocketCommunicator(
+                self.application,
+                f"/ws/game/{game_id}/?type=polygon"
+            )
+            communicator2.scope["user"] = self.user2
+            connected2, _ = await communicator2.connect()
+            self.assertTrue(connected2, "Second user failed to connect")
+            
+            try:
+                # Step 6: Verify user2 receives initial state
+                response2 = await communicator2.receive_json_from()
+                self.assertEqual(response2["type"], "initial_state", "Second user didn't receive initial state")
+                
+                # Step 7: Test paddle movement
+                print("Testing paddle movement...")
+                await communicator1.send_json_to({
+                    "action": "move_paddle",
+                    "direction": "left",
+                    "user_id": str(self.user1.id)
+                })
+                
+                # Both players should receive game state update
+                state_update1 = await communicator1.receive_json_from()
+                state_update2 = await communicator2.receive_json_from()
+                
+                self.assertEqual(state_update1["type"], "game_state", "First user didn't receive state update")
+                self.assertEqual(state_update2["type"], "game_state", "Second user didn't receive state update")
+                
+            finally:
+                print("Disconnecting second user...")
+                await communicator2.disconnect()
+        finally:
+            print("Disconnecting first user...")
+            await communicator1.disconnect()
+
+    def tearDown(self):
+        """Clean up after each test"""
+        print("Cleaning up test data...")
+        CustomUser.objects.all().delete()  # This will cascade delete Player instances
+        super().tearDown()

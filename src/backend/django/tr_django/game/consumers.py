@@ -24,9 +24,11 @@ class PongConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
         self.game_id = self.scope["url_route"]["kwargs"]["game_id"]
+        self.player_id = self.user = self.scope["user"] 
+        print (self.player_id.id)        
+
         query_string = self.scope["query_string"].decode("utf-8")
         query_params = dict(param.split("=") for param in query_string.split("&"))
-        self.player_id = query_params.get("player") 
         game_type = query_params.get("type", "polygon")  # Default to polygon_pong
         print(query_params)
         self.game_group = f"game_{self.game_id}"

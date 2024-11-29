@@ -8,7 +8,7 @@ import json
 from .services.tournament_service import build_tournament_data
 from datetime import datetime
 import asyncio  
-from .gamecordinator.GameCordinator import GameCordinator
+from .gamecordinator.GameCordinator import GameCordinator, RedisLock
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 from .gamecordinator.game_config import EnumGameMode 
@@ -18,19 +18,68 @@ from .gamecordinator.game_config import EnumGameMode
 def transcendance(request):
     return HttpResponse("Initial view for transcendance")
 
+
 import random
 @csrf_exempt
-async def create_new_game(request):
-    if request.method == "POST":
-        request.user.id = random.randint(1000, 9999)      
-        #if not request.user.is_authenticated:
-        #    return JsonResponse(
-        #        {
-        #            "error": "Unauthorized - missing authentication",
-        #            "message": "only login users can create new game"
-        #        },
-        #        status=401
-        #    )
+async def create_new_game(request, use_redis_lock: bool = True):
+    # checks without redis lock 
+    if request.method != "POST":
+        return JsonResponse(
+            {
+                "error": "Method Not Allowed",
+                "message": "only POST requests are allowed"
+            }, 
+            status=405
+        )
+    request.user.id = 123   # random.randint(1000, 9999) -> hardcoded for test        
+    # comment out because not connected to user yet
+    #if not request.user.is_authenticated:
+    #    return JsonResponse(
+    #        {
+    #            "error": "Unauthorized - missing authentication",
+    #            "message": "only login users can create new game"
+    #        },
+    #        status=401
+    #    )
+    if request.content_type != 'application/json':
+        return JsonResponse(
+            {
+                "error": "Unsupported Media Type",
+                "message": "This endpoint only accepts application/json payloads."
+            },
+            status=415
+        )
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse(
+            {
+                "error": "Invalid JSON",
+                "message": "The JSON payload is malformed."
+            },
+            status=400
+        )
+    game_mode = data.get('mode')
+    if not game_mode:
+        return JsonResponse(
+            {
+                "error": "Invalid request",
+                "message": "Game mode is required."
+            },
+            status=400
+        )
+
+    try:
+        game_mode = EnumGameMode(game_mode)
+    except ValueError:
+        return JsonResponse(
+            {
+                "error": "Invalid game mode",
+                "message": f"Valid modes are: {[mode.value for mode in EnumGameMode]}"
+            },
+            status=400
+        )
+    async def create_game_logic():
         if await GameCordinator.is_player_playing(request.user.id):
             return JsonResponse(
                 {
@@ -39,46 +88,6 @@ async def create_new_game(request):
                 },
                 status=409
             )
-        if request.content_type != 'application/json':
-            return JsonResponse(
-                {
-                    "error": "Unsupported Media Type",
-                    "message": "This endpoint only accepts application/json payloads."
-                },
-                status=415
-            )
-        
-        try:
-            data = json.loads(request.body)
-        except json.JSONDecodeError:
-            return JsonResponse(
-                {
-                    "error": "Invalid JSON",
-                    "message": "The JSON payload is malformed."
-                },
-                status=400
-            )
-        game_mode = data.get('mode')
-        if not game_mode:
-            return JsonResponse(
-                {
-                    "error": "Invalid request",
-                    "message": "Game mode is required."
-                },
-                status=400
-            )
-
-        try:
-            game_mode = EnumGameMode(game_mode)
-        except ValueError:
-            return JsonResponse(
-                {
-                    "error": "Invalid game mode",
-                    "message": f"Valid modes are: {[mode.value for mode in EnumGameMode]}"
-                },
-                status=400
-            )
-
         game_id = await GameCordinator.create_new_game(data)
         if not game_id:
                 return JsonResponse(
@@ -91,19 +100,31 @@ async def create_new_game(request):
         
         request.message = "NEW Game created successfully! Joined Gaime."
         request.method = 'GET'
-        response = await join_game(request, game_id) 
+        response = await join_game(request, game_id, use_redis_lock=False) 
         return response
+    
+    try:
+        if use_redis_lock:
+            async with await GameCordinator.get_redis(GameCordinator.REDIS_GAME_URL) as redis_conn:
+                async with RedisLock(redis_conn, f"player_lock:{request.user.id}"):
+                    return await create_game_logic()
+        return await create_game_logic()
+        
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
 
-    return JsonResponse(
-        {
-            "error": "Method Not Allowed",
-            "message": "only POST requests are allowed"
-        }, 
-        status=405
-    )
 
 @csrf_exempt
-async def join_game(request, game_id):
+async def join_game(request, game_id, use_redis_lock: bool = True):
+
+    if request.method != "GET":
+        return JsonResponse(
+            {
+                "error": "Method Not Allowed",
+                "message": "only GET requests are allowed"
+            }, 
+            status=405
+        )
     #if not request.user.is_authenticated:
     #    return JsonResponse(
     #        {
@@ -112,16 +133,15 @@ async def join_game(request, game_id):
     #        },
     #        status=401
     #    )
-    #if await GameCordinator.is_player_playing(request.user.id):
-    #    return JsonResponse(
-    #        {
-    #            "error": "Double booking",
-    #            "message": "Player already in active game"
-    #        },
-    #        status=409
-    #    )
-
-    if request.method == "GET":
+    async def join_logic():    
+        if await GameCordinator.is_player_playing(request.user.id):
+            return JsonResponse(
+                {
+                    "error": "Double booking",
+                    "message": "Player already in active game"
+                },
+                status=409
+            )
         message = getattr(request, "message", "Joined Game! ")
         
         response = await GameCordinator.join_game(request, game_id)
@@ -140,14 +160,18 @@ async def join_game(request, game_id):
             'message': response.get("message", "NOT SET ERROR")
             },
             status=response.get("status", 500)
-    ) 
-    return JsonResponse(
-        {
-            "error": "Method Not Allowed",
-            "message": "only GET requests are allowed"
-        }, 
-        status=405
-    )
+        )
+    try:
+            if use_redis_lock:
+                async with await GameCordinator.get_redis(GameCordinator.REDIS_GAME_URL) as redis_conn:
+                    async with RedisLock(redis_conn, f"player_lock:{request.user.id}"):
+                        return await join_logic()
+            return await join_logic()
+            
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+    
+ 
 
 
 @csrf_exempt
