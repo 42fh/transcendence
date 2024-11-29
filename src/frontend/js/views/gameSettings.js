@@ -1,5 +1,6 @@
 import { CONFIG } from "../config/constants.js";
 import { createNewGame } from "../services/gameSettingsService.js";
+import { displayModalError } from "../components/modal.js";
 
 export function gameSettings() {
   console.log("print from gameSettings");
@@ -142,6 +143,13 @@ export function gameSettings() {
       }
     });
 
+    const numSidesInput = document.getElementById("numSides");
+    if (numSidesInput) {
+      numSidesInput.addEventListener("change", (e) => {
+        state.formData.numSides = parseInt(e.target.value);
+      });
+    }
+
     const exitButton = document.createElement("button");
     exitButton.textContent = "Exit Settings";
     exitButton.id = "exit-settings-button";
@@ -154,7 +162,7 @@ export function gameSettings() {
   function updateGameTypeFields() {
     const config = state.gameConfigs[state.gameType];
     if (!config) return;
-
+  
     const numPlayersInput = document.getElementById("numPlayers");
     if (numPlayersInput) {
       numPlayersInput.max = config.maxPlayers;
@@ -163,10 +171,10 @@ export function gameSettings() {
         state.formData.numPlayers = config.maxPlayers;
       }
     }
-
+  
     const numSidesInput = document.getElementById("numSides");
     if (numSidesInput) {
-      numSidesInput.value = config.sides;
+      // Allow user to set sides for classic mode
       if (state.gameType === "circular") {
         numSidesInput.min = 4;
         numSidesInput.max = 12;
@@ -174,20 +182,22 @@ export function gameSettings() {
         numSidesInput.min = 3;
         numSidesInput.max = 8;
       }
-      state.formData.numSides = config.sides;
+      // Remove hardcoded setting of numSides
+      // state.formData.numSides = config.sides;
     }
-
+  
     const shapeFields = document.querySelectorAll(".shape-fields");
     shapeFields.forEach((field) => {
       field.style.display = state.gameType === "irregular" ? "block" : "none";
     });
-
+  
     const sidesField = document.getElementById("sidesField");
     if (sidesField) {
       sidesField.style.display =
         state.gameType !== "classic" ? "block" : "none";
     }
   }
+  
 
   function logEvent(event) {
     if (!state.eventLog) return;
@@ -223,7 +233,7 @@ export function gameSettings() {
     if (!config) {
       console.error("Invalid game type selected");
       console.log("Current game type:", state.gameType);
-      showStatus("Invalid game type selected", true);
+      displayModalError("Invalid game type selected");
       return;
     }
 
@@ -235,37 +245,31 @@ export function gameSettings() {
     const scoreMode = document.getElementById("scoreMode").value;
 
     if (numPlayers < 2 || numPlayers > config.maxPlayers) {
-      showStatus(
-        `Number of players must be between 2 and ${config.maxPlayers}`,
-        true
-      );
+      displayModalError(`Number of players must be between 2 and ${config.maxPlayers}`);
       return;
     }
 
     if (state.gameType === "circular") {
       if (numSides < 4 || numSides > 12) {
-        showStatus("Circular mode requires between 4 and 12 sides", true);
+        displayModalError("Circular mode requires between 4 and 12 sides", true);
         return;
       }
-    } else if (state.gameType !== "classic") {
+    } else {
       if (numSides < 3 || numSides > 8) {
-        showStatus(
-          "Number of sides must be between 3 and 8 for polygon modes",
-          true
-        );
+        displayModalError("Number of sides must be between 3 and 8 for polygon modes"); 
         return;
       }
     }
-
+    
     if (numBalls < 1 || numBalls > 4) {
-      showStatus("Number of balls must be between 1 and 4", true);
+      displayModalError("Number of balls must be between 1 and 4");
       return;
     }
 
     try {
       const userId = localStorage.getItem("pongUserId");
       if (!userId) {
-        showStatus("User ID not found in localStorage", true);
+        displayModalError("User ID not found in localStorage");
         return;
       }
 
@@ -283,8 +287,8 @@ export function gameSettings() {
         pongType: state.gameType,
         players: numPlayers,
         balls: numBalls,
-        sides: state.gameType === "classic" ? 4 : numSides,
-        shape: state.gameType === "irregular" ? shape : undefined,
+        sides: numSides,
+        shape: shape,
         scoreMode,
         userId,
       };
@@ -307,21 +311,11 @@ export function gameSettings() {
       if (mainContent) {
         mainContent.innerHTML = `<div class="error">Error: ${error.message}</div>`;
       }
-      showStatus(`Error: ${error.message}`, true);
+      displayModalError(`Error: ${error.message}`);
       console.error("Game creation error:", error);
     }
   }
 
-  function showStatus(message, isError = false) {
-    const status = document.getElementById("status");
-    if (!status) {
-      console.warn("Status element not found, skipping status update.");
-      return;
-    }
-    status.textContent = message;
-    status.className = `status ${isError ? "error" : "success"}`;
-    status.style.display = "block";
-  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
