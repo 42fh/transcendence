@@ -1,9 +1,16 @@
 /* Page container */
 .page-container--users {
   padding: 1rem;
-  min-height: calc(100vh - var(--bottom-nav-height));
+  /* min-height: calc(100vh - var(--bottom-nav-height)); */
+  height: calc(100vh - var(--bottom-nav-height));
+
+  position: fixed;
+  top: 0;
+  left: 2rem;
+  right: 0;
   display: flex;
   flex-direction: column;
+  padding: 1rem 1rem 0 1rem;
 }
 
 /* Users list */
@@ -39,6 +46,7 @@
   padding: 0.5rem;
   background: var(--color-background-secondary);
   border-radius: 8px;
+  font-size: 0.7rem;
 }
 
 .users-search__input {
