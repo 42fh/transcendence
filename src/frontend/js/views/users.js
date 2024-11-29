@@ -6,12 +6,7 @@ import { fetchUsers } from "../services/usersService.js";
 export async function loadUsersPage(addToHistory = true) {
   try {
     if (addToHistory) {
-      history.pushState(
-        {
-          view: "users",
-        },
-        ""
-      );
+      history.pushState({ view: "users" }, "");
       updateActiveNavItem("users");
     }
     if (!addToHistory) updateActiveNavItem("users");
@@ -19,16 +14,29 @@ export async function loadUsersPage(addToHistory = true) {
     const mainContent = document.getElementById("main-content");
     mainContent.innerHTML = "";
 
-    // Add users template to index.html first
+    // Get and clone the template
     const usersTemplate = document.getElementById("users-template");
     if (!usersTemplate) {
       throw new Error("Users template not found");
     }
 
-    mainContent.appendChild(document.importNode(usersTemplate.content, true));
+    // Clone the entire template
+    const content = document.importNode(usersTemplate.content, true);
+    mainContent.appendChild(content);
+
+    // Get the search input after template is cloned and added
+    // const searchInput = document.querySelector(".users-search__input");
+    // if (searchInput) {
+    //   searchInput.addEventListener(
+    //     "input",
+    //     debounce((e) => {
+    //       loadUsersList(1, 10, e.target.value);
+    //     }, 300)
+    //   );
+    // }
 
     // Initial load of first page
-    await loadUsersList(1);
+    await loadUsersList(1, 10, "");
   } catch (error) {
     console.error("Error loading users page:", error);
     displayModalError("Failed to load users page");
@@ -38,7 +46,6 @@ export async function loadUsersPage(addToHistory = true) {
 async function loadUsersList(page = 1, perPage = 10, search = "") {
   try {
     console.log("Loading users list with page:", page, "and per page:", perPage, "and search:", search);
-    // const response = await fetch(`/api/users/?page=${page}&per_page=${perPage}`);
     const data = await fetchUsers(page, perPage, search);
     if (!data) throw new Error("Failed to fetch users");
     console.log("Fetched users:", data);
@@ -53,40 +60,20 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
       userListItemTemplate: userListItemTemplate ? "✓" : "✗",
     });
 
-    if (!usersList || !paginationContainer || !userListItemTemplate) {
-      throw new Error("Users list, pagination container, or user list item template not found");
-    }
-
-    if (!userListItemTemplate) {
-      console.error("Template HTML:", document.body.innerHTML);
-      throw new Error("User list item template not found");
-    }
-
-    // Clear existing content
     usersList.innerHTML = "";
 
     // Render users
-    console.log("Rendering users:", data.users);
     data.users.forEach((user, index) => {
       try {
-        console.log(`Processing user ${index + 1}:`, user);
-
         const userItem = document.importNode(userListItemTemplate.content, true);
-        console.log(`User ${index + 1} template cloned:`, userItem);
-
-        // const userElement = userItem.querySelector(".users-list__item");
         const userElement = userItem.firstElementChild;
         if (!userElement) {
           throw new Error("Could not find users-list__item in cloned template");
         }
-        console.log("Created userItem:", userItem);
 
         const avatarImg = userElement.querySelector(".users-list__avatar");
-        console.log(`User ${index + 1} avatar element:`, avatarImg);
 
         avatarImg.src = user.avatar || ASSETS.IMAGES.DEFAULT_AVATAR;
-        avatarImg.alt = `${user.username}'s avatar`;
-        // Add error handler to fallback to default avatar if image fails to load
         avatarImg.onerror = function () {
           this.src = ASSETS.IMAGES.DEFAULT_AVATAR;
           console.log(`Avatar image failed to load for ${user.username}, using default`);
@@ -94,10 +81,8 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
 
         const username = userElement.querySelector(".users-list__username");
         username.textContent = user.username;
-        console.log("Set username:", username.textContent);
 
         const statusIndicator = userElement.querySelector(".users-list__status-indicator");
-        console.log(`User ${index + 1} status indicator:`, statusIndicator);
 
         if (user.is_active && user.visibility_online_status) {
           statusIndicator.classList.add("users-list__status-indicator--online");
@@ -122,33 +107,39 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
 }
 
 function renderPagination(pagination, container) {
+  console.log("Rendering pagination:", pagination);
+  console.log("Container:", container);
   const { total_pages, page, per_page } = pagination;
-  container.innerHTML = "";
 
-  if (total_pages <= 1) return;
+  const prevButton = container.querySelector(".pagination__button--prev");
+  const nextButton = container.querySelector(".pagination__button--next");
+  const currentPage = container.querySelector(".pagination__current");
+  const totalPages = container.querySelector(".pagination__total");
 
-  const createPageButton = (pageNum, label = pageNum, isActive = pageNum === page) => {
-    const button = document.createElement("button");
-    button.className = `pagination__button ${isActive ? "pagination__button--active" : ""}`;
-    button.textContent = label;
-    if (typeof pageNum === "number") {
-      button.onclick = () => loadUsersList(pageNum, per_page);
-    }
-    return button;
-  };
+  console.log("Found elements:", {
+    prevButton: prevButton ? "✓" : "✗",
+    nextButton: nextButton ? "✓" : "✗",
+    currentPage: currentPage ? "✓" : "✗",
+    totalPages: totalPages ? "✓" : "✗",
+  });
 
-  // Always show first page, last page, current page, and one page before and after current
-  const visiblePages = new Set([1, total_pages, page, Math.max(1, page - 1), Math.min(total_pages, page + 1)]);
-
-  let previousPage = 0;
-  for (let i = 1; i <= total_pages; i++) {
-    if (visiblePages.has(i)) {
-      // Add ellipsis if there's a gap
-      if (i - previousPage > 1) {
-        container.appendChild(createPageButton(null, "..."));
-      }
-      container.appendChild(createPageButton(i));
-      previousPage = i;
-    }
+  if (!prevButton || !nextButton || !currentPage || !totalPages) {
+    console.error("Missing pagination elements");
+    return;
   }
+
+  // Update page numbers
+  currentPage.textContent = page;
+  totalPages.textContent = total_pages;
+
+  // Update button states
+  prevButton.disabled = page <= 1;
+  nextButton.disabled = page >= total_pages;
+
+  // Add click handlers
+  prevButton.onclick = () => loadUsersList(page - 1);
+  nextButton.onclick = () => loadUsersList(page + 1);
+
+  // Hide pagination if there's only one page
+  container.style.display = total_pages <= 1 ? "none" : "flex";
 }

@@ -568,10 +568,22 @@
         <h2 class="users-page__title">Users</h2>
         <div class="users-search">
           <input type="text" class="users-search__input" placeholder="Search users..." />
-          <span class="material-symbols-outlined users-search__icon">search</span>
+          <!-- <span class="material-symbols-outlined users-search__icon">search</span> -->
         </div>
         <div id="users-list" class="users-list"></div>
-        <div id="users-pagination" class="pagination"></div>
+        <div id="users-pagination" class="pagination">
+          <button class="pagination__button pagination__button--prev">
+            <span class="material-symbols-outlined">chevron_left</span>
+          </button>
+          <div class="pagination__info">
+            <span class="pagination__current">1</span>
+            <span class="pagination__separator">/</span>
+            <span class="pagination__total">1</span>
+          </div>
+          <button class="pagination__button pagination__button--next">
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
       </div>
     </template>
 
