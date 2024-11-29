@@ -20,6 +20,7 @@
 @import "pages/auth.css";
 @import "pages/game.css";
 @import "pages/chat.css";
+@import "pages/users.css";
 
 body {
   background-color: var(--color-background);

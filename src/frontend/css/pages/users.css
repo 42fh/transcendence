@@ -1,0 +1,105 @@
+/* Page container */
+.page-container--users {
+  padding: 1rem;
+  min-height: calc(100vh - var(--bottom-nav-height));
+  display: flex;
+  flex-direction: column;
+}
+
+/* Add some spacing between elements */
+.users-list {
+  flex: 1; /* This will make the list take available space */
+  overflow-y: auto; /* Enable scrolling if content is too long */
+  margin-bottom: 1rem; /* Space for pagination */
+}
+
+/* Ensure pagination stays at the bottom */
+.pagination {
+  margin-top: auto;
+  padding-bottom: 1rem;
+}
+
+/* Search area */
+.users-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background: var(--color-background-secondary);
+  border-radius: 8px;
+}
+
+.users-search__input {
+  flex: 1;
+  border: none;
+  background: none;
+  color: var(--color-text);
+  padding: 0.5rem;
+}
+
+/* Users list */
+.users-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.users-list__item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: var(--color-background-secondary);
+  border-radius: 8px;
+}
+
+.users-list__avatar {
+  /* width: 40px; */
+  /* height: 40px; */
+  width: 2em;
+  height: 2em;
+
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0; /* Prevents the avatar from shrinking */
+}
+
+.users-list__info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.users-list__username {
+  color: var(--color-text);
+  font-size: 1rem;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.pagination__button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  background: var(--color-background-secondary);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.pagination__button--active {
+  background: var(--color-primary);
+}
+
+.users-list__status-indicator {
+  width: 0.5em;
+  height: 0.5em;
+  border-radius: 50%;
+  display: inline-block;
+}
