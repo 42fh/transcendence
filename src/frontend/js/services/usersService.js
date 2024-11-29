@@ -45,3 +45,50 @@ export function renderMatchHistory(matches, container) {
     container.appendChild(matchElement);
   });
 }
+
+export async function updateUserProfile(userId, userData) {
+  try {
+    const response = await fetch(`${CONFIG.API_BASE_URL}/api/users/${userId}/`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(userData),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const updatedUser = await response.json();
+    return updatedUser;
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    throw error;
+  }
+}
+
+export async function uploadUserAvatar(userId, avatarFile) {
+  try {
+    const formData = new FormData();
+    formData.append("avatar", avatarFile);
+
+    const url = `${CONFIG.API_BASE_URL}/api/users/users/${userId}/avatar/`;
+    const response = await fetch(url, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Upload error response:", errorText);
+      throw new Error("Upload failed");
+    }
+
+    const data = await response.json();
+    return data.avatar;
+  } catch (error) {
+    console.error("Error uploading avatar:", error);
+    throw error;
+  }
+}

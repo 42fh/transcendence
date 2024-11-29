@@ -2,6 +2,8 @@ import { fetchUserProfile, formatWinRatio, renderMatchHistory } from "../service
 import { showToast } from "../utils/toast.js";
 import { ASSETS, LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { updateActiveNavItem } from "../components/bottom-nav.js";
+import { loadHomePage } from "./home.js";
+import { loadProfileEditPage } from "./profileEdit.js";
 
 export async function loadProfilePage(addToHistory = true) {
   try {
@@ -20,34 +22,34 @@ export async function loadProfilePage(addToHistory = true) {
     if (!mainContent) {
       throw new Error("Main content element not found");
     }
-
-    mainContent.style.display = "block";
-    mainContent.innerHTML = ""; // Clear existing content
-
-    // Add loading state
+    // TODO: Make it beautiful
     mainContent.innerHTML = '<div class="loading">Loading profile...</div>';
 
-    // Get current user's ID from localStorage
     const userId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
-
     if (!userId) {
       throw new Error("User ID not found");
     }
 
     // Fetch user data
     const userData = await fetchUserProfile(userId);
+    if (!userData) {
+      // If user doesn't exist, clear localStorage and redirect to auth
+      localStorage.clear();
+      loadAuthPage();
+      return;
+    }
 
     // Clone and populate template
-    const template = document.getElementById("profile-template");
-    const content = document.importNode(template.content, true);
+    const profileTemplate = document.getElementById("profile-template");
+    const content = document.importNode(profileTemplate.content, true);
 
     // Populate user data
     content.querySelector(".profile__avatar").src = userData.avatar || ASSETS.IMAGES.DEFAULT_AVATAR;
     content.querySelector(".profile__username").textContent = userData.username;
-    content.querySelector(".profile__name").textContent =
+    content.querySelector(".profile__info-item--name").textContent =
       `${userData.first_name || ""} ${userData.last_name || ""}`.trim() || "No name set";
-    content.querySelector(".profile__email").textContent = userData.email || "No email set";
-    content.querySelector(".profile__phone").textContent = userData.telephone_number || "No phone set";
+    content.querySelector(".profile__info-item--email").textContent = userData.email || "No email set";
+    content.querySelector(".profile__info-item--phone").textContent = userData.telephone_number || "No phone set";
     content.querySelector(".profile__bio-text").textContent = userData.bio || "No bio available";
 
     // Populate stats
@@ -58,13 +60,17 @@ export async function loadProfilePage(addToHistory = true) {
       userData.stats.losses
     );
 
-    // Add content to main container
+    // Add content to main container and render match history
     mainContent.innerHTML = "";
     mainContent.appendChild(content);
-
-    // Render match history
     const matchesContainer = mainContent.querySelector(".profile__matches-list");
     renderMatchHistory(userData.recent_matches, matchesContainer);
+
+    // Add edit button handler
+    const editButton = mainContent.querySelector(".profile__button--edit");
+    editButton.addEventListener("click", () => {
+      loadProfileEditPage(userData);
+    });
 
     // Make sure bottom nav is visible
     const bottomNavContainer = document.getElementById("bottom-nav-container");

@@ -1,0 +1,76 @@
+/* Modal Overlay (covers the whole screen) */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 9999;
+}
+
+/* Modal Container */
+.modal {
+  background-color: black;
+  color: white;
+  padding: 1.5rem;
+  width: 80%;
+  max-width: 25rem;
+  border: 2px solid white;
+  position: relative;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 1rem rgba(255, 255, 255, 0.5);
+}
+
+.modal-message {
+  color: red; /* Default to red for error messages */
+  font-size: 0.9em;
+  margin-bottom: 1em;
+}
+
+/* Close Button */
+.modal-close-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.75rem;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+/* Modal Content */
+.modal-content {
+  text-align: center;
+}
+
+/* Form Styling */
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.modal-form label {
+  font-size: 0.8em;
+  color: white;
+}
+
+.modal-form input {
+  background: none;
+  border: 2px solid white;
+  padding: 10px;
+  color: white;
+  font-family: "Press Start 2P", cursive;
+  font-size: 0.8em;
+}
+
+.modal-form input::placeholder {
+  color: #999;
+  opacity: 0.8;
+  font-family: "Press Start 2P", cursive;
+}

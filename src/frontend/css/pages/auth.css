@@ -1,0 +1,81 @@
+.page-container--auth {
+  /* To be implemented */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.auth-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.auth-container h1 {
+  font-size: 4rem; /* Smaller than the global 8em */
+  letter-spacing: 5px;
+  margin-bottom: 3rem;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-direction: column;
+  width: 100%;
+  max-width: 300px;
+}
+
+/* More specific selector to override global button styles */
+.auth-container .auth-button {
+  background: none;
+  color: white;
+  font-size: 1.5rem; /* Smaller than global 30px */
+  padding: 1rem 2rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-family: "Press Start 2P", cursive;
+  border: 2px solid white;
+}
+
+.auth-container .auth-button:hover {
+  background-color: white;
+  color: black;
+  transform: scale(1.05);
+}
+
+/* Form Buttons */
+.auth-form__button {
+  background-color: var(--color-primary);
+  color: var(--color-background);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-small);
+  cursor: pointer;
+  border: var(--border-width) solid var(--color-primary);
+  transition: all var(--transition-duration) var(--transition-timing);
+}
+
+.auth-form__button:hover {
+  background-color: var(--color-background);
+  color: var(--color-primary);
+}
+
+/* Form Button Styling */
+/* TODO: These are two classes usee in the signup and signin templates */
+.auth-form__button {
+  padding: 10px;
+  font-family: "Press Start 2P", cursive;
+  font-size: 0.8em;
+  cursor: pointer;
+  border: 2px solid white;
+  transition: background 0.3s;
+}
+
+.auth-form__button:hover {
+  background-color: black;
+  color: white;
+  border: 2px solid white;
+}
