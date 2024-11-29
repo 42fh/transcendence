@@ -50,6 +50,7 @@ DEFAULT_IRREGULAR = {
 CIRCULAR_FIXED = {
     "type": "circular",
     "mode": "circular",
+    "shape": "circular"
 }
 
 DEFAULT_CIRCULAR = {

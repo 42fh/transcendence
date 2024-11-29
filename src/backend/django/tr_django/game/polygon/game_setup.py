@@ -177,6 +177,11 @@ def calculate_vertices(cls, settings: Dict[str, Any]) -> dict:
         vertex["y"] *= scale
     return {"vertices" : vertices, "scale" : scale}  
 
+
+
+
+
+
 # calculate_side_ratios
 import random
 

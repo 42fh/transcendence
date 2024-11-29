@@ -144,12 +144,10 @@ def add_initial(cls):
     """
     initial
     """
-    from .initial import initialize, initialize_new_game, create_initial_state
+    from .initial import initialize
 
     methods = {
         "initialize": initialize,
-        "initialize_new_game": initialize_new_game,
-        "create_initial_state": create_initial_state,
     }
 
     for name, method in methods.items():

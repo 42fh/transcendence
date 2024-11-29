@@ -15,7 +15,7 @@ from .game_config import (
     DEFAULT_PLAYER,
 )
 import asyncio
-from ..agame.AGameManager import AGameManager
+#from ..agame.AGameManager import AGameManager
 
 
 class GameSettingsError(Exception):
@@ -43,6 +43,7 @@ class GameSettingsManager:
     ) -> Dict[str, Any]:
         """ """
 
+        from ..agame.AGameManager import AGameManager
         # 1. step: combine usersettings with default settings
         game_mode = user_settings.get("mode")
         mode_config = self.MODE_CONFIGS[EnumGameMode[game_mode.upper()]]

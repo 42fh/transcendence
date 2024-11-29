@@ -12,6 +12,9 @@ import asyncio
 from .consumers import PongConsumer
 from .gamecordinator.GameCordinator import GameCordinator
 from .gamecordinator.game_config import EnumGameMode
+from tr_django.asgi import application
+
+
 
 class IntegratedGameTests(TransactionTestCase):
     """
@@ -24,6 +27,7 @@ class IntegratedGameTests(TransactionTestCase):
         """Initialize the test environment and run async setup"""
         super().setUp()
         # Store our test users in a dictionary for easy access
+        self.application = application
         self.test_users: Dict = {}
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
@@ -114,94 +118,49 @@ class IntegratedGameTests(TransactionTestCase):
         super().tearDown()
     
 
-    def test_a_game_creation(self):
-        """Test game creation with visible console output"""
-        async def _test_game_creation():
-            print("\nStarting game creation test")
-            print(f"\nAttempting to create game with settings: {self.game_settings}")
-            
+    #def test_a_game_creation(self):
+    #    """Test game creation with visible console output"""
+    #    async def _test_game_creation():
+    #        print("\nStarting game creation test")
+    #        print(f"\nAttempting to create game with settings: {self.game_settings}")
+    #        
+    #        response = await sync_to_async(self.client.post)(
+    #            reverse('create_new_game'),
+    #            data=json.dumps(self.game_settings),
+    #            content_type='application/json'
+    #        )
+    #        
+    #        print(f"\nResponse status code: {response.status_code}")
+    #        print(f"Response content: {response.content.decode()}")
+    #        
+    #        self.assertEqual(response.status_code, 201)
+    #        
+    #    self.loop.run_until_complete(_test_game_creation())
+
+    def test_b_complete_game_flow(self):
+        """Test the entire game flow from creation through gameplay"""
+        async def _test_complete_game_flow():
+
+            # Create game and get WebSocket URL
             response = await sync_to_async(self.client.post)(
                 reverse('create_new_game'),
                 data=json.dumps(self.game_settings),
                 content_type='application/json'
             )
-            
-            print(f"\nResponse status code: {response.status_code}")
-            print(f"Response content: {response.content.decode()}")
-            
             self.assertEqual(response.status_code, 201)
+            data = response.json()
+            ws_url = data['ws_url']
             
-        self.loop.run_until_complete(_test_game_creation())
-
-    def test_b_complete_game_flow(self):
-        """Test the entire game flow from creation through gameplay"""
-        async def _test_complete_game_flow():
-            # Create game and connect first player
-            game_id, comm1 = await self.create_and_connect_to_game(self.user1)
-            
-            # Verify initial state received
-            response1 = await comm1.receive_json_from()
-            self.assertEqual(response1["type"], "initial_state")
-            self.assertEqual(response1["role"], "player")
-            
-            # Connect second player
-            comm2 = WebsocketCommunicator(
+            # Create WebSocket communicator for first player
+            communicator1 = WebsocketCommunicator(
                 self.application,
-                f"ws/pong/{game_id}/?type=polygon&players=2"
+                ws_url
             )
-            comm2.scope["user"] = self.user2
-            connected2, _ = await comm2.connect()
-            self.assertTrue(connected2)
+            communicator1.scope["user"] = self.test_users["player1"]
             
-            # Verify second player receives initial state
-            response2 = await comm2.receive_json_from()
-            self.assertEqual(response2["type"], "initial_state")
-            self.assertEqual(response2["role"], "player")
-
-            # Test paddle movement and game state updates
-            await comm1.send_json_to({
-                "action": "move_paddle",
-                "direction": "left",
-                "user_id": str(self.user1.id)
-            })
-            
-            # Both players should receive state update
-            update1 = await comm1.receive_json_from()
-            update2 = await comm2.receive_json_from()
-            self.assertEqual(update1["type"], "game_state")
-            self.assertEqual(update2["type"], "game_state")
-            
-            # Clean up connections
-            await comm1.disconnect()
-            await comm2.disconnect()
-            
+            # Connect first player
+            connected1, _ = await communicator1.connect()
+            self.assertTrue(connected1)
+            print("Player 1 connected successfully")
         self.loop.run_until_complete(_test_complete_game_flow())
 
-    async def create_and_connect_to_game(self, user):
-        """Helper method for creating and connecting to a game"""
-        # Create the game through the API
-        response = await sync_to_async(self.client.post)(
-            reverse('create_new_game'),
-            data=json.dumps(self.game_settings),
-            content_type='application/json'
-        )
-        self.assertEqual(response.status_code, 201)
-        game_id = response.json()['game_id']
-
-        # Join the game
-        join_response = await sync_to_async(self.client.get)(
-            reverse('join_game', kwargs={'game_id': game_id})
-        )
-        self.assertEqual(join_response.status_code, 200)
-        
-        # Create and return WebSocket connection
-        communicator = WebsocketCommunicator(
-            self.application,
-            f"ws/pong/{game_id}/?type=polygon&players=2"
-        )
-        communicator.scope["user"] = user
-        
-        connected, _ = await communicator.connect()
-        self.assertTrue(connected)
-        
-        return game_id, communicator

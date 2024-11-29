@@ -2,6 +2,7 @@ import json
 import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .agame.AGameManager import AGameManager
+from .gamecordinator.GameCordinator import GameCordinator as GC
 import time
 import msgpack
 import redis.asyncio as redis
@@ -24,36 +25,20 @@ class PongConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
         self.game_id = self.scope["url_route"]["kwargs"]["game_id"]
-        self.player_id = self.user = self.scope["user"] 
-        print (self.player_id.id)        
-
-        query_string = self.scope["query_string"].decode("utf-8")
-        query_params = dict(param.split("=") for param in query_string.split("&"))
-        game_type = query_params.get("type", "polygon")  # Default to polygon_pong
-        print(query_params)
+        self.user = self.scope["user"] 
+        self.player_id = str(self.user.id)       
+        # init channels
         self.game_group = f"game_{self.game_id}"
         channel_key = f"asgi:group:{self.game_group}"
         await self.channel_layer.group_add(self.game_group, self.channel_name)
-        # redis_conn = await redis.Redis.from_url('redis://redis:6379', decode_responses=True)
-        # await redis_conn.expire(channel_key, 30)
+        # get gametype
+        async with await GC.get_redis(GC.REDIS_GAME_URL) as redis_game:
+            gametype = await redis_game.get(f"game_type:{self.game_id}")
         try:
-            # Try to get existing game or create new one with specified type
+            # init game instance
             self.game_manager = await AGameManager.get_instance(
                 self.game_id,
-                game_type=query_params.get("type", "polygon"),
-                settings={
-                    "num_players": int(query_params.get("players", "2")),
-                    "num_balls": int(query_params.get("balls", "1")),
-                    "min_players": int(query_params.get("players", "2")),
-                    "sides": int(query_params.get("sides", "4")),
-                    "pongType": str(query_params.get("pongType", "regular")),   # Type of pong (e.g., regular, irregular)
-                    "shape": query_params.get("shape", "regular"),         # Shape of the pong field (e.g., regular, polygon)
-                    "scoreMode": query_params.get("scoreMode", "classic"), # Scoring mode (e.g., classic, modern)
-                    "debug": query_params.get("debug", "false").lower() == "true",  # Debug mode (true or false)
-                    "playerId": query_params.get("playerId", "1"),    # ID of the player
-                    "gameId": query_params.get("gameId", "1"),        # ID of the game session
-                    "type": query_params.get("type", "polygon"),           # Type of game (e.g., polygon, other modes)
-                },
+                gametype
             )
 
             # Check Redis for existing players

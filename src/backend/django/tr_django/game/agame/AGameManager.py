@@ -7,7 +7,7 @@ import time
 import random
 from channels.layers import get_channel_layer
 from .method_decorators import *
-
+from ..gamecordinator.GameCordinator import GameCordinator as GC      
 
 class GameStateError(Exception):
     """Custom exception for game state validation errors"""
@@ -68,77 +68,28 @@ class AGameManager:
         return cls._game_types[game_type]
 
     @classmethod
-    async def get_instance(cls, game_id, game_type=None, settings=None):
-        """Process-safe get_instance with game type and settings support"""
+    async def get_instance(cls, game_id, game_type):
+        """ """
         try:
-            redis_conn = await redis.Redis.from_url(
-                "redis://redis:6379/1", decode_responses=True
-            )  # Use string decoding for type retrieval
-
-            # Try to get existing game type from Redis
-            stored_type = await redis_conn.get(f"game_type:{game_id}")
-
-            # If no stored type and no provided type, raise error
-            if not stored_type and not game_type:
+            if not game_type:
                 raise ValueError("Game type must be provided for new games")
-
-            # Use provided type for new games, otherwise use stored type
-            final_game_type = game_type if not stored_type else stored_type
-
-            # Get the appropriate game class
-            final_game_type = str(final_game_type)
-            game_class = cls.get_game_class(final_game_type)
+            
             # Create instance
+            game_class = cls.get_game_class(game_type)
             instance = game_class(game_id)
-            exists = await redis_conn.exists(f"game_state:{game_id}")
-            if exists:
-                # Load existing settings from Redis
-                redis_bin = await redis.Redis.from_url(
-                    "redis://redis:6379/1", decode_responses=False
-                )
-                stored_settings = await redis_bin.get(f"game_settings:{game_id}")
-                stored_vertices = await redis_bin.get(f"game_vertices:{game_id}")
-                await redis_bin.close()
-                if stored_settings:
-                    game_settings = msgpack.unpackb(stored_settings)
+            
+            # get settings
+            async with await GC.get_redis_binary(GC.REDIS_GAME_URL) as redis_game:
+                raw_settings = redis_game.get(f"game_settings:{game_id}")
+                if raw_settings:
+                    game_settings = msgpack.unpackb(raw_settings)
                     instance.settings = game_settings
                 else:
                     raise ValueError("Existing game found but no settings available")
-                if stored_vertices:
-                    instance.vertices = msgpack.unpackb(stored_vertices)
-            else:
-                # New game - prepare and store settings first
-                if not settings:
-                    # Use default settings if none provided
-                    settings = {
-                        "num_players": 2,
-                        "num_balls": 1,
-                        "min_players": 2,
-                        "sides": 4,
-                        "paddle_length": 0.3,
-                        "paddle_width": 0.2,
-                        "ball_size": 0.1,
-                        "initial_ball_speed": 0.006,
-                        "mode": "regular",
-                    }
-                    print("set default game settings.")  # debug
-
-                # Store settings in Redis before initialization
-                redis_bin = await redis.Redis.from_url(
-                    "redis://redis:6379/1", decode_responses=False
-                )
-                await redis_bin.set(f"game_settings:{game_id}", msgpack.packb(settings))
-                await redis_bin.close()
-                # Store game type if this is a new game
-                await redis_conn.set(f"game_type:{game_id}", game_type)
-
-                # Store settings in instance
-                instance.settings = settings
-
+        
             # Now initialize with settings in place
-            await instance.initialize(create_new=not exists)
+            await instance.initialize()
 
-            await redis_conn.close()
             return instance
 
         except Exception as e:
