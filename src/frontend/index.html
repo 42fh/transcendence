@@ -382,7 +382,7 @@
       </nav>
     </template>
 
-    <!-- Profile Template -->
+    <!-- Profile Template (used for both 'private' profile and 'public' profile) -->
     <template id="profile-template">
       <div class="page-container page-container--profile">
         <div class="profile">
@@ -391,12 +391,31 @@
               <img class="profile__avatar" src="" alt="Profile avatar" />
             </div>
             <div class="profile__info">
-              <h2 class="profile__username"></h2>
-              <p class="profile__info-item profile__info-item--name"></p>
-              <p class="profile__info-item profile__info-item--location"></p>
-              <p class="profile__info-item profile__info-item--email"></p>
-              <p class="profile__info-item profile__info-item--phone"></p>
+              <div class="profile__username-container">
+                <!-- TODO: think about this h2 if it has really to be -->
+                <h2 class="profile__username"></h2>
+                <span class="profile__online-status material-symbols-outlined profile__public-info">circle</span>
+              </div>
+              <!-- Private info will be hidden/shown based on view type -->
+              <p class="profile__info-item profile__info-item--name profile__private-info"></p>
+              <p class="profile__info-item profile__info-item--email profile__private-info"></p>
+              <p class="profile__info-item profile__info-item--phone profile__private-info"></p>
             </div>
+          </div>
+          <!-- Public Profile Actions -->
+          <div class="profile__section profile__section--public-actions profile__public-info">
+            <button class="profile__action-button" data-action="friend" title="Add Friend">
+              <span class="material-symbols-outlined">person_add</span>
+            </button>
+            <button class="profile__action-button" data-action="chat" title="Send Message">
+              <span class="material-symbols-outlined">maps_ugc</span>
+            </button>
+            <button class="profile__action-button" data-action="play" title="Challenge to Game">
+              <span class="material-symbols-outlined">play_circle</span>
+            </button>
+            <button class="profile__action-button" data-action="block" title="Block User">
+              <span class="material-symbols-outlined">block</span>
+            </button>
           </div>
           <div class="profile__section profile__section--bio">
             <h3 class="profile__section-title">Bio</h3>
@@ -423,7 +442,8 @@
             </div>
           </div>
 
-          <div class="profile__section profile__section--actions">
+          <!-- Private Profile Actions -->
+          <div class="profile__section profile__section--private-actions profile__private-info">
             <button class="profile__button profile__button--edit">Edit Profile</button>
           </div>
         </div>

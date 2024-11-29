@@ -258,3 +258,32 @@
   padding: 2rem;
   font-family: "Press Start 2P", cursive;
 }
+
+/* Visibility Classes */
+.profile__private-info,
+.profile__public-info {
+  display: none;
+}
+
+/* Show/hide based on profile type */
+.profile--private .profile__private-info {
+  display: block;
+}
+
+.profile--private .profile__section--private-actions {
+  display: flex;
+}
+
+.profile--public .profile__public-info {
+  display: block;
+}
+
+.profile--public .profile__section--public-actions {
+  display: flex;
+}
+
+/* Keep edit button at bottom */
+.profile__section--private-actions {
+  margin-top: auto; /* This pushes it to the bottom if we use flex column on parent */
+  padding-top: var(--spacing-lg);
+}
