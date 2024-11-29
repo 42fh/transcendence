@@ -251,16 +251,19 @@ class GameCordinator:
     async def cleanup_invalid_bookings(cls, redis_conn: redis.Redis, game_id: str):
         """Cleanup invalid bookings using Redis commands"""
         try:
-            async with RedisLock(redis_conn, cls.LOCK_KEYS[f"{game_id}"]):
+            async with RedisLock(redis_conn, f"{game_id}_cleanup_invalid_bookings"):
                 # Store booked user IDs in a temporary set
                 temp_set = f"temp_valid_bookings:{game_id}"
                 pipe = redis_conn.pipeline()
-                
+                # Track if we found any booked users
+                found_bookings = False 
                 # Get booked users using scan instead of keys
                 async for key in redis_conn.scan_iter(f"{cls.BOOKED_USER_PREFIX}*:{game_id}"):
+                    found_bookings = True 
                     user_id = key.split(':')[0].replace(f"{cls.BOOKED_USER_PREFIX}", '')
                     pipe.sadd(temp_set, user_id)
-                
+                if not found_bookings:
+                    return True
                 # Use Redis SDIFF to find invalid users
                 pipe.sdiff(f"game_booked_players:{game_id}", temp_set)
                 pipe.delete(temp_set)
@@ -282,7 +285,7 @@ class GameCordinator:
         try:
             async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
                 async with RedisLock(redis_conn, f"{game_id}_player_situation"):
-                    cls.cleanup_invalid_bookings(redis_conn, game_id)
+                    await cls.cleanup_invalid_bookings(redis_conn, game_id)
                     current_players = await redis_conn.scard(f"game_players:{game_id}")
                     reserved_players = await redis_conn.scard(f"game_booked_players:{game_id}")
                     return {"status": True, "current_players": current_players, "reserved_players": reserved_players}

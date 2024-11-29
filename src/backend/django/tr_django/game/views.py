@@ -152,7 +152,7 @@ async def join_game(request, game_id, use_redis_lock: bool = True):
                 'ws_url': f'ws://localhost:8000/ws/game/{game_id}/',
                 "message": message     
                 },
-                status=200
+                status=201
             )
 
         return  JsonResponse(
