@@ -5,7 +5,7 @@
 
 ## Play it online
 
-> > > [poing.xyz](https://poing.xyz) <<<
+> > > [t.000031.xyz](https://t.000031.xyz) <<<
 
 ## Stack
 
