@@ -1,0 +1,28 @@
+/* TODO: make work two following containers */
+.page-container--games {
+	gap: 20px;
+	padding: 20px;
+  }
+  .page-container--settings {
+	gap: 20px;
+	padding: 20px;
+  }
+  
+
+
+.game-item {
+	background-color: var(--color-surface);
+	color: var(--color-text-primary);
+	padding: var(--spacing-sm);
+	margin-bottom: var(--spacing-md);
+	border: var(--border-width) solid var(--color-border);
+	border-radius: var(--border-radius);
+	font-family: var(--font-family-primary);
+	font-size: var(--font-size-base);
+	transition: background-color var(--transition-duration) var(--transition-timing);
+  }
+  
+  .game-item:hover {
+	background-color: var(--color-hover);
+  }
+  
