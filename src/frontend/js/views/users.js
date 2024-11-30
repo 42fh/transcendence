@@ -45,20 +45,12 @@ export async function loadUsersPage(addToHistory = true) {
 
 async function loadUsersList(page = 1, perPage = 10, search = "") {
   try {
-    console.log("Loading users list with page:", page, "and per page:", perPage, "and search:", search);
     const data = await fetchUsers(page, perPage, search);
     if (!data) throw new Error("Failed to fetch users");
-    console.log("Fetched users:", data);
 
     const usersList = document.getElementById("users-list");
     const paginationContainer = document.getElementById("users-pagination");
     const userListItemTemplate = document.getElementById("users-list-item-template");
-
-    console.log("Found elements:", {
-      usersList: usersList ? "✓" : "✗",
-      paginationContainer: paginationContainer ? "✓" : "✗",
-      userListItemTemplate: userListItemTemplate ? "✓" : "✗",
-    });
 
     usersList.innerHTML = "";
 
@@ -76,7 +68,7 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
         avatarImg.src = user.avatar || ASSETS.IMAGES.DEFAULT_AVATAR;
         avatarImg.onerror = function () {
           this.src = ASSETS.IMAGES.DEFAULT_AVATAR;
-          console.log(`Avatar image failed to load for ${user.username}, using default`);
+          console.warn(`Avatar image failed to load for ${user.username}, using default`);
         };
 
         const username = userElement.querySelector(".users-list__username");
@@ -91,9 +83,7 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
           statusIndicator.classList.add("users-list__status-indicator--offline");
           statusIndicator.title = "Offline";
         }
-        console.log(`Appending user ${index + 1} to list`);
         usersList.appendChild(userItem);
-        console.log(`Users list content after append:`, usersList.innerHTML);
       } catch (error) {
         console.error(`Error rendering user ${index + 1}:`, user, error);
       }
@@ -107,21 +97,12 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
 }
 
 function renderPagination(pagination, container) {
-  console.log("Rendering pagination:", pagination);
-  console.log("Container:", container);
   const { total_pages, page, per_page } = pagination;
 
   const prevButton = container.querySelector(".pagination__button--prev");
   const nextButton = container.querySelector(".pagination__button--next");
   const currentPage = container.querySelector(".pagination__current");
   const totalPages = container.querySelector(".pagination__total");
-
-  console.log("Found elements:", {
-    prevButton: prevButton ? "✓" : "✗",
-    nextButton: nextButton ? "✓" : "✗",
-    currentPage: currentPage ? "✓" : "✗",
-    totalPages: totalPages ? "✓" : "✗",
-  });
 
   if (!prevButton || !nextButton || !currentPage || !totalPages) {
     console.error("Missing pagination elements");

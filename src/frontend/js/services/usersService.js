@@ -96,12 +96,9 @@ export async function uploadUserAvatar(userId, avatarFile) {
 export async function fetchUsers(page = 1, perPage = 10, search = "") {
   try {
     const url = `${CONFIG.API_BASE_URL}/api/users/?page=${page}&per_page=${perPage}&search=${search}`;
-    console.log("Fetching users from:", url);
     const response = await fetch(url);
-    console.log("Response status:", response.status);
     if (!response.ok) throw new Error("Failed to fetch users");
     const data = await response.json();
-    console.log("Fetched users:", data);
     return data;
   } catch (error) {
     console.error("Error fetching users:", error);
