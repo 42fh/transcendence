@@ -4,13 +4,24 @@ export async function fetchUserProfile(userId) {
   try {
     const response = await fetch(`${CONFIG.API_BASE_URL}/api/users/${userId}/`);
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      return {
+        success: false,
+        status: response.status,
+        error: response.status === 404 ? "USER_NOT_FOUND" : "SERVER_ERROR",
+        message: await response.text(),
+      };
     }
     const userData = await response.json();
-    return userData;
+    return {
+      success: true,
+      data: userData,
+    };
   } catch (error) {
-    console.error("Error fetching user profile:", error);
-    throw error;
+    return {
+      success: false,
+      error: "NETWORK_ERROR",
+      message: error.message,
+    };
   }
 }
 

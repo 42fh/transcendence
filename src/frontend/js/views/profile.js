@@ -45,8 +45,25 @@ export async function loadProfilePage(userId = null, addToHistory = true) {
     //   throw new Error("User ID not found");
     // }
 
-    // Fetch user data
-    const userData = await fetchUserProfile(targetUserId);
+    // Fetch result and handle errors
+    const result = await fetchUserProfile(targetUserId);
+
+    if (!result.success) {
+      if (result.status === 404 && isOwnProfile) {
+        localStorage.clear();
+        loadAuthPage();
+        return;
+      }
+
+      if (result.error === "NETWORK_ERROR") {
+        showToast("Network error. Please check your connection.", "error");
+        return;
+      }
+
+      throw new Error(result.message || "Failed to load profile");
+    }
+
+    const userData = result.data;
     if (!userData) {
       if (isOwnProfile) {
         // If user doesn't exist, clear localStorage and redirect to auth
