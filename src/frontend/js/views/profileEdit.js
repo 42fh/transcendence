@@ -232,7 +232,7 @@ async function handleFormSubmission(form, userId) {
     }
     const response = await updateUserProfile(userId, dataToSend);
     showToast("Profile updated successfully!");
-    loadProfilePage(false);
+    loadProfilePage(userId, false);
   } catch (error) {
     console.error("Error during form submission:", error);
     showToast("Failed to update profile", "error");
@@ -253,7 +253,8 @@ function setupFormSubmission(form, userId) {
 
   if (cancelButton) {
     cancelButton.addEventListener("click", () => {
-      loadProfilePage(false);
+      //   loadProfilePage(false);
+      loadProfilePage(userId, false);
     });
   }
 

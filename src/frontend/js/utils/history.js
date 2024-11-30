@@ -90,8 +90,8 @@ export function initializeHistory() {
             // Consider different cache durations for own profile vs other users
             const userId = state.userId || localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
 
-            // loadProfilePage(userId, false);
-            loadProfilePage(false);
+            // loadProfilePage(false);
+            loadProfilePage(userId, false);
             break;
           default:
             loadHomePage(false);
@@ -131,8 +131,8 @@ export function initializeHistory() {
         case "profile":
           const userId = event.target.dataset.userId || localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
 
-          // loadProfilePage(userId);
-          loadProfilePage();
+          //   loadProfilePage();
+          loadProfilePage(userId, false);
           break;
         default:
           loadHomePage();

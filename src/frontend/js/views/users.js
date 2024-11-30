@@ -2,6 +2,7 @@ import { displayModalError } from "../components/modal.js";
 import { ASSETS } from "../config/constants.js";
 import { updateActiveNavItem } from "../components/bottom-nav.js";
 import { fetchUsers } from "../services/usersService.js";
+import { loadProfilePage } from "./profile.js";
 
 export async function loadUsersPage(addToHistory = true) {
   try {
@@ -91,6 +92,10 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
           statusIndicator.classList.add("users-list__status-indicator--offline");
           statusIndicator.title = "Offline";
         }
+        userElement.addEventListener("click", () => {
+          const userId = user.id; // Make sure the backend sends this
+          loadProfilePage(userId, true);
+        });
         console.log(`Appending user ${index + 1} to list`);
         usersList.appendChild(userItem);
         console.log(`Users list content after append:`, usersList.innerHTML);

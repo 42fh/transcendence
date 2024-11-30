@@ -3,21 +3,18 @@ import { loadTournamentsPage } from "../views/tournaments.js";
 import { loadProfilePage } from "../views/profile.js";
 import { loadChatPage } from "../views/chats.js";
 import { loadUsersPage } from "../views/users.js";
-import { NAVIGATION } from "../config/constants.js";
+import { NAVIGATION, LOCAL_STORAGE_KEYS } from "../config/constants.js";
 
 export function initBottomNav() {
-  console.log("Initializing bottom nav...");
   const bottomNavTemplate = document.getElementById("bottom-nav-template");
   const bottomNavContainer = document.getElementById("bottom-nav-container");
 
   if (bottomNavTemplate && bottomNavContainer) {
-    console.log("Both elements found, cloning template...");
     const clone = document.importNode(bottomNavTemplate.content, true);
     bottomNavContainer.appendChild(clone);
 
     // Add click handlers
     const navItems = bottomNavContainer.querySelectorAll(".bottom-nav__item");
-    console.log("Nav items found:", navItems.length);
     navItems.forEach((item) => {
       item.addEventListener("click", handleNavClick);
     });
@@ -40,16 +37,18 @@ function handleNavClick(e) {
 
   updateActiveNavItem(page);
 
+  const userId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
+
   const pageLoaders = {
-    home: loadHomePage,
-    tournaments: loadTournamentsPage,
-    profile: loadProfilePage,
-    chat: loadChatPage,
-    users: loadUsersPage,
+    home: () => loadHomePage(false),
+    tournaments: () => loadTournamentsPage(false),
+    profile: () => loadProfilePage(userId, false),
+    chat: () => loadChatPage(false),
+    users: () => loadUsersPage(false),
   };
 
   if (pageLoaders[page]) {
-    pageLoaders[page](false); // Pass false to prevent another history push
+    pageLoaders[page](); // No need to pass false here anymore
   }
 }
 
