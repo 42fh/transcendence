@@ -82,7 +82,7 @@ export async function loadProfilePage(userId = null, addToHistory = true) {
     // Add the appropriate class to control visibility on the child classes
     content.querySelector(".profile").classList.add(isOwnProfile ? "profile--private" : "profile--public");
     // Populate all profile data
-    populateProfileHTML(content, userData);
+    populateProfileHTML(content, userData, isOwnProfile);
 
     // Add content to main container and render match history
     mainContent.innerHTML = "";
@@ -112,8 +112,14 @@ export async function loadProfilePage(userId = null, addToHistory = true) {
 }
 
 function populateProfileHTML(content, userData, isOwnProfile) {
-  // Basic info (always visible)
-  content.querySelector(".profile__avatar").src = userData.avatar || ASSETS.IMAGES.DEFAULT_AVATAR;
+  const avatarElement = content.querySelector(".profile__avatar");
+  const avatarSrc = userData.avatar || ASSETS.IMAGES.DEFAULT_AVATAR;
+  avatarElement.onerror = function () {
+    console.log("Avatar failed to load, falling back to default");
+    avatarElement.src = ASSETS.IMAGES.DEFAULT_AVATAR; // using the variable instead
+  };
+
+  //   content.querySelector(".profile__avatar").src = userData.avatar || ASSETS.IMAGES.DEFAULT_AVATAR;
   content.querySelector(".profile__username").textContent = userData.username;
   content.querySelector(".profile__bio-text").textContent = userData.bio || "No bio available";
   content.querySelector(".profile__info-item--name").textContent =
