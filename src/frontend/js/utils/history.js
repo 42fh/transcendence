@@ -1,5 +1,6 @@
 import { loadAuthPage } from "../views/auth.js";
 import { loadHomePage } from "../views/home.js";
+import { loadUsersPage } from "../views/users.js";
 import { loadTournamentsPage } from "../views/tournaments.js";
 import { loadTournamentDetailsPage } from "../views/tournament-detail.js";
 import { loadCreateTournamentPage } from "../views/tournament-create.js";
