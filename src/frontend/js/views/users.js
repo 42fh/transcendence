@@ -46,20 +46,12 @@ export async function loadUsersPage(addToHistory = true) {
 
 async function loadUsersList(page = 1, perPage = 10, search = "") {
   try {
-    console.log("Loading users list with page:", page, "and per page:", perPage, "and search:", search);
     const data = await fetchUsers(page, perPage, search);
     if (!data) throw new Error("Failed to fetch users");
-    console.log("Fetched users:", data);
 
     const usersList = document.getElementById("users-list");
     const paginationContainer = document.getElementById("users-pagination");
     const userListItemTemplate = document.getElementById("users-list-item-template");
-
-    console.log("Found elements:", {
-      usersList: usersList ? "✓" : "✗",
-      paginationContainer: paginationContainer ? "✓" : "✗",
-      userListItemTemplate: userListItemTemplate ? "✓" : "✗",
-    });
 
     usersList.innerHTML = "";
 
@@ -96,9 +88,7 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
           const userId = user.id; // Make sure the backend sends this
           loadProfilePage(userId, true);
         });
-        console.log(`Appending user ${index + 1} to list`);
         usersList.appendChild(userItem);
-        console.log(`Users list content after append:`, usersList.innerHTML);
       } catch (error) {
         console.error(`Error rendering user ${index + 1}:`, user, error);
       }
