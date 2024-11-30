@@ -237,13 +237,21 @@ export function gameSettings() {
     }
   }
 
+  function showStatus(message, isError = false) {
+    const status = document.getElementById("status");
+    status.textContent = message;
+    status.className = isError ? "error" : "success";
+    status.style.display = "block";
+
+    // Hide after 5 seconds
+    setTimeout(() => {
+      status.style.display = "none";
+    }, 5000);
+  }
+
   async function submitSettings() {
     console.log("Inside submitSettings");
     // console.log("Current state:", JSON.stringify(state, null, 2));
-
-    // const numSides = parseInt(document.getElementById("numSides").value);
-    // console.log("numSides from input:", numSides);
-    // console.log("state.formData.numSides:", state.formData.numSides);
 
     const config = state.gameConfigs[state.gameType];
     if (!config) {

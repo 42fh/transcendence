@@ -144,7 +144,6 @@
           <label for="numBalls">Number of Balls:</label>
           <input type="number" id="numBalls" name="numBalls" min="1" max="4" class="create-tournament-select">
         </div>
-        
         <div class="game-setting-group">
           <label for="mode">Select Mode:</label>
           <select id="mode" name="mode" class="create-tournament-select">
@@ -170,7 +169,6 @@
             <option value="modern">Modern</option>
           </select>
         </div>
-        
         <div class="game-setting-group">
           <button type="submit" class="form-button">Create Game</button>
         </div>
@@ -189,6 +187,8 @@
         <li><strong>Crazy Shape:</strong> Extreme deformation with sharp transitions.</li>
       </ul>
     </div>
+    <!-- Status message container -->
+    <div id="status" style="display: none;"></div>
   </div>
 </template>
 
