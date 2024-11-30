@@ -159,3 +159,18 @@
 .users-search {
   margin-bottom: 0;
 }
+
+.username {
+  max-width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.username:hover {
+  overflow: visible;
+  position: relative;
+  background-color: var(--background-color);
+  z-index: 1;
+}

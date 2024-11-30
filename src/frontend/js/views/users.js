@@ -3,7 +3,7 @@ import { ASSETS } from "../config/constants.js";
 import { updateActiveNavItem } from "../components/bottom-nav.js";
 import { fetchUsers, fetchFriends } from "../services/usersService.js";
 import { loadProfilePage } from "./profile.js";
-
+import { applyUsernameTruncation } from "../utils/strings.js";
 export async function loadUsersPage(addToHistory = true) {
   try {
     if (addToHistory) {
@@ -100,6 +100,7 @@ async function loadUsersList(page = 1, perPage = 10, search = "", showFriendsOnl
       try {
         const userItem = document.importNode(userListItemTemplate.content, true);
         const userElement = userItem.firstElementChild;
+        // const userElement = renderUserItem(user, userListItemTemplate);
         if (!userElement) {
           throw new Error("Invalid template structure");
         }
@@ -113,7 +114,7 @@ async function loadUsersList(page = 1, perPage = 10, search = "", showFriendsOnl
         };
 
         const username = userElement.querySelector(".users-list__username");
-        username.textContent = user.username;
+        applyUsernameTruncation(username, user.username, 15);
 
         // Set online status
         const statusIndicator = userElement.querySelector(".users-list__status-indicator");

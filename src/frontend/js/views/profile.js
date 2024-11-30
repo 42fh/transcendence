@@ -4,7 +4,7 @@ import { ASSETS, LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { updateActiveNavItem } from "../components/bottom-nav.js";
 import { loadHomePage } from "./home.js";
 import { loadProfileEditPage } from "./profileEdit.js";
-
+import { applyUsernameTruncation } from "../utils/strings.js";
 export async function loadProfilePage(userId = null, addToHistory = true) {
   const loggedInUserId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
   if (!loggedInUserId) {
@@ -120,7 +120,8 @@ function populateProfileHTML(content, userData, isOwnProfile) {
   };
 
   //   content.querySelector(".profile__avatar").src = userData.avatar || ASSETS.IMAGES.DEFAULT_AVATAR;
-  content.querySelector(".profile__username").textContent = userData.username;
+  const usernameElement = content.querySelector(".profile__username");
+  applyUsernameTruncation(usernameElement, userData.username, 15);
   content.querySelector(".profile__bio-text").textContent = userData.bio || "No bio available";
   content.querySelector(".profile__info-item--name").textContent =
     `${userData.first_name || ""} ${userData.last_name || ""}`.trim() || "No name set";
