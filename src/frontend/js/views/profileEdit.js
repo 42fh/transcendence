@@ -98,21 +98,30 @@ function handleAvatarUpload(file, avatarButton, avatarImg, userId) {
 
   return new Promise(async (resolve, reject) => {
     try {
-      console.log("DEBUG: Starting avatar upload");
-      console.log("DEBUG: File details:", {
-        name: file.name,
-        type: file.type,
-        size: file.size,
-      });
       avatarButton.textContent = "Uploading...";
       avatarButton.disabled = true;
 
-      const avatarUrl = await uploadUserAvatar(userId, file);
-      console.log("DEBUG: Avatar upload successful. New URL:", avatarUrl);
+      //   const result = await uploadUserAvatar(userId, file);
+      const result = await uploadUserAvatar(userId, file);
 
-      avatarImg.src = avatarUrl;
+      if (!result.success) {
+        if (result.status === 404) {
+          localStorage.clear();
+          showToast("Session expired. Please login again.", "error");
+          loadAuthPage();
+          return;
+        }
+
+        if (result.error === "NETWORK_ERROR") {
+          showToast("Network error. Please check your connection.", "error");
+          return;
+        }
+
+        throw new Error(result.message || "Failed to upload avatar");
+      }
+      avatarImg.src = result.data;
       showToast("Avatar updated successfully!");
-      resolve(avatarUrl);
+      resolve(result.data);
     } catch (error) {
       console.error("DEBUG: Avatar upload failed:", error);
 
@@ -185,8 +194,6 @@ async function handleFormSubmission(form, userId) {
   }
   try {
     setFormLoading(form, true);
-    // Approach 1: querySelector
-    console.log("--- Approach 1: querySelector ---");
 
     const formInputs = form.querySelectorAll("input, textarea");
     const updatedDataFromInputs = {};
@@ -194,62 +201,25 @@ async function handleFormSubmission(form, userId) {
     formInputs.forEach((input) => {
       updatedDataFromInputs[input.name] = input.value.trim();
     });
-    console.log("Data collected via querySelector:", updatedDataFromInputs);
 
-    // Approach 2: FormData
-    console.log("--- Approach 2: FormData ---");
-    // Try both ways to create FormData
-    const formData = new FormData(form);
-    const manualFormData = new FormData();
-    form.querySelectorAll("input, textarea").forEach((input) => {
-      console.log(`Adding to manual FormData: ${input.name} = ${input.value}`);
-      manualFormData.append(input.name, input.value);
-    });
-    const updatedDataFromFormData = {};
+    const result = await updateUserProfile(userId, updatedDataFromInputs);
 
-    // FormData don't have a .forEach method, so we need to iterate over its entries
-    // ... and it doesn't output directly to the console, so we need to log it separately
-    console.log("FormData:");
-    console.log(formData);
-    console.log("form.elements:");
-    console.log(form.elements);
-
-    console.log("Original FormData entries:");
-    for (let pair of formData.entries()) {
-      console.log(`${pair[0]}: '${pair[1]}'`);
-    }
-
-    console.log("Manual FormData entries:");
-    for (let pair of manualFormData.entries()) {
-      console.log(`${pair[0]}: '${pair[1]}'`);
-    }
-
-    console.log("Collecting form data");
-    formData.forEach((value, key) => {
-      console.log(`Field ${key}:`, {
-        value: value,
-        trimmed: value.trim(),
-        length: value.trim().length,
-      });
-      if (value.trim() !== "") {
-        updatedDataFromFormData[key] = value.trim();
+    if (!result.success) {
+      if (result.status === 404) {
+        localStorage.clear();
+        showToast("Session expired. Please login again.", "error");
+        loadAuthPage();
+        return;
       }
-    });
-    console.log("Data collected via FormData:", updatedDataFromFormData);
 
-    // Compare results
-    console.log("--- Comparing Results ---");
-    console.log("querySelector approach:", updatedDataFromInputs);
-    console.log("FormData approach:", updatedDataFromFormData);
+      if (result.error === "NETWORK_ERROR") {
+        showToast("Network error. Please check your connection.", "error");
+        return;
+      }
 
-    const dataToSend = updatedDataFromInputs;
-
-    if (Object.keys(dataToSend).length === 0) {
-      console.warn("No data to update");
-      showToast("No changes to save", "warning");
-      return;
+      throw new Error(result.message || "Failed to update profile");
     }
-    const response = await updateUserProfile(userId, dataToSend);
+
     showToast("Profile updated successfully!");
     loadProfilePage(userId, false);
   } catch (error) {

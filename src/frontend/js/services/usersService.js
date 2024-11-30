@@ -68,14 +68,25 @@ export async function updateUserProfile(userId, userData) {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      return {
+        success: false,
+        status: response.status,
+        error: response.status === 404 ? "USER_NOT_FOUND" : "SERVER_ERROR",
+        message: await response.text(),
+      };
     }
 
     const updatedUser = await response.json();
-    return updatedUser;
+    return {
+      success: true,
+      data: updatedUser,
+    };
   } catch (error) {
-    console.error("Error updating user profile:", error);
-    throw error;
+    return {
+      success: false,
+      error: "NETWORK_ERROR",
+      message: error.message,
+    };
   }
 }
 
@@ -91,16 +102,25 @@ export async function uploadUserAvatar(userId, avatarFile) {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Upload error response:", errorText);
-      throw new Error("Upload failed");
+      return {
+        success: false,
+        status: response.status,
+        error: response.status === 404 ? "USER_NOT_FOUND" : "SERVER_ERROR",
+        message: await response.text(),
+      };
     }
 
     const data = await response.json();
-    return data.avatar;
+    return {
+      success: true,
+      data: data.avatar,
+    };
   } catch (error) {
-    console.error("Error uploading avatar:", error);
-    throw error;
+    return {
+      success: false,
+      error: "NETWORK_ERROR",
+      message: error.message,
+    };
   }
 }
 
