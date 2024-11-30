@@ -8,8 +8,7 @@ import math
 async def start_game(self):
     """Start game with process-safe checks"""
     try:
-        settings = msgpack.unpackb(await self.redis_conn.get(self.settings_key))
-        min_players = settings.get("min_players", 2)
+        min_players = self.settings.get("min_players")
 
         while True:
             player_count = await self.redis_conn.scard(self.players_key)
@@ -60,8 +59,6 @@ async def end_game(self):
 
 async def update_game(self):
     """Process-safe game update with enhanced error handling"""
-    if not await self.acquire_lock():
-        return False
 
     try:
         # Get current state with error handling
@@ -179,5 +176,3 @@ async def update_game(self):
         await self.end_game()
         return False
 
-    finally:
-        await self.release_lock()

@@ -1,5 +1,5 @@
 
-def initialize_ball_movements(self, num_balls):
+def self_initialize_ball_movements(self, num_balls):
     """Initialize the nested array structure for ball movement tracking"""
     self.previous_movements = [
         {

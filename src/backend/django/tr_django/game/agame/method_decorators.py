@@ -190,18 +190,10 @@ def add_redis(cls):
     """
     from .redis import (
         setup_connections,
-        store_vertices,
-        get_vertices,
-        acquire_lock,
-        release_lock,
     )
 
     methods = {
         "setup_connections": setup_connections,
-        "store_vertices": store_vertices,
-        "get_vertices": get_vertices,
-        "acquire_lock": acquire_lock,
-        "release_lock": release_lock,
     }
 
     for name, method in methods.items():

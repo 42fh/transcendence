@@ -178,6 +178,28 @@ def calculate_vertices(cls, settings: Dict[str, Any]) -> dict:
     return {"vertices" : vertices, "scale" : scale}  
 
 
+@classmethod
+def initialize_ball_movements(cls, settings: Dict[str, Any]) -> dict:
+    """Initialize the nested array structure for ball movement tracking"""
+    num_balls = settings.get("num_balls")        
+    num_sides = settings.get("sides")
+    previous_movements = [
+        {
+            "sides": [
+                {
+                    "distance": float(0.0),
+                    "signed_distance": float(0.0),
+                    "dot_product": float(0.0),
+                }
+                for _ in range(num_sides)
+            ],
+            "in_deadzone": True,  # Start in deadzone since balls spawn at center
+            "last_position": {"x": float(0.0), "y": float(0.0)},
+        }
+        for _ in range(num_balls)
+    ]
+    print("ballmovements: ", previous_movements)    
+    return {"ballmovements": previous_movements}
 
 
 

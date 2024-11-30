@@ -9,7 +9,7 @@ class EnumGameMode(Enum):
 
 
 DEFAULT_PLAYER = {
-    "player_values": {
+    "player_settings": {
         "move_cooldown": float(0.1),
         "move_speed": float(0.05),
         "move_speed_boost": float(1.0),

@@ -33,12 +33,12 @@ class PongConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.game_group, self.channel_name)
         # get gametype
         async with await GC.get_redis(GC.REDIS_GAME_URL) as redis_game:
-            gametype = await redis_game.get(f"game_type:{self.game_id}")
+            game_type = await redis_game.get(f"game_type:{self.game_id}")
         try:
             # init game instance
             self.game_manager = await AGameManager.get_instance(
                 self.game_id,
-                gametype
+                game_type
             )
 
             # Check Redis for existing players
@@ -46,52 +46,43 @@ class PongConsumer(AsyncWebsocketConsumer):
                 self.game_manager.players_key
             )
 
-            # Initialize game if no players exist with provided settings -> notworking
-            if player_count == 0:
-                asyncio.create_task(self.game_manager.start_game())
-
             player_index = await self.game_manager.add_player(self.player_id)
             if not player_index:
                 await self.close(code=1011)
+                print("get instance: Error in add player")
                 return
+            # Initialize game if no players exist with provided settings -> notworking
+            if player_count == 0:
+                asyncio.create_task(self.game_manager.start_game())
             self.role = player_index['role']
+            # load player settings
             if self.role == 'player':
-                self.current_pos = player_index.get("position", 0.5)
-                self.player_index = player_index.get("index", 0)
+                self.current_pos = player_index.get("position")
+                self.player_index = player_index.get("index")
+                self.player_values =  player_index.get("settings") 
                 print(f"Player {self.player_id} connected to game {self.game_id} as player {self.player_index}")
 
             await self.accept()
 
             # Send initial game state
             try:
-                state_data = await self.game_manager.redis_conn.get(
-                    self.game_manager.state_key
+                await self.send(
+                    text_data=json.dumps(
+                        {
+                            "type": "initial_state",
+                            "game_state": self.game_manager.settings["state"],
+                            "role": self.role,        
+                            "player_index":self.game_manager.active_sides[self.player_index] if self.role == "player" else None,
+                            "message": player_index.get("message", "no message given"),        
+                            "player_values": self.player_values,
+                            "game_setup": {
+                                "type": game_type,
+                                "vertices": self.game_manager.vertices,
+                                #'settings': await self.game_manager.redis_conn.get(self.game_manager.settings_key)
+                            },
+                        }
+                    )
                 )
-                if state_data:
-                    current_state = msgpack.unpackb(state_data)
-                    sanitized_state = self.sanitize_for_json(current_state)
-                    vertices_data = await self.game_manager.redis_conn.get(
-                        self.game_manager.vertices_key
-                    )
-                    vertices = msgpack.unpackb(vertices_data) if vertices_data else None
-                    sanitized_vertices = self.sanitize_for_json(vertices)
-                    await self.send(
-                        text_data=json.dumps(
-                            {
-                                "type": "initial_state",
-                                "game_state": sanitized_state,
-                                "role": self.role,        
-                                "player_index":self.game_manager.active_sides[self.player_index] if self.role == "player" else None,
-                                "message": player_index.get("message", "no message given"),        
-                                "player_values": self.player_values,
-                                "game_setup": {
-                                    "type": game_type,
-                                    "vertices": sanitized_vertices,
-                                    #'settings': await self.game_manager.redis_conn.get(self.game_manager.settings_key)
-                                },
-                            }
-                        )
-                    )
             except Exception as e:
                 await self.send(
                     text_data=json.dumps(

@@ -57,7 +57,7 @@ class GameSettingsManager:
 
         # 2. step: add player settings
         player_values = DEFAULT_PLAYER.copy()
-        player_values["player_values"]["paddle_length"] = settings["paddle_length"]
+        player_values["player_settings"]["paddle_length"] = settings["paddle_length"]
     
         settings.update(player_values)
         print("settings after step 2: ", settings)

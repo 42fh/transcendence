@@ -9,10 +9,35 @@ from asgiref.sync import sync_to_async
 import json
 import asyncio
 
+
+
+
 from .consumers import PongConsumer
 from .gamecordinator.GameCordinator import GameCordinator
 from .gamecordinator.game_config import EnumGameMode
 from tr_django.asgi import application
+
+
+
+
+
+from django.contrib.sessions.middleware import SessionMiddleware
+
+class TestSessionMiddleware(SessionMiddleware):
+    def __init__(self, app):
+        self.app = app
+        self._session_store = {}
+
+    async def __call__(self, scope, receive, send):
+        scope['session'] = self._session_store
+        scope['session_key'] = '1234'
+        return await self.app(scope, receive, send)
+
+    def process_request(self, request):
+        request.session = self._session_store
+        request.session_key = '1234'
+
+
 
 
 
@@ -137,30 +162,69 @@ class IntegratedGameTests(TransactionTestCase):
     #        
     #    self.loop.run_until_complete(_test_game_creation())
 
-    def test_b_complete_game_flow(self):
-        """Test the entire game flow from creation through gameplay"""
-        async def _test_complete_game_flow():
+    #def test_b_complete_game_flow(self):
+    #    """Test the entire game flow from creation through gameplay"""
+    #    async def _test_complete_game_flow():
+    #
+    #        # Create game and get WebSocket URL
+    #        response = await sync_to_async(self.client.post)(
+    #            reverse('create_new_game'),
+    #            data=json.dumps(self.game_settings),
+    #            content_type='application/json'
+    #        )
+    #        self.assertEqual(response.status_code, 201)
+    #         data = response.json()
+    #        ws_url = data['ws_url']
+    #        
+    #        # Create WebSocket communicator for first player
+    #        communicator1 = WebsocketCommunicator(
+    #            self.application,
+    #            ws_url
+    #        )
+    #        communicator1.scope["user"] = self.test_users["player1"]
+    #        
+    #        # Connect first player
+    #        connected1, _ = await communicator1.connect()
+    #        self.assertTrue(connected1)
+    #        # Receive response
+    #        response = await communicator1.receive_from()
+    #        print(f"Received message: {response}")
+    #        print("Player 1 connected successfully")
+    #    self.loop.run_until_complete(_test_complete_game_flow())
 
-            # Create game and get WebSocket URL
+
+    async def _test_booking_and_websocket(self):
+            # Add session middleware
+            session_middleware = SessionMiddleware(lambda x: None)
+            self.client.cookies['sessionid'] = 'test-session'
+            # Login player1
+            correct_user = self.test_users["player1"]
+            # Add this line to authenticate
+            await sync_to_async(self.client.force_login)(correct_user)
+            self.client.user = correct_user
+            # Create game and join simultaneously
             response = await sync_to_async(self.client.post)(
                 reverse('create_new_game'),
                 data=json.dumps(self.game_settings),
                 content_type='application/json'
             )
-            self.assertEqual(response.status_code, 201)
             data = response.json()
             ws_url = data['ws_url']
             
-            # Create WebSocket communicator for first player
-            communicator1 = WebsocketCommunicator(
+            # Connect with WebSocket using same user
+            communicator = WebsocketCommunicator(
                 self.application,
                 ws_url
             )
-            communicator1.scope["user"] = self.test_users["player1"]
-            
-            # Connect first player
-            connected1, _ = await communicator1.connect()
-            self.assertTrue(connected1)
-            print("Player 1 connected successfully")
-        self.loop.run_until_complete(_test_complete_game_flow())
+            communicator.scope["user"] = correct_user
+            connected, _ = await communicator.connect()
+            self.assertTrue(connected)
+            response = await communicator.receive_from()
+            response_data = json.loads(response)
+            self.assertEqual(response_data["role"], "player")
+            self.assertIsNotNone(response_data["player_index"])
+            await communicator.disconnect()
+
+    def test_websocket_auth(self):
+            self.loop.run_until_complete(self._test_booking_and_websocket())
 

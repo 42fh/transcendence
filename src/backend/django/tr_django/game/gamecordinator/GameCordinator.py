@@ -88,7 +88,7 @@ class GameCordinator:
     LOCK_KEYS = {"game_id": "game_id",
                 "waiting": "waiting",
                 "running": "running",
-                "finished": "finised",       
+                "finished": "finished",       
     
     }
     
@@ -114,7 +114,7 @@ class GameCordinator:
     @classmethod
     async def create_new_game(cls, settings: Dict) -> str:
         """ """
-        # calculate all datai
+        # calculate all data
         game_id = None
         try:
             async with await cls.get_redis(cls.REDIS_URL) as redis_conn:
@@ -187,8 +187,8 @@ class GameCordinator:
                 pipeline.hset(f"game_paddles:{game_id}", mapping=paddle_positions)
             
             # Initialize player values as msgpack
-            pipeline.set(f"game_players_value:{game_id}",
-                        msgpack.packb(settings.get("player_values")))
+            pipeline.set(f"game_player_settings:{game_id}",
+                        msgpack.packb(settings.get("player_settings")))
             
             pipeline.set(f"{cls.NUM_PLAYERS_PREFIX}:{game_id}", str(settings.get("num_players")))
 
@@ -285,17 +285,17 @@ class GameCordinator:
         try:
             async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
                 async with RedisLock(redis_conn, f"{game_id}_player_situation"):
-                    await cls.cleanup_invalid_bookings(redis_conn, game_id)
+                    # await cls.cleanup_invalid_bookings(redis_conn, game_id)
                     current_players = await redis_conn.scard(f"game_players:{game_id}")
-                    reserved_players = await redis_conn.scard(f"game_booked_players:{game_id}")
-                    return {"status": True, "current_players": current_players, "reserved_players": reserved_players}
+                    booking_count = 0
+                    async for _ in redis_conn.scan_iter(f"{cls.BOOKED_USER_PREFIX}*:{game_id}"):
+                        booking_count += 1
+                    return {"status": True, "current_players": current_players, "reserved_players": booking_count}
                     
         except Exception as e:   
             print(f"Error player_situation: {e}")
             return {"status": False, "current_players": None, "reserved_players": None}
             
-
-
 
     @classmethod
     async def join_game(cls, request, game_id) -> dict:
@@ -316,9 +316,8 @@ class GameCordinator:
                         await redis_conn.set(
                             f"{cls.BOOKED_USER_PREFIX}{request.user.id}:{game_id}", 
                             "",
-                            ex=5  # 5 sec
+                            ex=5  # 5 sec None if tournament 
                         )
-                        await redis_conn.sadd(f"game_booked_players:{game_id}", request.user.id)
                 return {"available": True}
                 
         except Exception as e:
@@ -326,7 +325,7 @@ class GameCordinator:
             return {"available": False, "message": f"Error in join_game: {e}", "status": 500 }
 
 
-    # from AGameManager with signals
+    # from AGameManager 
     @classmethod
     async def leave_game(cls, game_id, player_id):
         pass

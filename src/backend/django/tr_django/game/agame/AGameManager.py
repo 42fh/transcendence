@@ -8,6 +8,9 @@ import random
 from channels.layers import get_channel_layer
 from .method_decorators import *
 from ..gamecordinator.GameCordinator import GameCordinator as GC      
+from asgiref.sync import async_to_sync
+
+
 
 class GameStateError(Exception):
     """Custom exception for game state validation errors"""
@@ -33,6 +36,8 @@ class AGameManager:
         self.game_id = game_id
         self.redis_conn = None
         self.channel_layer = None
+        self._is_closed = False
+
 
         # Redis keys
         self.state_key = f"game_state:{game_id}"
@@ -49,6 +54,35 @@ class AGameManager:
         self.inner_boundary = None
         self.scale =float(1.0)        
 
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        try:
+            await self.async_close()
+        except Exception as e:
+            print(f"Error in __aexit__: {e}")
+        return False
+
+    async def async_close(self):
+        if hasattr(self, 'redis_conn'):
+            await self.redis_conn.aclose()
+            self._is_closed = True
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+        return False
+    
+    def close(self):
+        if hasattr(self, 'redis_conn') and not self._is_closed:
+            async_to_sync(self.redis_conn.aclose)()
+            self._is_closed = True
+
+
+    @property
+    def is_closed(self):
+        return self._is_closed
+
+    def __del__(self):
+        if not self._is_closed:
+            print("Warning: Redis connection was not properly closed")
 
     @classmethod
     def register_game_type(cls, game_type_name):
@@ -80,7 +114,7 @@ class AGameManager:
             
             # get settings
             async with await GC.get_redis_binary(GC.REDIS_GAME_URL) as redis_game:
-                raw_settings = redis_game.get(f"game_settings:{game_id}")
+                raw_settings = await redis_game.get(f"game_settings:{game_id}")
                 if raw_settings:
                     game_settings = msgpack.unpackb(raw_settings)
                     instance.settings = game_settings
@@ -89,7 +123,6 @@ class AGameManager:
         
             # Now initialize with settings in place
             await instance.initialize()
-
             return instance
 
         except Exception as e:

@@ -15,14 +15,13 @@ async def initialize(self, create_new=False):
         self.game_shape = self.settings.get("shape")  # Get mode from settings
         self.score_mode = self.settings.get("scoreMode")
         self.active_sides = self.settings.get("players_sides")
-        self.initialize_ball_movements(self.settings.get("num_balls", 1)) # to cls
         self.vertices = self.settings.get("vertices")
         self.scale = self.settings.get("scale")
         self.side_normals = self.settings.get("normals")        
-        self.inner_boundary = self_.settings.get("inner_boundary") 
-        self.previus_movements  = self.settings.get("ballmovement)
+        self.inner_boundary = self.settings.get("inner_boundary") 
+        self.prevoius_movements  = self.settings.get("ballmovement")
         
-        except Exception as e:
+    except Exception as e:
         print(f"Error in initialize: {e}")
         raise
 

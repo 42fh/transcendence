@@ -12,12 +12,25 @@ from .gamecordinator.GameCordinator import GameCordinator, RedisLock
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 from .gamecordinator.game_config import EnumGameMode 
-
+from asgiref.sync import sync_to_async
 
 
 def transcendance(request):
     return HttpResponse("Initial view for transcendance")
 
+
+def print_request_details(request):
+    # Print all attributes
+#    print("Attributes:", vars(request))
+    
+    # Print all methods and properties
+ #   print("Methods and properties:", dir(request))
+    
+    # Print common request properties
+  #  print(f"Path: {request.path}")
+   # print(f"Method: {request.method}")
+   # print(f"GET params: {request.GET}")
+    print(f"USER: {request.user}")
 
 import random
 @csrf_exempt
@@ -31,16 +44,18 @@ async def create_new_game(request, use_redis_lock: bool = True):
             }, 
             status=405
         )
-    request.user.id = 123   # random.randint(1000, 9999) -> hardcoded for test        
+    # random.randint(1000, 9999) -> hardcoded for test        
     # comment out because not connected to user yet
-    #if not request.user.is_authenticated:
-    #    return JsonResponse(
-    #        {
-    #            "error": "Unauthorized - missing authentication",
-    #            "message": "only login users can create new game"
-    #        },
-    #        status=401
-    #    )
+    if not request.user.is_authenticated:
+        return JsonResponse(
+            {
+                "error": "Unauthorized - missing authentication",
+                "message": "only login users can create new game"
+            },
+            status=401
+        )
+    print_request_details(request)
+    request.user.id = 123
     if request.content_type != 'application/json':
         return JsonResponse(
             {

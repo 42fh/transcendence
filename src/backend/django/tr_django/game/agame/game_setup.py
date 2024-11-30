@@ -13,6 +13,7 @@ def setup_game(cls, settings: Dict[str, Any]) -> dict:
         settings.update(cls.calculate_sides_normals(settings))                                                                    
         settings.update(cls.calculate_inner(settings))
         settings.update(cls.set_initial_state(settings))
+        settings.update(cls.initialize_ball_movements(settings))
         return settings  
     except Exception as e:
         print("AGameManager setup error: ", e)   
@@ -28,6 +29,12 @@ def calculate_sides_normals(cls, settings: Dict[str, Any]) -> dict:
 @classmethod
 def calculate_inner(cls, settings: Dict[str, Any]) -> dict:
     raise NotImplementedError("Subclasses must implement this: inner_boundaries!")
+
+
+@classmethod
+def initialize_ball_movements(cls, settings: Dict[str, Any]) -> dict:
+    raise NotImplementedError("Subclasses must implement this: inner_boundaries!")                 
+
 
 @classmethod
 def  set_initial_state(cls, settings: Dict[str, Any]) -> dict:
