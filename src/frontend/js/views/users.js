@@ -132,10 +132,8 @@ async function loadUsersList(page = 1, perPage = 10, search = "", showFriendsOnl
       }
     });
 
-    // Update pagination
-    // Update pagination if data exists
     if (data.pagination) {
-      renderPagination(data.pagination, paginationContainer);
+      renderPagination(data.pagination, paginationContainer, showFriendsOnly);
     } else {
       paginationContainer.style.display = "none";
     }
@@ -150,7 +148,7 @@ async function loadUsersList(page = 1, perPage = 10, search = "", showFriendsOnl
   }
 }
 
-function renderPagination(pagination, container) {
+function renderPagination(pagination, container, showFriendsOnly) {
   console.log("Rendering pagination:", pagination);
   console.log("Container:", container);
   const { total_pages, page, per_page } = pagination;
@@ -159,13 +157,6 @@ function renderPagination(pagination, container) {
   const nextButton = container.querySelector(".pagination__button--next");
   const currentPage = container.querySelector(".pagination__current");
   const totalPages = container.querySelector(".pagination__total");
-
-  console.log("Found elements:", {
-    prevButton: prevButton ? "✓" : "✗",
-    nextButton: nextButton ? "✓" : "✗",
-    currentPage: currentPage ? "✓" : "✗",
-    totalPages: totalPages ? "✓" : "✗",
-  });
 
   if (!prevButton || !nextButton || !currentPage || !totalPages) {
     console.error("Missing pagination elements");
@@ -180,9 +171,9 @@ function renderPagination(pagination, container) {
   prevButton.disabled = page <= 1;
   nextButton.disabled = page >= total_pages;
 
-  // Add click handlers
-  prevButton.onclick = () => loadUsersList(page - 1);
-  nextButton.onclick = () => loadUsersList(page + 1);
+  // Add click handlers with showFriendsOnly parameter
+  prevButton.onclick = () => loadUsersList(page - 1, per_page, "", showFriendsOnly);
+  nextButton.onclick = () => loadUsersList(page + 1, per_page, "", showFriendsOnly);
 
   // Hide pagination if there's only one page
   container.style.display = total_pages <= 1 ? "none" : "flex";
