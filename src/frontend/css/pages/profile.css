@@ -51,6 +51,17 @@
   object-fit: cover;
 }
 
+.profile__username-container {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.profile__online-status {
+  font-size: 0.8em;
+  color: var(--color-success);
+}
+
 .profile__username {
   font-size: var(--font-size-large);
   color: var(--color-text-primary);
