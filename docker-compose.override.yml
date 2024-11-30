@@ -22,12 +22,12 @@ services:
     volumes:
       - ./src/backend/django:/app
       - ./media:/app/media
-    ports:
-      - "8000:8000"
     environment:
       - Debug=True
       - ENVIRONMENT=development
   nginx:
+    ports:
+      - "8443:443"
     build:
       context: ./src
       dockerfile: ./nginx/Dockerfile
@@ -36,7 +36,5 @@ services:
     volumes:
       - ./src/frontend/:/usr/share/nginx/html
       - ./media:/var/www/media
-    ports:
-      - "8080:80"
     environment:
       - ENVIRONMENT=development
