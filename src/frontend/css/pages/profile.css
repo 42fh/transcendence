@@ -10,8 +10,8 @@
 .profile {
   width: 100%;
   padding: var(--spacing-sm);
-  padding: var(--spacing-sm);
   max-width: 800px;
+  max-width: min(90vw, 50em); /* Fluid but with a maximum */
   margin: 0 auto;
 }
 
@@ -21,7 +21,25 @@
   border-radius: var(--profile-border-radius);
   padding: var(--spacing-sm);
   margin-bottom: var(--spacing-sm);
+  /* max-width: 20em; */
+  /* max-width: min(90vw, 50em); */
+  width: 100%; /* Take full width of parent */
+
+  word-wrap: break-word;
+  box-sizing: border-box;
 }
+
+/* @media (min-width: 768px) {
+  .profile__section {
+    max-width: 40em;
+  }
+}
+
+@media (min-width: 1024px) {
+  .profile__section {
+    max-width: min(90vw, 50em);
+  }
+} */
 
 /* Header Section - Mobile First */
 .profile__section--header {
@@ -58,10 +76,17 @@
 }
 
 .profile__online-status {
-  font-size: 0.8em;
-  color: var(--color-success);
+  font-size: 0.8em; /* Remove the crossed-out font-size */
+  /* color: var(--color-success); */
+  color: var(--color-status-online);
 }
 
+.profile__username-container .profile__online-status.material-symbols-outlined {
+  font-size: 0.8em;
+  color: var(--color-status-online);
+  font-variation-settings: "FILL" 1, "wght" 700; /* Filled and bold */
+  /* font-variation-settings: "FILL" 0, "wght" 100; */
+}
 .profile__username {
   font-size: var(--font-size-large);
   color: var(--color-text-primary);
@@ -291,6 +316,17 @@
 
 .profile--public .profile__section--public-actions {
   display: flex;
+  gap: 1rem;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  flex-wrap: wrap;
+  padding: var(--spacing-sm);
+}
+
+/* Override the base button styles */
+.profile--public .profile__section--public-actions button {
+  padding: 0.5rem 1rem;
 }
 
 /* Keep edit button at bottom */
