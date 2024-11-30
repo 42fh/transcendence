@@ -1,4 +1,4 @@
-import { CONFIG } from "../config/constants.js";
+import { CONFIG, LOCAL_STORAGE_KEYS } from "../config/constants.js";
 
 export async function fetchUserProfile(userId) {
   try {
@@ -136,6 +136,25 @@ export async function fetchUsers(page = 1, perPage = 10, search = "") {
     return data;
   } catch (error) {
     console.error("Error fetching users:", error);
+    throw error;
+  }
+}
+
+export async function fetchFriends(page = 1, perPage = 10, search = "") {
+  const userId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
+  if (!userId) throw new Error("User ID not found");
+  console.log("Fetching friends for user:", userId);
+  try {
+    const url = `${CONFIG.API_BASE_URL}/api/users/${userId}/friends/?page=${page}&per_page=${perPage}&search=${search}`;
+    console.log("Fetching from URL:", url);
+    const response = await fetch(url);
+    console.log("Response status:", response.status);
+    if (!response.ok) throw new Error("Failed to fetch friends");
+    const data = await response.json();
+    console.log("Received friends data:", data);
+    return data;
+  } catch (error) {
+    console.error("Error fetching friends:", error);
     throw error;
   }
 }

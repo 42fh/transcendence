@@ -565,11 +565,18 @@
 
     <template id="users-template">
       <div class="page-container page-container--users">
-        <!-- TODO: Folks around maybe is nicer instead of users -->
-        <h2 class="users-page__title">Users</h2>
-        <div class="users-search">
-          <input type="text" class="users-search__input" placeholder="Search users..." />
-          <!-- <span class="material-symbols-outlined users-search__icon">search</span> -->
+        <h2 class="users-page__title">Folks around</h2>
+        <div class="users-selection">
+          <div class="users-filter">
+            <button class="users-filter__button users-filter__button--all users-filter__button--active">
+              All of Them
+            </button>
+            <button class="users-filter__button users-filter__button--friends">Only Friends</button>
+          </div>
+          <div class="users-search">
+            <input type="text" class="users-search__input" placeholder="Search users..." />
+            <!-- <span class="material-symbols-outlined users-search__icon">search</span> -->
+          </div>
         </div>
         <div id="users-list" class="users-list"></div>
         <div id="users-pagination" class="pagination">

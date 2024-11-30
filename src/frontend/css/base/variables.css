@@ -11,6 +11,7 @@
   --color-text-secondary: #888888; /* Medium gray - Secondary text */
   --color-text-error: #f44336; /* Red - Error messages */
   --color-text-success: #4caf50; /* Green - Success messages */
+  --color-text-inverse: #000000; /* Black text for light backgrounds */
 
   /* Accent Colors */
   --color-accent: #4caf50; /* Green - Highlights, success states */
