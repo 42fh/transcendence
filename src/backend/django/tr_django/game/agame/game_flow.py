@@ -48,8 +48,8 @@ async def start_game(self):
 async def end_game(self):
     """End game with process-safe cleanup"""
     try:
-        await self.redis_conn.set(self.running_key, b"0")
-
+        # await self.redis_conn.set(self.running_key, b"0")
+        await GameCordinator.set_to_finished_game(self.game_id)
         # Keep game state briefly for end-game display
         for key in [
             self.state_key,

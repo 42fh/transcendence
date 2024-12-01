@@ -10,20 +10,6 @@ import math
 
 
 
-# os.getenv('REDIS_URL', 'redis://redis:6379/1')
-
-
-class Game:
-    def __init__(self):
-
-        self.players_key = f"game_players:{game_id}"
-        self.booked_players_key = f"game_booked_players:{game_id}"
-
-        # key only for game
-        self.lock_key = f"game_lock:{game_id}"
-        self.type_key = f"game_type:{game_id}"
-
-
 class RedisLock:
     def __init__(self, redis_conn: redis.Redis, lock_key: str, timeout: int = 10):
         self.redis_conn = redis_conn
@@ -55,23 +41,20 @@ class GameCordinator:
     FINISHED_GAMES = "finished_games"
 
     # Player Managment
-    TOTAL_USERS = "total_users" # all active users (PLAYING, RECORDED, SPECTATOR)
+    TOTAL_USERS = "total_users"  # all active users (PLAYING, RECORDED, SPECTATOR)
     PLAYING_USERS = "playing_users"
     BOOKED_USERS = "booked_users"
 
-
-    # invidual Game 
+    # invidual Game
     NUM_PLAYERS_PREFIX = "num_players_"
-
 
     # invidual Player Managment
     BOOKED_USER_PREFIX = "booked_"
     PLAYING_USER_PREFIX = "playing_"
-    
-    
+
     # user online
     USER_ONLINE_PREFIX = "user_online_"
-    USER_ONLINE_EXPIRY = 60             
+    USER_ONLINE_EXPIRY = 60
 
     # more possible key
     # waiting_tournament_games_key  = "waiting_tournament_games" # tournament games has fixed players not pubblic
@@ -85,13 +68,12 @@ class GameCordinator:
     # total_players_key = "total_players"
 
     # KEYS for Redis Lock
-    LOCK_KEYS = {"game_id": "game_id",
-                "waiting": "waiting",
-                "running": "running",
-                "finished": "finished",       
-    
+    LOCK_KEYS = {
+        "game_id": "game_id",
+        "waiting": "waiting",
+        "running": "running",
+        "finished": "finished",
     }
-    
 
     # logic
     # self.waiting_games_timeout = 300 # 5 min timeout only for waiting games tournament game stay open till the tournament close it.
@@ -145,39 +127,42 @@ class GameCordinator:
         async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
             # Add game to appropriate sets
             pipeline = redis_conn.pipeline()
-            
+
             # Boolean flags (using strings as Redis doesn't have boolean type)
             pipeline.set(f"game_recorded:{game_id}", "0")  # Not recorded
-            pipeline.set(f"game_running:{game_id}", "0")   # Not running
+            pipeline.set(f"game_running:{game_id}", "0")  # Not running
             pipeline.set(f"game_finished:{game_id}", "0")  # Not finished
             pipeline.set(f"game_is_tournament:{game_id}", "0")  # Not tournament
-            
+
             # String values
             pipeline.set(f"game_type:{game_id}", settings.get("type"))
             pipeline.set(f"game_lock:{game_id}", "0")  # Initialize unlock state
-            
+
             await pipeline.execute()
 
         # Step 3: Operations with redis_game (Binary/msgpack operations)
         async with await cls.get_redis_binary(cls.REDIS_GAME_URL) as redis_game:
             pipeline = redis_game.pipeline()
-            
+
             # MsgPack encoded data (complex structures)
             # all_settins
-            pipeline.set(f"game_settings:{game_id}", 
-                        msgpack.packb(settings))
+            pipeline.set(f"game_settings:{game_id}", msgpack.packb(settings))
             # state
-            pipeline.set(f"game_state:{game_id}", msgpack.packb(settings.get("state"))) 
-            
-            pipeline.set(f"game_vertices:{game_id}", 
-                        msgpack.packb(settings.get("vertices")))
-            
-            pipeline.set(f"game_normals:{game_id}", 
-                        msgpack.packb(settings.get("normals")))
-            
-            pipeline.set(f"game_players_sides:{game_id}", 
-                        msgpack.packb(settings.get("players_sides")))
-            
+            pipeline.set(f"game_state:{game_id}", msgpack.packb(settings.get("state")))
+
+            pipeline.set(
+                f"game_vertices:{game_id}", msgpack.packb(settings.get("vertices"))
+            )
+
+            pipeline.set(
+                f"game_normals:{game_id}", msgpack.packb(settings.get("normals"))
+            )
+
+            pipeline.set(
+                f"game_players_sides:{game_id}",
+                msgpack.packb(settings.get("players_sides")),
+            )
+
             # Hash Operations (paddle positions)
             paddle_positions = {
                 str(i): msgpack.packb({"position": 0.5})
@@ -185,13 +170,16 @@ class GameCordinator:
             }
             if paddle_positions:
                 pipeline.hset(f"game_paddles:{game_id}", mapping=paddle_positions)
-            
-            # Initialize player values as msgpack
-            pipeline.set(f"game_player_settings:{game_id}",
-                        msgpack.packb(settings.get("player_settings")))
-            
-            pipeline.set(f"{cls.NUM_PLAYERS_PREFIX}:{game_id}", str(settings.get("num_players")))
 
+            # Initialize player values as msgpack
+            pipeline.set(
+                f"game_player_settings:{game_id}",
+                msgpack.packb(settings.get("player_settings")),
+            )
+
+            pipeline.set(
+                f"{cls.NUM_PLAYERS_PREFIX}:{game_id}", str(settings.get("num_players"))
+            )
 
             await pipeline.execute()
 
@@ -215,7 +203,7 @@ class GameCordinator:
     @classmethod
     async def get_detail_from_game(cls, game_id) -> dict:
         async with await cls.get_redis_binary(cls.REDIS_GAME_URL) as redis_game:
-            stored_values = await redis_game.get(f"game_settings:{game_id}")    
+            stored_values = await redis_game.get(f"game_settings:{game_id}")
         return_value = msgpack.unpackb(stored_values)
         return return_value
 
@@ -234,22 +222,25 @@ class GameCordinator:
                 playing_exists = await redis_conn.exists(f"{cls.PLAYING_USER_PREFIX}{user_id}:*")
                 print("player is playing: ",playing_exists)
                 return bool(booked_exists or playing_exists)"""
-                async for key in redis_conn.scan_iter(f"{cls.BOOKED_USER_PREFIX}{user_id}:*"):
+                async for key in redis_conn.scan_iter(
+                    f"{cls.BOOKED_USER_PREFIX}{user_id}:*"
+                ):
                     print("player is booked: ", key)
                     return True
-            
+
                 # Check for playing status
-                async for key in redis_conn.scan_iter(f"{cls.PLAYING_USER_PREFIX}{user_id}:*"):
+                async for key in redis_conn.scan_iter(
+                    f"{cls.PLAYING_USER_PREFIX}{user_id}:*"
+                ):
                     print("player is playing: ", key)
                     return True
-                
+
                 return False
-        
+
         except Exception as e:
             print(f"Error checking player status: {e}")
             return False
 
-        
     @classmethod
     async def cleanup_invalid_bookings(cls, redis_conn: redis.Redis, game_id: str):
         """Cleanup invalid bookings using Redis commands"""
@@ -259,81 +250,106 @@ class GameCordinator:
                 temp_set = f"temp_valid_bookings:{game_id}"
                 pipe = redis_conn.pipeline()
                 # Track if we found any booked users
-                found_bookings = False 
+                found_bookings = False
                 # Get booked users using scan instead of keys
-                async for key in redis_conn.scan_iter(f"{cls.BOOKED_USER_PREFIX}*:{game_id}"):
-                    found_bookings = True 
-                    user_id = key.split(':')[0].replace(f"{cls.BOOKED_USER_PREFIX}", '')
+                async for key in redis_conn.scan_iter(
+                    f"{cls.BOOKED_USER_PREFIX}*:{game_id}"
+                ):
+                    found_bookings = True
+                    user_id = key.split(":")[0].replace(f"{cls.BOOKED_USER_PREFIX}", "")
                     pipe.sadd(temp_set, user_id)
                 if not found_bookings:
                     return True
                 # Use Redis SDIFF to find invalid users
                 pipe.sdiff(f"game_booked_players:{game_id}", temp_set)
                 pipe.delete(temp_set)
-                
+
                 results = await pipe.execute()
                 invalid_users = results[-2]  # Get SDIFF result
-                
+
                 if invalid_users:
-                    await redis_conn.srem(f"game_booked_players:{game_id}", *invalid_users)
-                
+                    await redis_conn.srem(
+                        f"game_booked_players:{game_id}", *invalid_users
+                    )
+
                 return True
-                
+
         except Exception as e:
             print(f"Error cleaning up invalid bookings: {e}")
             raise
 
     @classmethod
-    async def player_situation(cls, game_id:str) -> dict :
+    async def player_situation(cls, game_id: str) -> dict:
         try:
             async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
                 async with RedisLock(redis_conn, f"{game_id}_player_situation"):
                     # await cls.cleanup_invalid_bookings(redis_conn, game_id)
                     current_players = await redis_conn.scard(f"game_players:{game_id}")
                     booking_count = 0
-                    async for _ in redis_conn.scan_iter(f"{cls.BOOKED_USER_PREFIX}*:{game_id}"):
+                    async for _ in redis_conn.scan_iter(
+                        f"{cls.BOOKED_USER_PREFIX}*:{game_id}"
+                    ):
                         booking_count += 1
-                    return {"status": True, "current_players": current_players, "reserved_players": booking_count}
-                    
-        except Exception as e:   
+                    return {
+                        "status": True,
+                        "current_players": current_players,
+                        "reserved_players": booking_count,
+                    }
+
+        except Exception as e:
             print(f"Error player_situation: {e}")
             return {"status": False, "current_players": None, "reserved_players": None}
-            
 
     @classmethod
     async def join_game(cls, user_id, game_id) -> dict:
-        #session = request.session
+        # session = request.session
         try:
             # Get game settings to check player limits
             async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
-                num_players = await redis_conn.get(f"{cls.NUM_PLAYERS_PREFIX}:{game_id}")
-                if not num_players: 
-                    return {"available": False, "message": "Game not found", "status": 404}
+                num_players = await redis_conn.get(
+                    f"{cls.NUM_PLAYERS_PREFIX}:{game_id}"
+                )
+                if not num_players:
+                    return {
+                        "available": False,
+                        "message": "Game not found",
+                        "status": 404,
+                    }
                 async with RedisLock(redis_conn, f"{game_id}"):
-                    player_situation  = await cls.player_situation(game_id)
-                    total_players = player_situation["current_players"] + player_situation["reserved_players"]
+                    player_situation = await cls.player_situation(game_id)
+                    total_players = (
+                        player_situation["current_players"]
+                        + player_situation["reserved_players"]
+                    )
                     if total_players >= int(num_players):
-                        return {"available": False, "message": "No available slots in this game", "status": 503}
+                        return {
+                            "available": False,
+                            "message": "No available slots in this game",
+                            "status": 503,
+                        }
                     async with RedisLock(redis_conn, f"{game_id}_player_situation"):
-                        # create 
+                        # create
                         await redis_conn.set(
-                            f"{cls.BOOKED_USER_PREFIX}{user_id}:{game_id}", 
+                            f"{cls.BOOKED_USER_PREFIX}{user_id}:{game_id}",
                             "",
-                            ex=5  # 5 sec None if tournament 
+                            ex=5,  # 5 sec None if tournament
                         )
-                print(f"KEY: {cls.BOOKED_USER_PREFIX}{user_id}:{game_id}")    
+                print(f"KEY: {cls.BOOKED_USER_PREFIX}{user_id}:{game_id}")
                 return {"available": True}
-                
+
         except Exception as e:
             print(f"Error in join_game: {e}")
-            return {"available": False, "message": f"Error in join_game: {e}", "status": 500 }
+            return {
+                "available": False,
+                "message": f"Error in join_game: {e}",
+                "status": 500,
+            }
 
-
-    # from AGameManager 
+    # from AGameManager
     @classmethod
     async def leave_game(cls, game_id, player_id):
         pass
-    
+
     @classmethod
     async def set_to_waiting_game(cls, game_id):
         """"""
@@ -342,22 +358,44 @@ class GameCordinator:
 
     @classmethod
     async def set_to_running_game(cls, game_id):
-        pass
-    
+        async with await cls.get_redis(cls.REDIS_URL) as redis_conn:
+            async with RedisLock(redis_conn, cls.LOCK_KEYS["running"]):
+                # Remove from waiting games and add to running games in a pipeline
+                pipe = redis_conn.pipeline()
+                pipe.srem(cls.WAITING_GAMES, str(game_id))
+                pipe.sadd(cls.RUNNING_GAMES, str(game_id))
+                await pipe.execute()
+
+                # Update game status in game database
+                async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_game:
+                    await redis_game.set(f"game_running:{game_id}", "1")
+
     @classmethod
     async def set_to_finished_game(cls, game_id):
-        pass
-   
+        async with await cls.get_redis(cls.REDIS_URL) as redis_conn:
+            async with RedisLock(redis_conn, cls.LOCK_KEYS["finished"]):
+                # Remove from running games and add to finished games in a pipeline
+                pipe = redis_conn.pipeline()
+                pipe.srem(cls.RUNNING_GAMES, str(game_id))
+                pipe.sadd(cls.FINISHED_GAMES, str(game_id))
+                await pipe.execute()
 
+                # Update game status in game database
+                async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_game:
+                    pipe = redis_game.pipeline()
+                    pipe.set(f"game_running:{game_id}", "0")
+                    pipe.set(f"game_finished:{game_id}", "1")
+                    await pipe.execute()
 
- 
-    # for user managment 
-    # is user online 
+    # for user managment
+    # is user online
     @classmethod
     async def is_user_online(cls, user_id: str) -> bool:
         try:
             async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
-                return bool(await redis_conn.exists(f"{cls.USER_ONLINE_PREFIX}{user_id}"))
+                return bool(
+                    await redis_conn.exists(f"{cls.USER_ONLINE_PREFIX}{user_id}")
+                )
         except Exception as e:
             print(f"Error checking online status: {e}")
             return False
@@ -373,12 +411,10 @@ class GameCordinator:
                 await redis_conn.set(
                     f"{cls.USER_ONLINE_PREFIX}{user_id}",
                     "",  # Empty value since we just need the key
-                    ex=cls.USER_ONLINE_EXPIRY
+                    ex=cls.USER_ONLINE_EXPIRY,
                 )
         except Exception as e:
             print(f"Error setting online status: {e}")
-
-
 
     @classmethod
     async def set_user_offline(cls, user_id: str):

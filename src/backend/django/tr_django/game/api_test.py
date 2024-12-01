@@ -176,18 +176,18 @@ class IntegratedGameTests(TransactionTestCase):
     #         data = response.json()
     #        ws_url = data['ws_url']
     #        
-    #        # Create WebSocket communicator for first player
-    #        communicator1 = WebsocketCommunicator(
+    #        # Create WebSocket comm1 for first player
+    #        comm11 = WebsocketCommunicator(
     #            self.application,
     #            ws_url
     #        )
-    #        communicator1.scope["user"] = self.test_users["player1"]
+    #        comm11.scope["user"] = self.test_users["player1"]
     #        
     #        # Connect first player
-    #        connected1, _ = await communicator1.connect()
+    #        connected1, _ = await comm11.connect()
     #        self.assertTrue(connected1)
     #        # Receive response
-    #        response = await communicator1.receive_from()
+    #        response = await comm11.receive_from()
     #        print(f"Received message: {response}")
     #        print("Player 1 connected successfully")
     #    self.loop.run_until_complete(_test_complete_game_flow())
@@ -198,10 +198,10 @@ class IntegratedGameTests(TransactionTestCase):
             session_middleware = SessionMiddleware(lambda x: None)
             self.client.cookies['sessionid'] = 'test-session'
             # Login player1
-            correct_user = self.test_users["player1"]
+            player1 = self.test_users["player1"]
             # Add this line to authenticate
-            await sync_to_async(self.client.force_login)(correct_user)
-            self.client.user = correct_user
+            await sync_to_async(self.client.force_login)(player1)
+            self.client.user = player1
             # Create game and join simultaneously
             response = await sync_to_async(self.client.post)(
                 reverse('create_new_game'),
@@ -212,14 +212,14 @@ class IntegratedGameTests(TransactionTestCase):
             ws_url = data['ws_url']
             
             # Connect with WebSocket using same user
-            communicator = WebsocketCommunicator(
+            comm1 = WebsocketCommunicator(
                 self.application,
                 ws_url
             )
-            communicator.scope["user"] = correct_user
-            connected, _ = await communicator.connect()
+            comm1.scope["user"] = player1
+            connected, _ = await comm1.connect()
             self.assertTrue(connected)
-            response = await communicator.receive_from()
+            response = await comm1.receive_from()
             response_data = json.loads(response)
             print(response_data)
             self.assertEqual(response_data["role"], "player")
@@ -254,30 +254,87 @@ class IntegratedGameTests(TransactionTestCase):
             self.assertTrue(connected2)
             response2 = await comm2.receive_from()
             print("Player 2 connected:", json.loads(response2))
-   
-
-            player2_task = asyncio.create_task(self.monitor_messages(comm2, "Player 2"))
             
-            # Game loop simulation
+            # Start monitoring tasks
+            player1_task = asyncio.create_task(self.monitor_messages(comm1, "Player 1"))
+            player2_task = asyncio.create_task(self.monitor_messages(comm2, "Player 2"))
+
             try:
-                await asyncio.sleep(30)  # Increase time to observe more messages
+                # Wait for game to start
+                await asyncio.sleep(2)
+
+                # Test paddle movements for Player 1
+                print("\nTesting Player 1 paddle movements")
+                paddle_moves = [
+                    {"action": "move_paddle", "direction": "left", "user_id": str(player1.id)},
+                    {"action": "move_paddle", "direction": "right", "user_id": str(player1.id)},
+                ]
+
+                for move in paddle_moves:
+                    await comm1.send_json_to(move)
+                    # Wait for cooldown (0.1 seconds as defined in consumer)
+                    await asyncio.sleep(0.15)
+
+                # Test paddle movements for Player 2
+                print("\nTesting Player 2 paddle movements")
+                paddle_moves = [
+                    {"action": "move_paddle", "direction": "left", "user_id": str(player2.id)},
+                    {"action": "move_paddle", "direction": "right", "user_id": str(player2.id)},
+                ]
+
+                for move in paddle_moves:
+                    await comm2.send_json_to(move)
+                    await asyncio.sleep(0.15)
+
+                # Test invalid movements
+                print("\nTesting invalid movements")
+                
+                # Test wrong direction
+                await comm1.send_json_to({
+                    "action": "move_paddle",
+                    "direction": "up",  # invalid direction
+                    "user_id": str(player1.id)
+                })
+                
+                # Test wrong user_id
+                await comm1.send_json_to({
+                    "action": "move_paddle",
+                    "direction": "left",
+                    "user_id": str(player2.id)  # trying to move other player's paddle
+                })
+                
+                # Test cooldown violation
+                for _ in range(3):  # Send multiple moves quickly
+                    await comm1.send_json_to({
+                        "action": "move_paddle",
+                        "direction": "left",
+                        "user_id": str(player1.id)
+                    })
+
+                # Wait to observe responses
+                await asyncio.sleep(3)
+
             finally:
                 # Clean up tasks
+                player1_task.cancel()
                 player2_task.cancel()
                 try:
+                    await player1_task
                     await player2_task
                 except asyncio.CancelledError:
                     pass
                 
                 # Close connections
-                await communicator.disconnect()
+                await comm1.disconnect()
                 await comm2.disconnect()
 
-    async def monitor_messages(self, communicator, player_name):
+   
+
+    async def monitor_messages(self, comm1, player_name):
         """Helper method to continuously monitor websocket messages"""
         try:
             while True:
-                message = await communicator.receive_from()
+                message = await comm1.receive_from()
                 message_data = json.loads(message)
                 # Only print if the message type is not 'gamestate'
                 if message_data.get('type') != 'game_state':
