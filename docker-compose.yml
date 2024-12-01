@@ -22,8 +22,7 @@ services:
   django:
     build: ./src/backend/django
     # mind that manage.py is in the tr_django folder 
-    command: 
-      - command: sh -c "echo Error the command of django must be overwritten"
+    command: sh -c "echo Error the command of django must be overwritten"
     env_file:
       - ./.env
     volumes:
