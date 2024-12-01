@@ -39,3 +39,39 @@ async function handleAuthRequest(data, endpoint) {
 
   return result;
 }
+
+export async function sendEmailVerification(userData) {
+  const response = await fetch("/api/users/auth/send-email-verification/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(userData),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.error || "Failed to send email verification");
+  }
+
+  return result;
+}
+
+export async function validateEmailVerification(token) {
+  const response = await fetch(`/api/users/auth/validate-email-verification/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ token }),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.error || "Email verification failed");
+  }
+
+  return result;
+}

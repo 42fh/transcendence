@@ -2,6 +2,9 @@
 
 import json
 import logging
+import random
+from django.utils import timezone
+from datetime import timedelta
 from django.contrib.auth import authenticate, login, logout, get_user
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -17,6 +20,9 @@ from django.core.exceptions import ValidationError
 import uuid
 from django.conf import settings
 import logging
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.core.mail import send_mail
 
 
 logger = logging.getLogger(__name__)
@@ -140,6 +146,70 @@ class LogoutView(View):
             logger.warning("Unauthorized logout attempt detected.")
             return JsonResponse({"success": False, "error": "User is not logged in."}, status=401)
 
+@method_decorator(csrf_exempt, name="dispatch")
+class SendEmailVerificationView(View):
+    """
+    View to handle sending email verification emails.
+    https://docs.djangoproject.com/en/5.1/topics/email/
+    """
+
+    def post(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Authentication required"}, status=401)
+
+        try:
+            # Generate random 6-digit code
+            verification_code = str(random.randint(100000, 999999))
+            # Send email with verification code
+            send_mail(
+                "PONG | Verification code",
+                f"Your verification code is: {verification_code}",
+                "dantol29@gmail.com",
+                [request.user.email],
+                fail_silently=False,
+            )
+            # Store verification code and expiry time in user object
+            request.user.two_factor_code = verification_code
+            request.user.two_factor_code_expires_at = timezone.now() + timedelta(minutes=5)
+            request.user.save()
+            
+            return JsonResponse({"message": "Email verification sent successfully"})
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+@method_decorator(csrf_exempt, name="dispatch")
+class ValidateEmailVerificationView(View):
+    """
+    View to handle email verification.
+    """
+
+    def post(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Authentication required"}, status=401)
+
+        try:
+            data = json.loads(request.body)
+            verification_code = data.get("token")
+            print("Verification Code:", request.user.two_factor_code_expires_at, request.user.two_factor_code)
+
+            if not verification_code:
+                return JsonResponse({"error": "Verification code is required"}, status=400)
+
+            if request.user.last_2fa_code == verification_code:
+                return JsonResponse({"error": "Verification code is already used"}, status=400)
+            if request.user.two_factor_code == verification_code and request.user.two_factor_code_expires_at > timezone.now():
+                request.user.last_2fa_code = verification_code
+                request.user.email_verified = True
+                request.user.save()
+                return JsonResponse({"message": "Email verification successful"})
+            elif request.user.two_factor_code_expires_at < timezone.now():
+                return JsonResponse({"error": "Verification code expired"}, status=400)
+            else:
+                return JsonResponse({"error": "Invalid verification code"}, status=400)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid request format"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
 
 @method_decorator(csrf_exempt, name="dispatch")
 class DeleteUserView(View):
@@ -329,6 +399,7 @@ class UserDetailView(View):
                     "telephone_number": user.telephone_number,
                     "pronoun": user.pronoun,
                     "is_active": user.is_active,
+                    "two_factor_enabled": user.two_factor_enabled,
                     "visibility_online_status": user.visibility_online_status,
                     "visibility_user_profile": user.visibility_user_profile,
                     "stats": {
@@ -385,6 +456,7 @@ class UserDetailView(View):
                 "pronoun",
                 "visibility_online_status",
                 "visibility_user_profile",
+                "two_factor_enabled",
             }
 
             # Update fields if they exist in the request
@@ -404,6 +476,7 @@ class UserDetailView(View):
                     "bio": user.bio,
                     "telephone_number": user.telephone_number,
                     "pronoun": user.pronoun,
+                    "two_factor_enabled": user.two_factor_enabled,
                 },
             )
 
