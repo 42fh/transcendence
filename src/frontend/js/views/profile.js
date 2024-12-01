@@ -390,22 +390,31 @@ function showFriendshipActionModal({ title, message, actions }) {
 function updateFriendButton(newStatus) {
   //   const friendButton = document.getElementById("friend-button");
   const friendshipButton = document.querySelector('button[data-action="friend"]');
-  if (!friendshipButton) {
-    console.warn("Friend button not found in template");
+  const iconSpan = friendshipButton.querySelector(".material-symbols-outlined");
+  if (!friendshipButton || !iconSpan) {
+    console.warn("Friend button or icon not found");
     return;
   }
   switch (newStatus) {
-    case "none":
-      friendshipButton.textContent = "Add Friend";
+    case "not_friends":
+      iconSpan.textContent = "add_circle";
+      friendshipButton.setAttribute("title", "Add Friend");
+      friendshipButton.dataset.state = "not_friends";
       break;
     case "pending_sent":
-      friendshipButton.textContent = "Cancel Request";
+      iconSpan.textContent = "hourglass_top";
+      friendshipButton.setAttribute("title", "Friend Request Sent. Click to withdraw.");
+      friendshipButton.dataset.state = "pending_sent";
       break;
     case "pending_received":
-      friendshipButton.textContent = "Accept Request";
+      iconSpan.textContent = "check_circle";
+      friendshipButton.setAttribute("title", "Friend Request Received. Click to accept, reject or ignore.");
+      friendshipButton.dataset.state = "pending_received";
       break;
     case "friends":
-      friendshipButton.textContent = "Remove Friend";
+      iconSpan.textContent = "do_not_disturb_on";
+      friendshipButton.setAttribute("title", "Remove Friend");
+      friendshipButton.dataset.state = "friends";
       break;
   }
 }
