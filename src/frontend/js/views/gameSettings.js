@@ -5,7 +5,6 @@ import { displayModalError } from "../components/modal.js";
 export function gameSettings() {
   console.log("print from inside gameSettings");
   const state = {
-    gameType: "classic",
     showSettings: false,
     eventLog: document.getElementById("eventLog"),
     formData: {
@@ -15,8 +14,7 @@ export function gameSettings() {
       numBalls: 1,
       shape: "regular",
       scoreMode: "classic",
-      pongType: "classic",
-      mode: "regular",
+      mode: "regular", // This is the correct reference for the game type
     },
     gameConfigs: {
       classic: {
@@ -67,7 +65,10 @@ export function gameSettings() {
   initializeInterface();
   setupEventListeners();
 
+  console.log("Game settings initialized with state:", state);
+
   function initializeInterface() {
+    console.log("Initializing interface with form data:", state.formData);
     console.log("inside initializeInterface");
 
     Object.entries(state.formData).forEach(([key, value]) => {
@@ -77,11 +78,12 @@ export function gameSettings() {
       }
     });
 
-    updateGameTypeFields();
+    updatePongTypeFields();
   }
 
   function setupEventListeners() {
-    console.log("print from setupEventListeners");
+    console.log("Setting up event listeners");
+    console.log("print    from setupEventListeners");
     const toggleSettingsButton = document.getElementById("toggleSettings");
     if (toggleSettingsButton) {
       toggleSettingsButton.addEventListener("click", () => {
@@ -90,25 +92,26 @@ export function gameSettings() {
         const toggleText = document.getElementById("toggleText");
         const toggleIcon = document.getElementById("toggleIcon");
 
-        advancedSettings.style.display = state.showSettings ? "block" : "none";
-        toggleText.textContent = state.showSettings
-          ? "Hide Settings"
-          : "Show Settings";
-        toggleIcon.textContent = state.showSettings ? "▼" : "▶";
-      });
-    }
-
-    const gameTypeSelect = document.getElementById("gameType");
-    if (gameTypeSelect) {
-      gameTypeSelect.addEventListener("change", (e) => {
-        state.gameType = e.target.value;
-        updateGameTypeFields();
+        if (advancedSettings) {
+          advancedSettings.style.display = state.showSettings
+            ? "block"
+            : "none";
+        }
+        if (toggleText) {
+          toggleText.textContent = state.showSettings
+            ? "Hide Settings"
+            : "Show Settings";
+        }
+        if (toggleIcon) {
+          toggleIcon.textContent = state.showSettings ? "▼" : "▶";
+        }
       });
     }
 
     const shapeSelect = document.getElementById("shape");
     if (shapeSelect) {
       shapeSelect.addEventListener("change", (e) => {
+        console.log("Shape changed to:", e.target.value);
         state.formData.shape = e.target.value;
       });
     }
@@ -116,7 +119,9 @@ export function gameSettings() {
     const modeSelect = document.getElementById("mode");
     if (modeSelect) {
       modeSelect.addEventListener("change", (e) => {
-        state.formData.mode = e.target.value;
+        const selectedMode = e.target.value;
+        console.log("Mode changed to:", selectedMode);
+        state.formData.mode = selectedMode;
       });
     }
 
@@ -147,65 +152,40 @@ export function gameSettings() {
       }
     });
 
-    const numSidesInput = document.getElementById("numSides");
-    if (numSidesInput) {
-      numSidesInput.addEventListener("change", (e) => {
-        state.formData.numSides = parseInt(e.target.value);
-      });
-    }
-
     const exitButton = document.createElement("button");
     exitButton.textContent = "Exit Settings";
     exitButton.id = "exit-settings-button";
     exitButton.addEventListener("click", () => {
-      mainContent.innerHTML = "";
+      console.log("Exiting settings");
+      if (mainContent) {
+        mainContent.innerHTML = "";
+      }
     });
     mainContent.appendChild(exitButton);
   }
 
-  function updateGameTypeFields() {
-    console.log("print from updateGameTypeFields");
+  function updatePongTypeFields() {
+    console.log("print from updatePongTypeFields");
 
-    const config = state.gameConfigs[state.gameType];
-    if (!config) return;
-
-    const numPlayersInput = document.getElementById("numPlayers");
-    if (numPlayersInput) {
-      numPlayersInput.addEventListener("change", (e) => {
-        const newNumPlayers = parseInt(e.target.value);
-        if (
-          newNumPlayers >= 2 &&
-          newNumPlayers <= state.gameConfigs[state.gameType].maxPlayers
-        ) {
-          state.formData.numPlayers = newNumPlayers;
-        } else {
-          console.error(
-            "Number of players must be between 2 and " +
-              state.gameConfigs[state.gameType].maxPlayers
-          );
-        }
-      });
+    const config = state.gameConfigs[state.formData.mode]; // Corrected to use state.formData.mode
+    if (!config) {
+      console.error("Invalid game type selected");
+      console.log("Current game type:", state.formData.mode);
+      displayModalError("Invalid game type selected");
+      return;
     }
-
-    const numSidesInput = document.getElementById("numSides");
-    if (numSidesInput) {
-      numSidesInput.addEventListener("change", (e) => {
-        const newSides = parseInt(e.target.value);
-        state.formData.numSides = newSides;
-        console.log("Sides updated in state:", state.formData.numSides);
-      });
-    }
-
-    const shapeFields = document.querySelectorAll(".shape-fields");
-    shapeFields.forEach((field) => {
-      field.style.display = state.gameType === "irregular" ? "block" : "none";
-    });
 
     const sidesField = document.getElementById("sidesField");
     if (sidesField) {
       sidesField.style.display =
-        state.gameType !== "classic" ? "block" : "none";
+        state.formData.mode === "classic" ? "none" : "block";
     }
+
+    const shapeFields = document.querySelectorAll(".shape-fields");
+    shapeFields.forEach((field) => {
+      field.style.display =
+        state.formData.mode === "irregular" ? "block" : "none";
+    });
   }
 
   function logEvent(event) {
@@ -217,14 +197,10 @@ export function gameSettings() {
     const timestamp = new Date().toLocaleTimeString();
 
     logEntry.innerHTML = `
-            <span class="log-timestamp">[${timestamp}]</span>
-            <span class="log-message">${event.message}</span>
-            ${
-              event.details
-                ? `<div class="log-details">${event.details}</div>`
-                : ""
-            }
-        `;
+      <span class="log-timestamp">[${timestamp}]</span>
+      <span class="log-message">${event.message}</span>
+      ${event.details ? `<div class="log-details">${event.details}</div>` : ""}
+    `;
 
     if (state.eventLog.firstChild) {
       state.eventLog.insertBefore(logEntry, state.eventLog.firstChild);
@@ -239,6 +215,11 @@ export function gameSettings() {
 
   function showStatus(message, isError = false) {
     const status = document.getElementById("status");
+    if (!status) {
+      console.error("Status element not found");
+      return;
+    }
+
     status.textContent = message;
     status.className = isError ? "error" : "success";
     status.style.display = "block";
@@ -250,13 +231,11 @@ export function gameSettings() {
   }
 
   async function submitSettings() {
-    console.log("Inside submitSettings");
-    // console.log("Current state:", JSON.stringify(state, null, 2));
+    // console.log("Submitting settings with current state:", state.formData);
 
-    const config = state.gameConfigs[state.gameType];
+    const config = state.gameConfigs[state.formData.mode];
     if (!config) {
-      console.error("Invalid game type selected");
-      console.log("Current game type:", state.gameType);
+      console.error("ERROR: Invalid game type selected");
       displayModalError("Invalid game type selected");
       return;
     }
@@ -268,88 +247,58 @@ export function gameSettings() {
     const shape = document.getElementById("shape").value;
     const scoreMode = document.getElementById("scoreMode").value;
 
-    // console.log("Submitting numSides:", numSides);
+    // Validation before call
+    if (!playerId) {
+      console.error("ERROR: Player ID is required");
+      displayModalError("Player ID is required.");
+      return;
+    }
 
-    if (numPlayers < 2 || numPlayers > config.maxPlayers) {
-      showStatus(
-        `Number of players must be between 2 and ${config.maxPlayers}`,
-        true
+    if (
+      numPlayers < 1 ||
+      numPlayers > state.gameConfigs[state.formData.mode].maxPlayers
+    ) {
+      displayModalError(
+        `Number of players must be between 1 and ${
+          state.gameConfigs[state.formData.mode].maxPlayers
+        }.`
+      );
+      console.error(
+        "ERROR: Invalid number of players. Please enter a number between 1 and",
+        state.gameConfigs[state.formData.mode].maxPlayers
       );
       return;
     }
 
-    if (state.gameType === "circular") {
-      if (numSides < 4 || numSides > 12) {
-        showStatus("Circular mode requires between 4 and 12 sides", true);
-        return;
-      }
-    } else if (state.gameType !== "classic") {
-      if (numSides < 3 || numSides > 8) {
-        showStatus(
-          "Number of sides must be between 3 and 8 for polygon modes",
-          true
-        );
-        return;
-      }
-    }
+    const settings = {
+      playerId,
+      numPlayers,
+      numSides,
+      numBalls,
+      shape,
+      scoreMode,
+      pongType: state.formData.mode,
+      mode: state.formData.mode,
+    };
 
-    if (numBalls < 1 || numBalls > 4) {
-      displayModalError("Number of balls must be between 1 and 4");
-      return;
-    }
+    console.log("DEBUG: Prepared settings to submit:", settings);
 
     try {
-      const userId = localStorage.getItem("pongUserId");
-      if (!userId) {
-        displayModalError("User ID not found in localStorage");
-        return;
+      const response = await createNewGame(settings);
+
+      if (response.success) {
+        console.log("SUCCESS: Game created successfully:", response);
+        showStatus("Game created successfully!");
+      } else {
+        console.error(
+          "ERROR: Failed to create game:",
+          response.message || "Unknown error"
+        );
+        displayModalError(response.message || "Failed to create game.");
       }
-
-      const mainContent = document.getElementById("main-content");
-      if (!mainContent) {
-        throw new Error("Main content element not found");
-      }
-
-      mainContent.innerHTML = '<div class="loading">Creating game...</div>';
-
-      const gameConfig = {
-        playerId,
-        mode: state.formData.mode,
-        type: config.type,
-        pongType: state.gameType,
-        players: numPlayers,
-        balls: numBalls,
-        sides: numSides,
-        shape: state.gameType === "irregular" ? shape : undefined,
-        scoreMode,
-        userId,
-      };
-
-      console.log(
-        "Submitting gameConfig:",
-        JSON.stringify(gameConfig, null, 2)
-      );
-
-      const data = await createNewGame(gameConfig);
-      const gameId = data.gameId;
-      mainContent.innerHTML = `<div class="success">Game created successfully with ID: ${gameId}</div>`;
-      logEvent({
-        type: "info",
-        message: "Game created",
-        details: `Game ID: ${gameId}`,
-      });
     } catch (error) {
-      const mainContent = document.getElementById("main-content");
-      if (mainContent) {
-        mainContent.innerHTML = `<div class="error">Error: ${error.message}</div>`;
-      }
-      displayModalError(`Error: ${error.message}`);
-      console.error("Game creation error:", error);
+      console.error("ERROR: Exception while creating game:", error);
+      displayModalError("Error creating game: " + error.message);
     }
   }
 }
-
-document.addEventListener("DOMContentLoaded", () => {
-  gameSettings();
-});
-// test

@@ -13,16 +13,12 @@ export async function createNewGame(gameConfig) {
       }
     );
 
-    if (response.ok) {
-      console.log("POST request successful");
-      const data = await response.json();
-      console.log("Data received: ", data);
-      return data;
-    } else {
-      console.log("POST request unsuccessful");
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to create game");
-    }
+    const data = await response.json();
+
+    return {
+      success: response.ok,
+      ...data,
+    };
   } catch (error) {
     console.error("Game creation error:", error);
     throw error;
