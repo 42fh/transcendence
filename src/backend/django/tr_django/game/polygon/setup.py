@@ -1,5 +1,6 @@
 import math
-
+import logging
+logger = logging.getLogger(__name__)
 
 def calculate_side_normals(self):
     """
@@ -37,7 +38,7 @@ def calculate_side_normals(self):
             # Handle degenerate case (zero-length side)
             normal_x = float(1.0)  # Default to unit vector pointing right
             normal_y = float(0.0)
-            print(f"Warning: Near-zero length side detected at index {i}")
+            logging.debug(f"{self.game_id}:Warning: Near-zero length side detected at index {i}")
 
         # Check if normal points inward
         # Take the midpoint of the side
@@ -67,14 +68,6 @@ def calculate_side_normals(self):
             }
         )
 
-        # Debug print with explicit float formatting
-        print(
-            f"Side {i} normal: ({normal_x:.6f}, {normal_y:.6f})"
-            + (" (Player Side)" if i in self.active_sides else "")
-            + f" length: {length:.6f}, dot: {dot_product:.6f}"
-        )
-
-
 #
 def calculate_polygon_vertices(self):
     """Calculate vertices based on number of sides and player distribution"""
@@ -85,7 +78,6 @@ def calculate_polygon_vertices(self):
     base_radius = 1.0
 
     if self.game_mode == "regular":
-        print("regular")
         # Perfect regular polygon: all sides equal, evenly spaced
         angle_step = (2 * math.pi) / self.num_sides
         # start_angle = -math.pi / 2  # Start from top
@@ -97,7 +89,6 @@ def calculate_polygon_vertices(self):
                 {"x": base_radius * math.cos(angle), "y": base_radius * math.sin(angle)}
             )
     elif self.game_mode == "classic":
-        print("classic")
         width = 1.0  # Base width
         height = width * (9/16)  # Height based on 16:9 ratio
     
@@ -111,7 +102,6 @@ def calculate_polygon_vertices(self):
 
 
     else:  # irregular modes
-        print("irregular")
         # Get ratios and adjustments based on specific irregular mode
         ratios, angle_adjustments = self._calculate_side_ratios()
 
@@ -135,7 +125,7 @@ def calculate_polygon_vertices(self):
     for vertex in vertices:
         vertex["x"] *= self.scale
         vertex["y"] *= self.scale
-    print("scale: ", self.scale)
+    logging.debug(f"{self.game_id} / scale: {self.scale}")
     self.vertices = vertices
 
 
@@ -193,7 +183,7 @@ def get_player_side_indices(self):
     # Sort the sides for consistent ordering
     player_sides.sort()
 
-    print(
-        f"Sides: {self.num_sides}, Players: {self.num_paddles}, Distribution: {player_sides}"
+    logger.debug(
+        f"{self.game_id}: Sides: {self.num_sides}, Players: {self.num_paddles}, Distribution: {player_sides}"
     )
     return player_sides

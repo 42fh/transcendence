@@ -7,7 +7,7 @@ import time
 import msgpack
 import redis.asyncio as redis
 import logging
-
+from django.core.serializers.json import DjangoJSONEncoder
 
 logger = logging.getLogger(__name__) 
 
@@ -183,9 +183,9 @@ class PongConsumer(AsyncWebsocketConsumer):
                 await self.handle_paddle_move(direction, user_id)
 
         except json.JSONDecodeError:
-            print(f"Invalid JSON received: {text_data}")
+            logger.error(f"Invalid JSON received: {text_data}")
         except Exception as e:
-            print(f"Error processing message: {str(e)}")
+            logger.error(f"Error processing message: {str(e)}")
 
     async def handle_paddle_move(self, direction, user_id):
         if user_id != self.player_id:  # this could go into a cheatlog
@@ -295,7 +295,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 
     async def game_collision(self, event):
         collisions = event.get("data")
-        print("collisons: ", collisions)
+        logger.debug(f"collisons: {collisions}")
         for event in collisions:
             sanitized_event = self.sanitize_for_json(event)
             await self.send(
@@ -321,20 +321,32 @@ class PongConsumer(AsyncWebsocketConsumer):
     async def game_finished(self, event):
         """Handle game finished events"""
         winner_index = event.get("winner")
-        print(winner_index)
+        logger.debug(winner_index)
         is_winner = (
             self.player_index in winner_index if winner_index is not None else False
         )
-        sanitized_state = self.sanitize_for_json(event["game_state"])
+        # sanitized_state = self.sanitize_for_json(event["game_state"])
         await self.send(
             text_data=json.dumps(
                 {
                     "type": "game_finished",
-                    "game_state": sanitized_state,
+                    "game_state": event["game_state"],
                     "winner": "you" if is_winner else "other",
-                }
+                },
+                cls=DjangoJSONEncoder
             )
         )
+
+    async def waiting(self, event):
+        """Handle waiting state events"""
+        await self.send(
+            text_data=json.dumps({
+                "type": "waiting",
+                "current_players": event.get("current_players", 0),
+                "required_players": event.get("required_players", 0)
+            })
+        )
+
 
     async def error(self, event):
         # Create error message with all fields except 'type'

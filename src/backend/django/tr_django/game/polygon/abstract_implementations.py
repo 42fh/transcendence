@@ -1,3 +1,7 @@
+import logging 
+logger = logging.getLogger(__name__)
+
+
 # Setup
 def calculate_inner_boundaries(self):
     """Calculate inner boundary using true perpendicular distances for any polygon"""
@@ -16,19 +20,19 @@ def calculate_inner_boundaries(self):
         # Distance = dot product of any point on the line (vertex) with the normal
         distance = abs(vertex["x"] * normal["x"] + vertex["y"] * normal["y"])
         
-        print(f"Side {i} perpendicular distance: {distance}")
+        logger.debug(f"Side {i} perpendicular distance: {distance}")
         min_distance = min(min_distance, distance)
     
     self.inner_boundary = float(min_distance)
-    print(f"Final inner boundary: {self.inner_boundary}")
+    logger.info(f"{self.game_id}:Final inner boundary: {self.inner_boundary}")
     
     return self.inner_boundary
 
 
 # Movement Phase
-# no movement here
+# no Movement here
 # Boundary Phase
-
+# no Boundary here 
 
 # Collision Candidate Phase
 def find_collision_candidate(self, ball, ball_index, new_state, distance_from_center):
@@ -56,12 +60,12 @@ def find_collision_candidate(self, ball, ball_index, new_state, distance_from_ce
                         "type": ball_movement["type"],
                     }
                 )
-    # print("here are the candidates: ", collisions_candidates)
+    # logger.debug("here are the candidates: ", collisions_candidates)
     if collisions_candidates:
         candidate = min(
             collisions_candidates, key=lambda x: x["movement"]["current_distance"]
         )
-        print(candidate)
+        logger.debug(f"{self.game_id}: {candidate}")
         return candidate
 
     # No collisions found

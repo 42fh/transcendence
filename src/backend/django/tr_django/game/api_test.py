@@ -71,7 +71,7 @@ class IntegratedGameTests(TransactionTestCase):
             await self._create_test_users()
             # Initialize game settings that can be used across tests
             self.game_settings = {
-            "mode": "classic",
+            "mode": "circular",
             }
             print("\nTest setup completed - Redis flushed and users created and settings")
             
@@ -219,7 +219,6 @@ class IntegratedGameTests(TransactionTestCase):
             comm1.scope["user"] = player1
             connected, _ = await comm1.connect()
             self.assertTrue(connected)
-            player1_task = asyncio.create_task(self.monitor_messages(comm1, "Player 1"))
             # self.assertEqual(response_data["role"], "player")
             # self.assertIsNotNone(response_data["player_index"])
             await  asyncio.sleep(1)
@@ -250,11 +249,12 @@ class IntegratedGameTests(TransactionTestCase):
             comm2.scope["user"] = player2
             connected2, _ = await comm2.connect()
             self.assertTrue(connected2)
-            player2_task = asyncio.create_task(self.monitor_messages(comm2, "Player 2"))
             #print("Player 2 connected:", json.loads(response2))
             
             # Start monitoring tasks
 
+            player1_task = asyncio.create_task(self.monitor_messages(comm1, "Player 1"))
+            player2_task = asyncio.create_task(self.monitor_messages(comm2, "Player 2"))
             try:
                 # Wait for game to start
                 await asyncio.sleep(2)
@@ -308,7 +308,7 @@ class IntegratedGameTests(TransactionTestCase):
                     })
 
                 # Wait to observe responses
-                await asyncio.sleep(20)
+                await asyncio.sleep(5)
 
             finally:
                 # Clean up tasks

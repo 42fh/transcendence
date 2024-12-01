@@ -1,6 +1,11 @@
 import random
 from typing import List, Dict, Optional, Any, Tuple 
 import math
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 
 
 @classmethod
@@ -25,11 +30,11 @@ def calculate_inner(cls, settings: Dict[str, Any]) -> dict:
         # Distance = dot product of any point on the line (vertex) with the normal
         distance = abs(vertex["x"] * normal["x"] + vertex["y"] * normal["y"])
         
-        print(f"Side {i} perpendicular distance: {distance}")
+        # logger.debug(f"Side {i} perpendicular distance: {distance}")
         min_distance = min(min_distance, distance)
     
     inner_boundary = float(min_distance)
-    print(f"Final inner boundary: {inner_boundary}")
+    # logger.info(f"Final inner boundary: {inner_boundary}")
     
     return {"inner_boundary": inner_boundary}
 
@@ -76,7 +81,7 @@ def calculate_sides_normals(cls, settings: Dict[str, Any]) -> dict:
             # Handle degenerate case (zero-length side)
             normal_x = float(1.0)  # Default to unit vector pointing right
             normal_y = float(0.0)
-            print(f"Warning: Near-zero length side detected at index {i}")
+            logger.warning(f"Warning: Near-zero length side detected at index {i}")
 
         # Check if normal points inward
         # Take the midpoint of the side
@@ -106,12 +111,6 @@ def calculate_sides_normals(cls, settings: Dict[str, Any]) -> dict:
             }
         )
 
-        # Debug print with explicit float formatting
-        print(
-            f"Side {i} normal: ({normal_x:.6f}, {normal_y:.6f})"
-            + (" (Player Side)" if i in player_sides else "")
-            + f" length: {length:.6f}, dot: {dot_product:.6f}"
-        )
     return {"normals": side_normals}
 
 #
@@ -201,7 +200,6 @@ def initialize_ball_movements(cls, settings: Dict[str, Any]) -> dict:
         }
         for _ in range(num_balls)
     ]
-    print("ballmovements: ", previous_movements)    
     return {"ballmovements": previous_movements}
 
 

@@ -3,20 +3,10 @@ import math
 import random
 import msgpack
 import time
+import logging
+from typing import List, Dict, Optional, Any, Tuple
 
-# from .method_decorators import (
-#    add_abstract_implementations,
-#    add_setup,
-#    add_collision_verification_phase,
-#    add_collision_candidate_phase,
-#    add_ball_movement_tracking
-# )
-
-# @add_ball_movement_tracking
-# @add_collision_candidate_phase
-# @add_collision_verification_phase
-# @add_setup
-# @add_abstract_implementations
+logger = logging.getLogger(__name__)
 
 
 # from Polypong reused: self.get_player_side_indices()
@@ -39,6 +29,148 @@ class CircularPongGame(AGameManager):
         self.last_hit_time = 0
         self.combo_timeout = 1.5  # seconds
         self.highest_recorded_speed = 0
+
+
+
+    @classmethod
+    def calculate_vertices(cls, settings: Dict[str, Any]) -> dict:
+        """
+        Calculate vertices for circular game board based on number of sectors.
+        Each sector is an arc segment of the circle.
+        """
+
+        active_sides = settings.get("players_sides")                                                      
+        game_mode = settings.get("mode")                                                                  
+        num_sides = settings.get("sides")                                                                 
+
+        if not active_sides:
+            raise ValueError(
+                "Active sides must be determined before calculating vertices"
+            )
+
+        vertices = []
+        radius = 1.0  # Base radius of circle
+
+        # Calculate angle for each sector
+        angle_step = (2 * math.pi) / num_sides
+
+        # Calculate vertices at intersection points of sectors
+        for i in range(num_sides):
+            angle = i * angle_step
+            vertices.append(
+                {
+                    "x": float(radius * math.cos(angle)),
+                    "y": float(radius * math.sin(angle)),
+                    "angle": float(angle),  # Store angle for later use
+                    "is_player": bool(i in active_sides),
+                }
+            )
+
+        # Store additional arc information for each vertex
+        for i in range(num_sides):
+            vertex = vertices[i]
+            next_vertex = vertices[(i + 1) % num_sides]
+
+            # Calculate center angle of the arc segment
+            start_angle = vertex["angle"]
+            end_angle = next_vertex["angle"]
+            center_angle = (start_angle + end_angle) / 2
+
+            # Store arc segment information
+            vertex.update(
+                {
+                    "arc_start": float(start_angle),
+                    "arc_end": float(end_angle),
+                    "arc_center": float(center_angle),
+                    "arc_length": float(angle_step),
+                    "radius": float(radius),
+                }
+            )
+        logger.debug(f"vertices{vertices}")
+        return {"vertices" : vertices, "scale" : float(1.0)} 
+
+    @classmethod
+    def calculate_sides_normals(cls, settings: Dict[str, Any]) -> dict:
+        """
+        Calculate normal vectors for each arc segment.
+        For a circle, normals always point towards the center.
+        """
+        logger.debug(f"begin normal: {settings}")
+        active_sides = settings.get("players_sides")                                                      
+        game_mode = settings.get("mode")                                                                  
+        num_sides = settings.get("sides")                                                                 
+        vertices = settings.get("vertices")     
+
+        if not vertices:
+            raise ValueError("Vertices must be calculated before normals")
+
+        side_normals = []
+
+        for i in range(num_sides):
+            vertex = vertices[i]
+            center_angle = vertex["arc_center"]
+
+            # Normal points inward from the arc center
+            normal = {
+                "x": float(
+                    -math.cos(center_angle)
+                ),  # Negative because we want inward-pointing
+                "y": float(-math.sin(center_angle)),
+                "side_index": int(i),
+                "is_player": bool(i in active_sides),
+                "angle": float(center_angle),
+            }
+
+            side_normals.append(normal)
+        logger.debug(f"normals: {side_normals}")
+        return {"normals": side_normals}
+
+    @classmethod
+    def calculate_inner(cls, settings: Dict[str, Any]) -> dict:
+        """Calculate inner boundary for circular layout"""
+        BUFFER = float(0.8)
+        inner_boundary = 1 * BUFFER
+        return {"inner_boundary": inner_boundary}
+
+    @classmethod
+    def initialize_ball_movements(cls, settings: Dict[str, Any]) -> dict:
+        """
+        Initialize the nested array structure for ball movement tracking in circular layout.
+
+        Args:
+            num_balls (int): Number of balls to track
+
+        Creates a data structure for each ball that tracks:
+        - Per-sector movement data
+        - Deadzone state
+        - Last position (x,y)
+        - Last angular position
+        - Last radial distance
+        """
+        num_balls = settings.get("num_balls")                                                             
+        num_sides = settings.get("sides") 
+        previous_movements = [
+            {
+                "sides": [
+                    {
+                        "distance": float(0.0),  # Distance from boundary
+                        "signed_distance": float(
+                            0.0
+                        ),  # Signed distance (positive = outside)
+                        "dot_product": float(0.0),  # Radial velocity component
+                        "angle": float(0.0),  # Angular position within sector
+                    }
+                    for _ in range(num_sides)
+                ],
+                "in_deadzone": True,  # Start in deadzone (center)
+                "last_position": {"x": float(0.0), "y": float(0.0)},
+                "last_angle": float(0.0),  # Last angular position
+                "last_radial_distance": float(0.0),  # Last distance from center
+            }
+            for _ in range(num_balls)
+        ]
+        return {"ballmovements": previous_movements}
+
 
     async def apply_game_settings(self):
         """Apply game-specific values from settings"""
@@ -118,7 +250,7 @@ class CircularPongGame(AGameManager):
         self.vertices = vertices
         return vertices
 
-    def calculate_sides_normals(self):
+    def calculate_side_normals(self):
         """
         Calculate normal vectors for each arc segment.
         For a circle, normals always point towards the center.
@@ -642,7 +774,7 @@ class CircularPongGame(AGameManager):
         else:
             return self.handle_wall(ball, current_sector, new_state)
 
-    def initialize_ball_movements(self, num_balls):
+    def self_initialize_ball_movements(self, num_balls):
         """
         Initialize the nested array structure for ball movement tracking in circular layout.
 
@@ -830,7 +962,7 @@ class CircularPongGame(AGameManager):
         # Sort the sides for consistent ordering
         player_sides.sort()
 
-        print(
+        logger.debug(
             f"Sides: {self.num_sides}, Players: {self.num_paddles}, Distribution: {player_sides}"
         )
         return player_sides

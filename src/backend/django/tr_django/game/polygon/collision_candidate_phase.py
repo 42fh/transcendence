@@ -1,5 +1,6 @@
 # Collision Candidate Phase
-
+import logging
+logger = logging.getLogger(__name__)
 
 def check_ball_movement_relative_to_side(self, ball, side_index, ball_index, new_state):
     # Get normal from class's side_normals
@@ -85,7 +86,7 @@ def check_ball_movement_relative_to_side(self, ball, side_index, ball_index, new
 
                 # Case 3ba: Tunneling detected
                 if position_sign_changed:
-                    print("3ba")
+                    logger.debug(f"{self.game_id}: 3ba - tunneling detected")
                     # Don't update previous_movements for tunneling case
                     # This preserves the state before tunneling for proper bounce handling
                     return {
@@ -96,7 +97,7 @@ def check_ball_movement_relative_to_side(self, ball, side_index, ball_index, new
                         "approach_speed": float(abs(current_dot_product)),
                         "type": "tunneling",
                     }
-            print("3bb")
+            logger.debug(f"{self.game_id}: 3bb - tunneling detected - false positive ")
             # Case 3bb: Regular moving away (including post-bounce)
             self.update_ball_movement(
                 ball_index,
