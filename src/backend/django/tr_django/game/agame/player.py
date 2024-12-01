@@ -13,7 +13,7 @@ async def add_player(self, player_id):
         max_players = self.settings.get("num_players")
 
         # Check if player exists
-        if await self.redis_conn.sismember(self.players_key, str(player_id)):
+        if await self.redis_conn.sismember(self.players_key, player_id):
             return {
                 "role" : "spectator",
                 "message" : "Already connected - switching to spectator mode"
@@ -38,7 +38,7 @@ async def add_player(self, player_id):
 
         async with RedisLock(self.redis_conn, f"{self.game_id}_player_situation"):
             pipeline = self.redis_conn.pipeline()
-            pipeline.sadd(self.players_key, str(player_id))
+            pipeline.sadd(self.players_key, player_id)
             pipeline.delete(booking_key)
             await pipeline.execute()
             return {
@@ -58,7 +58,7 @@ async def remove_player(self, player_id):
     """Remove player with process-safe cleanup"""
     try:
         async with RedisLock(self.redis_conn, f"{self.game_id}_player_situation"):
-            if await self.redis_conn.srem(self.players_key, str(player_id)):
+            if await self.redis_conn.srem(self.players_key, player_id):
                 remaining = await self.redis_conn.scard(self.players_key)
 
                 min_players = self.settings.get("min_players")
