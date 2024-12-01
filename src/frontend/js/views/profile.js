@@ -5,6 +5,7 @@ import { updateActiveNavItem } from "../components/bottom-nav.js";
 import { loadHomePage } from "./home.js";
 import { loadProfileEditPage } from "./profileEdit.js";
 import { applyUsernameTruncation } from "../utils/strings.js";
+import { loadUsersPage } from "./users.js";
 export async function loadProfilePage(userId = null, addToHistory = true) {
   const loggedInUserId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
   if (!loggedInUserId) {
@@ -138,6 +139,27 @@ function populateProfileHTML(content, userData, isOwnProfile) {
     emailElement.style.display = "none";
     phoneElement.style.display = "none";
   }
+
+  // Add friends section click handler
+  const friendsSection = content.querySelector(".profile__section--friends");
+  friendsSection.setAttribute("role", "button");
+  friendsSection.setAttribute("tabindex", "0");
+
+  friendsSection.addEventListener("click", () => {
+    history.pushState({ view: "users", showFriendsOnly: true }, "");
+    loadUsersPage(false);
+    // Activate friends filter
+    const friendsFilter = document.querySelector(".users-filter__button--friends");
+    friendsFilter.click();
+  });
+
+  // Add keyboard support
+  friendsSection.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      friendsSection.click();
+    }
+  });
 
   // Stats (always visible)
   if (userData.stats) {

@@ -385,3 +385,29 @@
   margin-top: auto; /* This pushes it to the bottom if we use flex column on parent */
   padding-top: var(--spacing-lg);
 }
+
+/* .profile__section--friends {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+} */
+
+.profile__section--friends {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.profile__section--friends:hover {
+  background: var(--color-primary);
+}
+
+.profile__section--friends:hover .profile__section-title,
+.profile__section--friends:hover .profile__friends-count {
+  color: var(--color-text-inverse);
+}
+.profile__friends-count {
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-primary);
+  transition: color 0.2s ease;
+}
