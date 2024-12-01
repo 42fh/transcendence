@@ -16,6 +16,13 @@ class PongConsumer(AsyncWebsocketConsumer):
         super().__init__(*args, **kwargs)
 
         self.last_move_time = 0
+        
+        # Healthcheck RFC 6455
+        self.ping_interval = 5  # seconds
+        self.ping_timeout = 5   # seconds
+        self.last_pong = time.time()
+        self.ping_task = None
+        self.check_connection_task = None
 
     async def connect(self):
         self.game_id = self.scope["url_route"]["kwargs"]["game_id"]
@@ -53,11 +60,24 @@ class PongConsumer(AsyncWebsocketConsumer):
                 self.current_pos = player_index.get("position")
                 self.player_index = player_index.get("index")
                 self.player_values =  player_index.get("settings") 
-                logger.info(f"Player[{self.player_id}] connected to game[{self.game_id}] as player: {self.player_indexi +1 } index {self.player_indexi +1 }")
-           else
-                logger.info(f"Player[{self.player_id}] connected to game[{self.game_id}] as spectator")
-                 
+                logger.info(f"Player[{self.player_id}] connected to game[{self.game_id}] as player: {self.player_index +1 } index {self.player_index +1 }")
+            else:
+                logger.info(f"Player[{self.player_id}] connected to game[{self.game_id}] as spectator") 
             await self.accept()
+            # Healthcheck RFC 6455 -Start ping/pong mechanism after accepting connection
+            #self.ping_task = asyncio.create_task(self.send_ping())
+            #self.check_connection_task = asyncio.create_task(self.check_connection())
+            if self.role == 'player':
+                await self.channel_layer.group_send(
+                    self.game_group,
+                    {
+                        "type": "player_joined",
+                        "player_id": self.player_id,
+                        "player_index": self.player_index,
+                        "current_players": player_count + 1
+                    }
+                )
+
 
             # Send initial game state
             try:
@@ -92,16 +112,51 @@ class PongConsumer(AsyncWebsocketConsumer):
             logger.error(f"Error in connect: {e}")
             await self.close(code=1011)
 
-    # TODO: disconnect could not be called (browser crash etc. so we need a extra test if the client is there
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(self.game_group, self.channel_name)
+        if self.ping_task:
+            self.ping_task.cancel()
+        if self.check_connection_task:
+            self.check_connection_task.cancel()
         if self.role == "player": 
             await self.game_manager.remove_player(self.player_id)
-            print(f"Player {self.player_id} disconnected from game {self.game_id}")
+            logger.info(f"Player[{self.player_id}] disconnected from game[{self.game_id}]")
+    
+    # Healthcheck RFC 6455
+    async def send_ping(self):
+        """Periodically send ping messages"""
+        while True:
+            try:
+                await self.send(text_data="ping")
+                await asyncio.sleep(self.ping_interval)
+            except Exception as e:
+                logger.error(f"Error sending ping: {str(e)}")
+                break
 
-    # TODO: What else do/ could we recieve from the client: 1.answer for PING, 2.want to use powerup etc ....
+    async def check_connection(self):
+        """Check if we're receiving pongs within timeout period"""
+        while True:
+            try:
+                await asyncio.sleep(self.ping_timeout)
+                if time.time() - self.last_pong > self.ping_interval + self.ping_timeout:
+                    logger.warning(f"Client {self.player_id} connection timed out")
+                    await self.disconnect(code=1006)  # Properly disconnect
+                    await self.close(code=1006)  # Connection closed abnormally
+                    break
+            except Exception as e:
+                logger.error(f"Error checking connection: {str(e)}")
+                await self.disconnect(code=1006)  # Properly disconnect
+                await self.close(code=1006)  # Connection closed abnormally
+                break
+
+
+
     async def receive(self, text_data):
         try:
+            if text_data == "pong":
+                self.last_pong = time.time()
+                #logger.info("POOOOOOONG")
+                return
             data = json.loads(text_data)
             action = data.get("action")
                         
@@ -251,7 +306,16 @@ class PongConsumer(AsyncWebsocketConsumer):
                     }
                 )
             )
-            
+
+    async def player_joined(self, event):
+        """Handle player join notifications"""
+        await self.send(text_data=json.dumps({
+            "type": "player_joined",
+            "player_id": event["player_id"],
+            "player_index": event["player_index"],
+            "current_players": event["current_players"]
+        }))
+
         
 
     async def game_finished(self, event):

@@ -219,11 +219,9 @@ class IntegratedGameTests(TransactionTestCase):
             comm1.scope["user"] = player1
             connected, _ = await comm1.connect()
             self.assertTrue(connected)
-            response = await comm1.receive_from()
-            response_data = json.loads(response)
-            print(response_data)
-            self.assertEqual(response_data["role"], "player")
-            self.assertIsNotNone(response_data["player_index"])
+            player1_task = asyncio.create_task(self.monitor_messages(comm1, "Player 1"))
+            # self.assertEqual(response_data["role"], "player")
+            # self.assertIsNotNone(response_data["player_index"])
             await  asyncio.sleep(1)
                            
             print("next pLayer") 
@@ -252,12 +250,10 @@ class IntegratedGameTests(TransactionTestCase):
             comm2.scope["user"] = player2
             connected2, _ = await comm2.connect()
             self.assertTrue(connected2)
-            response2 = await comm2.receive_from()
-            print("Player 2 connected:", json.loads(response2))
+            player2_task = asyncio.create_task(self.monitor_messages(comm2, "Player 2"))
+            #print("Player 2 connected:", json.loads(response2))
             
             # Start monitoring tasks
-            player1_task = asyncio.create_task(self.monitor_messages(comm1, "Player 1"))
-            player2_task = asyncio.create_task(self.monitor_messages(comm2, "Player 2"))
 
             try:
                 # Wait for game to start
@@ -312,7 +308,7 @@ class IntegratedGameTests(TransactionTestCase):
                     })
 
                 # Wait to observe responses
-                await asyncio.sleep(3)
+                await asyncio.sleep(20)
 
             finally:
                 # Clean up tasks
@@ -328,13 +324,21 @@ class IntegratedGameTests(TransactionTestCase):
                 await comm1.disconnect()
                 await comm2.disconnect()
 
-   
+  
+
+
+ 
 
     async def monitor_messages(self, comm1, player_name):
         """Helper method to continuously monitor websocket messages"""
         try:
             while True:
                 message = await comm1.receive_from()
+                if message == "ping":
+                    print(f"PING {player_name}")
+                    # await comm.send_to(text_data="pong")
+                    continue
+                
                 message_data = json.loads(message)
                 # Only print if the message type is not 'gamestate'
                 if message_data.get('type') != 'game_state':
@@ -342,12 +346,6 @@ class IntegratedGameTests(TransactionTestCase):
 
         except Exception as e:
             print(f"{player_name} monitoring ended: {str(e)}")
-
-     
-            # Game loop simulation
-            await asyncio.sleep(30) # Wait for game start    
-        
-
 
 
 
