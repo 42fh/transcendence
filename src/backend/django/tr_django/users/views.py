@@ -3,6 +3,8 @@
 import json
 import logging
 import random
+import os
+from dotenv import load_dotenv
 from django.utils import timezone
 from datetime import timedelta
 from django.contrib.auth import authenticate, login, logout, get_user
@@ -26,7 +28,7 @@ from django.core.mail import send_mail
 
 
 logger = logging.getLogger(__name__)
-
+load_dotenv(override=False)
 
 @method_decorator(csrf_exempt, name="dispatch")
 class SignupView(View):
@@ -164,13 +166,13 @@ class SendEmailVerificationView(View):
             send_mail(
                 "PONG | Verification code",
                 f"Your verification code is: {verification_code}",
-                "dantol29@gmail.com",
+                f"{os.getenv("EMAIL_HOST_USER")}",
                 [request.user.email],
                 fail_silently=False,
             )
             # Store verification code and expiry time in user object
             request.user.two_factor_code = verification_code
-            request.user.two_factor_code_expires_at = timezone.now() + timedelta(minutes=5)
+            request.user.two_factor_code_expires_at = timezone.now() + timedelta(minutes=1)
             request.user.save()
             
             return JsonResponse({"message": "Email verification sent successfully"})
@@ -190,7 +192,6 @@ class ValidateEmailVerificationView(View):
         try:
             data = json.loads(request.body)
             verification_code = data.get("token")
-            print("Verification Code:", request.user.two_factor_code_expires_at, request.user.two_factor_code)
 
             if not verification_code:
                 return JsonResponse({"error": "Verification code is required"}, status=400)
