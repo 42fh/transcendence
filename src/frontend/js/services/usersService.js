@@ -1,5 +1,35 @@
 import { CONFIG, LOCAL_STORAGE_KEYS } from "../config/constants.js";
 
+/**
+ * Fetches a user's profile data
+ * @param {string} userId - The ID of the user to fetch
+ * @returns {Promise<{
+ *   success: boolean,
+ *   status?: number,
+ *   error?: "USER_NOT_FOUND" | "SERVER_ERROR" | "NETWORK_ERROR",
+ *   message?: string,
+ *   data?: {
+ *     id: string,
+ *     username: string,
+ *     first_name: string,
+ *     last_name: string,
+ *     avatar: string | null,
+ *     bio: string,
+ *     pronoun: string,
+ *     is_active: boolean,
+ *     is_friend?: boolean,        // Only present when viewing other profiles
+ *     friend_request_status?: "none" | "sent" | "received", // Only present when viewing other profiles
+ *     email?: string,            // Only present when viewing own profile
+ *     telephone_number?: string, // Only present when viewing own profile
+ *     stats: {
+ *       wins: number,
+ *       losses: number,
+ *       win_ratio: number,
+ *       display_name: string
+ *     }
+ *   }
+ * }>}
+ */
 export async function fetchUserProfile(userId) {
   try {
     const response = await fetch(`${CONFIG.API_BASE_URL}/api/users/${userId}/`);

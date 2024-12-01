@@ -110,13 +110,13 @@ export async function loadProfilePage(userId = null, addToHistory = true) {
 
 function populateProfileHTML(content, userData, isOwnProfile) {
   // Shared elements
-  populateSharedElements(content, userData);
+  populateSharedProfileHTML(content, userData);
 
   // Split based on profile type
   if (isOwnProfile) {
-    populateOwnProfileElements(content, userData);
+    populateOwnProfileHTML(content, userData);
   } else {
-    populatePublicProfileElements(content, userData);
+    populatePublicProfileHTML(content, userData);
   }
 }
 
@@ -173,19 +173,47 @@ function populateOwnProfileHTML(content, userData) {
   });
 }
 
-function populatePublicProfileElements(content, userData) {
-  // Hide private elements
+function populatePublicProfileHTML(content, userData) {
+  // Hide private elements: email, phone, name, friends
   const privateElements = content.querySelectorAll(".profile__private-info");
   privateElements.forEach((element) => {
     element.style.display = "none";
   });
 
-  // TODO: doppelt gemoppelt
+  // TODO: doppelt gemoppelt just to be sure
   const emailElement = content.querySelector(".profile__info-item--email");
   const phoneElement = content.querySelector(".profile__info-item--phone");
   emailElement.style.display = "none";
   phoneElement.style.display = "none";
 
-  // TODO: Handle friend button state and functionality
-  // We'll implement this next when we have the API friendship status
+  const friendshipButton = content.querySelector(".profile__button--add-remove-friend");
+  const iconSpan = friendshipButton.querySelector(".material-symbols-outlined");
+
+  if (userData.is_friend) {
+    iconSpan.textContent = "do_not_disturb_on";
+    friendshipButton.setAttribute("title", "Remove Friend");
+  } else {
+    switch (userData.friend_request_status) {
+      case "sent":
+        iconSpan.textContent = "hourglass_top";
+        friendshipButton.setAttribute("title", "Friend Request Sent. Click to withdraw.");
+        break;
+      case "received":
+        iconSpan.textContent = "check_circle";
+        friendshipButton.setAttribute("title", "Friend Request Received. Click to accept, reject or ignore.");
+        break;
+      default:
+        iconSpan.textContent = "add_circle";
+        friendshipButton.setAttribute("title", "Add Friend");
+    }
+  }
+  // Add click handler for friend button
+  friendButton.addEventListener("click", async () => {
+    // TODO: Implement friend request actions
+    // We'll add this functionality next
+    console.log("Friend button clicked:", {
+      is_friend: userData.is_friend,
+      status: userData.friend_request_status,
+    });
+  });
 }
