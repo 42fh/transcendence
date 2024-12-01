@@ -74,3 +74,19 @@
   opacity: 0.8;
   font-family: "Press Start 2P", cursive;
 }
+
+/* Values for the friendship action buttons */
+.modal-button--primary {
+  background: var(--color-background-inverse);
+  color: var(--color-text-inverse);
+}
+
+.modal-button--secondary {
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+}
+
+.modal-button--tertiary {
+  background: none;
+  text-decoration: underline;
+}

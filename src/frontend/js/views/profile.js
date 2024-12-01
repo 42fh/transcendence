@@ -6,6 +6,13 @@ import { loadHomePage } from "./home.js";
 import { loadProfileEditPage } from "./profileEdit.js";
 import { applyUsernameTruncation } from "../utils/strings.js";
 import { loadUsersPage } from "./users.js";
+import {
+  sendFriendRequest,
+  removeFriend,
+  acceptFriendRequest,
+  withdrawFriendRequest,
+  rejectFriendRequest,
+} from "../services/friendshipService.js";
 
 export async function loadProfilePage(userId = null, addToHistory = true) {
   const loggedInUserId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
@@ -229,67 +236,175 @@ function populatePublicProfileHTML(content, userData) {
   //       status: userData.friend_request_status,
   //     });
   //   });
-  friendshipButton.addEventListener("click", () => handleFriendButtonClick(friendshipButton.dataset.state, userData));
+  friendshipButton.addEventListener("click", () =>
+    handleFriendshipButtonClick(friendshipButton.dataset.state, userData)
+  );
 }
 
-async function handleFriendButtonClick(friendshipButtonDatasetState, userData) {
+async function handleFriendshipButtonClick(friendshipButtonDatasetState, userData) {
   try {
     switch (friendshipButtonDatasetState) {
       case "not_friends":
         // Send friend request
         const sendResult = await sendFriendRequest(userData.id);
         if (sendResult.success) {
-          updateFriendButton("pending_sent");
+          try {
+            updateFriendButton("pending_sent");
+          } catch (uiError) {
+            // If UI update fails, reload the page
+            console.warn("UI update failed, reloading profile:", uiError);
+            await loadProfilePage(userData.id, false);
+          }
         }
         break;
 
       case "pending_sent":
-        // Withdraw sent request
-        // Open Modal with confirmation
-        // const withdrawResult = await handleFriendRequest(userData.id, "withdraw");
-        // if (withdrawResult.success) {
-        console.log("Withdraw request successful");
-        // }
+        const withdrawAction = await showFriendshipActionModal({
+          title: "Withdraw Friend Request",
+          message: "Are you sure you want to withdraw your friend request?",
+          actions: [
+            { text: "Withdraw Request", value: "confirm", type: "secondary" },
+            { text: "Cancel", value: "tertiary" },
+          ],
+        });
+        if (withdrawAction === "confirm") {
+          const withdrawResult = await withdrawFriendRequest(userData.id);
+          if (withdrawResult.success) {
+            try {
+              updateFriendButton("not_friends");
+            } catch (uiError) {
+              await loadProfilePage(userData.id, false);
+            }
+          }
+        }
         break;
 
       case "pending_received":
-        // Accept, reject or ignore friend request
-        // Open Modal with options
-        const acceptResult = await acceptFriendRequest(userData.id);
-        if (acceptResult.success) {
-          updateFriendButton("friends");
+        // Open action selection modal
+        const pendingReceivedAction = await showFriendshipActionModal({
+          title: "Friend Request Received",
+          message: "What would you like to do with this friend request?",
+          actions: [
+            { text: "Accept", value: "accept", type: "primary" },
+            { text: "Reject", value: "reject", type: "secondary" },
+            { text: "Ignore", value: "ignore", type: "tertiary" },
+          ],
+        });
+        if (pendingReceivedAction === "accept") {
+          const acceptResult = await acceptFriendRequest(userData.id);
+          if (acceptResult.success) {
+            try {
+              updateFriendButton("friends");
+            } catch (uiError) {
+              await loadProfilePage(userData.id, false);
+            }
+          }
+        } else if (pendingReceivedAction === "reject") {
+          const rejectResult = await rejectFriendRequest(userData.id);
+          if (rejectResult.success) {
+            try {
+              updateFriendButton("not_friends");
+            } catch (uiError) {
+              await loadProfilePage(userData.id, false);
+            }
+          }
         }
         break;
 
       case "friends":
-        // Remove friend
-        // Open Modal with confirmation
-        const removeResult = await removeFriend(userData.id);
-        if (removeResult.success) {
-          updateFriendButton("none");
+        const removeAction = await showFriendshipActionModal({
+          title: "Remove Friend",
+          message: "Are you sure you want to remove this friend?",
+          actions: [
+            { text: "Remove Friend", value: "confirm", type: "secondary" },
+            { text: "Cancel", value: "tertiary" },
+          ],
+        });
+
+        if (removeAction === "confirm") {
+          const removeResult = await removeFriend(userData.id);
+          if (removeResult.success) {
+            try {
+              updateFriendButton("not_friends");
+            } catch (uiError) {
+              await loadProfilePage(userData.id, false);
+            }
+          }
         }
         break;
     }
   } catch (error) {
     console.error("Error handling friend action:", error);
-    // Show error to user
+    showToast("Failed to perform friend action", "error");
   }
 }
 
+/**
+ * Shows a modal for friendship-related actions
+ * @param {Object} options Modal configuration
+ * @param {string} options.title - Modal title
+ * @param {string} options.message - Modal message
+ * @param {Array<{text: string, value: string, type: 'primary'|'secondary'|'tertiary'}>} options.actions
+ *        - Array of action buttons. Type affects button styling:
+ *          - primary: Main action (strongest emphasis)
+ *          - secondary: Alternative action (medium emphasis)
+ *          - tertiary: Optional action (least emphasis)
+ * @returns {Promise<'confirm'|'accept'|'reject'|'ignore'|'cancel'>} Action selected by user
+ */
+function showFriendshipActionModal({ title, message, actions }) {
+  return new Promise((resolve) => {
+    renderModal("friendship-action-template", {
+      submitHandler: (event) => {
+        event.preventDefault();
+        const action = event.submitter.dataset.action;
+        closeModal();
+        resolve(action);
+      },
+      setup: (modalElement) => {
+        const titleEl = modalElement.querySelector("#modal-title");
+        const messageEl = modalElement.querySelector("#modal-message");
+        const actionsDiv = modalElement.querySelector(".modal-actions");
+
+        titleEl.textContent = title;
+        messageEl.textContent = message;
+
+        // Clear existing content
+        actionsDiv.innerHTML = "";
+
+        // Create buttons safely
+        // Warning about dynamic creation of buttons: They needs to be created dynamically cause we could have two or three buttons. The other solution would be two different templates, but this is more scalable!
+        actions.forEach((action) => {
+          const button = document.createElement("button");
+          button.className = `modal-button ${action.type ? `modal-button--${action.type}` : ""}`;
+          button.dataset.action = action.value;
+          button.textContent = action.text;
+          actionsDiv.appendChild(button);
+        });
+      },
+    });
+  });
+}
+
+// TODO: we need to refactor this, cause we are not going to change the button text, but the icon and the title
 function updateFriendButton(newStatus) {
-  const friendButton = document.getElementById("friend-button");
+  //   const friendButton = document.getElementById("friend-button");
+  const friendshipButton = document.querySelector('button[data-action="friend"]');
+  if (!friendshipButton) {
+    console.warn("Friend button not found in template");
+    return;
+  }
   switch (newStatus) {
     case "none":
-      friendButton.textContent = "Add Friend";
+      friendshipButton.textContent = "Add Friend";
       break;
     case "pending_sent":
-      friendButton.textContent = "Cancel Request";
+      friendshipButton.textContent = "Cancel Request";
       break;
     case "pending_received":
-      friendButton.textContent = "Accept Request";
+      friendshipButton.textContent = "Accept Request";
       break;
     case "friends":
-      friendButton.textContent = "Remove Friend";
+      friendshipButton.textContent = "Remove Friend";
       break;
   }
 }
