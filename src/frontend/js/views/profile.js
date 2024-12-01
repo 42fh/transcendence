@@ -6,6 +6,7 @@ import { loadHomePage } from "./home.js";
 import { loadProfileEditPage } from "./profileEdit.js";
 import { applyUsernameTruncation } from "../utils/strings.js";
 import { loadUsersPage } from "./users.js";
+
 export async function loadProfilePage(userId = null, addToHistory = true) {
   const loggedInUserId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
   if (!loggedInUserId) {
@@ -40,11 +41,6 @@ export async function loadProfilePage(userId = null, addToHistory = true) {
     }
     // TODO: Make it beautiful
     mainContent.innerHTML = '<div class="loading">Loading profile...</div>';
-
-    // const userId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
-    // if (!userId) {
-    //   throw new Error("User ID not found");
-    // }
 
     // Fetch result and handle errors
     const result = await fetchUserProfile(targetUserId);
@@ -113,53 +109,31 @@ export async function loadProfilePage(userId = null, addToHistory = true) {
 }
 
 function populateProfileHTML(content, userData, isOwnProfile) {
+  // Shared elements
+  populateSharedElements(content, userData);
+
+  // Split based on profile type
+  if (isOwnProfile) {
+    populateOwnProfileElements(content, userData);
+  } else {
+    populatePublicProfileElements(content, userData);
+  }
+}
+
+function populateSharedProfileHTML(content, userData) {
+  // Avatar
   const avatarElement = content.querySelector(".profile__avatar");
-  const avatarSrc = userData.avatar || ASSETS.IMAGES.DEFAULT_AVATAR;
   avatarElement.onerror = function () {
     console.log("Avatar failed to load, falling back to default");
-    avatarElement.src = ASSETS.IMAGES.DEFAULT_AVATAR; // using the variable instead
+    avatarElement.src = ASSETS.IMAGES.DEFAULT_AVATAR;
   };
 
-  //   content.querySelector(".profile__avatar").src = userData.avatar || ASSETS.IMAGES.DEFAULT_AVATAR;
+  // Username
   const usernameElement = content.querySelector(".profile__username");
   applyUsernameTruncation(usernameElement, userData.username, 15);
+
+  // Bio
   content.querySelector(".profile__bio-text").textContent = userData.bio || "No bio available";
-  content.querySelector(".profile__info-item--name").textContent =
-    `${userData.first_name || ""} ${userData.last_name || ""}`.trim() || "No name set";
-
-  // Private info (only visible on own profile)
-  const emailElement = content.querySelector(".profile__info-item--email");
-  const phoneElement = content.querySelector(".profile__info-item--phone");
-
-  if (isOwnProfile) {
-    emailElement.textContent = userData.email || "No email set";
-    phoneElement.textContent = userData.telephone_number || "No phone set";
-  } else {
-    // Hide private info elements instead of removing them
-    emailElement.style.display = "none";
-    phoneElement.style.display = "none";
-  }
-
-  // Add friends section click handler
-  const friendsSection = content.querySelector(".profile__section--friends");
-  friendsSection.setAttribute("role", "button");
-  friendsSection.setAttribute("tabindex", "0");
-
-  friendsSection.addEventListener("click", () => {
-    history.pushState({ view: "users", showFriendsOnly: true }, "");
-    loadUsersPage(false);
-    // Activate friends filter
-    const friendsFilter = document.querySelector(".users-filter__button--friends");
-    friendsFilter.click();
-  });
-
-  // Add keyboard support
-  friendsSection.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      friendsSection.click();
-    }
-  });
 
   // Stats (always visible)
   if (userData.stats) {
@@ -170,4 +144,48 @@ function populateProfileHTML(content, userData, isOwnProfile) {
       userData.stats.losses
     );
   }
+}
+
+function populateOwnProfileHTML(content, userData) {
+  // Private info
+  content.querySelector(".profile__info-item--name").textContent =
+    `${userData.first_name || ""} ${userData.last_name || ""}`.trim() || "No name set";
+  content.querySelector(".profile__info-item--email").textContent = userData.email || "No email set";
+  content.querySelector(".profile__info-item--phone").textContent = userData.telephone_number || "No phone set";
+
+  // Friends section with click handler
+  const friendsSection = content.querySelector(".profile__section--friends");
+  friendsSection.setAttribute("role", "button");
+  friendsSection.setAttribute("tabindex", "0");
+
+  friendsSection.addEventListener("click", () => {
+    history.pushState({ view: "users", showFriendsOnly: true }, "");
+    loadUsersPage(false);
+    const friendsFilter = document.querySelector(".users-filter__button--friends");
+    friendsFilter.click();
+  });
+
+  friendsSection.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      friendsSection.click();
+    }
+  });
+}
+
+function populatePublicProfileElements(content, userData) {
+  // Hide private elements
+  const privateElements = content.querySelectorAll(".profile__private-info");
+  privateElements.forEach((element) => {
+    element.style.display = "none";
+  });
+
+  // TODO: doppelt gemoppelt
+  const emailElement = content.querySelector(".profile__info-item--email");
+  const phoneElement = content.querySelector(".profile__info-item--phone");
+  emailElement.style.display = "none";
+  phoneElement.style.display = "none";
+
+  // TODO: Handle friend button state and functionality
+  // We'll implement this next when we have the API friendship status
 }
