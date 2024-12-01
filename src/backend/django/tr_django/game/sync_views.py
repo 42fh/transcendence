@@ -12,10 +12,7 @@ from .gamecordinator.GameCordinator import GameCordinator, RedisLock
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 from .gamecordinator.game_config import EnumGameMode 
-from asgiref.sync import sync_to_async
-from django.views.decorators.http import require_http_methods
-from django.utils.decorators import async_only_middleware
-
+from asgiref.sync import sync_to_async, async_to_sync
 
 def transcendance(request):
     return HttpResponse("Initial view for transcendance")
@@ -32,13 +29,36 @@ def print_request_details(request):
   #  print(f"Path: {request.path}")
    # print(f"Method: {request.method}")
    # print(f"GET params: {request.GET}")
-    print(f"USER: {request.user}, ID: {request.user.id} ")
+    print(f"USER: {request.user}, ID: {request.user.id}")
+
+import redis as sync_redis
+import time
+
+class RedisLockSync:
+    def __init__(self, redis_conn, lock_key, timeout=10):
+        self.redis_conn = redis_conn
+        self.lock_key = lock_key
+        self.timeout = timeout
+
+    def __enter__(self):
+        start_time = time.time()
+        while True:
+            if self.redis_conn.set(self.lock_key, "1", nx=True, ex=self.timeout):
+                return self
+            if time.time() - start_time > self.timeout:
+                raise TimeoutError(f"Could not acquire lock: {self.lock_key}")
+            time.sleep(0.1)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.redis_conn.delete(self.lock_key)
+
+def get_redis(url: str = "redis://redis:6379/1") :
+    return sync_redis.Redis.from_url(url, decode_responses=True)
+
 
 import random
 @csrf_exempt
-@async_only_middleware
-@require_http_methods(["POST"])
-async def create_new_game(request, use_redis_lock: bool = True):
+def create_new_game(request, use_redis_lock: bool = True):
     # checks without redis lock 
     if request.method != "POST":
         return JsonResponse(
@@ -50,8 +70,7 @@ async def create_new_game(request, use_redis_lock: bool = True):
         )
     # random.randint(1000, 9999) -> hardcoded for test        
     # comment out because not connected to user yet
-    is_authenticated = await sync_to_async(lambda: request.user.is_authenticated)()
-    if not is_authenticated:
+    if not request.user.is_authenticated:
         return JsonResponse(
             {
                 "error": "Unauthorized - missing authentication",
@@ -59,8 +78,8 @@ async def create_new_game(request, use_redis_lock: bool = True):
             },
             status=401
         )
-    user_id = await sync_to_async(lambda: request.user.id)()
-    async_request = await sync_to_async(lambda: request)()
+    print_request_details(request)
+    request.user.id = 123
     if request.content_type != 'application/json':
         return JsonResponse(
             {
@@ -99,7 +118,8 @@ async def create_new_game(request, use_redis_lock: bool = True):
             },
             status=400
         )
-    async def create_game_logic():
+    user_id = request.user.id
+    async def create_game_logic(user_id):
         if await GameCordinator.is_player_playing(user_id):
             return JsonResponse(
                 {
@@ -120,7 +140,6 @@ async def create_new_game(request, use_redis_lock: bool = True):
         
         message = "NEW Game created successfully! Joined Gaime."
         response = await GameCordinator.join_game(user_id, game_id)
-
         if response.get('available', True):          
             return JsonResponse(
                 {'available': True, 
@@ -136,22 +155,19 @@ async def create_new_game(request, use_redis_lock: bool = True):
             },
             status=response.get("status", 500)
         )
-    
     try:
         if use_redis_lock:
-            async with await GameCordinator.get_redis(GameCordinator.REDIS_GAME_URL) as redis_conn:
-                async with RedisLock(redis_conn, f"player_lock:{async_request.user.id}"):
-                    return await create_game_logic()
-        return await create_game_logic()
+            with get_redis() as redis_conn:
+                with RedisLockSync(redis_conn, f"player_lock:{request.user.id}"):
+                    return async_to_sync(lambda: create_game_logic())()
+        return async_to_sync(lambda: create_game_logic())()
         
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
 
 @csrf_exempt
-@async_only_middleware
-@require_http_methods(["GET"])
-async def join_game(request, game_id, use_redis_lock: bool = True):
+def join_game(request, game_id, use_redis_lock: bool = True):
 
     if request.method != "GET":
         return JsonResponse(
@@ -161,8 +177,7 @@ async def join_game(request, game_id, use_redis_lock: bool = True):
             }, 
             status=405
         )
-    is_authenticated = await sync_to_async(lambda: request.user.is_authenticated)()
-    if not is_authenticated:
+    if not request.user.is_authenticated:
         return JsonResponse(
             {
                 "error": "Unauthorized - missing authentication",
@@ -170,8 +185,8 @@ async def join_game(request, game_id, use_redis_lock: bool = True):
             },
             status=401
         )
-    user_id = await sync_to_async(lambda: request.user.id)()
-    async def join_logic():    
+    user_id = request.user.id
+    async def join_logic(user_id):    
         if await GameCordinator.is_player_playing(user_id):
             return JsonResponse(
                 {
@@ -180,7 +195,7 @@ async def join_game(request, game_id, use_redis_lock: bool = True):
                 },
                 status=409
             )
-        message = "Joined Game! "
+        message = getattr(request, "message", "Joined Game! ")
         
         response = await GameCordinator.join_game(user_id, game_id)
 
@@ -200,11 +215,11 @@ async def join_game(request, game_id, use_redis_lock: bool = True):
             status=response.get("status", 500)
         )
     try:
-            if use_redis_lock:
-                async with await GameCordinator.get_redis(GameCordinator.REDIS_GAME_URL) as redis_conn:
-                    async with RedisLock(redis_conn, f"player_lock:{user_id}"):
-                        return await join_logic()
-            return await join_logic()
+        if use_redis_lock:
+            with get_redis() as redis_conn:
+                with RedisLockSync(redis_conn, f"player_lock:{request.user.id}"):
+                    return async_to_sync(join_logic(user_id))
+        return async_to_sync(create_game_logic(user_id))
             
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
@@ -212,12 +227,10 @@ async def join_game(request, game_id, use_redis_lock: bool = True):
  
 
 
-@async_only_middleware
-@require_http_methods(["GET"])
 @csrf_exempt
-async def get_all_games(request):
+def get_all_games(request):
     if request.method == "GET":      
-        games = await GameCordinator.get_all_games()
+        games = async_to_sync(GameCordinator.get_all_games())
         first_item = next(iter(games), None)
         if first_item and isinstance(first_item, bytes):
             # If bytes, decode
@@ -237,35 +250,11 @@ async def get_all_games(request):
     return JsonResponse({"message": "only GET requests are allowed"}, status=400)
 
 
-@async_only_middleware
-@require_http_methods(["GET"])
 @csrf_exempt
-async def get_waiting_games(request):
-    if request.method == "GET":      
-        games = await GameCordinator.get_waiting_games()
-        first_item = next(iter(games), None)
-        if first_item and isinstance(first_item, bytes):
-            # If bytes, decode
-            games_list = [member.decode('utf-8') for member in games]
-        else:
-            # If already strings, use directly
-            games_list = list(games)
-    
-        json_string = json.dumps(games_list, cls=DjangoJSONEncoder)
-        return JsonResponse(
-            {
-                "games": json_string,
-                "message": "all game uuids ",
-            }
-        )
-
-    return JsonResponse({"message": "only GET requests are allowed"}, status=400)
-
-@csrf_exempt
-async def get_detail_from_game(request):
+def get_detail_from_game(request):
     if request.method == "GET":      
         param = request.GET.get('game_id')
-        settings = await GameCordinator.get_detail_from_game(param)
+        settings = async_to_sync(GameCordinator.get_detail_from_game(param))
         json_string = json.dumps(settings, cls=DjangoJSONEncoder)
         return JsonResponse(
             {

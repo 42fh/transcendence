@@ -26,7 +26,8 @@ class PongConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.game_id = self.scope["url_route"]["kwargs"]["game_id"]
         self.user = self.scope["user"] 
-        self.player_id = str(self.user.id)       
+        self.player_id = self.user.id
+        print(f"USER: {self.user} ID: {self.player_id}" )       
         # init channels
         self.game_group = f"game_{self.game_id}"
         channel_key = f"asgi:group:{self.game_group}"

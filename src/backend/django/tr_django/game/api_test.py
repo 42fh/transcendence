@@ -221,9 +221,78 @@ class IntegratedGameTests(TransactionTestCase):
             self.assertTrue(connected)
             response = await communicator.receive_from()
             response_data = json.loads(response)
+            print(response_data)
             self.assertEqual(response_data["role"], "player")
             self.assertIsNotNone(response_data["player_index"])
-            await communicator.disconnect()
+            await  asyncio.sleep(1)
+                           
+            print("next pLayer") 
+            # Player 2 Setup
+            player2 = self.test_users["player2"]
+            await sync_to_async(self.client.force_login)(player2)
+    
+            # First get available games
+            response = await sync_to_async(self.client.get)(
+            reverse('get_waiting_games')
+            )
+            games = response.json()
+            print("Available games:", games)
+            game_id = json.loads(games["games"])[0]
+            print(game_id)
+            # Join specific game as Player 2
+            join_response = await sync_to_async(self.client.get)(
+            reverse('join_game', kwargs={'game_id': game_id}),
+            content_type='application/json'
+            )
+            join_data = join_response.json()
+            print (join_data) 
+            ws_url2 = join_data['ws_url']
+            # Now connect Player 2 via websocket
+            comm2 = WebsocketCommunicator(self.application, ws_url2)
+            comm2.scope["user"] = player2
+            connected2, _ = await comm2.connect()
+            self.assertTrue(connected2)
+            response2 = await comm2.receive_from()
+            print("Player 2 connected:", json.loads(response2))
+   
+
+            player2_task = asyncio.create_task(self.monitor_messages(comm2, "Player 2"))
+            
+            # Game loop simulation
+            try:
+                await asyncio.sleep(30)  # Increase time to observe more messages
+            finally:
+                # Clean up tasks
+                player2_task.cancel()
+                try:
+                    await player2_task
+                except asyncio.CancelledError:
+                    pass
+                
+                # Close connections
+                await communicator.disconnect()
+                await comm2.disconnect()
+
+    async def monitor_messages(self, communicator, player_name):
+        """Helper method to continuously monitor websocket messages"""
+        try:
+            while True:
+                message = await communicator.receive_from()
+                message_data = json.loads(message)
+                # Only print if the message type is not 'gamestate'
+                if message_data.get('type') != 'game_state':
+                    print(f"{player_name} received: {message_data}")
+
+        except Exception as e:
+            print(f"{player_name} monitoring ended: {str(e)}")
+
+     
+            # Game loop simulation
+            await asyncio.sleep(30) # Wait for game start    
+        
+
+
+
 
     def test_websocket_auth(self):
             self.loop.run_until_complete(self._test_booking_and_websocket())

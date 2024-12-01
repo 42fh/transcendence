@@ -3,16 +3,17 @@ import msgpack
 import asyncio
 from .AGameManager import GameStateError
 import math
-
+from ..gamecordinator.GameCordinator import GameCordinator , RedisLock  
 
 async def start_game(self):
     """Start game with process-safe checks"""
     try:
         min_players = self.settings.get("min_players")
-
+        await GameCordinator.set_to_waiting_game(self.game_id) 
         while True:
             player_count = await self.redis_conn.scard(self.players_key)
             if player_count == 0:
+                await self.end_game()
                 return
             if player_count >= min_players:
                 break
@@ -20,7 +21,19 @@ async def start_game(self):
             await asyncio.sleep(1)
 
         await self.redis_conn.set(self.running_key, b"1")
-
+        print("DEBUG")    
+        print("sides: ",self.num_sides) 
+        print(self.num_paddles) 
+        print(self.game_mode) 
+        print(self.game_shape) 
+        print(self.score_mode) 
+        print(self.active_sides)
+        print(self.vertices) 
+        print(self.scale) 
+        print(self.side_normals)         
+        print(self.inner_boundary)  
+        print("ball_mov: ",self.previous_movements, type(self.previous_movements)) 
+        await GameCordinator.set_to_running_game(self.game_id)
         while await self.redis_conn.get(self.running_key) == b"1":
             game_over = await self.update_game()
             if game_over:

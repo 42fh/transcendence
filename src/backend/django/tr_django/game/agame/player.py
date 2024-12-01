@@ -28,6 +28,7 @@ async def add_player(self, player_id):
             }
         # Check if player is booked
         booking_key = f"{GC.BOOKED_USER_PREFIX}{player_id}:{self.game_id}"
+        print(booking_key)
         is_booked = await self.redis_conn.exists(booking_key)
         if not is_booked:
             return {
@@ -35,7 +36,7 @@ async def add_player(self, player_id):
                 "message": "No booking found - joining as spectator"
             }
 
-        async with RedisLock(redis_conn, f"{self.game_id}_player_situation"):
+        async with RedisLock(self.redis_conn, f"{self.game_id}_player_situation"):
             pipeline = self.redis_conn.pipeline()
             pipeline.sadd(self.players_key, str(player_id))
             pipeline.delete(booking_key)

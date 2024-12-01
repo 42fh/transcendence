@@ -203,8 +203,11 @@ class GameCordinator:
         async with await cls.get_redis(cls.REDIS_URL) as redis_conn:
             return await redis_conn.smembers(cls.ALL_GAMES)
 
-    def get_waiting_games(self):
-        pass
+    @classmethod
+    async def get_waiting_games(cls):
+        """Get all game IDs"""
+        async with await cls.get_redis(cls.REDIS_URL) as redis_conn:
+            return await redis_conn.smembers(cls.WAITING_GAMES)
 
     def get_running_games(self):
         pass
@@ -298,7 +301,7 @@ class GameCordinator:
             
 
     @classmethod
-    async def join_game(cls, request, game_id) -> dict:
+    async def join_game(cls, user_id, game_id) -> dict:
         #session = request.session
         try:
             # Get game settings to check player limits
@@ -314,10 +317,11 @@ class GameCordinator:
                     async with RedisLock(redis_conn, f"{game_id}_player_situation"):
                         # create 
                         await redis_conn.set(
-                            f"{cls.BOOKED_USER_PREFIX}{request.user.id}:{game_id}", 
+                            f"{cls.BOOKED_USER_PREFIX}{user_id}:{game_id}", 
                             "",
                             ex=5  # 5 sec None if tournament 
                         )
+                print(f"KEY: {cls.BOOKED_USER_PREFIX}{user_id}:{game_id}")    
                 return {"available": True}
                 
         except Exception as e:
@@ -329,12 +333,17 @@ class GameCordinator:
     @classmethod
     async def leave_game(cls, game_id, player_id):
         pass
+    
     @classmethod
     async def set_to_waiting_game(cls, game_id):
-        pass
+        """"""
+        async with await cls.get_redis(cls.REDIS_URL) as redis_conn:
+            await redis_conn.sadd(cls.WAITING_GAMES, str(game_id))
+
     @classmethod
     async def set_to_running_game(cls, game_id):
         pass
+    
     @classmethod
     async def set_to_finished_game(cls, game_id):
         pass

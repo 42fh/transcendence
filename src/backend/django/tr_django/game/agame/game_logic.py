@@ -10,57 +10,59 @@ async def game_logic(self, current_state):
     """
     game_over = False
     new_state = current_state.copy()
+    #print("DEBUG_state: ", new_state)
     cycle_data = self.initialize_cycle_data()
+    try:
+        for ball_index, ball in enumerate(new_state["balls"]):
+            # Movement Phase
+            self.move_ball(ball)
+            # Boundary Phase
+            distance_from_center = self.get_distance(ball)
+            # self.update_distance_metrics(distance_from_center, cycle_data)
+            print(distance_from_center)
+            boundary_check = self.handle_distance_check(
+                ball_index, ball, distance_from_center, new_state, cycle_data
+            )
+            if boundary_check.get("skip_ball"):
+                if boundary_check.get("game_over"):
+                    game_over = True
+                    # self.add_game_over_event(cycle_data, new_state)
+                    break
+                continue
 
-    for ball_index, ball in enumerate(new_state["balls"]):
-        # Movement Phase
-        self.move_ball(ball)
-        # Boundary Phase
-        distance_from_center = self.get_distance(ball)
-        # self.update_distance_metrics(distance_from_center, cycle_data)
-        print(distance_from_center)
-        boundary_check = self.handle_distance_check(
-            ball_index, ball, distance_from_center, new_state, cycle_data
-        )
-        if boundary_check.get("skip_ball"):
-            if boundary_check.get("game_over"):
+            print("ball2")
+            # if ball should be.
+            # Collision Candidate Phase
+            collision_candidate = self.find_collision_candidate(
+                ball, ball_index, new_state, distance_from_center
+            )
+            # print("ball4")
+            if not collision_candidate:
+                continue
+
+            # Collision Verification Phase
+            verified_collision = self.verify_collision_candidate(
+                ball, collision_candidate, new_state
+            )
+            # print("ball5")
+            if not verified_collision:
+                continue
+            print("colliosion: ", verified_collision)
+            # Impact Processing Phase
+            collision_result = self.collision_handler(
+                verified_collision, ball, new_state, cycle_data, ball_index
+            )
+            # print("ball6")
+            if not collision_result:
+                continue
+            if collision_result.get("game_over"):
                 game_over = True
                 # self.add_game_over_event(cycle_data, new_state)
                 break
-            continue
-
-        # print("ball2")
-        # if ball should be.
-        # Collision Candidate Phase
-        collision_candidate = self.find_collision_candidate(
-            ball, ball_index, new_state, distance_from_center
-        )
-        # print("ball4")
-        if not collision_candidate:
-            continue
-
-        # Collision Verification Phase
-        verified_collision = self.verify_collision_candidate(
-            ball, collision_candidate, new_state
-        )
-        # print("ball5")
-        if not verified_collision:
-            continue
-        print("colliosion: ", verified_collision)
-        # Impact Processing Phase
-        collision_result = self.collision_handler(
-            verified_collision, ball, new_state, cycle_data, ball_index
-        )
-        # print("ball6")
-        if not collision_result:
-            continue
-        if collision_result.get("game_over"):
-            game_over = True
-            # self.add_game_over_event(cycle_data, new_state)
-            break
-    
-    return new_state, game_over, cycle_data
-
+        return new_state, game_over, cycle_data
+    except Exception as e:
+        print(f"Error in game_logic: {e}")
+        raise 
 
 # Movement Phase
 def move_ball(self, ball):
@@ -122,12 +124,12 @@ def handle_distance_check(self, ball_index, ball, distance, state, cycle_data):
     # Normal deadzone transitioni
     # Only reset when entering deadzone
     elif is_in_deadzone and not was_in_deadzone:
-        # print("set deadzone")
+        print("set deadzone")
         self.reset_ball_movement(ball_index)
     # When exiting, just update the state
     elif was_in_deadzone and not is_in_deadzone:
         self.previous_movements[ball_index]["in_deadzone"] = False
-        # print("out of deadzone")
+        print("out of deadzone")
     # Store current position for next frame's comparison
     self.previous_movements[ball_index]["last_position"] = {
         "x": ball["x"],
