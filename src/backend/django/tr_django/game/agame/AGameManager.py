@@ -9,12 +9,13 @@ from channels.layers import get_channel_layer
 from .method_decorators import *
 from ..gamecordinator.GameCordinator import GameCordinator as GC      
 from asgiref.sync import async_to_sync
+import logging
 
+logger = logging.getLogger(__name__) 
 
-
+  
 class GameStateError(Exception):
     """Custom exception for game state validation errors"""
-
     pass
 
 
@@ -22,11 +23,10 @@ class GameStateError(Exception):
 @add_player
 @add_paddle
 @add_initial
-@add_gamestate  # Validation layer (most specific)
-@add_event_flow  # Event system
-@add_game_physics  # Physics engine
-@add_game_logic  # Core game rules
-@add_game_flow  # Game state management
+@add_gamestate  
+@add_game_physics  
+@add_game_logic  
+@add_game_flow  
 @add_cls_methods
 class AGameManager:
 
@@ -54,11 +54,12 @@ class AGameManager:
         self.inner_boundary = None
         self.scale =float(1.0)        
 
+    # TODO: redis closing -> till register_game_type are the methods to solve this-> not solved yet  
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         try:
             await self.async_close()
         except Exception as e:
-            print(f"Error in __aexit__: {e}")
+            logger.error(f"Error in __aexit__: {e}")
         return False
 
     async def async_close(self):
@@ -82,7 +83,7 @@ class AGameManager:
 
     def __del__(self):
         if not self._is_closed:
-            print("Warning: Redis connection was not properly closed")
+            logger.warning("Warning: Redis connection was not properly closed")
 
     @classmethod
     def register_game_type(cls, game_type_name):
@@ -107,7 +108,6 @@ class AGameManager:
         try:
             if not game_type:
                 raise ValueError("Game type must be provided for new games")
-            
             # Create instance
             game_class = cls.get_game_class(game_type)
             instance = game_class(game_id)
@@ -126,7 +126,7 @@ class AGameManager:
             return instance
 
         except Exception as e:
-            print(f"Error in get_instance: {e}")
+            logger.error(f"Error in get_instance: {e}")
             raise
 
     @property
@@ -136,7 +136,7 @@ class AGameManager:
             running = await self.redis_conn.get(self.running_key)
             return running == b"1"
         except Exception as e:
-            print(f"Error checking running state: {e}")
+            logger.error(f"Error checking running state: {e}")
             return False
 
 

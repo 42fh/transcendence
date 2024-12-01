@@ -3,7 +3,9 @@ import msgpack
 import redis.asyncio as redis
 import random
 import math
+import logging
 
+logger = logging.getLogger(__name__)    
 
 async def initialize(self, create_new=False):
     """Initialize game resources"""
@@ -22,7 +24,7 @@ async def initialize(self, create_new=False):
         self.previous_movements  = self.settings.get("ballmovements")
         
     except Exception as e:
-        print(f"Error in initialize: {e}")
+        logger.error(f"Error in initialize: {e}")
         raise
 
 

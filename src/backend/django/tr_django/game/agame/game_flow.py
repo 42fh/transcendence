@@ -4,6 +4,9 @@ import asyncio
 from .AGameManager import GameStateError
 import math
 from ..gamecordinator.GameCordinator import GameCordinator , RedisLock  
+import logging 
+
+logger = logging.getLogger(__name__)
 
 async def start_game(self):
     """Start game with process-safe checks"""
@@ -17,22 +20,32 @@ async def start_game(self):
                 return
             if player_count >= min_players:
                 break
-            print(f"Waiting for players... ({player_count}/{min_players})")
+            logger.info(f"{self.game_id}: Waiting for players... ({player_count}/{min_players})")
+            await self.channel_layer.group_send(
+                f"game_{self.game_id}",
+                {
+                    "type": "waiting",
+                    "current_players": player_count,
+                    "required_players": min_players,
+                    "message": f"Waiting for players... ({player_count}/{min_players})",
+                },
+            )
+            
             await asyncio.sleep(1)
 
         await self.redis_conn.set(self.running_key, b"1")
-        print("DEBUG")    
-        print("sides: ",self.num_sides) 
-        print(self.num_paddles) 
-        print(self.game_mode) 
-        print(self.game_shape) 
-        print(self.score_mode) 
-        print(self.active_sides)
-        print(self.vertices) 
-        print(self.scale) 
-        print(self.side_normals)         
-        print(self.inner_boundary)  
-        print("ball_mov: ",self.previous_movements, type(self.previous_movements)) 
+        logger.debug(f"""DEBUG    
+        sides: {self.num_sides} 
+        paddles: {self.num_paddles} 
+        mode: {self.game_mode} 
+        shape: {self.game_shape} 
+        score: {self.score_mode} 
+        active_sides:  {self.active_sides}
+        vertices:  {self.vertices}
+        scale: {self.scale}
+        normals:  {self.side_normals}         
+        inner_boundary: {self.inner_boundary}  
+        ball_mov: {self.previous_movements, type(self.previous_movements)}""")
         await GameCordinator.set_to_running_game(self.game_id)
         while await self.redis_conn.get(self.running_key) == b"1":
             game_over = await self.update_game()
@@ -41,7 +54,7 @@ async def start_game(self):
                 break
             await asyncio.sleep(0.016)  # ~60 FPS
     except Exception as e:
-        print(f"Error in start_game: {e}")
+        logger.error(f"Error in start_game: {e}")
         await self.end_game()
         return
 
@@ -64,10 +77,10 @@ async def end_game(self):
             # await self.redis_conn.expire(key, 300)  # 5 minute expiry
             await self.redis_conn.expire(key, 1)  # 1 sec expiry
 
-        print(f"Game {self.game_id} has ended.")
+        logger.info(f"Game {self.game_id} has ended.")
 
     except Exception as e:
-        print(f"Error ending game: {e}")
+        logger.error(f"Error ending game: {e}")
 
 
 async def update_game(self):
@@ -79,7 +92,7 @@ async def update_game(self):
             state_data = await self.redis_conn.get(self.state_key)
             current_state = msgpack.unpackb(state_data) if state_data else None
         except msgpack.UnpackException as e:
-            print(f"Error unpacking game state: {e}")
+            logger.error(f"Error unpacking game state: {e}")
             await self.channel_layer.group_send(
                 f"game_{self.game_id}",
                 {
@@ -104,7 +117,7 @@ async def update_game(self):
         try:
             self.verify_game_state(current_state)
         except GameStateError as e:
-            print(f"Game state validation error: {e}")
+            logger.error(f"Game state validation error: {e}")
             await self.channel_layer.group_send(
                 f"game_{self.game_id}",
                 {
@@ -129,7 +142,7 @@ async def update_game(self):
         try:
             self.verify_game_state(new_state)
         except GameStateError as e:
-            print(f"New game state validation error: {e}")
+            logger.error(f"New game state validation error: {e}")
             await self.channel_layer.group_send(
                 f"game_{self.game_id}",
                 {
@@ -145,7 +158,7 @@ async def update_game(self):
             packed_state = msgpack.packb(new_state)
             await self.redis_conn.set(self.state_key, packed_state)
         except Exception as e:
-            print(f"Error saving game state: {e}")
+            logger.error(f"Error saving game state: {e}")
             await self.channel_layer.group_send(
                 f"game_{self.game_id}",
                 {
@@ -181,7 +194,7 @@ async def update_game(self):
         return game_over
 
     except Exception as e:
-        print(f"Error in update_game: {e}")
+        logger.error(f"Error in update_game: {e}")
         await self.channel_layer.group_send(
             f"game_{self.game_id}",
             {"type": "error", "error": "Game update failed", "details": str(e)},

@@ -3,7 +3,9 @@ import msgpack
 import redis.asyncio as redis
 from ..gamecordinator.GameCordinator import GameCordinator as GC 
 from ..gamecordinator.GameCordinator import RedisLock
+import logging
 
+logger = logging.getLogger(__name__)    
 
 async def add_player(self, player_id):
     """Add player with process-safe checks"""
@@ -28,7 +30,7 @@ async def add_player(self, player_id):
             }
         # Check if player is booked
         booking_key = f"{GC.BOOKED_USER_PREFIX}{player_id}:{self.game_id}"
-        print(booking_key)
+        logger.debug(f"{booking_key}")
         is_booked = await self.redis_conn.exists(booking_key)
         if not is_booked:
             return {
@@ -50,7 +52,7 @@ async def add_player(self, player_id):
             }
 
     except Exception as e:
-        print(f"Error adding player: {e}")
+        logger.error(f"Error adding player: {e}")
         return False
 
 
@@ -71,5 +73,5 @@ async def remove_player(self, player_id):
         return False
 
     except Exception as e:
-        print(f"Error removing player: {e}")
+        logger.error(f"Error removing player: {e}")
         return False

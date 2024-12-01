@@ -3,6 +3,11 @@ from typing import List, Dict, Optional, Any
 import math
 from .ball_utils import BallUtils
 import time
+import logging 
+
+logger = logging.getLogger(__name__) 
+
+
 
 @classmethod
 def setup_game(cls, settings: Dict[str, Any]) -> dict:
@@ -16,7 +21,7 @@ def setup_game(cls, settings: Dict[str, Any]) -> dict:
         settings.update(cls.initialize_ball_movements(settings))
         return settings  
     except Exception as e:
-        print("AGameManager setup error: ", e)   
+        logger.error(f"AGameManager setup error: {e}")   
 
 @classmethod
 def calculate_vertices(cls, settings: Dict[str, Any]) -> dict:
@@ -76,7 +81,7 @@ def  set_initial_state(cls, settings: Dict[str, Any]) -> dict:
             return {"state" : state}
 
         except Exception as e:
-            print(f"Error creating initial game state: {e}")
+            logger.error(f"Error creating initial game state: {e}")
             raise
 
 
@@ -147,7 +152,7 @@ def calculate_player_side_indices(cls, settings: Dict[str, Any]) -> dict:
     # Sort the sides for consistent ordering
     player_sides.sort()
 
-    print(
+    logger.debug(
         f"Sides: {num_sides}, Players: {num_paddles}, Distribution: {player_sides}" # debug
     )
     return {"players_sides": player_sides}

@@ -67,6 +67,7 @@ def add_game_logic(cls):
         apply_ball_bounce_effect,
         collision_miss,
         check_winner,
+        initialize_cycle_data
     )
 
     methods = {
@@ -93,24 +94,12 @@ def add_game_logic(cls):
         "apply_ball_bounce_effect": apply_ball_bounce_effect,
         "collision_miss": collision_miss,
         "check_winner": check_winner,
+        "initialize_cycle_data": initialize_cycle_data
     }
 
     for name, method in methods.items():
         setattr(cls, name, method)
 
-    return cls
-
-
-def add_event_flow(cls):
-    """
-    cyyle_date and events
-    """
-    from .event_flow import initialize_cycle_data
-
-    methods = {"initialize_cycle_data": initialize_cycle_data}
-
-    for name, method in methods.items():
-        setattr(cls, name, method)
     return cls
 
 
