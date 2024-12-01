@@ -1,6 +1,4 @@
-import { CONFIG } from "../config/constants.js";
 import { createNewGame } from "../services/gameSettingsService.js";
-import { displayModalError } from "../components/modal.js";
 
 export function gameSettings() {
   console.log("print from inside gameSettings");
@@ -171,7 +169,7 @@ export function gameSettings() {
     if (!config) {
       console.error("Invalid game type selected");
       console.log("Current game type:", state.formData.mode);
-      displayModalError("Invalid game type selected");
+      showStatus("Invalid game type selected", 1);
       return;
     }
 
@@ -236,7 +234,7 @@ export function gameSettings() {
     const config = state.gameConfigs[state.formData.mode];
     if (!config) {
       console.error("ERROR: Invalid game type selected");
-      displayModalError("Invalid game type selected");
+      showStatus("Invalid game type selected");
       return;
     }
 
@@ -250,7 +248,7 @@ export function gameSettings() {
     // Validation before call
     if (!playerId) {
       console.error("ERROR: Player ID is required");
-      displayModalError("Player ID is required.");
+      showStatus("Player ID is required.", 1);
       return;
     }
 
@@ -258,7 +256,7 @@ export function gameSettings() {
       numPlayers < 1 ||
       numPlayers > state.gameConfigs[state.formData.mode].maxPlayers
     ) {
-      displayModalError(
+      showStatus(
         `Number of players must be between 1 and ${
           state.gameConfigs[state.formData.mode].maxPlayers
         }.`
@@ -288,17 +286,17 @@ export function gameSettings() {
 
       if (response.success) {
         console.log("SUCCESS: Game created successfully:", response);
-        showStatus("Game created successfully!");
+        showStatus("Game created successfully!", 0);
       } else {
         console.error(
           "ERROR: Failed to create game:",
           response.message || "Unknown error"
         );
-        displayModalError(response.message || "Failed to create game.");
+        showStatus(response.message || "Failed to create game.", 1);
       }
     } catch (error) {
       console.error("ERROR: Exception while creating game:", error);
-      displayModalError("Error creating game: " + error.message);
+      showStatus("Error creating game: " + error.message, 1);
     }
   }
 }

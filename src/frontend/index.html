@@ -68,7 +68,6 @@
       <p id="modal-message" class="modal-message"></p>
       <form id="signup-form" class="modal-form">
         <!-- Message element added here -->
-
         <label for="username">Username</label>
         <input type="text" id="username" name="username" required />
 
@@ -122,8 +121,33 @@
       <button id="cta__button-settings" style="display: none;">Settings</button>
     </template>
 
+
+
+
+    <!-- Modal Template -->
+<template id="modal-template">
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <button class="modal-close-btn" aria-label="Close Modal">&times;</button>
+      <div class="modal-content">
+        <h2>Error</h2>
+        <p class="modal-message" id="modal-message">An error occurred. Please try again.</p>
+        <div class="modal-form">
+          <label for="inputField">Example Input:</label>
+          <input type="text" id="inputField" placeholder="Enter some text" />
+          <button type="button" class="form-button" id="submit-form">Submit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+
 <!-- Game Settings Template-->
 <template id="game-settings-template">
+  <p id="status" class="status"></p>
+      <!-- Status message container -->
+      <div id="status" style="display: none;"></div>
   <div class="tournament-container page-container--settings">
     <h2>GAME SETTINGS</h2>
     <div class="tournament-detail-container">
@@ -187,8 +211,6 @@
         <li><strong>Crazy Shape:</strong> Extreme deformation with sharp transitions.</li>
       </ul>
     </div>
-    <!-- Status message container -->
-    <div id="status" style="display: none;"></div>
   </div>
 </template>
 
