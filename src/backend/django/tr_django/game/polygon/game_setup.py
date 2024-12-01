@@ -1,5 +1,5 @@
-
-from typing import List, Dict, Optional, Any 
+import random
+from typing import List, Dict, Optional, Any, Tuple 
 import math
 
 
@@ -122,7 +122,9 @@ def calculate_vertices(cls, settings: Dict[str, Any]) -> dict:
     active_sides = settings.get("players_sides")
     game_mode = settings.get("mode")
     num_sides = settings.get("sides")
-    
+    num_paddles = settings.get("num_players")
+    game_shape = settings.get("shape")
+
     if not active_sides:
         raise ValueError("Active sides must be determined before calculating vertices")
 
@@ -153,7 +155,8 @@ def calculate_vertices(cls, settings: Dict[str, Any]) -> dict:
 
     elif game_mode ==  "irregular":  # irregular modes
         # Get ratios and adjustments based on specific irregular mode
-        ratios, angle_adjustments = cls.calculate_side_ratios()
+        base_deform = calculate_base_deformation(num_sides, num_paddles, game_shape)
+        ratios, angle_adjustments = calculate_side_ratios(num_sides, game_shape, active_sides, base_deform)
 
         # start_angle = -math.pi / 2
         angle_step = (2 * math.pi) / num_sides
@@ -203,115 +206,100 @@ def initialize_ball_movements(cls, settings: Dict[str, Any]) -> dict:
 
 
 
-
-# calculate_side_ratios
-import random
-
-
-def calculate_base_deformation(self):
+def calculate_base_deformation(num_sides: int, num_paddles: int, game_shape: str) -> float:
     """Calculate deformation based on game mode"""
-    player_density = self.num_paddles / self.num_sides
+    player_density = num_paddles / num_sides
 
-    if self.game_shape == "irregular":
-        # Original balanced ratios
-        if self.num_sides == 4:
-            return 4 / 3 if self.num_paddles == 2 else 1.0
-        else:
-            if player_density <= 0.5:
-                return 1.0 + (player_density * 0.5)
-            else:
-                return 1.25 - (player_density * 0.25)
-
-    elif self.game_shape == "crazy":
-        # Extreme deformation
-        if self.num_sides == 4:
-            return 4 / 3 if self.num_paddles == 2 else 1.0
-        else:
-            return 1.8 if player_density <= 0.5 else 1.5
-
-    elif self.game_shape == "star":
-        # Alternating long and short sides
+    if game_shape == "irregular":
+        if num_sides == 4:
+            return 4 / 3 if num_paddles == 2 else 1.0
+        return 1.0 + (player_density * 0.5) if player_density <= 0.5 else 1.25 - (player_density * 0.25)
+    
+    if game_shape == "crazy":
+        if num_sides == 4:
+            return 4 / 3 if num_paddles == 2 else 1.0
+        return 1.8 if player_density <= 0.5 else 1.5
+    
+    if game_shape == "star":
         return 2.2 if player_density <= 0.3 else 1.8
+    
+    return 1.0
 
-    return 1.0  # Default if mode not recognized
-
-
-def calculate_side_ratios(self):
+def calculate_side_ratios(num_sides: int, game_shape: str, active_sides: List[int], base_deform: float) -> Tuple[List[float], List[float]]:
     """Calculate ratios based on game mode"""
-    base_deform = self._calculate_base_deformation()
+    if game_shape == "crazy":
+        return _calculate_crazy_ratios(num_sides, active_sides, base_deform)
+    if game_shape == "star":
+        return _calculate_star_ratios(num_sides, active_sides, base_deform)
+    return _calculate_regular_ratios(num_sides, active_sides, base_deform)
 
-    if self.game_shape == "irregular":
-        return self._calculate_regular_ratios(
-            base_deform
-        )  # This is now our irregular mode
-    elif self.game_shape == "crazy":
-        return self._calculate_crazy_ratios(base_deform)
-    elif self.game_shape == "star":
-        return self._calculate_star_ratios(base_deform)
-    else:
-        return self._calculate_regular_ratios(base_deform)  # Default
-
-
-def calculate_regular_ratios(self, base_deform):
+def _calculate_regular_ratios(num_sides: int, active_sides: List[int], base_deform: float) -> Tuple[List[float], List[float]]:
     """Original balanced ratio calculation"""
-    ratios = [1.0] * self.num_sides
-    angle_adjustments = [0] * self.num_sides
+    ratios = [1.0] * num_sides
+    angle_adjustments = [0] * num_sides
 
-    if self.num_sides == 4:
-        if self.num_paddles == 2:
-            # Special handling for rectangle
-            if 0 in self.active_sides and 2 in self.active_sides:
+    if num_sides == 4:
+        if len(active_sides) == 2:
+            if 0 in active_sides and 2 in active_sides:
                 ratios[0] = ratios[2] = base_deform
                 ratios[1] = ratios[3] = 1.0
-            elif 1 in self.active_sides and 3 in self.active_sides:
+            elif 1 in active_sides and 3 in active_sides:
                 ratios[0] = ratios[2] = 1.0
                 ratios[1] = ratios[3] = base_deform
         else:
-            # More square-like for more players
-            for i in self.active_sides:
+            for i in active_sides:
                 ratios[i] = base_deform
     else:
-        # General polygon case
-        for side in self.active_sides:
+        for side in active_sides:
             ratios[side] = base_deform
-            prev_side = (side - 1) % self.num_sides
-            next_side = (side + 1) % self.num_sides
+            prev_side = (side - 1) % num_sides
+            next_side = (side + 1) % num_sides
             ratios[prev_side] = 1.0 + (base_deform - 1.0) * 0.5
             ratios[next_side] = 1.0 + (base_deform - 1.0) * 0.5
 
-        # Smooth out the ratios
         smoothed_ratios = ratios.copy()
-        for i in range(self.num_sides):
-            prev_ratio = ratios[(i - 1) % self.num_sides]
-            next_ratio = ratios[(i + 1) % self.num_sides]
+        for i in range(num_sides):
+            prev_ratio = ratios[(i - 1) % num_sides]
+            next_ratio = ratios[(i + 1) % num_sides]
             smoothed_ratios[i] = (prev_ratio + 2 * ratios[i] + next_ratio) / 4
         ratios = smoothed_ratios
 
     return ratios, angle_adjustments
 
 
-def _calculate_crazy_ratios(self, base_deform):
-    """Extreme ratio calculation with sharp transitions"""
-    ratios = [0.6] * self.num_sides  # Compressed non-player sides
-    angle_adjustments = [0] * self.num_sides
 
-    # Set player sides
-    for side in self.active_sides:
+def _calculate_crazy_ratios(num_sides: int, active_sides: List[int], base_deform: float) -> Tuple[List[float], List[float]]:
+    """Extreme ratio calculation with sharp transitions"""
+    ratios = [0.6] * num_sides
+    angle_adjustments = [0] * num_sides
+
+    for side in active_sides:
         ratios[side] = base_deform
-        if (side + 1) % self.num_sides not in self.active_sides:
+        if (side + 1) % num_sides not in active_sides:
             angle_adjustments[side] = random.uniform(-0.26, 0.26)
 
     return ratios, angle_adjustments
 
 
-def _calculate_star_ratios(self, base_deform):
-    """Star-like shape with alternating long and short sides"""
-    ratios = [0.4 if i % 2 == 0 else 1.2 for i in range(self.num_sides)]
-    angle_adjustments = [0] * self.num_sides
 
-    # Ensure player sides are equal
-    for side in self.active_sides:
+
+
+def _calculate_star_ratios(num_sides: int, active_sides: List[int], base_deform: float) -> Tuple[List[float], List[float]]:
+    """Star-like shape with alternating long and short sides"""
+    ratios = [0.4 if i % 2 == 0 else 1.2 for i in range(num_sides)]
+    angle_adjustments = [0] * num_sides
+
+    for side in active_sides:
         ratios[side] = base_deform
 
     return ratios, angle_adjustments
+
+
+
+
+
+
+
+
+
 

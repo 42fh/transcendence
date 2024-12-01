@@ -21,7 +21,7 @@ DEFAULT_PLAYER = {
 
 REGULAR_FIXED = {"type": "polygon", "mode": "regular", "shape": "regular"}
 
-IRREGULAR_FIXED = {"type": "polygon", "mode": "regular"}
+IRREGULAR_FIXED = {"type": "polygon", "mode": "irregular"}
 
 DEFAULT_POLYGON = {
     "num_players": int(2),
