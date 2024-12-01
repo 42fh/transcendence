@@ -310,6 +310,21 @@ class UserDetailView(View):
                 "is_active": user.is_active,
             }
 
+            # Add friendship status if not own profile
+            if not is_own_profile:
+                user_data.update(
+                    {
+                        "is_friend": request.user.is_friend_with(user),
+                        "friend_request_status": "none",
+                    }
+                )
+
+                # Check friend request status
+                if user in request.user.friend_requests_sent.all():
+                    user_data["friend_request_status"] = "sent"
+                elif user in request.user.friend_requests_received.all():
+                    user_data["friend_request_status"] = "received"
+
             # Add sensitive data only if it's the user's own profile
             if is_own_profile:
                 user_data.update(
@@ -517,8 +532,196 @@ class UserAvatarView(View):
 
 
 @method_decorator(csrf_exempt, name="dispatch")
-class FriendsListView(View):
-    """View for listing a user's friends with pagination and search capabilities"""
+class FriendRequestsView(View):
+    """
+    View for managing friend requests
+
+    Endpoints:
+    GET: List all pending friend requests (sent and received)
+    POST: {"to_user_id": "<uuid>"} - Send new request
+    DELETE: {
+        "to_user_id": "<uuid>",  # For withdrawing a sent request
+        "from_user_id": "<uuid>" # For rejecting a received request
+        "action": "withdraw|reject"
+    }"""
+
+    def get(self, request):
+        """List friend requests (both sent and received)"""
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Authentication required"}, status=401)
+
+        sent_requests = [
+            {
+                "id": str(user.id),
+                "username": user.username,
+                "avatar": user.avatar.url if user.avatar else None,
+                "status": "sent",
+            }
+            for user in request.user.friend_requests_sent.all()
+        ]
+
+        received_requests = [
+            {
+                "id": str(user.id),
+                "username": user.username,
+                "avatar": user.avatar.url if user.avatar else None,
+                "status": "received",
+            }
+            for user in request.user.friend_requests_received.all()
+        ]
+
+        return JsonResponse({"sent": sent_requests, "received": received_requests})
+
+    def post(self, request):
+        """Send a new friend request to 'to_user_id'"""
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Authentication required"}, status=401)
+
+        try:
+            data = json.loads(request.body)
+            to_user_id = data.get("to_user_id")
+
+            if not to_user_id:
+                return JsonResponse(
+                    {"error": "Please specify the user you want to send a friend request to"}, status=400
+                )
+
+            # Add validation for sending request to self
+            if str(to_user_id) == str(request.user.id):
+                return JsonResponse({"error": "Cannot send friend request to yourself"}, status=400)
+
+            # First validate UUID format
+            try:
+                uuid_obj = uuid.UUID(str(to_user_id))
+            except ValueError:
+                return JsonResponse({"error": "User not found"}, status=404)
+
+            # Then try to get the user
+            try:
+                to_user = CustomUser.objects.get(id=uuid_obj)
+            except CustomUser.DoesNotExist:
+                return JsonResponse({"error": "User not found"}, status=404)
+
+            # Check if already friends
+            if request.user.is_friend_with(to_user):
+                return JsonResponse({"error": "You are already friends with this user"}, status=400)
+
+            # Check if request already sent
+            if to_user in request.user.friend_requests_sent.all():
+                return JsonResponse({"error": "You have already sent a friend request to this user"}, status=400)
+
+            request.user.send_friend_request(to_user)
+            return JsonResponse(
+                {
+                    "message": "Friend request sent successfully",
+                    "to_user": {"id": str(to_user.id), "username": to_user.username},
+                }
+            )
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid request format"}, status=400)
+
+    # def patch(self, request):
+    #     """Accept/reject friend request"""
+    #     if not request.user.is_authenticated:
+    #         return JsonResponse({"error": "Authentication required"}, status=401)
+
+    #     try:
+    #         data = json.loads(request.body)
+    #         from_user_id = data.get("from_user_id")
+    #         action = data.get("action")
+
+    #         if not from_user_id:
+    #             return JsonResponse(
+    #                 {"error": "Please specify the user whose friend request you want to respond to"}, status=400
+    #             )
+
+    #         if action not in ["accept", "reject"]:
+    #             return JsonResponse(
+    #                 {"error": "Please specify whether you want to accept or reject the friend request"}, status=400
+    #             )
+
+    #         try:
+    #             from_user = CustomUser.objects.get(id=from_user_id)
+    #         except CustomUser.DoesNotExist:
+    #             return JsonResponse({"error": "User not found"}, status=404)
+
+    #         # Check if there's a pending request
+    #         if from_user not in request.user.friend_requests_received.all():
+    #             return JsonResponse({"error": "No pending friend request from this user"}, status=404)
+
+    #         if action == "accept":
+    #             request.user.accept_friend_request(from_user)
+    #             message = "Friend request accepted successfully"
+    #         else:
+    #             request.user.reject_friend_request(from_user)
+    #             message = "Friend request rejected"
+
+    #         return JsonResponse({"message": message})
+
+    #     except json.JSONDecodeError:
+    #         return JsonResponse({"error": "Invalid request format"}, status=400)
+    #     except Exception as e:
+    #         return JsonResponse({"error": str(e)}, status=500)
+
+    def delete(self, request):
+        """
+        Withdraw a friend request previously sent OR reject a received friend request (depending on the request type "sent" or "received")
+        The target user is specified in the request body as 'to_user_id' for 'sent' and 'from_user_id' for 'received'
+        """
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Authentication required"}, status=401)
+
+        try:
+            data = json.loads(request.body)
+            to_user_id = data.get("to_user_id")
+            from_user_id = data.get("from_user_id")
+            request_type = data.get("request_type")
+
+            if not to_user_id:
+                return JsonResponse(
+                    {"error": "Please specify the user whose friend request you want to cancel"}, status=400
+                )
+
+            try:
+                to_user = CustomUser.objects.get(id=to_user_id)
+            except CustomUser.DoesNotExist:
+                return JsonResponse({"error": "User not found"}, status=404)
+            try:
+                from_user = CustomUser.objects.get(id=from_user_id)
+            except CustomUser.DoesNotExist:
+                return JsonResponse({"error": "User not found"}, status=404)
+
+            # Check if there's a pending request
+            if request_type == "sent":
+                if to_user not in request.user.friend_requests_sent.all():
+                    return JsonResponse({"error": "No pending friend request to this user"}, status=404)
+                request.user.cancel_friend_request(to_user)
+                return JsonResponse({"message": "Friend request cancelled successfully"})
+            elif request_type == "received":
+                if from_user not in request.user.friend_requests_received.all():
+                    return JsonResponse({"error": "No pending friend request from this user"}, status=404)
+                request.user.reject_friend_request(from_user)
+                return JsonResponse({"message": "Friend request rejected"})
+            else:
+                return JsonResponse({"error": "Invalid request type"}, status=400)
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid request format"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class FriendshipsView(View):
+    """
+    View for managing friendships
+
+    Endpoints:
+    GET: /api/friends/<user_id>/ - List all of the user's friends with pagination and search capabilities
+    POST: /api/friends/ {"from_user_id": "<uuid>"} - Accept a friend request
+    DELETE: /api/friends/ {"user_id": "<uuid>"} - Remove an existing friend
+    """
 
     def get(self, request, user_id):
         try:
@@ -577,131 +780,27 @@ class FriendsListView(View):
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
 
-
-@method_decorator(csrf_exempt, name="dispatch")
-class FriendRequestsView(View):
-    """
-    Handle friend requests
-
-    Expected request body formats:
-    POST: {"to_user_id": "<uuid>"}
-    PATCH: {"from_user_id": "<uuid>", "action": "accept" | "reject"}
-    DELETE: {"to_user_id": "<uuid>"}
-    """
-
-    def get(self, request):
-        """List friend requests (both sent and received)"""
-        if not request.user.is_authenticated:
-            return JsonResponse({"error": "Authentication required"}, status=401)
-
-        sent_requests = [
-            {
-                "id": str(user.id),
-                "username": user.username,
-                "avatar": user.avatar.url if user.avatar else None,
-                "status": "sent",
-            }
-            for user in request.user.friend_requests_sent.all()
-        ]
-
-        received_requests = [
-            {
-                "id": str(user.id),
-                "username": user.username,
-                "avatar": user.avatar.url if user.avatar else None,
-                "status": "received",
-            }
-            for user in request.user.friend_requests_received.all()
-        ]
-
-        return JsonResponse({"sent": sent_requests, "received": received_requests})
-
     def post(self, request):
-        """Send a friend request"""
-        if not request.user.is_authenticated:
-            return JsonResponse({"error": "Authentication required"}, status=401)
-
-        try:
-            data = json.loads(request.body)
-            to_user_id = data.get("to_user_id")
-
-            if not to_user_id:
-                return JsonResponse(
-                    {"error": "Please specify the user you want to send a friend request to"}, status=400
-                )
-
-            # Add validation for sending request to self
-            if str(to_user_id) == str(request.user.id):
-                return JsonResponse({"error": "Cannot send friend request to yourself"}, status=400)
-
-            # First validate UUID format
-            try:
-                uuid_obj = uuid.UUID(str(to_user_id))
-            except ValueError:
-                return JsonResponse({"error": "User not found"}, status=404)
-
-            # Then try to get the user
-            try:
-                to_user = CustomUser.objects.get(id=uuid_obj)
-            except CustomUser.DoesNotExist:
-                return JsonResponse({"error": "User not found"}, status=404)
-
-            # Check if already friends
-            if request.user.is_friend_with(to_user):
-                return JsonResponse({"error": "You are already friends with this user"}, status=400)
-
-            # Check if request already sent
-            if to_user in request.user.friend_requests_sent.all():
-                return JsonResponse({"error": "You have already sent a friend request to this user"}, status=400)
-
-            request.user.send_friend_request(to_user)
-            return JsonResponse(
-                {
-                    "message": "Friend request sent successfully",
-                    "to_user": {"id": str(to_user.id), "username": to_user.username},
-                }
-            )
-
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid request format"}, status=400)
-
-    def patch(self, request):
-        """Accept/reject friend request"""
+        """Accept friend request"""
         if not request.user.is_authenticated:
             return JsonResponse({"error": "Authentication required"}, status=401)
 
         try:
             data = json.loads(request.body)
             from_user_id = data.get("from_user_id")
-            action = data.get("action")
 
             if not from_user_id:
-                return JsonResponse(
-                    {"error": "Please specify the user whose friend request you want to respond to"}, status=400
-                )
-
-            if action not in ["accept", "reject"]:
-                return JsonResponse(
-                    {"error": "Please specify whether you want to accept or reject the friend request"}, status=400
-                )
-
+                return JsonResponse({"error": "Please specify from_user_id"}, status=400)
             try:
                 from_user = CustomUser.objects.get(id=from_user_id)
             except CustomUser.DoesNotExist:
                 return JsonResponse({"error": "User not found"}, status=404)
 
-            # Check if there's a pending request
             if from_user not in request.user.friend_requests_received.all():
                 return JsonResponse({"error": "No pending friend request from this user"}, status=404)
 
-            if action == "accept":
-                request.user.accept_friend_request(from_user)
-                message = "Friend request accepted successfully"
-            else:
-                request.user.reject_friend_request(from_user)
-                message = "Friend request rejected"
-
-            return JsonResponse({"message": message})
+            request.user.accept_friend_request(from_user)
+            return JsonResponse({"message": "Friend request accepted successfully"})
 
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid request format"}, status=400)
@@ -709,30 +808,28 @@ class FriendRequestsView(View):
             return JsonResponse({"error": str(e)}, status=500)
 
     def delete(self, request):
-        """Cancel friend request"""
+        """Remove a friend"""
         if not request.user.is_authenticated:
             return JsonResponse({"error": "Authentication required"}, status=401)
 
         try:
             data = json.loads(request.body)
-            to_user_id = data.get("to_user_id")
+            user_id = data.get("user_id")
 
-            if not to_user_id:
-                return JsonResponse(
-                    {"error": "Please specify the user whose friend request you want to cancel"}, status=400
-                )
+            if not user_id:
+                return JsonResponse({"error": "Please specify the friend to remove"}, status=400)
 
             try:
-                to_user = CustomUser.objects.get(id=to_user_id)
+                friend = CustomUser.objects.get(id=user_id)
             except CustomUser.DoesNotExist:
                 return JsonResponse({"error": "User not found"}, status=404)
 
-            # Check if there's a pending request
-            if to_user not in request.user.friend_requests_sent.all():
-                return JsonResponse({"error": "No pending friend request to this user"}, status=404)
+            # Check if they are actually friends
+            if not request.user.is_friend_with(friend):
+                return JsonResponse({"error": "You are not friends with this user"}, status=400)
 
-            request.user.cancel_friend_request(to_user)
-            return JsonResponse({"message": "Friend request cancelled successfully"})
+            request.user.remove_friend(friend)
+            return JsonResponse({"message": "Friend removed successfully"})
 
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid request format"}, status=400)

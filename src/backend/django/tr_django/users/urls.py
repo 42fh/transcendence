@@ -10,20 +10,23 @@ from .views import (
     DeleteUserView,
     UsersListView,
     UserDetailView,
-    FriendsListView,
     FriendRequestsView,
     UserAvatarView,
-    # FriendStatusView,
+    FriendshipsView,
 )
 
 urlpatterns = [
+    # Auth endpoints
     path("auth/signup/", SignupView.as_view(), name="signup"),
     path("auth/login/", LoginView.as_view(), name="login"),
     path("auth/logout/", LogoutView.as_view(), name="logout"),
     path("auth/delete/", DeleteUserView.as_view(), name="delete_user"),
+    # User endpoints
     path("", UsersListView.as_view(), name="users_list"),
     path("<uuid:user_id>/", UserDetailView.as_view(), name="user_detail"),
     path("users/<uuid:user_id>/avatar/", UserAvatarView.as_view(), name="user_avatar"),
-    path("<uuid:user_id>/friends/", FriendsListView.as_view(), name="friends_list"),
-    path("friend-requests/", FriendRequestsView.as_view(), name="friend_requests"),
+    # Friendship endpoints
+    path("friends/<uuid:user_id>/", FriendshipsView.as_view(), name="friends_list"),  # GET - list friends
+    path("friends/", FriendshipsView.as_view(), name="friends_manage"),  # POST/DELETE - accept/remove
+    path("friend-requests/", FriendRequestsView.as_view(), name="friend_requests"),  # GET/POST/DELETE
 ]
