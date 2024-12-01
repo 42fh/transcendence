@@ -63,7 +63,7 @@ export function displayModalError(message) {
   }
 
   // Set the error message and styling
-  messageElement.style.color = "var(--color-text-error)";
+  messageElement.style.color = "var(--color-error)";
   messageElement.textContent = message;
 }
 

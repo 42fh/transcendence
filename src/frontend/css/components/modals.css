@@ -34,6 +34,22 @@
   margin-bottom: 1em;
 }
 
+.modal-button {
+  font-family: var(--button-font-family);
+  background: var(--button-background);
+  color: var(--button-color);
+  border: var(--button-border);
+  border-radius: var(--button-border-radius);
+  padding: var(--button-padding);
+  cursor: pointer;
+  transition: var(--button-transition);
+}
+
+.modal-button:hover {
+  background: var(--button-hover-background);
+  color: var(--button-hover-color);
+}
+
 /* Close Button */
 .modal-close-btn {
   position: absolute;
@@ -75,18 +91,26 @@
   font-family: "Press Start 2P", cursive;
 }
 
-/* Values for the friendship action buttons */
+/* Button Variants */
 .modal-button--primary {
   background: var(--color-background-inverse);
   color: var(--color-text-inverse);
+  border-color: var(--color-background-inverse);
 }
 
 .modal-button--secondary {
   background: var(--color-background);
-  border: 1px solid var(--color-border);
+  border-color: var(--color-border);
+  color: var(--color-text);
 }
 
 .modal-button--tertiary {
   background: none;
+  border: none;
   text-decoration: underline;
+  padding: 0.5rem;
+}
+
+.modal-button:hover {
+  transform: scale(1.05);
 }

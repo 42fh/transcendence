@@ -80,7 +80,7 @@ async function handleAuth(form, authFunction) {
       loadHomePage();
     }, 2000);
   } catch (error) {
-    messageElement.style.color = "var(--color-text-error)";
+    messageElement.style.color = "var(--color-error)";
     messageElement.innerText = error.message;
     console.error("Error submitting form:", error);
   }

@@ -38,31 +38,16 @@ body {
   line-height: 1;
 }
 
-/* Modal and Toast Button Styling */
-/* TODO: solve this */
-
-.modal-button,
-.toast-button {
-  font-family: "Press Start 2P", cursive;
-  background: transparent;
-  color: white;
-  border: 2px solid white;
-  border-radius: 10px;
-  padding: 0.8rem 1.5rem;
-  cursor: pointer;
-  transition: background-color 0.3s, color 0.3s;
-}
-
 .modal-button:hover,
 .toast-button:hover {
-  background: white;
-  color: black;
+  background: var(--button-hover-background);
+  color: var(--button-hover-color);
 }
 
 .modal-error,
 .toast-error {
-  color: red;
-  border-color: red;
+  color: var(--error-color);
+  border-color: var(--error-color);
 }
 
 /* Daniils */

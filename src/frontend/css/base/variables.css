@@ -5,17 +5,13 @@
   --color-primary: #ffffff; /* White - Primary interactive elements */
   --color-secondary: #cccccc; /* Light gray - Secondary elements */
   --color-border: rgba(255, 255, 255, 0.3); /* Semi-transparent white for borders */
+  --color-accent: #4caf50; /* Green - Highlights, success states */
 
   /* Text Colors */
   --color-text-primary: var(--color-primary); /* White - Main text */
   --color-text-secondary: #888888; /* Medium gray - Secondary text */
-  --color-text-error: #f44336; /* Red - Error messages */
-  --color-text-success: #4caf50; /* Green - Success messages */
+  --color-text-success: var(--color-accent); /* Green - Success messages */
   --color-text-inverse: #000000; /* Black text for light backgrounds */
-
-  /* Accent Colors */
-  --color-accent: #4caf50; /* Green - Highlights, success states */
-  --color-error: #f44336; /* Red - Error states */
 
   /* Overlays and Opacities */
   --color-overlay: rgba(255, 255, 255, 0.9); /* Light overlay for modals */
@@ -26,9 +22,13 @@
   --color-hover: rgba(255, 255, 255, 0.2); /* Hover state */
   --color-active: rgba(255, 255, 255, 0.3); /* Active state */
 
+  /* Error States */
+  --color-error: #f44336; /* Red - Error states and messages */
+  --color-error-border: 2px solid var(--color-error);
+
   /* Status Colors */
-  --color-status-online: #4caf50; /* Same as success color for now */
-  --color-status-offline: #888888; /* Using our secondary text color */
+  --color-status-online: var(--color-accent); /* Same as success color for now */
+  --color-status-offline: var(--color-text-secondary); /* Using our secondary text color */
 
   /* Typography */
   --font-family-primary: "Press Start 2P", cursive;
@@ -74,4 +74,17 @@
   --profile-section-spacing: var(--spacing-md);
   --profile-border-radius: var(--border-radius);
   --profile-section-bg: rgba(26, 26, 26, 0.9);
+
+  /* Button Styles */
+  --button-font-family: var(--font-family-primary);
+  --button-background: transparent;
+  --button-color: white;
+  --button-border: 2px solid white;
+  --button-border-radius: var(--border-radius);
+  --button-padding: 0.8rem 1.5rem;
+  --button-transition: background-color 0.3s, color 0.3s;
+
+  /* Button Hover States */
+  --button-hover-background: white;
+  --button-hover-color: black;
 }
