@@ -156,7 +156,11 @@ export async function uploadUserAvatar(userId, avatarFile) {
 
 export async function fetchUsers(page = 1, perPage = 10, search = "") {
   try {
-    const url = `${CONFIG.API_BASE_URL}/api/users/?page=${page}&per_page=${perPage}&search=${search}`;
+    const queryParams = new URLSearchParams();
+    queryParams.set("page", page);
+    queryParams.set("per_page", perPage);
+    if (search) queryParams.set("search", search);
+    const url = `${CONFIG.API_BASE_URL}/api/users/?${queryParams}`;
     console.log("Fetching users from:", url);
     const response = await fetch(url);
     console.log("Response status:", response.status);
@@ -175,7 +179,12 @@ export async function fetchFriends(page = 1, perPage = 10, search = "") {
   if (!userId) throw new Error("User ID not found");
   console.log("Fetching friends for user:", userId);
   try {
-    const url = `${CONFIG.API_BASE_URL}/api/users/${userId}/friends/?page=${page}&per_page=${perPage}&search=${search}`;
+    const queryParams = new URLSearchParams();
+    queryParams.set("page", page);
+    queryParams.set("per_page", perPage);
+    if (search) queryParams.set("search", search);
+    const url = `${CONFIG.API_BASE_URL}/api/users/friends/?${queryParams}`;
+
     console.log("Fetching from URL:", url);
     const response = await fetch(url);
     console.log("Response status:", response.status);

@@ -723,9 +723,11 @@ class FriendshipsView(View):
     DELETE: /api/friends/ {"user_id": "<uuid>"} - Remove an existing friend
     """
 
-    def get(self, request, user_id):
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Authentication required"}, status=401)
+
         try:
-            user = CustomUser.objects.get(id=user_id)
 
             # Get query parameters
             search = request.GET.get("search", "")
@@ -741,7 +743,7 @@ class FriendshipsView(View):
                 return JsonResponse({"error": "Invalid pagination parameters"}, status=400)
 
             # Get friends with search filter
-            friends = user.friends.filter(Q(username__icontains=search)).order_by("username")
+            friends = request.user.friends.filter(Q(username__icontains=search)).order_by("username")
 
             # Paginate results
             paginator = Paginator(friends, per_page)
