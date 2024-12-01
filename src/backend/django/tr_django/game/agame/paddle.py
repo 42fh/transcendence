@@ -3,7 +3,8 @@ import asyncio
 import msgpack
 import logging
 
-logger = logging.getLogger(__name__)    
+logger = logging.getLogger(__name__)
+
 
 async def update_paddle(self, player_index, position):
     """Update paddle position atomically with length-based limits"""

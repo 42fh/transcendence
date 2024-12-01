@@ -3,16 +3,17 @@ import msgpack
 import asyncio
 from .AGameManager import GameStateError
 import math
-from ..gamecordinator.GameCordinator import GameCordinator , RedisLock  
-import logging 
+from ..gamecordinator.GameCordinator import GameCordinator, RedisLock
+import logging
 
 logger = logging.getLogger(__name__)
+
 
 async def start_game(self):
     """Start game with process-safe checks"""
     try:
         min_players = self.settings.get("min_players")
-        await GameCordinator.set_to_waiting_game(self.game_id) 
+        await GameCordinator.set_to_waiting_game(self.game_id)
         while True:
             player_count = await self.redis_conn.scard(self.players_key)
             if player_count == 0:
@@ -20,7 +21,9 @@ async def start_game(self):
                 return
             if player_count >= min_players:
                 break
-            logger.info(f"{self.game_id}: Waiting for players... ({player_count}/{min_players})")
+            logger.info(
+                f"{self.game_id}: Waiting for players... ({player_count}/{min_players})"
+            )
             await self.channel_layer.group_send(
                 f"game_{self.game_id}",
                 {
@@ -30,11 +33,12 @@ async def start_game(self):
                     "message": f"Waiting for players... ({player_count}/{min_players})",
                 },
             )
-            
+
             await asyncio.sleep(1)
 
         await self.redis_conn.set(self.running_key, b"1")
-        logger.debug(f"""DEBUG    
+        logger.debug(
+            f"""DEBUG    
         sides: {self.num_sides} 
         paddles: {self.num_paddles} 
         mode: {self.game_mode} 
@@ -45,7 +49,8 @@ async def start_game(self):
         scale: {self.scale}
         normals:  {self.side_normals}         
         inner_boundary: {self.inner_boundary}  
-        ball_mov: {self.previous_movements, type(self.previous_movements)}""")
+        ball_mov: {self.previous_movements, type(self.previous_movements)}"""
+        )
         await GameCordinator.set_to_running_game(self.game_id)
         while await self.redis_conn.get(self.running_key) == b"1":
             game_over = await self.update_game()
@@ -57,6 +62,7 @@ async def start_game(self):
         logger.error(f"Error in start_game: {e}")
         await self.end_game()
         return
+
 
 async def end_game(self):
     """End game with process-safe cleanup"""
@@ -176,20 +182,14 @@ async def update_game(self):
             {
                 "type": "game_finished" if game_over else "game_state",
                 "game_state": new_state,
-                "winner": winner
+                "winner": winner,
             },
         )
         if len(cycle_data["events"]) > 0:
             await self.channel_layer.group_send(
                 f"game_{self.game_id}",
-                {
-                    "type": "game_collision",
-                    "data": cycle_data["events"]
-                },
+                {"type": "game_collision", "data": cycle_data["events"]},
             )
-            
-
-        
 
         return game_over
 
@@ -201,4 +201,3 @@ async def update_game(self):
         )
         await self.end_game()
         return False
-

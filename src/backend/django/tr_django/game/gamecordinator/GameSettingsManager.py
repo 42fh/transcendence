@@ -15,7 +15,8 @@ from .game_config import (
     DEFAULT_PLAYER,
 )
 import asyncio
-#from ..agame.AGameManager import AGameManager
+
+# from ..agame.AGameManager import AGameManager
 
 
 class GameSettingsError(Exception):
@@ -37,13 +38,13 @@ class GameSettingsManager:
         EnumGameMode.CLASSIC: {"default": DEFAULT_CLASSIC, "fixed": CLASSIC_FIXED},
     }
 
-
     def create_game_settings(
         self, user_settings: Dict[str, Any], game_id: str
     ) -> Dict[str, Any]:
         """ """
 
         from ..agame.AGameManager import AGameManager
+
         # 1. step: combine usersettings with default settings
         game_mode = user_settings.get("mode")
         mode_config = self.MODE_CONFIGS[EnumGameMode[game_mode.upper()]]
@@ -58,7 +59,7 @@ class GameSettingsManager:
         # 2. step: add player settings
         player_values = DEFAULT_PLAYER.copy()
         player_values["player_settings"]["paddle_length"] = settings["paddle_length"]
-    
+
         settings.update(player_values)
         print("settings after step 2: ", settings)
         try:
@@ -92,7 +93,10 @@ class GameSettingsManager:
             value = settings.get(field)
             if value is not None and not (float(0) < value <= float(1)):
                 raise GameSettingsError(f"{field} must be between 0 and 1")
-    # create selections for frontend 
-    
-    def create_selcetions_of_data(self, user_settings: Dict[str, Any]) -> Dict[str, Any]:
+
+    # create selections for frontend
+
+    def create_selcetions_of_data(
+        self, user_settings: Dict[str, Any]
+    ) -> Dict[str, Any]:
         pass

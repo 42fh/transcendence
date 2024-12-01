@@ -1,43 +1,42 @@
 import random
-from typing import List, Dict, Optional, Any, Tuple 
+from typing import List, Dict, Optional, Any, Tuple
 import math
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-
-
 @classmethod
 def calculate_inner(cls, settings: Dict[str, Any]) -> dict:
     """Calculate inner boundary using true perpendicular distances for any polygon"""
-    
-    vertices = settings.get("vertices")  
-    num_sides =  settings.get("sides") 
+
+    vertices = settings.get("vertices")
+    num_sides = settings.get("sides")
     side_normals = settings.get("normals")
     if not vertices or not side_normals:
-        raise ValueError("Vertices and normals must be calculated before inner boundary")
+        raise ValueError(
+            "Vertices and normals must be calculated before inner boundary"
+        )
 
     # Calculate perpendicular distances from center to each side
-    min_distance = float('inf')
-    
+    min_distance = float("inf")
+
     for i in range(num_sides):
         # Get start vertex of the side and its normal
         vertex = vertices[i]
         normal = side_normals[i]
-        
+
         # Calculate perpendicular distance using the dot product
         # Distance = dot product of any point on the line (vertex) with the normal
         distance = abs(vertex["x"] * normal["x"] + vertex["y"] * normal["y"])
-        
+
         # logger.debug(f"Side {i} perpendicular distance: {distance}")
         min_distance = min(min_distance, distance)
-    
+
     inner_boundary = float(min_distance)
     # logger.info(f"Final inner boundary: {inner_boundary}")
-    
-    return {"inner_boundary": inner_boundary}
 
+    return {"inner_boundary": inner_boundary}
 
 
 @classmethod
@@ -48,9 +47,9 @@ def calculate_sides_normals(cls, settings: Dict[str, Any]) -> dict:
     All values are stored as floats.
     Uses epsilon for float comparisons.
     """
-    vertices = settings.get("vertices")  
-    num_sides =  settings.get("sides") 
-    player_sides =  settings.get("players_sides") 
+    vertices = settings.get("vertices")
+    num_sides = settings.get("sides")
+    player_sides = settings.get("players_sides")
 
     if not vertices:
         raise ValueError("Vertices must be calculated before normals")
@@ -113,6 +112,7 @@ def calculate_sides_normals(cls, settings: Dict[str, Any]) -> dict:
 
     return {"normals": side_normals}
 
+
 #
 @classmethod
 def calculate_vertices(cls, settings: Dict[str, Any]) -> dict:
@@ -140,22 +140,23 @@ def calculate_vertices(cls, settings: Dict[str, Any]) -> dict:
                 {"x": base_radius * math.cos(angle), "y": base_radius * math.sin(angle)}
             )
     elif game_mode == "classic":
-        width = 1.0 
-        height = width * (9/16) 
-    
+        width = 1.0
+        height = width * (9 / 16)
+
         # Create rectangle vertices in clockwise order starting from top-left
         vertices = [
-            {"x": -width/2, "y": height/2},   # Top-left
-            {"x": width/2, "y": height/2},    # Top-right
-            {"x": width/2, "y": -height/2},   # Bottom-right
-            {"x": -width/2, "y": -height/2}   # Bottom-left
-    ]     
+            {"x": -width / 2, "y": height / 2},  # Top-left
+            {"x": width / 2, "y": height / 2},  # Top-right
+            {"x": width / 2, "y": -height / 2},  # Bottom-right
+            {"x": -width / 2, "y": -height / 2},  # Bottom-left
+        ]
 
-
-    elif game_mode ==  "irregular":  # irregular modes
+    elif game_mode == "irregular":  # irregular modes
         # Get ratios and adjustments based on specific irregular mode
         base_deform = calculate_base_deformation(num_sides, num_paddles, game_shape)
-        ratios, angle_adjustments = calculate_side_ratios(num_sides, game_shape, active_sides, base_deform)
+        ratios, angle_adjustments = calculate_side_ratios(
+            num_sides, game_shape, active_sides, base_deform
+        )
 
         # start_angle = -math.pi / 2
         angle_step = (2 * math.pi) / num_sides
@@ -177,13 +178,13 @@ def calculate_vertices(cls, settings: Dict[str, Any]) -> dict:
     for vertex in vertices:
         vertex["x"] *= scale
         vertex["y"] *= scale
-    return {"vertices" : vertices, "scale" : scale}  
+    return {"vertices": vertices, "scale": scale}
 
 
 @classmethod
 def initialize_ball_movements(cls, settings: Dict[str, Any]) -> dict:
     """Initialize the nested array structure for ball movement tracking"""
-    num_balls = settings.get("num_balls")        
+    num_balls = settings.get("num_balls")
     num_sides = settings.get("sides")
     previous_movements = [
         {
@@ -203,27 +204,35 @@ def initialize_ball_movements(cls, settings: Dict[str, Any]) -> dict:
     return {"ballmovements": previous_movements}
 
 
-
-def calculate_base_deformation(num_sides: int, num_paddles: int, game_shape: str) -> float:
+def calculate_base_deformation(
+    num_sides: int, num_paddles: int, game_shape: str
+) -> float:
     """Calculate deformation based on game mode"""
     player_density = num_paddles / num_sides
 
     if game_shape == "irregular":
         if num_sides == 4:
             return 4 / 3 if num_paddles == 2 else 1.0
-        return 1.0 + (player_density * 0.5) if player_density <= 0.5 else 1.25 - (player_density * 0.25)
-    
+        return (
+            1.0 + (player_density * 0.5)
+            if player_density <= 0.5
+            else 1.25 - (player_density * 0.25)
+        )
+
     if game_shape == "crazy":
         if num_sides == 4:
             return 4 / 3 if num_paddles == 2 else 1.0
         return 1.8 if player_density <= 0.5 else 1.5
-    
+
     if game_shape == "star":
         return 2.2 if player_density <= 0.3 else 1.8
-    
+
     return 1.0
 
-def calculate_side_ratios(num_sides: int, game_shape: str, active_sides: List[int], base_deform: float) -> Tuple[List[float], List[float]]:
+
+def calculate_side_ratios(
+    num_sides: int, game_shape: str, active_sides: List[int], base_deform: float
+) -> Tuple[List[float], List[float]]:
     """Calculate ratios based on game mode"""
     if game_shape == "crazy":
         return _calculate_crazy_ratios(num_sides, active_sides, base_deform)
@@ -231,7 +240,10 @@ def calculate_side_ratios(num_sides: int, game_shape: str, active_sides: List[in
         return _calculate_star_ratios(num_sides, active_sides, base_deform)
     return _calculate_regular_ratios(num_sides, active_sides, base_deform)
 
-def _calculate_regular_ratios(num_sides: int, active_sides: List[int], base_deform: float) -> Tuple[List[float], List[float]]:
+
+def _calculate_regular_ratios(
+    num_sides: int, active_sides: List[int], base_deform: float
+) -> Tuple[List[float], List[float]]:
     """Original balanced ratio calculation"""
     ratios = [1.0] * num_sides
     angle_adjustments = [0] * num_sides
@@ -265,8 +277,9 @@ def _calculate_regular_ratios(num_sides: int, active_sides: List[int], base_defo
     return ratios, angle_adjustments
 
 
-
-def _calculate_crazy_ratios(num_sides: int, active_sides: List[int], base_deform: float) -> Tuple[List[float], List[float]]:
+def _calculate_crazy_ratios(
+    num_sides: int, active_sides: List[int], base_deform: float
+) -> Tuple[List[float], List[float]]:
     """Extreme ratio calculation with sharp transitions"""
     ratios = [0.6] * num_sides
     angle_adjustments = [0] * num_sides
@@ -279,10 +292,9 @@ def _calculate_crazy_ratios(num_sides: int, active_sides: List[int], base_deform
     return ratios, angle_adjustments
 
 
-
-
-
-def _calculate_star_ratios(num_sides: int, active_sides: List[int], base_deform: float) -> Tuple[List[float], List[float]]:
+def _calculate_star_ratios(
+    num_sides: int, active_sides: List[int], base_deform: float
+) -> Tuple[List[float], List[float]]:
     """Star-like shape with alternating long and short sides"""
     ratios = [0.4 if i % 2 == 0 else 1.2 for i in range(num_sides)]
     angle_adjustments = [0] * num_sides
@@ -291,13 +303,3 @@ def _calculate_star_ratios(num_sides: int, active_sides: List[int], base_deform:
         ratios[side] = base_deform
 
     return ratios, angle_adjustments
-
-
-
-
-
-
-
-
-
-

@@ -1,4 +1,5 @@
-import logging 
+import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -6,33 +7,36 @@ logger = logging.getLogger(__name__)
 def calculate_inner_boundaries(self):
     """Calculate inner boundary using true perpendicular distances for any polygon"""
     if not self.vertices or not self.side_normals:
-        raise ValueError("Vertices and normals must be calculated before inner boundary")
+        raise ValueError(
+            "Vertices and normals must be calculated before inner boundary"
+        )
 
     # Calculate perpendicular distances from center to each side
-    min_distance = float('inf')
-    
+    min_distance = float("inf")
+
     for i in range(self.num_sides):
         # Get start vertex of the side and its normal
         vertex = self.vertices[i]
         normal = self.side_normals[i]
-        
+
         # Calculate perpendicular distance using the dot product
         # Distance = dot product of any point on the line (vertex) with the normal
         distance = abs(vertex["x"] * normal["x"] + vertex["y"] * normal["y"])
-        
+
         logger.debug(f"Side {i} perpendicular distance: {distance}")
         min_distance = min(min_distance, distance)
-    
+
     self.inner_boundary = float(min_distance)
     logger.info(f"{self.game_id}:Final inner boundary: {self.inner_boundary}")
-    
+
     return self.inner_boundary
 
 
 # Movement Phase
 # no Movement here
 # Boundary Phase
-# no Boundary here 
+# no Boundary here
+
 
 # Collision Candidate Phase
 def find_collision_candidate(self, ball, ball_index, new_state, distance_from_center):
@@ -294,5 +298,6 @@ def handle_wall(self, ball, collision_candidate, new_state):
         },
     }
 
+
 # Impact Processing Phase
-# no method    
+# no method

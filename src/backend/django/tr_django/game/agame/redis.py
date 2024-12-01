@@ -9,5 +9,3 @@ async def setup_connections(self):
         "redis://redis:6379/1", decode_responses=False
     )
     self.channel_layer = get_channel_layer()
-
-

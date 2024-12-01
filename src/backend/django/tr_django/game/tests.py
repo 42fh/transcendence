@@ -228,7 +228,9 @@ class GameModeTestCase(TestCase):
 class LegacyGameAppTestsRefactored(TestCase):
     def setUp(self):
         # Create users for testing
-        self.user = CustomUser.objects.create_user(username="testuser1", password="12345")
+        self.user = CustomUser.objects.create_user(
+            username="testuser1", password="12345"
+        )
         self.user_profile = CustomUser.objects.create_user(
             username="testuser2",
             password="testpass123",
@@ -279,8 +281,12 @@ class LegacyGameAppTestsRefactored(TestCase):
 class PlayerModelTest(TestCase):
     def setUp(self):
         # Create a CustomUser instance, which should automatically create a Player instance
-        self.user = CustomUser.objects.create_user(username="testuser", password="password123")
-        self.player = Player.objects.get(user=self.user)  # Retrieve the associated Player instance
+        self.user = CustomUser.objects.create_user(
+            username="testuser", password="password123"
+        )
+        self.player = Player.objects.get(
+            user=self.user
+        )  # Retrieve the associated Player instance
 
     def test_player_creation(self):
         """Test that a Player instance is created automatically when a CustomUser is created."""
@@ -292,7 +298,9 @@ class PlayerModelTest(TestCase):
         """Test that the Player instance has correct initial values for wins, losses, and display name."""
         self.assertEqual(self.player.wins, 0)
         self.assertEqual(self.player.losses, 0)
-        self.assertIsNone(self.player.display_name)  # Assuming display name starts as None
+        self.assertIsNone(
+            self.player.display_name
+        )  # Assuming display name starts as None
 
     def test_update_wins_losses_display_name(self):
         """Test updating the wins, losses, and display name fields."""
@@ -321,7 +329,9 @@ class PlayerModelTest(TestCase):
 class PlayerStatsTest(TestCase):
     def setUp(self):
         # Create a CustomUser and associated Player instance
-        self.user = CustomUser.objects.create_user(username="testuser", password="password123")
+        self.user = CustomUser.objects.create_user(
+            username="testuser", password="password123"
+        )
         self.player = Player.objects.get(user=self.user)
 
     def test_update_stats_wins(self):
@@ -373,8 +383,12 @@ class PlayerStatsTest(TestCase):
 class SingleGameTest(TestCase):
     def setUp(self):
         # Create test users and players
-        self.user1 = CustomUser.objects.create_user(username="player1", email="p1@test.com", password="test123")
-        self.user2 = CustomUser.objects.create_user(username="player2", email="p2@test.com", password="test123")
+        self.user1 = CustomUser.objects.create_user(
+            username="player1", email="p1@test.com", password="test123"
+        )
+        self.user2 = CustomUser.objects.create_user(
+            username="player2", email="p2@test.com", password="test123"
+        )
         # Get the automatically created Player instances
         self.player1 = Player.objects.get(user=self.user1)
         self.player2 = Player.objects.get(user=self.user2)
@@ -389,7 +403,9 @@ class SingleGameTest(TestCase):
         )
 
         # Create a SingleGame instance in DRAFT status
-        self.game = SingleGame.objects.create(mode=self.game_mode, status=SingleGame.DRAFT)  # Start in DRAFT status
+        self.game = SingleGame.objects.create(
+            mode=self.game_mode, status=SingleGame.DRAFT
+        )  # Start in DRAFT status
         # Add players to the game
         self.game.players.set([self.player1, self.player2])
 
@@ -439,7 +455,9 @@ class SingleGameTest(TestCase):
     def test_save_and_load_template(self):
         """Test saving game configuration as template"""
         # Create a game with specific configuration
-        template_game = SingleGame.objects.create(mode=self.game_mode, status=SingleGame.DRAFT)
+        template_game = SingleGame.objects.create(
+            mode=self.game_mode, status=SingleGame.DRAFT
+        )
 
         # Save as template
         template_name = "My Favorite Setup"
@@ -613,7 +631,9 @@ class TournamentTest(TestCase):
         )
 
         # Create a new user and get its automatically created player
-        user2 = CustomUser.objects.create_user(username="testuser2", email="test2@example.com", password="testpass123")
+        user2 = CustomUser.objects.create_user(
+            username="testuser2", email="test2@example.com", password="testpass123"
+        )
         player2 = Player.objects.get(user=user2)
         player2.display_name = "TestPlayer2"
         player2.save()
@@ -777,7 +797,9 @@ class TournamentCreationTest(TestCase):
         # Quarter-finals (Round 1)
         quarter_finals = []
         for i in range(0, 8, 2):
-            game = TournamentGame.objects.create(game_type=TournamentGame.GAME_TYPE_DIRECT_ELIMINATION)
+            game = TournamentGame.objects.create(
+                game_type=TournamentGame.GAME_TYPE_DIRECT_ELIMINATION
+            )
             PlayerGameStats.objects.create(tournament_game=game, player=players[i])
             PlayerGameStats.objects.create(tournament_game=game, player=players[i + 1])
             TournamentGameSchedule.objects.create(
@@ -826,8 +848,12 @@ class TournamentCreationTest(TestCase):
 
         # 2. Verify round progression
         for round_num in range(1, 4):
-            games_in_round = TournamentGameSchedule.objects.filter(tournament=tournament, round_number=round_num)
-            expected_games = 2 ** (3 - round_num)  # 4 games in round 1, 2 in round 2, 1 in round 3
+            games_in_round = TournamentGameSchedule.objects.filter(
+                tournament=tournament, round_number=round_num
+            )
+            expected_games = 2 ** (
+                3 - round_num
+            )  # 4 games in round 1, 2 in round 2, 1 in round 3
             self.assertEqual(games_in_round.count(), expected_games)
 
         # 3. Verify game relationships
@@ -836,11 +862,15 @@ class TournamentCreationTest(TestCase):
             self.assertIsNotNone(semi_final.source_game1)
             self.assertIsNotNone(semi_final.source_game2)
             self.assertEqual(
-                TournamentGameSchedule.objects.get(game=semi_final.source_game1).round_number,
+                TournamentGameSchedule.objects.get(
+                    game=semi_final.source_game1
+                ).round_number,
                 1,
             )
             self.assertEqual(
-                TournamentGameSchedule.objects.get(game=semi_final.source_game2).round_number,
+                TournamentGameSchedule.objects.get(
+                    game=semi_final.source_game2
+                ).round_number,
                 1,
             )
 
@@ -863,13 +893,17 @@ class TournamentCreationTest(TestCase):
                 return True
             if game.source_game1:
                 self.assertLess(
-                    TournamentGameSchedule.objects.get(game=game.source_game1).round_number,
+                    TournamentGameSchedule.objects.get(
+                        game=game.source_game1
+                    ).round_number,
                     TournamentGameSchedule.objects.get(game=game).round_number,
                 )
                 verify_game_tree(game.source_game1)
             if game.source_game2:
                 self.assertLess(
-                    TournamentGameSchedule.objects.get(game=game.source_game2).round_number,
+                    TournamentGameSchedule.objects.get(
+                        game=game.source_game2
+                    ).round_number,
                     TournamentGameSchedule.objects.get(game=game).round_number,
                 )
                 verify_game_tree(game.source_game2)
@@ -888,13 +922,17 @@ class TournamentAPITest(TestCase):
         Test that all tournaments from the fixture are loaded
         and returned correctly by the /tournaments/ endpoint.
         """
-        response = self.client.get(reverse("tournaments"))  # Use reverse for URL resolution
+        response = self.client.get(
+            reverse("tournaments")
+        )  # Use reverse for URL resolution
         self.assertEqual(response.status_code, 200)
 
         # Parse response data
         data = response.json()
         self.assertIn("tournaments", data)
-        self.assertEqual(len(data["tournaments"]), 4)  # Ensure all 4 tournaments are returned
+        self.assertEqual(
+            len(data["tournaments"]), 4
+        )  # Ensure all 4 tournaments are returned
 
     def test_tournament_data_format(self):
         """
@@ -904,15 +942,24 @@ class TournamentAPITest(TestCase):
         data = response.json()["tournaments"]
 
         # Retrieve the first tournament from the database
-        tournament = Tournament.objects.get(pk=1)  # Assumes pk=1 is the first tournament in the fixture
+        tournament = Tournament.objects.get(
+            pk=1
+        )  # Assumes pk=1 is the first tournament in the fixture
         first_tournament = data[0]
 
         # Validate fields dynamically
         self.assertEqual(first_tournament["name"], tournament.name)
         self.assertEqual(first_tournament["type"], tournament.type.replace("_", " "))
-        self.assertEqual(first_tournament["startingDate"], tournament.start_date.isoformat())
-        self.assertEqual(first_tournament["closingRegistrationDate"], tournament.end_registration.isoformat())
-        self.assertEqual(first_tournament["isTimetableAvailable"], bool(tournament.games.exists()))
+        self.assertEqual(
+            first_tournament["startingDate"], tournament.start_date.isoformat()
+        )
+        self.assertEqual(
+            first_tournament["closingRegistrationDate"],
+            tournament.end_registration.isoformat(),
+        )
+        self.assertEqual(
+            first_tournament["isTimetableAvailable"], bool(tournament.games.exists())
+        )
         self.assertIsNone(first_tournament["timetable"])
 
     def test_get_single_tournament(self):
@@ -926,7 +973,10 @@ class TournamentAPITest(TestCase):
         data = response.json()
         self.assertEqual(data["id"], 1)
         self.assertEqual(data["name"], "WIMBLEDON")
-        self.assertEqual(data["description"], "Lorem ipsum dolor sit amet, consectetur adipiscing elit")
+        self.assertEqual(
+            data["description"],
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+        )
         self.assertEqual(data["start_registration"], "2024-07-01T00:00:00+00:00")
         self.assertEqual(data["end_registration"], "2024-07-19T23:59:00+00:00")
         self.assertEqual(data["type"], "single_elimination")
@@ -998,7 +1048,9 @@ class TournamentAPITest(TestCase):
 
         # Send POST request
         response = self.client.post(
-            reverse("tournaments"), data=json.dumps(tournament_data), content_type="application/json"
+            reverse("tournaments"),
+            data=json.dumps(tournament_data),
+            content_type="application/json",
         )
 
         # Check response
@@ -1031,8 +1083,12 @@ class TournamentEnrollmentTest(TestCase):
         self.client = self.client_class()
 
         # Create a test user and get its automatically created Player
-        self.user = CustomUser.objects.create_user(username="testuser", password="testpass123")
-        self.client.login(username="testuser", password="testpass123")  # Add this line to login the test user
+        self.user = CustomUser.objects.create_user(
+            username="testuser", password="testpass123"
+        )
+        self.client.login(
+            username="testuser", password="testpass123"
+        )  # Add this line to login the test user
 
         # Get the automatically created Player instance instead of creating a new one
         self.player = Player.objects.get(user=self.user)
@@ -1057,16 +1113,32 @@ class TournamentEnrollmentTest(TestCase):
 
     def test_enrollment_success(self):
         """Test successful enrollment in tournament"""
-        response = self.client.post(reverse("tournament_enrollment", kwargs={"tournament_id": self.tournament.id}))
+        response = self.client.post(
+            reverse(
+                "tournament_enrollment", kwargs={"tournament_id": self.tournament.id}
+            )
+        )
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(self.tournament.participants.filter(user__username=self.user.username).exists())
+        self.assertTrue(
+            self.tournament.participants.filter(
+                user__username=self.user.username
+            ).exists()
+        )
 
     def test_enrollment_duplicate(self):
         """Test enrolling when already enrolled"""
         # First enrollment
-        self.client.post(reverse("tournament_enrollment", kwargs={"tournament_id": self.tournament.id}))
+        self.client.post(
+            reverse(
+                "tournament_enrollment", kwargs={"tournament_id": self.tournament.id}
+            )
+        )
         # Try to enroll again
-        response = self.client.post(reverse("tournament_enrollment", kwargs={"tournament_id": self.tournament.id}))
+        response = self.client.post(
+            reverse(
+                "tournament_enrollment", kwargs={"tournament_id": self.tournament.id}
+            )
+        )
         self.assertEqual(response.status_code, 400)
 
     def test_leave_success(self):
@@ -1074,18 +1146,32 @@ class TournamentEnrollmentTest(TestCase):
         # First enroll
         self.tournament.participants.add(self.player)
         # Then leave
-        response = self.client.delete(reverse("tournament_enrollment", kwargs={"tournament_id": self.tournament.id}))
+        response = self.client.delete(
+            reverse(
+                "tournament_enrollment", kwargs={"tournament_id": self.tournament.id}
+            )
+        )
         self.assertEqual(response.status_code, 200)
-        self.assertFalse(self.tournament.participants.filter(user__username=self.user.username).exists())
+        self.assertFalse(
+            self.tournament.participants.filter(
+                user__username=self.user.username
+            ).exists()
+        )
 
     def test_leave_not_enrolled(self):
         """Test leaving when not enrolled"""
-        response = self.client.delete(reverse("tournament_enrollment", kwargs={"tournament_id": self.tournament.id}))
+        response = self.client.delete(
+            reverse(
+                "tournament_enrollment", kwargs={"tournament_id": self.tournament.id}
+            )
+        )
         self.assertEqual(response.status_code, 400)
 
     def test_invalid_tournament(self):
         """Test enrollment with invalid tournament ID"""
-        response = self.client.post(reverse("tournament_enrollment", kwargs={"tournament_id": 9999}))
+        response = self.client.post(
+            reverse("tournament_enrollment", kwargs={"tournament_id": 9999})
+        )
         self.assertEqual(response.status_code, 404)
 
 
@@ -1093,7 +1179,9 @@ class TournamentServiceTest(TestCase):
     fixtures = ["tournaments.json"]
 
     def setUp(self):
-        self.tournament = Tournament.objects.get(pk=4)  # Get tournament with games from fixture
+        self.tournament = Tournament.objects.get(
+            pk=4
+        )  # Get tournament with games from fixture
 
     def test_build_tournament_data_structure(self):
         """Test that tournament data is built correctly"""
@@ -1104,13 +1192,22 @@ class TournamentServiceTest(TestCase):
         self.assertEqual(data["description"], self.tournament.description)
         self.assertEqual(data["type"], self.tournament.type.replace("_", " "))
         self.assertEqual(
-            data["startingDate"], self.tournament.start_date.isoformat() if self.tournament.start_date else None
+            data["startingDate"],
+            (
+                self.tournament.start_date.isoformat()
+                if self.tournament.start_date
+                else None
+            ),
         )
-        self.assertEqual(data["closingRegistrationDate"], self.tournament.end_registration.isoformat())
+        self.assertEqual(
+            data["closingRegistrationDate"],
+            self.tournament.end_registration.isoformat(),
+        )
 
         # Test participants
         self.assertEqual(
-            data["participants"], list(self.tournament.participants.values_list("display_name", flat=True))
+            data["participants"],
+            list(self.tournament.participants.values_list("display_name", flat=True)),
         )
 
         # Test timetable availability
@@ -1156,4 +1253,3 @@ class TournamentServiceTest(TestCase):
         data = build_tournament_data(tournament)
         self.assertFalse(data["isTimetableAvailable"])
         self.assertIsNone(data["timetable"])
-

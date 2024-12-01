@@ -9,7 +9,6 @@ from .GameSettingsManager import GameSettingsManager
 import math
 
 
-
 class RedisLock:
     def __init__(self, redis_conn: redis.Redis, lock_key: str, timeout: int = 10):
         self.redis_conn = redis_conn

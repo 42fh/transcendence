@@ -30,8 +30,6 @@ class CircularPongGame(AGameManager):
         self.combo_timeout = 1.5  # seconds
         self.highest_recorded_speed = 0
 
-
-
     @classmethod
     def calculate_vertices(cls, settings: Dict[str, Any]) -> dict:
         """
@@ -39,9 +37,9 @@ class CircularPongGame(AGameManager):
         Each sector is an arc segment of the circle.
         """
 
-        active_sides = settings.get("players_sides")                                                      
-        game_mode = settings.get("mode")                                                                  
-        num_sides = settings.get("sides")                                                                 
+        active_sides = settings.get("players_sides")
+        game_mode = settings.get("mode")
+        num_sides = settings.get("sides")
 
         if not active_sides:
             raise ValueError(
@@ -87,7 +85,7 @@ class CircularPongGame(AGameManager):
                 }
             )
         logger.debug(f"vertices{vertices}")
-        return {"vertices" : vertices, "scale" : float(1.0)} 
+        return {"vertices": vertices, "scale": float(1.0)}
 
     @classmethod
     def calculate_sides_normals(cls, settings: Dict[str, Any]) -> dict:
@@ -96,10 +94,10 @@ class CircularPongGame(AGameManager):
         For a circle, normals always point towards the center.
         """
         logger.debug(f"begin normal: {settings}")
-        active_sides = settings.get("players_sides")                                                      
-        game_mode = settings.get("mode")                                                                  
-        num_sides = settings.get("sides")                                                                 
-        vertices = settings.get("vertices")     
+        active_sides = settings.get("players_sides")
+        game_mode = settings.get("mode")
+        num_sides = settings.get("sides")
+        vertices = settings.get("vertices")
 
         if not vertices:
             raise ValueError("Vertices must be calculated before normals")
@@ -147,8 +145,8 @@ class CircularPongGame(AGameManager):
         - Last angular position
         - Last radial distance
         """
-        num_balls = settings.get("num_balls")                                                             
-        num_sides = settings.get("sides") 
+        num_balls = settings.get("num_balls")
+        num_sides = settings.get("sides")
         previous_movements = [
             {
                 "sides": [
@@ -170,7 +168,6 @@ class CircularPongGame(AGameManager):
             for _ in range(num_balls)
         ]
         return {"ballmovements": previous_movements}
-
 
     async def apply_game_settings(self):
         """Apply game-specific values from settings"""
@@ -385,13 +382,12 @@ class CircularPongGame(AGameManager):
         relative_angle = current_angle
         if relative_angle < sector_start:
             relative_angle += 2 * math.pi
-            
+
         # Calculate how far the ball is from this sector's arc
         angular_distance = min(
-            abs(relative_angle - sector_start),
-            abs(relative_angle - sector_end)
+            abs(relative_angle - sector_start), abs(relative_angle - sector_end)
         )
-        
+
         # Use both radial and angular components to determine true distance to sector
         if sector_start <= relative_angle <= sector_end:
             # Ball is directly in front of sector - use radial distance
@@ -401,7 +397,7 @@ class CircularPongGame(AGameManager):
             # Convert angular distance to arc length at current radius
             arc_length = angular_distance * radial_distance
             current_distance = math.sqrt(
-                (self.outer_boundary - radial_distance)**2 + arc_length**2
+                (self.outer_boundary - radial_distance) ** 2 + arc_length**2
             )
         # Calculate radial velocity (positive means moving outward)
         radial_velocity = (
@@ -444,7 +440,7 @@ class CircularPongGame(AGameManager):
             )
             return {
                 "is_approaching": True,
-                "current_distance": float( current_distance),
+                "current_distance": float(current_distance),
                 "signed_distance": float(signed_distance),
                 "approach_speed": float(radial_velocity),
                 "type": "approaching",
@@ -463,7 +459,7 @@ class CircularPongGame(AGameManager):
                 )
                 return {
                     "is_approaching": False,
-                    "current_distance": float( current_distance),
+                    "current_distance": float(current_distance),
                     "signed_distance": float(signed_distance),
                     "approach_speed": float(abs(radial_velocity)),
                     "type": "moving_away",
@@ -485,7 +481,7 @@ class CircularPongGame(AGameManager):
                         # Don't update movement tracking for tunneling
                         return {
                             "is_approaching": True,
-                            "current_distance": float( current_distance),
+                            "current_distance": float(current_distance),
                             "signed_distance": float(signed_distance),
                             "approach_speed": float(abs(radial_velocity)),
                             "type": "tunneling",
@@ -501,7 +497,7 @@ class CircularPongGame(AGameManager):
                 )
                 return {
                     "is_approaching": False,
-                    "current_distance": float( current_distance),
+                    "current_distance": float(current_distance),
                     "signed_distance": float(signed_distance),
                     "approach_speed": float(abs(radial_velocity)),
                     "type": "moving_away",

@@ -1,6 +1,8 @@
 import math
 import logging
+
 logger = logging.getLogger(__name__)
+
 
 def calculate_side_normals(self):
     """
@@ -38,7 +40,9 @@ def calculate_side_normals(self):
             # Handle degenerate case (zero-length side)
             normal_x = float(1.0)  # Default to unit vector pointing right
             normal_y = float(0.0)
-            logging.debug(f"{self.game_id}:Warning: Near-zero length side detected at index {i}")
+            logging.debug(
+                f"{self.game_id}:Warning: Near-zero length side detected at index {i}"
+            )
 
         # Check if normal points inward
         # Take the midpoint of the side
@@ -68,6 +72,7 @@ def calculate_side_normals(self):
             }
         )
 
+
 #
 def calculate_polygon_vertices(self):
     """Calculate vertices based on number of sides and player distribution"""
@@ -90,16 +95,15 @@ def calculate_polygon_vertices(self):
             )
     elif self.game_mode == "classic":
         width = 1.0  # Base width
-        height = width * (9/16)  # Height based on 16:9 ratio
-    
+        height = width * (9 / 16)  # Height based on 16:9 ratio
+
         # Create rectangle vertices in clockwise order starting from top-left
         vertices = [
-            {"x": -width/2, "y": height/2},   # Top-left
-            {"x": width/2, "y": height/2},    # Top-right
-            {"x": width/2, "y": -height/2},   # Bottom-right
-            {"x": -width/2, "y": -height/2}   # Bottom-left
-    ]     
-
+            {"x": -width / 2, "y": height / 2},  # Top-left
+            {"x": width / 2, "y": height / 2},  # Top-right
+            {"x": width / 2, "y": -height / 2},  # Bottom-right
+            {"x": -width / 2, "y": -height / 2},  # Bottom-left
+        ]
 
     else:  # irregular modes
         # Get ratios and adjustments based on specific irregular mode
@@ -146,7 +150,6 @@ def get_player_side_indices(self):
         # For 2 players, prefer opposite sides
         half_sides = self.num_sides // 2
         player_sides = [0, half_sides]  # Top and bottom when possible
-
 
     else:
         half_sides = self.num_sides // 2

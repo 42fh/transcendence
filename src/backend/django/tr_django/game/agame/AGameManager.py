@@ -7,15 +7,16 @@ import time
 import random
 from channels.layers import get_channel_layer
 from .method_decorators import *
-from ..gamecordinator.GameCordinator import GameCordinator as GC      
+from ..gamecordinator.GameCordinator import GameCordinator as GC
 from asgiref.sync import async_to_sync
 import logging
 
-logger = logging.getLogger(__name__) 
+logger = logging.getLogger(__name__)
 
-  
+
 class GameStateError(Exception):
     """Custom exception for game state validation errors"""
+
     pass
 
 
@@ -23,10 +24,10 @@ class GameStateError(Exception):
 @add_player
 @add_paddle
 @add_initial
-@add_gamestate  
-@add_game_physics  
-@add_game_logic  
-@add_game_flow  
+@add_gamestate
+@add_game_physics
+@add_game_logic
+@add_game_flow
 @add_cls_methods
 class AGameManager:
 
@@ -37,7 +38,6 @@ class AGameManager:
         self.redis_conn = None
         self.channel_layer = None
         self._is_closed = False
-
 
         # Redis keys
         self.state_key = f"game_state:{game_id}"
@@ -52,9 +52,9 @@ class AGameManager:
         # game physic
         self.outer_boundary = float(1.0)
         self.inner_boundary = None
-        self.scale =float(1.0)        
+        self.scale = float(1.0)
 
-    # TODO: redis closing -> till register_game_type are the methods to solve this-> not solved yet  
+    # TODO: redis closing -> till register_game_type are the methods to solve this-> not solved yet
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         try:
             await self.async_close()
@@ -63,19 +63,18 @@ class AGameManager:
         return False
 
     async def async_close(self):
-        if hasattr(self, 'redis_conn'):
+        if hasattr(self, "redis_conn"):
             await self.redis_conn.aclose()
             self._is_closed = True
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
         return False
-    
+
     def close(self):
-        if hasattr(self, 'redis_conn') and not self._is_closed:
+        if hasattr(self, "redis_conn") and not self._is_closed:
             async_to_sync(self.redis_conn.aclose)()
             self._is_closed = True
-
 
     @property
     def is_closed(self):
@@ -111,7 +110,7 @@ class AGameManager:
             # Create instance
             game_class = cls.get_game_class(game_type)
             instance = game_class(game_id)
-            
+
             # get settings
             async with await GC.get_redis_binary(GC.REDIS_GAME_URL) as redis_game:
                 raw_settings = await redis_game.get(f"game_settings:{game_id}")
@@ -120,7 +119,7 @@ class AGameManager:
                     instance.settings = game_settings
                 else:
                     raise ValueError("Existing game found but no settings available")
-        
+
             # Now initialize with settings in place
             await instance.initialize()
             return instance
@@ -139,13 +138,7 @@ class AGameManager:
             logger.error(f"Error checking running state: {e}")
             return False
 
-
-
-
-
-
-
-    async  def apply_game_settings(self):
+    async def apply_game_settings(self):
         """Method to be implemented by subclasses"""
         raise NotImplementedError("Subclasses must implement this method")
 
@@ -167,9 +160,10 @@ class AGameManager:
     # no method in Baseclass
 
     # Collision Candidate Phase
-    def  find_collision_candidate(ball, ball_index, new_state, distance_from_center):
+    def find_collision_candidate(ball, ball_index, new_state, distance_from_center):
         """Method to be implemented by subclasses"""
         raise NotImplementedError("Subclasses must implement this method")
+
     # Collision Verification Phase
 
     def handle_tunneling(self, ball, sector_info, state):
@@ -179,7 +173,8 @@ class AGameManager:
     def handle_paddle(self, ball, current_sector, state):
         """Method to be implemented by subclasses"""
         raise NotImplementedError("Subclasses must implement this method")
-#
+
+    #
     def handle_wall(self, ball, current_sector, state):
         """Method to be implemented by subclasses"""
         raise NotImplementedError("Subclasses must implement this method")

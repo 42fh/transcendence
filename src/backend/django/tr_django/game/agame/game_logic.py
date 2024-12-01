@@ -5,6 +5,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 def initialize_cycle_data(self):
     """Initialize data structure for tracking events and metrics"""
     return {
@@ -13,6 +14,7 @@ def initialize_cycle_data(self):
         "state_updates": {},
         "collision_data": [],
     }
+
 
 async def game_logic(self, current_state):
     """
@@ -55,7 +57,9 @@ async def game_logic(self, current_state):
             )
             if not verified_collision:
                 continue
-            logger.debug(f"{self.game_id}/ball[{ball_index}]colliosion: {verified_collision}")
+            logger.debug(
+                f"{self.game_id}/ball[{ball_index}]colliosion: {verified_collision}"
+            )
             # Impact Processing Phase
             collision_result = self.collision_handler(
                 verified_collision, ball, new_state, cycle_data, ball_index
@@ -68,7 +72,8 @@ async def game_logic(self, current_state):
         return new_state, game_over, cycle_data
     except Exception as e:
         logger.error(f"Error in game_logic: {e}")
-        raise 
+        raise
+
 
 # Movement Phase
 def move_ball(self, ball):
@@ -499,7 +504,7 @@ def collision_miss(self, collision, ball, new_state, cycle_data, ball_index):
 
     # Step 3: Reset ball and collect physics data
     self.reset_ball(ball, ball_index)
-    
+
     # Step 3: Create collision event data
     event_data = {
         "collision": collision,

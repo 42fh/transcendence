@@ -1,6 +1,8 @@
 # Collision Candidate Phase
 import logging
+
 logger = logging.getLogger(__name__)
+
 
 def check_ball_movement_relative_to_side(self, ball, side_index, ball_index, new_state):
     # Get normal from class's side_normals

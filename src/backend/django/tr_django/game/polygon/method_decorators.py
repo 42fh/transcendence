@@ -37,21 +37,25 @@ def add_abstract_implementations(cls):
 
 
 def add_cls_methods(cls):
-    
-    from .game_setup import calculate_vertices, calculate_sides_normals, calculate_inner, initialize_ball_movements
+
+    from .game_setup import (
+        calculate_vertices,
+        calculate_sides_normals,
+        calculate_inner,
+        initialize_ball_movements,
+    )
 
     methods = {
         "calculate_vertices": calculate_vertices,
         "calculate_sides_normals": calculate_sides_normals,
-        "calculate_inner" : calculate_inner,
-        "initialize_ball_movements": initialize_ball_movements
+        "calculate_inner": calculate_inner,
+        "initialize_ball_movements": initialize_ball_movements,
     }
 
     for name, method in methods.items():
         setattr(cls, name, method)
 
     return cls
-
 
 
 def add_overwriten_methods(cls):

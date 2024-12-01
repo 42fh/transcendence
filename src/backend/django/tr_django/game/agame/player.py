@@ -1,33 +1,30 @@
 import asyncio
 import msgpack
 import redis.asyncio as redis
-from ..gamecordinator.GameCordinator import GameCordinator as GC 
+from ..gamecordinator.GameCordinator import GameCordinator as GC
 from ..gamecordinator.GameCordinator import RedisLock
 import logging
 
-logger = logging.getLogger(__name__)    
+logger = logging.getLogger(__name__)
+
 
 async def add_player(self, player_id):
     """Add player with process-safe checks"""
     try:
-        
-        
+
         max_players = self.settings.get("num_players")
 
         # Check if player exists
         if await self.redis_conn.sismember(self.players_key, player_id):
             return {
-                "role" : "spectator",
-                "message" : "Already connected - switching to spectator mode"
+                "role": "spectator",
+                "message": "Already connected - switching to spectator mode",
             }
 
         # Check if game is full
         current_count = await self.redis_conn.scard(self.players_key)
         if current_count >= max_players:
-            return {
-                "role" : "spectator",
-                "message" : "Game full - joining as spectator"
-            }
+            return {"role": "spectator", "message": "Game full - joining as spectator"}
         # Check if player is booked
         booking_key = f"{GC.BOOKED_USER_PREFIX}{player_id}:{self.game_id}"
         logger.debug(f"{booking_key}")
@@ -35,7 +32,7 @@ async def add_player(self, player_id):
         if not is_booked:
             return {
                 "role": "spectator",
-                "message": "No booking found - joining as spectator"
+                "message": "No booking found - joining as spectator",
             }
 
         async with RedisLock(self.redis_conn, f"{self.game_id}_player_situation"):
@@ -44,11 +41,11 @@ async def add_player(self, player_id):
             pipeline.delete(booking_key)
             await pipeline.execute()
             return {
-                "role" : "player",
+                "role": "player",
                 "index": current_count,
                 "position": 0.5,
                 "settings": self.settings.get("player_settings"),
-                "message" : "Successfully joined as player"
+                "message": "Successfully joined as player",
             }
 
     except Exception as e:
@@ -65,10 +62,11 @@ async def remove_player(self, player_id):
 
                 min_players = self.settings.get("min_players")
 
-                
                 if remaining < min_players:
                     await self.end_game()
-                await self.redis_conn.delete(f"{GC.PLAYING_USER_PREFIX}{player_id}:{self.game_id}")
+                await self.redis_conn.delete(
+                    f"{GC.PLAYING_USER_PREFIX}{player_id}:{self.game_id}"
+                )
                 return True
         return False
 

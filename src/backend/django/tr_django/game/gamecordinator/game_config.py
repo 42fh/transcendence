@@ -47,11 +47,7 @@ DEFAULT_IRREGULAR = {
     "shape": "irregular",
 }
 
-CIRCULAR_FIXED = {
-    "type": "circular",
-    "mode": "circular",
-    "shape": "circular"
-}
+CIRCULAR_FIXED = {"type": "circular", "mode": "circular", "shape": "circular"}
 
 DEFAULT_CIRCULAR = {
     "num_players": int(2),

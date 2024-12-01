@@ -5,7 +5,8 @@ import random
 import math
 import logging
 
-logger = logging.getLogger(__name__)    
+logger = logging.getLogger(__name__)
+
 
 async def initialize(self, create_new=False):
     """Initialize game resources"""
@@ -19,13 +20,10 @@ async def initialize(self, create_new=False):
         self.active_sides = self.settings.get("players_sides")
         self.vertices = self.settings.get("vertices")
         self.scale = self.settings.get("scale")
-        self.side_normals = self.settings.get("normals")        
-        self.inner_boundary = self.settings.get("inner_boundary") 
-        self.previous_movements  = self.settings.get("ballmovements")
-        
+        self.side_normals = self.settings.get("normals")
+        self.inner_boundary = self.settings.get("inner_boundary")
+        self.previous_movements = self.settings.get("ballmovements")
+
     except Exception as e:
         logger.error(f"Error in initialize: {e}")
         raise
-
-
-        
