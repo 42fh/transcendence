@@ -9,8 +9,10 @@ https://docs.djangoproject.com/en/5.1/howto/deployment/asgi/
 
 import os
 from django.core.asgi import get_asgi_application
+import django
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tr_django.settings")
+django.setup()
 
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack

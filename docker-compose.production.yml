@@ -7,8 +7,8 @@ services:
         python tr_django/manage.py migrate &&
         python tr_django/manage.py seed_users &&
         python tr_django/manage.py seed_tournaments &&
-        daphne -b 0.0.0.0 -p 8000 tr_django/tr_django.asgi:application"
-    # command: sh -c "python tr_django/manage.py migrate && daphne -b 0.0.0.0 -p 8000 tr_django.asgi:application"
+        cd tr_django &&
+        daphne -b 0.0.0.0 -p 8000 tr_django.asgi:application" 
     ports:
       - "443:443"
     environment:
