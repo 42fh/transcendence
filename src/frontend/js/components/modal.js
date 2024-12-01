@@ -1,31 +1,56 @@
+/**
+ * Renders a modal dialog using two templates:
+ * 1. Base Modal Template (modal-template):
+ *    - Provides the modal structure (overlay, container, close button)
+ *    - Must have elements with IDs: modal-overlay, modal-content, close-modal
+ *
+ * 2. Content Template (specified by templateId):
+ *    - Contains the specific modal content
+ *    - Will be inserted into modal-content
+ *
+ * @param {string} templateId - ID of the template containing modal content
+ * @param {Object} options - Modal configuration
+ * @param {Function} [options.setup] - Function to populate modal content
+ * @param {Function} [options.submitHandler] - Function to handle form submissions
+ */
+
 export function renderModal(templateId, options = {}) {
-  const modalTemplate = document.getElementById("modal-template");
-  const contentTemplate = document.getElementById(templateId);
-  if (!modalTemplate || !contentTemplate) {
+  console.log("Starting renderModal with templateId:", templateId);
+  const baseModalTemplate = document.getElementById("modal-template");
+  const specificContentTemplate = document.getElementById(templateId);
+  if (!baseModalTemplate || !specificContentTemplate) {
     console.error("Modal template or content template not found");
     return;
   }
 
   // Remove any existing modal
-  const existingModal = document.getElementById("modal-overlay");
-  if (existingModal) {
-    existingModal.remove();
+  const existingModalOverlay = document.getElementById("modal-overlay");
+  if (existingModalOverlay) {
+    existingModalOverlay.remove();
   }
 
   // Clone and add modal to DOM
-  const modalElement = document.importNode(modalTemplate.content, true);
-  document.body.appendChild(modalElement);
+  const baseModalNodes = document.importNode(baseModalTemplate.content, true);
+  document.body.appendChild(baseModalNodes);
+  console.log("Base modal element added to body");
 
   // Get modal content element and clear it
-  const modalContent = document.getElementById("modal-content");
-  modalContent.innerHTML = ""; // Clear existing content
+  const modalContentContainer = document.getElementById("modal-content");
+  console.log("Modal content element found:", !!modalContentContainer);
+  modalContentContainer.innerHTML = ""; // Clear existing content
 
   // Clone and append new content
-  const contentElement = document.importNode(contentTemplate.content, true);
-  modalContent.appendChild(contentElement);
+  const specificContentNodes = document.importNode(specificContentTemplate.content, true);
+  modalContentContainer.appendChild(specificContentNodes);
+
+  // Run setup function if provided
+  if (options.setup) {
+    options.setup(modalContentContainer);
+  }
 
   // Add event listeners
   const closeBtn = document.getElementById("close-modal");
+  console.log("Close button found:", !!closeBtn);
   closeBtn.addEventListener("click", closeModal);
 
   const modalOverlay = document.getElementById("modal-overlay");
@@ -43,6 +68,7 @@ export function renderModal(templateId, options = {}) {
   // Show modal
   modalOverlay.style.visibility = "visible";
   modalOverlay.style.opacity = "1";
+  console.log("Modal display complete");
 }
 
 export function displayModalError(message) {

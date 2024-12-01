@@ -13,6 +13,7 @@ import {
   withdrawFriendRequest,
   rejectFriendRequest,
 } from "../services/friendshipService.js";
+import { renderModal, closeModal } from "../components/modal.js";
 
 export async function loadProfilePage(userId = null, addToHistory = true) {
   const loggedInUserId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
