@@ -24,7 +24,6 @@ export function loadChatRoom(chatPartner) {
   initializeChatRoom(chatPartner);
 }
 
-
 function sendMessage(chatPartner) {
   const messageInput = document.getElementById("chat-message-input");
   const message = messageInput.value.trim();
@@ -47,15 +46,17 @@ function sendMessage(chatPartner) {
 }
 
 function initializeChatRoom(chatPartner) {
-  const currentUser = localStorage.getItem("username");
-  console.log("Current User:", currentUser);
+  const currentUser = localStorage.getItem("pongUsername");
+  console.log("pongUsername:", currentUser);
   console.log("Chat Partner:", chatPartner);
 
   const roomName = [currentUser, chatPartner].sort().join("_");
   console.log("Room Name:", roomName);
 
   const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-  const wsUrl = `${wsProtocol}//${window.location.hostname}:${8000}/ws/chat/${roomName}/`;
+  const wsUrl = `${wsProtocol}//${
+    window.location.hostname
+  }:${8000}/ws/chat/${roomName}/`;
 
   const chatMessages = document.getElementById("chat-messages");
   const messageInput = document.getElementById("chat-message-input");
@@ -69,7 +70,9 @@ function initializeChatRoom(chatPartner) {
 
         const messageDiv = messageElement.querySelector(".chat-message");
         messageDiv.classList.add(`chat-message-${type}`);
-        const usernameElement = messageDiv.querySelector(".chat-message-username");
+        const usernameElement = messageDiv.querySelector(
+          ".chat-message-username"
+        );
         const textElement = messageDiv.querySelector(".chat-message-text");
 
         usernameElement.textContent = `${username}:`;
@@ -81,12 +84,20 @@ function initializeChatRoom(chatPartner) {
       handleWebSocketMessage: (data) => {
         console.log("Received WebSocket message:", data);
         if (data.type === "chat_message") {
-          handlers.addMessageToChat(data.username, data.message, data.username === currentUser ? "self" : "other");
+          handlers.addMessageToChat(
+            data.username,
+            data.message,
+            data.username === currentUser ? "self" : "other"
+          );
         } else if (data.type === "message_history") {
           console.log("Processing history messages:", data.messages);
           data.messages.forEach((msg) => {
             console.log("Processing message:", msg);
-            handlers.addMessageToChat(msg.username, msg.message, msg.username === currentUser ? "self" : "other");
+            handlers.addMessageToChat(
+              msg.username,
+              msg.message,
+              msg.username === currentUser ? "self" : "other"
+            );
           });
           handlers.state.messageHistoryLoaded = true;
         }

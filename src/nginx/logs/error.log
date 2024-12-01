@@ -1,0 +1,1233 @@
+2024/11/28 20:10:00 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/11/28 20:10:00 [notice] 1#1: using the "epoll" event method
+2024/11/28 20:10:00 [notice] 1#1: nginx/1.26.1
+2024/11/28 20:10:00 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/11/28 20:10:00 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/11/28 20:10:00 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/11/28 20:10:00 [notice] 1#1: start worker processes
+2024/11/28 20:10:00 [notice] 1#1: start worker process 27
+2024/11/28 20:10:00 [notice] 1#1: start worker process 28
+2024/11/28 20:10:00 [notice] 1#1: start worker process 29
+2024/11/28 20:10:00 [notice] 1#1: start worker process 30
+2024/11/28 20:10:00 [notice] 1#1: start worker process 31
+2024/11/29 09:42:24 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/11/29 09:42:24 [notice] 1#1: using the "epoll" event method
+2024/11/29 09:42:24 [notice] 1#1: nginx/1.26.1
+2024/11/29 09:42:24 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/11/29 09:42:24 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/11/29 09:42:24 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/11/29 09:42:24 [notice] 1#1: start worker processes
+2024/11/29 09:42:24 [notice] 1#1: start worker process 28
+2024/11/29 09:42:24 [notice] 1#1: start worker process 29
+2024/11/29 09:42:24 [notice] 1#1: start worker process 30
+2024/11/29 09:42:24 [notice] 1#1: start worker process 31
+2024/11/29 09:42:24 [notice] 1#1: start worker process 32
+2024/11/29 10:12:58 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/11/29 10:12:58 [notice] 31#31: gracefully shutting down
+2024/11/29 10:12:58 [notice] 31#31: exiting
+2024/11/29 10:12:58 [notice] 28#28: gracefully shutting down
+2024/11/29 10:12:58 [notice] 28#28: exiting
+2024/11/29 10:12:58 [notice] 32#32: gracefully shutting down
+2024/11/29 10:12:58 [notice] 30#30: gracefully shutting down
+2024/11/29 10:12:58 [notice] 30#30: exiting
+2024/11/29 10:12:58 [notice] 29#29: gracefully shutting down
+2024/11/29 10:12:58 [notice] 29#29: exiting
+2024/11/29 10:12:58 [notice] 31#31: exit
+2024/11/29 10:12:58 [notice] 28#28: exit
+2024/11/29 10:12:58 [notice] 32#32: exiting
+2024/11/29 10:12:58 [notice] 30#30: exit
+2024/11/29 10:12:58 [notice] 29#29: exit
+2024/11/29 10:12:58 [notice] 32#32: exit
+2024/11/29 10:12:58 [notice] 1#1: signal 17 (SIGCHLD) received from 31
+2024/11/29 10:12:58 [notice] 1#1: worker process 31 exited with code 0
+2024/11/29 10:12:58 [notice] 1#1: worker process 32 exited with code 0
+2024/11/29 10:12:58 [notice] 1#1: signal 29 (SIGIO) received
+2024/11/29 10:12:58 [notice] 1#1: signal 17 (SIGCHLD) received from 32
+2024/11/29 10:12:58 [notice] 1#1: signal 17 (SIGCHLD) received from 28
+2024/11/29 10:12:58 [notice] 1#1: worker process 28 exited with code 0
+2024/11/29 10:12:58 [notice] 1#1: worker process 30 exited with code 0
+2024/11/29 10:12:58 [notice] 1#1: signal 29 (SIGIO) received
+2024/11/29 10:12:58 [notice] 1#1: signal 17 (SIGCHLD) received from 29
+2024/11/29 10:12:58 [notice] 1#1: worker process 29 exited with code 0
+2024/11/29 10:12:58 [notice] 1#1: exit
+2024/11/29 10:13:28 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/11/29 10:13:28 [notice] 1#1: using the "epoll" event method
+2024/11/29 10:13:28 [notice] 1#1: nginx/1.26.1
+2024/11/29 10:13:28 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/11/29 10:13:28 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/11/29 10:13:28 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/11/29 10:13:28 [notice] 1#1: start worker processes
+2024/11/29 10:13:28 [notice] 1#1: start worker process 28
+2024/11/29 10:13:28 [notice] 1#1: start worker process 29
+2024/11/29 10:13:28 [notice] 1#1: start worker process 30
+2024/11/29 10:13:28 [notice] 1#1: start worker process 31
+2024/11/29 10:13:28 [notice] 1#1: start worker process 32
+2024/11/29 10:14:44 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/11/29 10:14:44 [notice] 31#31: gracefully shutting down
+2024/11/29 10:14:44 [notice] 29#29: gracefully shutting down
+2024/11/29 10:14:44 [notice] 29#29: exiting
+2024/11/29 10:14:44 [notice] 30#30: gracefully shutting down
+2024/11/29 10:14:44 [notice] 30#30: exiting
+2024/11/29 10:14:44 [notice] 32#32: gracefully shutting down
+2024/11/29 10:14:44 [notice] 28#28: gracefully shutting down
+2024/11/29 10:14:44 [notice] 31#31: exiting
+2024/11/29 10:14:44 [notice] 29#29: exit
+2024/11/29 10:14:44 [notice] 30#30: exit
+2024/11/29 10:14:44 [notice] 32#32: exiting
+2024/11/29 10:14:44 [notice] 28#28: exiting
+2024/11/29 10:14:44 [notice] 31#31: exit
+2024/11/29 10:14:44 [notice] 32#32: exit
+2024/11/29 10:14:44 [notice] 28#28: exit
+2024/11/29 10:14:44 [notice] 1#1: signal 17 (SIGCHLD) received from 29
+2024/11/29 10:14:44 [notice] 1#1: worker process 29 exited with code 0
+2024/11/29 10:14:44 [notice] 1#1: worker process 30 exited with code 0
+2024/11/29 10:14:44 [notice] 1#1: worker process 31 exited with code 0
+2024/11/29 10:14:44 [notice] 1#1: signal 29 (SIGIO) received
+2024/11/29 10:14:44 [notice] 1#1: signal 17 (SIGCHLD) received from 31
+2024/11/29 10:14:44 [notice] 1#1: signal 17 (SIGCHLD) received from 32
+2024/11/29 10:14:44 [notice] 1#1: worker process 28 exited with code 0
+2024/11/29 10:14:44 [notice] 1#1: worker process 32 exited with code 0
+2024/11/29 10:14:44 [notice] 1#1: exit
+2024/11/29 10:22:57 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/11/29 10:22:57 [notice] 1#1: using the "epoll" event method
+2024/11/29 10:22:57 [notice] 1#1: nginx/1.26.1
+2024/11/29 10:22:57 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/11/29 10:22:57 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/11/29 10:22:57 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/11/29 10:22:57 [notice] 1#1: start worker processes
+2024/11/29 10:22:57 [notice] 1#1: start worker process 28
+2024/11/29 10:22:57 [notice] 1#1: start worker process 29
+2024/11/29 10:22:57 [notice] 1#1: start worker process 30
+2024/11/29 10:22:57 [notice] 1#1: start worker process 31
+2024/11/29 10:22:57 [notice] 1#1: start worker process 32
+2024/11/29 10:29:09 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/11/29 10:29:09 [notice] 30#30: gracefully shutting down
+2024/11/29 10:29:09 [notice] 30#30: exiting
+2024/11/29 10:29:09 [notice] 31#31: gracefully shutting down
+2024/11/29 10:29:09 [notice] 31#31: exiting
+2024/11/29 10:29:09 [notice] 32#32: gracefully shutting down
+2024/11/29 10:29:09 [notice] 32#32: exiting
+2024/11/29 10:29:09 [notice] 28#28: gracefully shutting down
+2024/11/29 10:29:09 [notice] 28#28: exiting
+2024/11/29 10:29:09 [notice] 28#28: exit
+2024/11/29 10:29:09 [notice] 29#29: gracefully shutting down
+2024/11/29 10:29:09 [notice] 30#30: exit
+2024/11/29 10:29:09 [notice] 31#31: exit
+2024/11/29 10:29:09 [notice] 32#32: exit
+2024/11/29 10:29:09 [notice] 29#29: exiting
+2024/11/29 10:29:09 [notice] 29#29: exit
+2024/11/29 10:29:09 [notice] 1#1: signal 17 (SIGCHLD) received from 30
+2024/11/29 10:29:09 [notice] 1#1: worker process 30 exited with code 0
+2024/11/29 10:29:09 [notice] 1#1: signal 29 (SIGIO) received
+2024/11/29 10:29:09 [notice] 1#1: signal 17 (SIGCHLD) received from 32
+2024/11/29 10:29:09 [notice] 1#1: worker process 32 exited with code 0
+2024/11/29 10:29:09 [notice] 1#1: worker process 28 exited with code 0
+2024/11/29 10:29:09 [notice] 1#1: worker process 29 exited with code 0
+2024/11/29 10:29:09 [notice] 1#1: worker process 31 exited with code 0
+2024/11/29 10:29:09 [notice] 1#1: exit
+2024/11/29 10:29:54 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/11/29 10:29:54 [notice] 1#1: using the "epoll" event method
+2024/11/29 10:29:54 [notice] 1#1: nginx/1.26.1
+2024/11/29 10:29:54 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/11/29 10:29:54 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/11/29 10:29:54 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/11/29 10:29:54 [notice] 1#1: start worker processes
+2024/11/29 10:29:54 [notice] 1#1: start worker process 28
+2024/11/29 10:29:54 [notice] 1#1: start worker process 29
+2024/11/29 10:29:54 [notice] 1#1: start worker process 30
+2024/11/29 10:29:54 [notice] 1#1: start worker process 31
+2024/11/29 10:29:54 [notice] 1#1: start worker process 32
+2024/11/29 10:44:07 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/11/29 10:44:07 [notice] 28#28: gracefully shutting down
+2024/11/29 10:44:07 [notice] 30#30: gracefully shutting down
+2024/11/29 10:44:07 [notice] 29#29: gracefully shutting down
+2024/11/29 10:44:07 [notice] 29#29: exiting
+2024/11/29 10:44:07 [notice] 31#31: gracefully shutting down
+2024/11/29 10:44:07 [notice] 31#31: exiting
+2024/11/29 10:44:07 [notice] 32#32: gracefully shutting down
+2024/11/29 10:44:07 [notice] 32#32: exiting
+2024/11/29 10:44:07 [notice] 28#28: exiting
+2024/11/29 10:44:07 [notice] 30#30: exiting
+2024/11/29 10:44:07 [notice] 29#29: exit
+2024/11/29 10:44:07 [notice] 31#31: exit
+2024/11/29 10:44:07 [notice] 32#32: exit
+2024/11/29 10:44:07 [notice] 28#28: exit
+2024/11/29 10:44:07 [notice] 30#30: exit
+2024/11/29 10:44:07 [notice] 1#1: signal 17 (SIGCHLD) received from 29
+2024/11/29 10:44:07 [notice] 1#1: worker process 28 exited with code 0
+2024/11/29 10:44:07 [notice] 1#1: worker process 29 exited with code 0
+2024/11/29 10:44:07 [notice] 1#1: worker process 31 exited with code 0
+2024/11/29 10:44:07 [notice] 1#1: worker process 32 exited with code 0
+2024/11/29 10:44:07 [notice] 1#1: worker process 30 exited with code 0
+2024/11/29 10:44:07 [notice] 1#1: exit
+2024/11/29 10:44:31 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/11/29 10:44:31 [notice] 1#1: using the "epoll" event method
+2024/11/29 10:44:31 [notice] 1#1: nginx/1.26.1
+2024/11/29 10:44:31 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/11/29 10:44:31 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/11/29 10:44:31 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/11/29 10:44:31 [notice] 1#1: start worker processes
+2024/11/29 10:44:31 [notice] 1#1: start worker process 27
+2024/11/29 10:44:31 [notice] 1#1: start worker process 28
+2024/11/29 10:44:31 [notice] 1#1: start worker process 29
+2024/11/29 10:44:31 [notice] 1#1: start worker process 30
+2024/11/29 10:44:31 [notice] 1#1: start worker process 31
+2024/11/29 10:47:00 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/11/29 10:47:00 [notice] 29#29: gracefully shutting down
+2024/11/29 10:47:00 [notice] 28#28: gracefully shutting down
+2024/11/29 10:47:00 [notice] 28#28: exiting
+2024/11/29 10:47:00 [notice] 27#27: gracefully shutting down
+2024/11/29 10:47:00 [notice] 27#27: exiting
+2024/11/29 10:47:00 [notice] 31#31: gracefully shutting down
+2024/11/29 10:47:00 [notice] 30#30: gracefully shutting down
+2024/11/29 10:47:00 [notice] 30#30: exiting
+2024/11/29 10:47:00 [notice] 29#29: exiting
+2024/11/29 10:47:00 [notice] 28#28: exit
+2024/11/29 10:47:00 [notice] 27#27: exit
+2024/11/29 10:47:00 [notice] 31#31: exiting
+2024/11/29 10:47:00 [notice] 30#30: exit
+2024/11/29 10:47:00 [notice] 29#29: exit
+2024/11/29 10:47:00 [notice] 31#31: exit
+2024/11/29 10:47:00 [notice] 1#1: signal 17 (SIGCHLD) received from 28
+2024/11/29 10:47:00 [notice] 1#1: worker process 28 exited with code 0
+2024/11/29 10:47:00 [notice] 1#1: signal 29 (SIGIO) received
+2024/11/29 10:47:00 [notice] 1#1: signal 17 (SIGCHLD) received from 31
+2024/11/29 10:47:00 [notice] 1#1: worker process 31 exited with code 0
+2024/11/29 10:47:00 [notice] 1#1: signal 29 (SIGIO) received
+2024/11/29 10:47:00 [notice] 1#1: signal 17 (SIGCHLD) received from 27
+2024/11/29 10:47:00 [notice] 1#1: worker process 27 exited with code 0
+2024/11/29 10:47:00 [notice] 1#1: worker process 29 exited with code 0
+2024/11/29 10:47:00 [notice] 1#1: worker process 30 exited with code 0
+2024/11/29 10:47:00 [notice] 1#1: exit
+2024/11/29 10:47:58 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/11/29 10:47:58 [notice] 1#1: using the "epoll" event method
+2024/11/29 10:47:58 [notice] 1#1: nginx/1.26.1
+2024/11/29 10:47:58 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/11/29 10:47:58 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/11/29 10:47:58 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/11/29 10:47:58 [notice] 1#1: start worker processes
+2024/11/29 10:47:58 [notice] 1#1: start worker process 28
+2024/11/29 10:47:58 [notice] 1#1: start worker process 29
+2024/11/29 10:47:58 [notice] 1#1: start worker process 30
+2024/11/29 10:47:58 [notice] 1#1: start worker process 31
+2024/11/29 10:47:58 [notice] 1#1: start worker process 32
+2024/11/29 11:04:13 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/11/29 11:04:13 [notice] 28#28: gracefully shutting down
+2024/11/29 11:04:13 [notice] 30#30: gracefully shutting down
+2024/11/29 11:04:13 [notice] 31#31: gracefully shutting down
+2024/11/29 11:04:13 [notice] 32#32: gracefully shutting down
+2024/11/29 11:04:13 [notice] 29#29: gracefully shutting down
+2024/11/29 11:04:13 [notice] 28#28: exiting
+2024/11/29 11:04:13 [notice] 30#30: exiting
+2024/11/29 11:04:13 [notice] 31#31: exiting
+2024/11/29 11:04:13 [notice] 32#32: exiting
+2024/11/29 11:04:13 [notice] 29#29: exiting
+2024/11/29 11:04:13 [notice] 28#28: exit
+2024/11/29 11:04:13 [notice] 30#30: exit
+2024/11/29 11:04:13 [notice] 31#31: exit
+2024/11/29 11:04:13 [notice] 32#32: exit
+2024/11/29 11:04:13 [notice] 29#29: exit
+2024/11/29 11:04:13 [notice] 1#1: signal 17 (SIGCHLD) received from 30
+2024/11/29 11:04:13 [notice] 1#1: worker process 30 exited with code 0
+2024/11/29 11:04:13 [notice] 1#1: signal 29 (SIGIO) received
+2024/11/29 11:04:13 [notice] 1#1: signal 17 (SIGCHLD) received from 32
+2024/11/29 11:04:13 [notice] 1#1: worker process 32 exited with code 0
+2024/11/29 11:04:13 [notice] 1#1: worker process 31 exited with code 0
+2024/11/29 11:04:13 [notice] 1#1: signal 29 (SIGIO) received
+2024/11/29 11:04:13 [notice] 1#1: signal 17 (SIGCHLD) received from 31
+2024/11/29 11:04:13 [notice] 1#1: signal 17 (SIGCHLD) received from 28
+2024/11/29 11:04:13 [notice] 1#1: worker process 28 exited with code 0
+2024/11/29 11:04:13 [notice] 1#1: worker process 29 exited with code 0
+2024/11/29 11:04:13 [notice] 1#1: exit
+2024/11/29 11:06:08 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/11/29 11:06:08 [notice] 1#1: using the "epoll" event method
+2024/11/29 11:06:08 [notice] 1#1: nginx/1.26.1
+2024/11/29 11:06:08 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/11/29 11:06:08 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/11/29 11:06:08 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/11/29 11:06:08 [notice] 1#1: start worker processes
+2024/11/29 11:06:08 [notice] 1#1: start worker process 28
+2024/11/29 11:06:08 [notice] 1#1: start worker process 29
+2024/11/29 11:06:08 [notice] 1#1: start worker process 30
+2024/11/29 11:06:08 [notice] 1#1: start worker process 31
+2024/11/29 11:06:08 [notice] 1#1: start worker process 32
+2024/11/29 11:10:40 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/11/29 11:10:40 [notice] 28#28: gracefully shutting down
+2024/11/29 11:10:40 [notice] 30#30: gracefully shutting down
+2024/11/29 11:10:40 [notice] 29#29: gracefully shutting down
+2024/11/29 11:10:40 [notice] 29#29: exiting
+2024/11/29 11:10:40 [notice] 31#31: gracefully shutting down
+2024/11/29 11:10:40 [notice] 31#31: exiting
+2024/11/29 11:10:40 [notice] 32#32: gracefully shutting down
+2024/11/29 11:10:40 [notice] 28#28: exiting
+2024/11/29 11:10:40 [notice] 30#30: exiting
+2024/11/29 11:10:40 [notice] 29#29: exit
+2024/11/29 11:10:40 [notice] 31#31: exit
+2024/11/29 11:10:40 [notice] 32#32: exiting
+2024/11/29 11:10:40 [notice] 32#32: exit
+2024/11/29 11:10:40 [notice] 28#28: exit
+2024/11/29 11:10:40 [notice] 30#30: exit
+2024/11/29 11:10:40 [notice] 1#1: signal 17 (SIGCHLD) received from 29
+2024/11/29 11:10:40 [notice] 1#1: worker process 29 exited with code 0
+2024/11/29 11:10:40 [notice] 1#1: worker process 31 exited with code 0
+2024/11/29 11:10:40 [notice] 1#1: signal 29 (SIGIO) received
+2024/11/29 11:10:40 [notice] 1#1: signal 17 (SIGCHLD) received from 32
+2024/11/29 11:10:40 [notice] 1#1: worker process 28 exited with code 0
+2024/11/29 11:10:40 [notice] 1#1: worker process 30 exited with code 0
+2024/11/29 11:10:40 [notice] 1#1: worker process 32 exited with code 0
+2024/11/29 11:10:40 [notice] 1#1: exit
+2024/11/29 11:12:27 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/11/29 11:12:27 [notice] 1#1: using the "epoll" event method
+2024/11/29 11:12:27 [notice] 1#1: nginx/1.26.1
+2024/11/29 11:12:27 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/11/29 11:12:27 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/11/29 11:12:27 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/11/29 11:12:27 [notice] 1#1: start worker processes
+2024/11/29 11:12:27 [notice] 1#1: start worker process 28
+2024/11/29 11:12:27 [notice] 1#1: start worker process 29
+2024/11/29 11:12:27 [notice] 1#1: start worker process 30
+2024/11/29 11:12:27 [notice] 1#1: start worker process 31
+2024/11/29 11:12:27 [notice] 1#1: start worker process 32
+2024/11/29 11:14:43 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/11/29 11:14:43 [notice] 28#28: gracefully shutting down
+2024/11/29 11:14:43 [notice] 29#29: gracefully shutting down
+2024/11/29 11:14:43 [notice] 30#30: gracefully shutting down
+2024/11/29 11:14:43 [notice] 30#30: exiting
+2024/11/29 11:14:43 [notice] 31#31: gracefully shutting down
+2024/11/29 11:14:43 [notice] 32#32: gracefully shutting down
+2024/11/29 11:14:43 [notice] 28#28: exiting
+2024/11/29 11:14:43 [notice] 29#29: exiting
+2024/11/29 11:14:43 [notice] 30#30: exit
+2024/11/29 11:14:43 [notice] 31#31: exiting
+2024/11/29 11:14:43 [notice] 32#32: exiting
+2024/11/29 11:14:43 [notice] 28#28: exit
+2024/11/29 11:14:43 [notice] 29#29: exit
+2024/11/29 11:14:43 [notice] 31#31: exit
+2024/11/29 11:14:43 [notice] 32#32: exit
+2024/11/29 11:14:43 [notice] 1#1: signal 17 (SIGCHLD) received from 30
+2024/11/29 11:14:43 [notice] 1#1: worker process 30 exited with code 0
+2024/11/29 11:14:43 [notice] 1#1: signal 29 (SIGIO) received
+2024/11/29 11:14:43 [notice] 1#1: signal 17 (SIGCHLD) received from 28
+2024/11/29 11:14:43 [notice] 1#1: worker process 28 exited with code 0
+2024/11/29 11:14:43 [notice] 1#1: worker process 29 exited with code 0
+2024/11/29 11:14:43 [notice] 1#1: worker process 32 exited with code 0
+2024/11/29 11:14:43 [notice] 1#1: signal 29 (SIGIO) received
+2024/11/29 11:14:43 [notice] 1#1: signal 17 (SIGCHLD) received from 32
+2024/11/29 11:14:43 [notice] 1#1: signal 17 (SIGCHLD) received from 31
+2024/11/29 11:14:43 [notice] 1#1: worker process 31 exited with code 0
+2024/11/29 11:14:43 [notice] 1#1: exit
+2024/11/29 16:44:32 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/11/29 16:44:32 [notice] 1#1: using the "epoll" event method
+2024/11/29 16:44:32 [notice] 1#1: nginx/1.26.1
+2024/11/29 16:44:32 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/11/29 16:44:32 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/11/29 16:44:32 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/11/29 16:44:32 [notice] 1#1: start worker processes
+2024/11/29 16:44:32 [notice] 1#1: start worker process 29
+2024/11/29 16:44:32 [notice] 1#1: start worker process 30
+2024/11/29 16:44:32 [notice] 1#1: start worker process 31
+2024/11/29 16:44:32 [notice] 1#1: start worker process 32
+2024/11/29 16:44:32 [notice] 1#1: start worker process 33
+2024/11/29 16:44:45 [error] 32#32: *4 open() "/usr/share/nginx/html/js/views/home.js" failed (2: No such file or directory), client: 192.168.65.1, server: localhost, request: "GET /js/views/home.js HTTP/1.1", host: "localhost:8080", referrer: "http://localhost:8080/js/main.js"
+2024/11/29 16:44:55 [error] 32#32: *4 open() "/usr/share/nginx/html/js/views/home.js" failed (2: No such file or directory), client: 192.168.65.1, server: localhost, request: "GET /js/views/home.js HTTP/1.1", host: "localhost:8080", referrer: "http://localhost:8080/js/main.js"
+2024/11/29 16:45:12 [error] 32#32: *6 open() "/usr/share/nginx/html/js/views/home.js" failed (2: No such file or directory), client: 192.168.65.1, server: localhost, request: "GET /js/views/home.js HTTP/1.1", host: "localhost:8080", referrer: "http://localhost:8080/js/main.js"
+2024/11/29 16:45:13 [error] 29#29: *1 open() "/usr/share/nginx/html/js/views/home.js" failed (2: No such file or directory), client: 192.168.65.1, server: localhost, request: "GET /js/views/home.js HTTP/1.1", host: "localhost:8080", referrer: "http://localhost:8080/js/main.js"
+2024/11/29 16:45:16 [error] 33#33: *5 open() "/usr/share/nginx/html/js/views/home.js" failed (2: No such file or directory), client: 192.168.65.1, server: localhost, request: "GET /js/views/home.js HTTP/1.1", host: "localhost:8080", referrer: "http://localhost:8080/js/main.js"
+2024/11/29 16:45:41 [error] 33#33: *5 open() "/usr/share/nginx/html/js/views/home.js" failed (2: No such file or directory), client: 192.168.65.1, server: localhost, request: "GET /js/views/home.js HTTP/1.1", host: "localhost:8080", referrer: "http://localhost:8080/js/main.js"
+2024/11/29 16:57:15 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/11/29 16:57:15 [notice] 29#29: gracefully shutting down
+2024/11/29 16:57:15 [notice] 29#29: exiting
+2024/11/29 16:57:15 [notice] 30#30: gracefully shutting down
+2024/11/29 16:57:15 [notice] 30#30: exiting
+2024/11/29 16:57:15 [notice] 33#33: gracefully shutting down
+2024/11/29 16:57:15 [notice] 33#33: exiting
+2024/11/29 16:57:15 [notice] 32#32: gracefully shutting down
+2024/11/29 16:57:15 [notice] 32#32: exiting
+2024/11/29 16:57:15 [notice] 31#31: gracefully shutting down
+2024/11/29 16:57:15 [notice] 29#29: exit
+2024/11/29 16:57:15 [notice] 30#30: exit
+2024/11/29 16:57:15 [notice] 33#33: exit
+2024/11/29 16:57:15 [notice] 32#32: exit
+2024/11/29 16:57:15 [notice] 31#31: exiting
+2024/11/29 16:57:15 [notice] 31#31: exit
+2024/11/29 16:57:15 [notice] 1#1: signal 17 (SIGCHLD) received from 31
+2024/11/29 16:57:15 [notice] 1#1: worker process 31 exited with code 0
+2024/11/29 16:57:15 [notice] 1#1: signal 29 (SIGIO) received
+2024/11/29 16:57:15 [notice] 1#1: signal 17 (SIGCHLD) received from 29
+2024/11/29 16:57:15 [notice] 1#1: worker process 29 exited with code 0
+2024/11/29 16:57:15 [notice] 1#1: signal 29 (SIGIO) received
+2024/11/29 16:57:15 [notice] 1#1: signal 17 (SIGCHLD) received from 32
+2024/11/29 16:57:15 [notice] 1#1: worker process 30 exited with code 0
+2024/11/29 16:57:15 [notice] 1#1: worker process 32 exited with code 0
+2024/11/29 16:57:15 [notice] 1#1: worker process 33 exited with code 0
+2024/11/29 16:57:15 [notice] 1#1: exit
+2024/11/29 16:57:34 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/11/29 16:57:34 [notice] 1#1: using the "epoll" event method
+2024/11/29 16:57:34 [notice] 1#1: nginx/1.26.1
+2024/11/29 16:57:34 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/11/29 16:57:34 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/11/29 16:57:34 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/11/29 16:57:34 [notice] 1#1: start worker processes
+2024/11/29 16:57:34 [notice] 1#1: start worker process 28
+2024/11/29 16:57:34 [notice] 1#1: start worker process 29
+2024/11/29 16:57:34 [notice] 1#1: start worker process 30
+2024/11/29 16:57:34 [notice] 1#1: start worker process 31
+2024/11/29 16:57:34 [notice] 1#1: start worker process 32
+2024/11/29 16:59:40 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/11/29 16:59:40 [notice] 28#28: gracefully shutting down
+2024/11/29 16:59:40 [notice] 28#28: exiting
+2024/11/29 16:59:40 [notice] 31#31: gracefully shutting down
+2024/11/29 16:59:40 [notice] 31#31: exiting
+2024/11/29 16:59:40 [notice] 30#30: gracefully shutting down
+2024/11/29 16:59:40 [notice] 29#29: gracefully shutting down
+2024/11/29 16:59:40 [notice] 29#29: exiting
+2024/11/29 16:59:40 [notice] 32#32: gracefully shutting down
+2024/11/29 16:59:40 [notice] 32#32: exiting
+2024/11/29 16:59:40 [notice] 28#28: exit
+2024/11/29 16:59:40 [notice] 31#31: exit
+2024/11/29 16:59:40 [notice] 30#30: exiting
+2024/11/29 16:59:40 [notice] 29#29: exit
+2024/11/29 16:59:40 [notice] 32#32: exit
+2024/11/29 16:59:40 [notice] 30#30: exit
+2024/11/29 16:59:40 [notice] 1#1: signal 17 (SIGCHLD) received from 28
+2024/11/29 16:59:40 [notice] 1#1: worker process 28 exited with code 0
+2024/11/29 16:59:40 [notice] 1#1: signal 29 (SIGIO) received
+2024/11/29 16:59:40 [notice] 1#1: signal 17 (SIGCHLD) received from 30
+2024/11/29 16:59:40 [notice] 1#1: worker process 30 exited with code 0
+2024/11/29 16:59:40 [notice] 1#1: signal 29 (SIGIO) received
+2024/11/29 16:59:40 [notice] 1#1: signal 17 (SIGCHLD) received from 31
+2024/11/29 16:59:40 [notice] 1#1: worker process 29 exited with code 0
+2024/11/29 16:59:40 [notice] 1#1: worker process 31 exited with code 0
+2024/11/29 16:59:40 [notice] 1#1: worker process 32 exited with code 0
+2024/11/29 16:59:40 [notice] 1#1: exit
+2024/11/29 17:00:17 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/11/29 17:00:17 [notice] 1#1: using the "epoll" event method
+2024/11/29 17:00:17 [notice] 1#1: nginx/1.26.1
+2024/11/29 17:00:17 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/11/29 17:00:17 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/11/29 17:00:17 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/11/29 17:00:17 [notice] 1#1: start worker processes
+2024/11/29 17:00:17 [notice] 1#1: start worker process 27
+2024/11/29 17:00:17 [notice] 1#1: start worker process 28
+2024/11/29 17:00:17 [notice] 1#1: start worker process 29
+2024/11/29 17:00:17 [notice] 1#1: start worker process 30
+2024/11/29 17:00:17 [notice] 1#1: start worker process 31
+2024/11/30 12:55:41 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/11/30 12:55:41 [notice] 1#1: using the "epoll" event method
+2024/11/30 12:55:41 [notice] 1#1: nginx/1.26.1
+2024/11/30 12:55:41 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/11/30 12:55:41 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/11/30 12:55:41 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/11/30 12:55:41 [notice] 1#1: start worker processes
+2024/11/30 12:55:41 [notice] 1#1: start worker process 28
+2024/11/30 12:55:41 [notice] 1#1: start worker process 29
+2024/11/30 12:55:41 [notice] 1#1: start worker process 30
+2024/11/30 12:55:41 [notice] 1#1: start worker process 31
+2024/11/30 12:55:41 [notice] 1#1: start worker process 32
+2024/11/30 12:58:58 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/11/30 12:58:58 [notice] 28#28: gracefully shutting down
+2024/11/30 12:58:58 [notice] 31#31: gracefully shutting down
+2024/11/30 12:58:58 [notice] 32#32: gracefully shutting down
+2024/11/30 12:58:58 [notice] 30#30: gracefully shutting down
+2024/11/30 12:58:58 [notice] 29#29: gracefully shutting down
+2024/11/30 12:58:58 [notice] 28#28: exiting
+2024/11/30 12:58:58 [notice] 31#31: exiting
+2024/11/30 12:58:58 [notice] 32#32: exiting
+2024/11/30 12:58:58 [notice] 30#30: exiting
+2024/11/30 12:58:58 [notice] 29#29: exiting
+2024/11/30 12:58:58 [notice] 28#28: exit
+2024/11/30 12:58:58 [notice] 31#31: exit
+2024/11/30 12:58:58 [notice] 32#32: exit
+2024/11/30 12:58:58 [notice] 30#30: exit
+2024/11/30 12:58:58 [notice] 29#29: exit
+2024/11/30 12:58:58 [notice] 1#1: signal 17 (SIGCHLD) received from 30
+2024/11/30 12:58:58 [notice] 1#1: worker process 30 exited with code 0
+2024/11/30 12:58:58 [notice] 1#1: signal 29 (SIGIO) received
+2024/11/30 12:58:58 [notice] 1#1: signal 17 (SIGCHLD) received from 31
+2024/11/30 12:58:58 [notice] 1#1: worker process 28 exited with code 0
+2024/11/30 12:58:58 [notice] 1#1: worker process 29 exited with code 0
+2024/11/30 12:58:58 [notice] 1#1: worker process 31 exited with code 0
+2024/11/30 12:58:58 [notice] 1#1: worker process 32 exited with code 0
+2024/11/30 12:58:58 [notice] 1#1: exit
+2024/11/30 12:59:33 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/11/30 12:59:33 [notice] 1#1: using the "epoll" event method
+2024/11/30 12:59:33 [notice] 1#1: nginx/1.26.1
+2024/11/30 12:59:33 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/11/30 12:59:33 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/11/30 12:59:33 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/11/30 12:59:33 [notice] 1#1: start worker processes
+2024/11/30 12:59:33 [notice] 1#1: start worker process 29
+2024/11/30 12:59:33 [notice] 1#1: start worker process 30
+2024/11/30 12:59:33 [notice] 1#1: start worker process 31
+2024/11/30 12:59:33 [notice] 1#1: start worker process 32
+2024/11/30 12:59:33 [notice] 1#1: start worker process 33
+2024/11/30 13:01:37 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/11/30 13:01:37 [notice] 32#32: gracefully shutting down
+2024/11/30 13:01:37 [notice] 32#32: exiting
+2024/11/30 13:01:37 [notice] 29#29: gracefully shutting down
+2024/11/30 13:01:37 [notice] 29#29: exiting
+2024/11/30 13:01:37 [notice] 33#33: gracefully shutting down
+2024/11/30 13:01:37 [notice] 33#33: exiting
+2024/11/30 13:01:37 [notice] 31#31: gracefully shutting down
+2024/11/30 13:01:37 [notice] 31#31: exiting
+2024/11/30 13:01:37 [notice] 30#30: gracefully shutting down
+2024/11/30 13:01:37 [notice] 32#32: exit
+2024/11/30 13:01:37 [notice] 29#29: exit
+2024/11/30 13:01:37 [notice] 33#33: exit
+2024/11/30 13:01:37 [notice] 31#31: exit
+2024/11/30 13:01:37 [notice] 30#30: exiting
+2024/11/30 13:01:37 [notice] 30#30: exit
+2024/11/30 13:01:37 [notice] 1#1: signal 17 (SIGCHLD) received from 32
+2024/11/30 13:01:37 [notice] 1#1: worker process 31 exited with code 0
+2024/11/30 13:01:37 [notice] 1#1: worker process 32 exited with code 0
+2024/11/30 13:01:37 [notice] 1#1: signal 29 (SIGIO) received
+2024/11/30 13:01:37 [notice] 1#1: signal 17 (SIGCHLD) received from 31
+2024/11/30 13:01:37 [notice] 1#1: worker process 33 exited with code 0
+2024/11/30 13:01:37 [notice] 1#1: worker process 29 exited with code 0
+2024/11/30 13:01:37 [notice] 1#1: worker process 30 exited with code 0
+2024/11/30 13:01:37 [notice] 1#1: exit
+2024/11/30 13:17:56 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/11/30 13:17:56 [notice] 1#1: using the "epoll" event method
+2024/11/30 13:17:56 [notice] 1#1: nginx/1.26.1
+2024/11/30 13:17:56 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/11/30 13:17:56 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/11/30 13:17:56 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/11/30 13:17:56 [notice] 1#1: start worker processes
+2024/11/30 13:17:56 [notice] 1#1: start worker process 28
+2024/11/30 13:17:56 [notice] 1#1: start worker process 29
+2024/11/30 13:17:56 [notice] 1#1: start worker process 30
+2024/11/30 13:17:56 [notice] 1#1: start worker process 31
+2024/11/30 13:17:56 [notice] 1#1: start worker process 32
+2024/11/30 13:18:58 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/11/30 13:18:58 [notice] 28#28: gracefully shutting down
+2024/11/30 13:18:58 [notice] 28#28: exiting
+2024/11/30 13:18:58 [notice] 29#29: gracefully shutting down
+2024/11/30 13:18:58 [notice] 29#29: exiting
+2024/11/30 13:18:58 [notice] 32#32: gracefully shutting down
+2024/11/30 13:18:58 [notice] 30#30: gracefully shutting down
+2024/11/30 13:18:58 [notice] 31#31: gracefully shutting down
+2024/11/30 13:18:58 [notice] 31#31: exiting
+2024/11/30 13:18:58 [notice] 28#28: exit
+2024/11/30 13:18:58 [notice] 29#29: exit
+2024/11/30 13:18:58 [notice] 32#32: exiting
+2024/11/30 13:18:58 [notice] 32#32: exit
+2024/11/30 13:18:58 [notice] 30#30: exiting
+2024/11/30 13:18:58 [notice] 31#31: exit
+2024/11/30 13:18:58 [notice] 30#30: exit
+2024/11/30 13:18:58 [notice] 1#1: signal 17 (SIGCHLD) received from 29
+2024/11/30 13:18:58 [notice] 1#1: worker process 29 exited with code 0
+2024/11/30 13:18:58 [notice] 1#1: signal 29 (SIGIO) received
+2024/11/30 13:18:58 [notice] 1#1: signal 17 (SIGCHLD) received from 28
+2024/11/30 13:18:58 [notice] 1#1: worker process 28 exited with code 0
+2024/11/30 13:18:58 [notice] 1#1: worker process 31 exited with code 0
+2024/11/30 13:18:58 [notice] 1#1: worker process 30 exited with code 0
+2024/11/30 13:18:58 [notice] 1#1: worker process 32 exited with code 0
+2024/11/30 13:18:58 [notice] 1#1: exit
+2024/11/30 13:20:48 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/11/30 13:20:48 [notice] 1#1: using the "epoll" event method
+2024/11/30 13:20:48 [notice] 1#1: nginx/1.26.1
+2024/11/30 13:20:48 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/11/30 13:20:48 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/11/30 13:20:48 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/11/30 13:20:48 [notice] 1#1: start worker processes
+2024/11/30 13:20:48 [notice] 1#1: start worker process 28
+2024/11/30 13:20:48 [notice] 1#1: start worker process 29
+2024/11/30 13:20:48 [notice] 1#1: start worker process 30
+2024/11/30 13:20:48 [notice] 1#1: start worker process 31
+2024/11/30 13:20:48 [notice] 1#1: start worker process 32
+2024/11/30 13:32:06 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/11/30 13:32:06 [notice] 28#28: gracefully shutting down
+2024/11/30 13:32:06 [notice] 30#30: gracefully shutting down
+2024/11/30 13:32:06 [notice] 29#29: gracefully shutting down
+2024/11/30 13:32:06 [notice] 32#32: gracefully shutting down
+2024/11/30 13:32:06 [notice] 31#31: gracefully shutting down
+2024/11/30 13:32:06 [notice] 28#28: exiting
+2024/11/30 13:32:06 [notice] 30#30: exiting
+2024/11/30 13:32:06 [notice] 29#29: exiting
+2024/11/30 13:32:06 [notice] 32#32: exiting
+2024/11/30 13:32:06 [notice] 31#31: exiting
+2024/11/30 13:32:06 [notice] 28#28: exit
+2024/11/30 13:32:06 [notice] 30#30: exit
+2024/11/30 13:32:06 [notice] 29#29: exit
+2024/11/30 13:32:06 [notice] 32#32: exit
+2024/11/30 13:32:06 [notice] 31#31: exit
+2024/11/30 13:32:06 [notice] 1#1: signal 17 (SIGCHLD) received from 30
+2024/11/30 13:32:06 [notice] 1#1: worker process 30 exited with code 0
+2024/11/30 13:32:06 [notice] 1#1: signal 29 (SIGIO) received
+2024/11/30 13:32:06 [notice] 1#1: signal 17 (SIGCHLD) received from 28
+2024/11/30 13:32:06 [notice] 1#1: worker process 28 exited with code 0
+2024/11/30 13:32:06 [notice] 1#1: worker process 29 exited with code 0
+2024/11/30 13:32:06 [notice] 1#1: worker process 31 exited with code 0
+2024/11/30 13:32:06 [notice] 1#1: worker process 32 exited with code 0
+2024/11/30 13:32:06 [notice] 1#1: exit
+2024/11/30 13:35:51 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/11/30 13:35:51 [notice] 1#1: using the "epoll" event method
+2024/11/30 13:35:51 [notice] 1#1: nginx/1.26.1
+2024/11/30 13:35:51 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/11/30 13:35:51 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/11/30 13:35:51 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/11/30 13:35:51 [notice] 1#1: start worker processes
+2024/11/30 13:35:51 [notice] 1#1: start worker process 29
+2024/11/30 13:35:51 [notice] 1#1: start worker process 30
+2024/11/30 13:35:51 [notice] 1#1: start worker process 31
+2024/11/30 13:35:51 [notice] 1#1: start worker process 32
+2024/11/30 13:35:51 [notice] 1#1: start worker process 33
+2024/11/30 13:38:58 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/11/30 13:38:58 [notice] 33#33: gracefully shutting down
+2024/11/30 13:38:58 [notice] 33#33: exiting
+2024/11/30 13:38:58 [notice] 29#29: gracefully shutting down
+2024/11/30 13:38:58 [notice] 29#29: exiting
+2024/11/30 13:38:58 [notice] 30#30: gracefully shutting down
+2024/11/30 13:38:58 [notice] 32#32: gracefully shutting down
+2024/11/30 13:38:58 [notice] 32#32: exiting
+2024/11/30 13:38:58 [notice] 31#31: gracefully shutting down
+2024/11/30 13:38:58 [notice] 31#31: exiting
+2024/11/30 13:38:58 [notice] 33#33: exit
+2024/11/30 13:38:58 [notice] 29#29: exit
+2024/11/30 13:38:58 [notice] 30#30: exiting
+2024/11/30 13:38:58 [notice] 32#32: exit
+2024/11/30 13:38:58 [notice] 31#31: exit
+2024/11/30 13:38:58 [notice] 30#30: exit
+2024/11/30 13:38:58 [notice] 1#1: signal 17 (SIGCHLD) received from 33
+2024/11/30 13:38:58 [notice] 1#1: worker process 31 exited with code 0
+2024/11/30 13:38:58 [notice] 1#1: worker process 33 exited with code 0
+2024/11/30 13:38:58 [notice] 1#1: signal 29 (SIGIO) received
+2024/11/30 13:38:58 [notice] 1#1: signal 17 (SIGCHLD) received from 30
+2024/11/30 13:38:58 [notice] 1#1: worker process 29 exited with code 0
+2024/11/30 13:38:58 [notice] 1#1: worker process 30 exited with code 0
+2024/11/30 13:38:58 [notice] 1#1: worker process 32 exited with code 0
+2024/11/30 13:38:58 [notice] 1#1: exit
+2024/11/30 13:39:12 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/11/30 13:39:12 [notice] 1#1: using the "epoll" event method
+2024/11/30 13:39:12 [notice] 1#1: nginx/1.26.1
+2024/11/30 13:39:12 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/11/30 13:39:12 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/11/30 13:39:12 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/11/30 13:39:12 [notice] 1#1: start worker processes
+2024/11/30 13:39:12 [notice] 1#1: start worker process 28
+2024/11/30 13:39:12 [notice] 1#1: start worker process 29
+2024/11/30 13:39:12 [notice] 1#1: start worker process 30
+2024/11/30 13:39:12 [notice] 1#1: start worker process 31
+2024/11/30 13:39:12 [notice] 1#1: start worker process 32
+2024/11/30 13:47:52 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/11/30 13:47:52 [notice] 32#32: gracefully shutting down
+2024/11/30 13:47:52 [notice] 28#28: gracefully shutting down
+2024/11/30 13:47:52 [notice] 30#30: gracefully shutting down
+2024/11/30 13:47:52 [notice] 30#30: exiting
+2024/11/30 13:47:52 [notice] 29#29: gracefully shutting down
+2024/11/30 13:47:52 [notice] 31#31: gracefully shutting down
+2024/11/30 13:47:52 [notice] 32#32: exiting
+2024/11/30 13:47:52 [notice] 28#28: exiting
+2024/11/30 13:47:52 [notice] 30#30: exit
+2024/11/30 13:47:52 [notice] 29#29: exiting
+2024/11/30 13:47:52 [notice] 31#31: exiting
+2024/11/30 13:47:52 [notice] 32#32: exit
+2024/11/30 13:47:52 [notice] 28#28: exit
+2024/11/30 13:47:52 [notice] 29#29: exit
+2024/11/30 13:47:52 [notice] 31#31: exit
+2024/11/30 13:47:52 [notice] 1#1: signal 17 (SIGCHLD) received from 31
+2024/11/30 13:47:52 [notice] 1#1: worker process 31 exited with code 0
+2024/11/30 13:47:52 [notice] 1#1: signal 29 (SIGIO) received
+2024/11/30 13:47:52 [notice] 1#1: signal 17 (SIGCHLD) received from 29
+2024/11/30 13:47:52 [notice] 1#1: worker process 29 exited with code 0
+2024/11/30 13:47:52 [notice] 1#1: worker process 30 exited with code 0
+2024/11/30 13:47:52 [notice] 1#1: worker process 32 exited with code 0
+2024/11/30 13:47:52 [notice] 1#1: signal 29 (SIGIO) received
+2024/11/30 13:47:52 [notice] 1#1: signal 17 (SIGCHLD) received from 32
+2024/11/30 13:47:52 [notice] 1#1: signal 17 (SIGCHLD) received from 28
+2024/11/30 13:47:52 [notice] 1#1: worker process 28 exited with code 0
+2024/11/30 13:47:52 [notice] 1#1: exit
+2024/11/30 13:48:08 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/11/30 13:48:08 [notice] 1#1: using the "epoll" event method
+2024/11/30 13:48:08 [notice] 1#1: nginx/1.26.1
+2024/11/30 13:48:08 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/11/30 13:48:08 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/11/30 13:48:08 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/11/30 13:48:08 [notice] 1#1: start worker processes
+2024/11/30 13:48:08 [notice] 1#1: start worker process 27
+2024/11/30 13:48:08 [notice] 1#1: start worker process 28
+2024/11/30 13:48:08 [notice] 1#1: start worker process 29
+2024/11/30 13:48:08 [notice] 1#1: start worker process 30
+2024/11/30 13:48:08 [notice] 1#1: start worker process 31
+2024/11/30 14:42:48 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/11/30 14:42:48 [notice] 30#30: gracefully shutting down
+2024/11/30 14:42:48 [notice] 29#29: gracefully shutting down
+2024/11/30 14:42:48 [notice] 31#31: gracefully shutting down
+2024/11/30 14:42:48 [notice] 27#27: gracefully shutting down
+2024/11/30 14:42:48 [notice] 28#28: gracefully shutting down
+2024/11/30 14:42:48 [notice] 30#30: exiting
+2024/11/30 14:42:48 [notice] 29#29: exiting
+2024/11/30 14:42:48 [notice] 31#31: exiting
+2024/11/30 14:42:48 [notice] 27#27: exiting
+2024/11/30 14:42:48 [notice] 28#28: exiting
+2024/11/30 14:42:48 [notice] 30#30: exit
+2024/11/30 14:42:48 [notice] 29#29: exit
+2024/11/30 14:42:48 [notice] 31#31: exit
+2024/11/30 14:42:48 [notice] 27#27: exit
+2024/11/30 14:42:48 [notice] 28#28: exit
+2024/11/30 14:42:48 [notice] 1#1: signal 17 (SIGCHLD) received from 31
+2024/11/30 14:42:48 [notice] 1#1: worker process 27 exited with code 0
+2024/11/30 14:42:48 [notice] 1#1: worker process 29 exited with code 0
+2024/11/30 14:42:48 [notice] 1#1: worker process 30 exited with code 0
+2024/11/30 14:42:48 [notice] 1#1: worker process 31 exited with code 0
+2024/11/30 14:42:48 [notice] 1#1: signal 29 (SIGIO) received
+2024/11/30 14:42:48 [notice] 1#1: signal 17 (SIGCHLD) received from 28
+2024/11/30 14:42:48 [notice] 1#1: worker process 28 exited with code 0
+2024/11/30 14:42:48 [notice] 1#1: exit
+2024/11/30 14:43:19 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/11/30 14:43:19 [notice] 1#1: using the "epoll" event method
+2024/11/30 14:43:19 [notice] 1#1: nginx/1.26.1
+2024/11/30 14:43:19 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/11/30 14:43:19 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/11/30 14:43:19 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/11/30 14:43:19 [notice] 1#1: start worker processes
+2024/11/30 14:43:19 [notice] 1#1: start worker process 27
+2024/11/30 14:43:19 [notice] 1#1: start worker process 28
+2024/11/30 14:43:19 [notice] 1#1: start worker process 29
+2024/11/30 14:43:19 [notice] 1#1: start worker process 30
+2024/11/30 14:43:19 [notice] 1#1: start worker process 31
+2024/12/01 13:37:13 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/12/01 13:37:13 [notice] 1#1: using the "epoll" event method
+2024/12/01 13:37:13 [notice] 1#1: nginx/1.26.1
+2024/12/01 13:37:13 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/12/01 13:37:13 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/12/01 13:37:13 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/12/01 13:37:13 [notice] 1#1: start worker processes
+2024/12/01 13:37:13 [notice] 1#1: start worker process 27
+2024/12/01 13:37:13 [notice] 1#1: start worker process 28
+2024/12/01 13:37:13 [notice] 1#1: start worker process 29
+2024/12/01 13:37:13 [notice] 1#1: start worker process 30
+2024/12/01 13:37:13 [notice] 1#1: start worker process 31
+2024/12/01 13:52:42 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/12/01 13:52:42 [notice] 27#27: gracefully shutting down
+2024/12/01 13:52:42 [notice] 27#27: exiting
+2024/12/01 13:52:42 [notice] 28#28: gracefully shutting down
+2024/12/01 13:52:42 [notice] 28#28: exiting
+2024/12/01 13:52:42 [notice] 30#30: gracefully shutting down
+2024/12/01 13:52:42 [notice] 30#30: exiting
+2024/12/01 13:52:42 [notice] 29#29: gracefully shutting down
+2024/12/01 13:52:42 [notice] 31#31: gracefully shutting down
+2024/12/01 13:52:42 [notice] 27#27: exit
+2024/12/01 13:52:42 [notice] 28#28: exit
+2024/12/01 13:52:42 [notice] 30#30: exit
+2024/12/01 13:52:42 [notice] 29#29: exiting
+2024/12/01 13:52:42 [notice] 31#31: exiting
+2024/12/01 13:52:42 [notice] 31#31: exit
+2024/12/01 13:52:42 [notice] 29#29: exit
+2024/12/01 13:52:42 [notice] 1#1: signal 17 (SIGCHLD) received from 27
+2024/12/01 13:52:42 [notice] 1#1: worker process 27 exited with code 0
+2024/12/01 13:52:42 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/01 13:52:42 [notice] 1#1: signal 17 (SIGCHLD) received from 28
+2024/12/01 13:52:42 [notice] 1#1: worker process 28 exited with code 0
+2024/12/01 13:52:42 [notice] 1#1: worker process 29 exited with code 0
+2024/12/01 13:52:42 [notice] 1#1: worker process 30 exited with code 0
+2024/12/01 13:52:42 [notice] 1#1: worker process 31 exited with code 0
+2024/12/01 13:52:42 [notice] 1#1: exit
+2024/12/01 13:53:16 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/12/01 13:53:16 [notice] 1#1: using the "epoll" event method
+2024/12/01 13:53:16 [notice] 1#1: nginx/1.26.1
+2024/12/01 13:53:16 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/12/01 13:53:16 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/12/01 13:53:16 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/12/01 13:53:16 [notice] 1#1: start worker processes
+2024/12/01 13:53:16 [notice] 1#1: start worker process 28
+2024/12/01 13:53:16 [notice] 1#1: start worker process 29
+2024/12/01 13:53:16 [notice] 1#1: start worker process 30
+2024/12/01 13:53:16 [notice] 1#1: start worker process 31
+2024/12/01 13:53:16 [notice] 1#1: start worker process 32
+2024/12/01 14:03:22 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/12/01 14:03:22 [notice] 28#28: gracefully shutting down
+2024/12/01 14:03:22 [notice] 29#29: gracefully shutting down
+2024/12/01 14:03:22 [notice] 32#32: gracefully shutting down
+2024/12/01 14:03:22 [notice] 32#32: exiting
+2024/12/01 14:03:22 [notice] 31#31: gracefully shutting down
+2024/12/01 14:03:22 [notice] 31#31: exiting
+2024/12/01 14:03:22 [notice] 30#30: gracefully shutting down
+2024/12/01 14:03:22 [notice] 28#28: exiting
+2024/12/01 14:03:22 [notice] 29#29: exiting
+2024/12/01 14:03:22 [notice] 32#32: exit
+2024/12/01 14:03:22 [notice] 31#31: exit
+2024/12/01 14:03:22 [notice] 30#30: exiting
+2024/12/01 14:03:22 [notice] 28#28: exit
+2024/12/01 14:03:22 [notice] 29#29: exit
+2024/12/01 14:03:22 [notice] 30#30: exit
+2024/12/01 14:03:22 [notice] 1#1: signal 17 (SIGCHLD) received from 32
+2024/12/01 14:03:22 [notice] 1#1: worker process 29 exited with code 0
+2024/12/01 14:03:22 [notice] 1#1: worker process 32 exited with code 0
+2024/12/01 14:03:22 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/01 14:03:22 [notice] 1#1: signal 17 (SIGCHLD) received from 29
+2024/12/01 14:03:22 [notice] 1#1: signal 17 (SIGCHLD) received from 28
+2024/12/01 14:03:22 [notice] 1#1: worker process 28 exited with code 0
+2024/12/01 14:03:22 [notice] 1#1: worker process 31 exited with code 0
+2024/12/01 14:03:22 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/01 14:03:22 [notice] 1#1: signal 17 (SIGCHLD) received from 30
+2024/12/01 14:03:22 [notice] 1#1: worker process 30 exited with code 0
+2024/12/01 14:03:22 [notice] 1#1: exit
+2024/12/01 14:03:44 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/12/01 14:03:44 [notice] 1#1: using the "epoll" event method
+2024/12/01 14:03:44 [notice] 1#1: nginx/1.26.1
+2024/12/01 14:03:44 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/12/01 14:03:44 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/12/01 14:03:44 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/12/01 14:03:44 [notice] 1#1: start worker processes
+2024/12/01 14:03:44 [notice] 1#1: start worker process 28
+2024/12/01 14:03:44 [notice] 1#1: start worker process 29
+2024/12/01 14:03:44 [notice] 1#1: start worker process 30
+2024/12/01 14:03:44 [notice] 1#1: start worker process 31
+2024/12/01 14:03:44 [notice] 1#1: start worker process 32
+2024/12/01 14:03:54 [error] 28#28: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 192.168.65.1, server: localhost, request: "GET /api/game/get_all_games/ HTTP/1.1", upstream: "http://172.18.0.4:8000/api/game/get_all_games/", host: "localhost:8080", referrer: "http://localhost:8080/"
+2024/12/01 14:04:02 [error] 28#28: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 192.168.65.1, server: localhost, request: "GET /api/game/get_all_games/ HTTP/1.1", upstream: "http://172.18.0.4:8000/api/game/get_all_games/", host: "localhost:8080", referrer: "http://localhost:8080/"
+2024/12/01 14:04:26 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/12/01 14:04:26 [notice] 28#28: gracefully shutting down
+2024/12/01 14:04:26 [notice] 30#30: gracefully shutting down
+2024/12/01 14:04:26 [notice] 29#29: gracefully shutting down
+2024/12/01 14:04:26 [notice] 29#29: exiting
+2024/12/01 14:04:26 [notice] 32#32: gracefully shutting down
+2024/12/01 14:04:26 [notice] 31#31: gracefully shutting down
+2024/12/01 14:04:26 [notice] 31#31: exiting
+2024/12/01 14:04:26 [notice] 28#28: exiting
+2024/12/01 14:04:26 [notice] 30#30: exiting
+2024/12/01 14:04:26 [notice] 29#29: exit
+2024/12/01 14:04:26 [notice] 32#32: exiting
+2024/12/01 14:04:26 [notice] 31#31: exit
+2024/12/01 14:04:26 [notice] 28#28: exit
+2024/12/01 14:04:26 [notice] 30#30: exit
+2024/12/01 14:04:26 [notice] 32#32: exit
+2024/12/01 14:04:26 [notice] 1#1: signal 17 (SIGCHLD) received from 31
+2024/12/01 14:04:26 [notice] 1#1: worker process 31 exited with code 0
+2024/12/01 14:04:26 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/01 14:04:26 [notice] 1#1: signal 17 (SIGCHLD) received from 29
+2024/12/01 14:04:26 [notice] 1#1: worker process 28 exited with code 0
+2024/12/01 14:04:26 [notice] 1#1: worker process 29 exited with code 0
+2024/12/01 14:04:26 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/01 14:04:26 [notice] 1#1: signal 17 (SIGCHLD) received from 28
+2024/12/01 14:04:26 [notice] 1#1: worker process 32 exited with code 0
+2024/12/01 14:04:26 [notice] 1#1: worker process 30 exited with code 0
+2024/12/01 14:04:26 [notice] 1#1: exit
+2024/12/01 14:04:54 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/12/01 14:04:54 [notice] 1#1: using the "epoll" event method
+2024/12/01 14:04:54 [notice] 1#1: nginx/1.26.1
+2024/12/01 14:04:54 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/12/01 14:04:54 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/12/01 14:04:54 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/12/01 14:04:54 [notice] 1#1: start worker processes
+2024/12/01 14:04:54 [notice] 1#1: start worker process 28
+2024/12/01 14:04:54 [notice] 1#1: start worker process 29
+2024/12/01 14:04:54 [notice] 1#1: start worker process 30
+2024/12/01 14:04:54 [notice] 1#1: start worker process 31
+2024/12/01 14:04:54 [notice] 1#1: start worker process 32
+2024/12/01 14:15:42 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/12/01 14:15:42 [notice] 28#28: gracefully shutting down
+2024/12/01 14:15:42 [notice] 29#29: gracefully shutting down
+2024/12/01 14:15:42 [notice] 29#29: exiting
+2024/12/01 14:15:42 [notice] 31#31: gracefully shutting down
+2024/12/01 14:15:42 [notice] 31#31: exiting
+2024/12/01 14:15:42 [notice] 30#30: gracefully shutting down
+2024/12/01 14:15:42 [notice] 32#32: gracefully shutting down
+2024/12/01 14:15:42 [notice] 28#28: exiting
+2024/12/01 14:15:42 [notice] 29#29: exit
+2024/12/01 14:15:42 [notice] 31#31: exit
+2024/12/01 14:15:42 [notice] 30#30: exiting
+2024/12/01 14:15:42 [notice] 32#32: exiting
+2024/12/01 14:15:42 [notice] 28#28: exit
+2024/12/01 14:15:42 [notice] 30#30: exit
+2024/12/01 14:15:42 [notice] 32#32: exit
+2024/12/01 14:15:42 [notice] 1#1: signal 17 (SIGCHLD) received from 30
+2024/12/01 14:15:42 [notice] 1#1: worker process 30 exited with code 0
+2024/12/01 14:15:42 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/01 14:15:42 [notice] 1#1: signal 17 (SIGCHLD) received from 29
+2024/12/01 14:15:42 [notice] 1#1: worker process 28 exited with code 0
+2024/12/01 14:15:42 [notice] 1#1: worker process 29 exited with code 0
+2024/12/01 14:15:42 [notice] 1#1: worker process 31 exited with code 0
+2024/12/01 14:15:42 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/01 14:15:42 [notice] 1#1: signal 17 (SIGCHLD) received from 32
+2024/12/01 14:15:42 [notice] 1#1: worker process 32 exited with code 0
+2024/12/01 14:15:42 [notice] 1#1: exit
+2024/12/01 14:16:24 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/12/01 14:16:24 [notice] 1#1: using the "epoll" event method
+2024/12/01 14:16:24 [notice] 1#1: nginx/1.26.1
+2024/12/01 14:16:24 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/12/01 14:16:24 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/12/01 14:16:24 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/12/01 14:16:24 [notice] 1#1: start worker processes
+2024/12/01 14:16:24 [notice] 1#1: start worker process 28
+2024/12/01 14:16:24 [notice] 1#1: start worker process 29
+2024/12/01 14:16:24 [notice] 1#1: start worker process 30
+2024/12/01 14:16:24 [notice] 1#1: start worker process 31
+2024/12/01 14:16:24 [notice] 1#1: start worker process 32
+2024/12/01 14:16:36 [error] 28#28: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 192.168.65.1, server: localhost, request: "GET /api/game/get_all_games/ HTTP/1.1", upstream: "http://172.18.0.4:8000/api/game/get_all_games/", host: "localhost:8080", referrer: "http://localhost:8080/"
+2024/12/01 14:17:13 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/12/01 14:17:13 [notice] 28#28: gracefully shutting down
+2024/12/01 14:17:13 [notice] 29#29: gracefully shutting down
+2024/12/01 14:17:13 [notice] 29#29: exiting
+2024/12/01 14:17:13 [notice] 30#30: gracefully shutting down
+2024/12/01 14:17:13 [notice] 31#31: gracefully shutting down
+2024/12/01 14:17:13 [notice] 31#31: exiting
+2024/12/01 14:17:13 [notice] 32#32: gracefully shutting down
+2024/12/01 14:17:13 [notice] 32#32: exiting
+2024/12/01 14:17:13 [notice] 28#28: exiting
+2024/12/01 14:17:13 [notice] 29#29: exit
+2024/12/01 14:17:13 [notice] 30#30: exiting
+2024/12/01 14:17:13 [notice] 31#31: exit
+2024/12/01 14:17:13 [notice] 32#32: exit
+2024/12/01 14:17:13 [notice] 28#28: exit
+2024/12/01 14:17:13 [notice] 30#30: exit
+2024/12/01 14:17:13 [notice] 1#1: signal 17 (SIGCHLD) received from 29
+2024/12/01 14:17:13 [notice] 1#1: worker process 29 exited with code 0
+2024/12/01 14:17:13 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/01 14:17:13 [notice] 1#1: signal 17 (SIGCHLD) received from 32
+2024/12/01 14:17:13 [notice] 1#1: worker process 32 exited with code 0
+2024/12/01 14:17:13 [notice] 1#1: worker process 31 exited with code 0
+2024/12/01 14:17:13 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/01 14:17:13 [notice] 1#1: signal 17 (SIGCHLD) received from 31
+2024/12/01 14:17:13 [notice] 1#1: signal 17 (SIGCHLD) received from 30
+2024/12/01 14:17:13 [notice] 1#1: worker process 30 exited with code 0
+2024/12/01 14:17:13 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/01 14:17:13 [notice] 1#1: signal 17 (SIGCHLD) received from 28
+2024/12/01 14:17:13 [notice] 1#1: worker process 28 exited with code 0
+2024/12/01 14:17:13 [notice] 1#1: exit
+2024/12/01 14:17:31 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/12/01 14:17:31 [notice] 1#1: using the "epoll" event method
+2024/12/01 14:17:31 [notice] 1#1: nginx/1.26.1
+2024/12/01 14:17:31 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/12/01 14:17:31 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/12/01 14:17:31 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/12/01 14:17:31 [notice] 1#1: start worker processes
+2024/12/01 14:17:31 [notice] 1#1: start worker process 27
+2024/12/01 14:17:31 [notice] 1#1: start worker process 28
+2024/12/01 14:17:31 [notice] 1#1: start worker process 29
+2024/12/01 14:17:31 [notice] 1#1: start worker process 30
+2024/12/01 14:17:31 [notice] 1#1: start worker process 31
+2024/12/01 14:19:49 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/12/01 14:19:49 [notice] 27#27: gracefully shutting down
+2024/12/01 14:19:49 [notice] 31#31: gracefully shutting down
+2024/12/01 14:19:49 [notice] 29#29: gracefully shutting down
+2024/12/01 14:19:49 [notice] 29#29: exiting
+2024/12/01 14:19:49 [notice] 28#28: gracefully shutting down
+2024/12/01 14:19:49 [notice] 28#28: exiting
+2024/12/01 14:19:49 [notice] 30#30: gracefully shutting down
+2024/12/01 14:19:49 [notice] 27#27: exiting
+2024/12/01 14:19:49 [notice] 31#31: exiting
+2024/12/01 14:19:49 [notice] 29#29: exit
+2024/12/01 14:19:49 [notice] 28#28: exit
+2024/12/01 14:19:49 [notice] 30#30: exiting
+2024/12/01 14:19:49 [notice] 27#27: exit
+2024/12/01 14:19:49 [notice] 31#31: exit
+2024/12/01 14:19:49 [notice] 30#30: exit
+2024/12/01 14:19:49 [notice] 1#1: signal 17 (SIGCHLD) received from 27
+2024/12/01 14:19:49 [notice] 1#1: worker process 27 exited with code 0
+2024/12/01 14:19:49 [notice] 1#1: worker process 28 exited with code 0
+2024/12/01 14:19:49 [notice] 1#1: worker process 29 exited with code 0
+2024/12/01 14:19:49 [notice] 1#1: worker process 30 exited with code 0
+2024/12/01 14:19:49 [notice] 1#1: worker process 31 exited with code 0
+2024/12/01 14:19:49 [notice] 1#1: exit
+2024/12/01 14:20:16 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/12/01 14:20:16 [notice] 1#1: using the "epoll" event method
+2024/12/01 14:20:16 [notice] 1#1: nginx/1.26.1
+2024/12/01 14:20:16 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/12/01 14:20:16 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/12/01 14:20:16 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/12/01 14:20:16 [notice] 1#1: start worker processes
+2024/12/01 14:20:16 [notice] 1#1: start worker process 28
+2024/12/01 14:20:16 [notice] 1#1: start worker process 29
+2024/12/01 14:20:16 [notice] 1#1: start worker process 30
+2024/12/01 14:20:16 [notice] 1#1: start worker process 31
+2024/12/01 14:20:16 [notice] 1#1: start worker process 32
+2024/12/01 14:20:45 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/12/01 14:20:45 [notice] 28#28: gracefully shutting down
+2024/12/01 14:20:45 [notice] 30#30: gracefully shutting down
+2024/12/01 14:20:45 [notice] 30#30: exiting
+2024/12/01 14:20:45 [notice] 29#29: gracefully shutting down
+2024/12/01 14:20:45 [notice] 29#29: exiting
+2024/12/01 14:20:45 [notice] 31#31: gracefully shutting down
+2024/12/01 14:20:45 [notice] 31#31: exiting
+2024/12/01 14:20:45 [notice] 32#32: gracefully shutting down
+2024/12/01 14:20:45 [notice] 28#28: exiting
+2024/12/01 14:20:45 [notice] 30#30: exit
+2024/12/01 14:20:45 [notice] 29#29: exit
+2024/12/01 14:20:45 [notice] 31#31: exit
+2024/12/01 14:20:45 [notice] 32#32: exiting
+2024/12/01 14:20:45 [notice] 32#32: exit
+2024/12/01 14:20:45 [notice] 28#28: exit
+2024/12/01 14:20:45 [notice] 1#1: signal 17 (SIGCHLD) received from 31
+2024/12/01 14:20:45 [notice] 1#1: worker process 31 exited with code 0
+2024/12/01 14:20:45 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/01 14:20:45 [notice] 1#1: signal 17 (SIGCHLD) received from 30
+2024/12/01 14:20:45 [notice] 1#1: worker process 28 exited with code 0
+2024/12/01 14:20:45 [notice] 1#1: worker process 29 exited with code 0
+2024/12/01 14:20:45 [notice] 1#1: worker process 30 exited with code 0
+2024/12/01 14:20:45 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/01 14:20:45 [notice] 1#1: signal 17 (SIGCHLD) received from 32
+2024/12/01 14:20:45 [notice] 1#1: worker process 32 exited with code 0
+2024/12/01 14:20:45 [notice] 1#1: exit
+2024/12/01 14:23:42 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/12/01 14:23:42 [notice] 1#1: using the "epoll" event method
+2024/12/01 14:23:42 [notice] 1#1: nginx/1.26.1
+2024/12/01 14:23:42 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/12/01 14:23:42 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/12/01 14:23:42 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/12/01 14:23:42 [notice] 1#1: start worker processes
+2024/12/01 14:23:42 [notice] 1#1: start worker process 28
+2024/12/01 14:23:42 [notice] 1#1: start worker process 29
+2024/12/01 14:23:42 [notice] 1#1: start worker process 30
+2024/12/01 14:23:42 [notice] 1#1: start worker process 31
+2024/12/01 14:23:42 [notice] 1#1: start worker process 32
+2024/12/01 14:26:04 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/12/01 14:26:04 [notice] 30#30: gracefully shutting down
+2024/12/01 14:26:04 [notice] 29#29: gracefully shutting down
+2024/12/01 14:26:04 [notice] 29#29: exiting
+2024/12/01 14:26:04 [notice] 29#29: exit
+2024/12/01 14:26:04 [notice] 28#28: gracefully shutting down
+2024/12/01 14:26:04 [notice] 28#28: exiting
+2024/12/01 14:26:04 [notice] 32#32: gracefully shutting down
+2024/12/01 14:26:04 [notice] 31#31: gracefully shutting down
+2024/12/01 14:26:04 [notice] 30#30: exiting
+2024/12/01 14:26:04 [notice] 28#28: exit
+2024/12/01 14:26:04 [notice] 32#32: exiting
+2024/12/01 14:26:04 [notice] 31#31: exiting
+2024/12/01 14:26:04 [notice] 31#31: exit
+2024/12/01 14:26:04 [notice] 30#30: exit
+2024/12/01 14:26:04 [notice] 32#32: exit
+2024/12/01 14:26:04 [notice] 1#1: signal 17 (SIGCHLD) received from 29
+2024/12/01 14:26:04 [notice] 1#1: worker process 28 exited with code 0
+2024/12/01 14:26:04 [notice] 1#1: worker process 29 exited with code 0
+2024/12/01 14:26:04 [notice] 1#1: worker process 31 exited with code 0
+2024/12/01 14:26:04 [notice] 1#1: worker process 30 exited with code 0
+2024/12/01 14:26:04 [notice] 1#1: worker process 32 exited with code 0
+2024/12/01 14:26:04 [notice] 1#1: exit
+2024/12/01 14:26:22 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/12/01 14:26:22 [notice] 1#1: using the "epoll" event method
+2024/12/01 14:26:22 [notice] 1#1: nginx/1.26.1
+2024/12/01 14:26:22 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/12/01 14:26:22 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/12/01 14:26:22 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/12/01 14:26:22 [notice] 1#1: start worker processes
+2024/12/01 14:26:22 [notice] 1#1: start worker process 28
+2024/12/01 14:26:22 [notice] 1#1: start worker process 29
+2024/12/01 14:26:22 [notice] 1#1: start worker process 30
+2024/12/01 14:26:22 [notice] 1#1: start worker process 31
+2024/12/01 14:26:22 [notice] 1#1: start worker process 32
+2024/12/01 14:26:48 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/12/01 14:26:48 [notice] 29#29: gracefully shutting down
+2024/12/01 14:26:48 [notice] 29#29: exiting
+2024/12/01 14:26:48 [notice] 28#28: gracefully shutting down
+2024/12/01 14:26:48 [notice] 31#31: gracefully shutting down
+2024/12/01 14:26:48 [notice] 31#31: exiting
+2024/12/01 14:26:48 [notice] 32#32: gracefully shutting down
+2024/12/01 14:26:48 [notice] 32#32: exiting
+2024/12/01 14:26:48 [notice] 30#30: gracefully shutting down
+2024/12/01 14:26:48 [notice] 30#30: exiting
+2024/12/01 14:26:48 [notice] 29#29: exit
+2024/12/01 14:26:48 [notice] 28#28: exiting
+2024/12/01 14:26:48 [notice] 31#31: exit
+2024/12/01 14:26:48 [notice] 32#32: exit
+2024/12/01 14:26:48 [notice] 30#30: exit
+2024/12/01 14:26:48 [notice] 28#28: exit
+2024/12/01 14:26:48 [notice] 1#1: signal 17 (SIGCHLD) received from 29
+2024/12/01 14:26:48 [notice] 1#1: worker process 29 exited with code 0
+2024/12/01 14:26:48 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/01 14:26:48 [notice] 1#1: signal 17 (SIGCHLD) received from 28
+2024/12/01 14:26:48 [notice] 1#1: worker process 28 exited with code 0
+2024/12/01 14:26:48 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/01 14:26:48 [notice] 1#1: signal 17 (SIGCHLD) received from 31
+2024/12/01 14:26:48 [notice] 1#1: worker process 30 exited with code 0
+2024/12/01 14:26:48 [notice] 1#1: worker process 31 exited with code 0
+2024/12/01 14:26:48 [notice] 1#1: worker process 32 exited with code 0
+2024/12/01 14:26:48 [notice] 1#1: exit
+2024/12/01 14:27:20 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/12/01 14:27:20 [notice] 1#1: using the "epoll" event method
+2024/12/01 14:27:20 [notice] 1#1: nginx/1.26.1
+2024/12/01 14:27:20 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/12/01 14:27:20 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/12/01 14:27:20 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/12/01 14:27:20 [notice] 1#1: start worker processes
+2024/12/01 14:27:20 [notice] 1#1: start worker process 28
+2024/12/01 14:27:20 [notice] 1#1: start worker process 29
+2024/12/01 14:27:20 [notice] 1#1: start worker process 30
+2024/12/01 14:27:20 [notice] 1#1: start worker process 31
+2024/12/01 14:27:20 [notice] 1#1: start worker process 32
+2024/12/01 14:27:35 [error] 28#28: *6 connect() failed (111: Connection refused) while connecting to upstream, client: 192.168.65.1, server: localhost, request: "POST /api/users/auth/login/ HTTP/1.1", upstream: "http://172.20.0.4:8000/api/users/auth/login/", host: "localhost:8080", referrer: "http://localhost:8080/"
+2024/12/01 14:44:13 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/12/01 14:44:13 [notice] 30#30: gracefully shutting down
+2024/12/01 14:44:13 [notice] 30#30: exiting
+2024/12/01 14:44:13 [notice] 28#28: gracefully shutting down
+2024/12/01 14:44:13 [notice] 29#29: gracefully shutting down
+2024/12/01 14:44:13 [notice] 31#31: gracefully shutting down
+2024/12/01 14:44:13 [notice] 32#32: gracefully shutting down
+2024/12/01 14:44:13 [notice] 28#28: exiting
+2024/12/01 14:44:13 [notice] 30#30: exit
+2024/12/01 14:44:13 [notice] 29#29: exiting
+2024/12/01 14:44:13 [notice] 31#31: exiting
+2024/12/01 14:44:13 [notice] 32#32: exiting
+2024/12/01 14:44:13 [notice] 28#28: exit
+2024/12/01 14:44:13 [notice] 29#29: exit
+2024/12/01 14:44:13 [notice] 31#31: exit
+2024/12/01 14:44:13 [notice] 32#32: exit
+2024/12/01 14:44:13 [notice] 1#1: signal 17 (SIGCHLD) received from 30
+2024/12/01 14:44:13 [notice] 1#1: worker process 28 exited with code 0
+2024/12/01 14:44:13 [notice] 1#1: worker process 29 exited with code 0
+2024/12/01 14:44:13 [notice] 1#1: worker process 30 exited with code 0
+2024/12/01 14:44:13 [notice] 1#1: worker process 31 exited with code 0
+2024/12/01 14:44:13 [notice] 1#1: worker process 32 exited with code 0
+2024/12/01 14:44:13 [notice] 1#1: exit
+2024/12/01 14:44:40 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/12/01 14:44:40 [notice] 1#1: using the "epoll" event method
+2024/12/01 14:44:40 [notice] 1#1: nginx/1.26.1
+2024/12/01 14:44:40 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/12/01 14:44:40 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/12/01 14:44:40 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/12/01 14:44:40 [notice] 1#1: start worker processes
+2024/12/01 14:44:40 [notice] 1#1: start worker process 28
+2024/12/01 14:44:40 [notice] 1#1: start worker process 29
+2024/12/01 14:44:40 [notice] 1#1: start worker process 30
+2024/12/01 14:44:40 [notice] 1#1: start worker process 31
+2024/12/01 14:44:40 [notice] 1#1: start worker process 32
+2024/12/01 14:44:49 [error] 28#28: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 192.168.65.1, server: localhost, request: "GET /api/game/get_all_games/ HTTP/1.1", upstream: "http://172.20.0.4:8000/api/game/get_all_games/", host: "localhost:8080", referrer: "http://localhost:8080/"
+2024/12/01 14:46:51 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/12/01 14:46:51 [notice] 31#31: gracefully shutting down
+2024/12/01 14:46:51 [notice] 28#28: gracefully shutting down
+2024/12/01 14:46:51 [notice] 30#30: gracefully shutting down
+2024/12/01 14:46:51 [notice] 29#29: gracefully shutting down
+2024/12/01 14:46:51 [notice] 29#29: exiting
+2024/12/01 14:46:51 [notice] 29#29: exit
+2024/12/01 14:46:51 [notice] 32#32: gracefully shutting down
+2024/12/01 14:46:51 [notice] 32#32: exiting
+2024/12/01 14:46:51 [notice] 31#31: exiting
+2024/12/01 14:46:51 [notice] 28#28: exiting
+2024/12/01 14:46:51 [notice] 28#28: exit
+2024/12/01 14:46:51 [notice] 30#30: exiting
+2024/12/01 14:46:51 [notice] 30#30: exit
+2024/12/01 14:46:51 [notice] 32#32: exit
+2024/12/01 14:46:51 [notice] 31#31: exit
+2024/12/01 14:46:52 [notice] 1#1: signal 17 (SIGCHLD) received from 29
+2024/12/01 14:46:52 [notice] 1#1: worker process 29 exited with code 0
+2024/12/01 14:46:52 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/01 14:46:52 [notice] 1#1: signal 17 (SIGCHLD) received from 28
+2024/12/01 14:46:52 [notice] 1#1: worker process 28 exited with code 0
+2024/12/01 14:46:52 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/01 14:46:52 [notice] 1#1: signal 17 (SIGCHLD) received from 30
+2024/12/01 14:46:52 [notice] 1#1: worker process 30 exited with code 0
+2024/12/01 14:46:52 [notice] 1#1: worker process 31 exited with code 0
+2024/12/01 14:46:52 [notice] 1#1: worker process 32 exited with code 0
+2024/12/01 14:46:52 [notice] 1#1: exit
+2024/12/01 14:47:17 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/12/01 14:47:17 [notice] 1#1: using the "epoll" event method
+2024/12/01 14:47:17 [notice] 1#1: nginx/1.26.1
+2024/12/01 14:47:17 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/12/01 14:47:17 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/12/01 14:47:17 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/12/01 14:47:17 [notice] 1#1: start worker processes
+2024/12/01 14:47:17 [notice] 1#1: start worker process 28
+2024/12/01 14:47:17 [notice] 1#1: start worker process 29
+2024/12/01 14:47:17 [notice] 1#1: start worker process 30
+2024/12/01 14:47:17 [notice] 1#1: start worker process 31
+2024/12/01 14:47:17 [notice] 1#1: start worker process 32
+2024/12/01 14:47:33 [error] 28#28: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 192.168.65.1, server: localhost, request: "GET /api/game/get_all_games/ HTTP/1.1", upstream: "http://172.21.0.4:8000/api/game/get_all_games/", host: "localhost:8080", referrer: "http://localhost:8080/"
+2024/12/01 14:49:36 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/12/01 14:49:36 [notice] 30#30: gracefully shutting down
+2024/12/01 14:49:36 [notice] 30#30: exiting
+2024/12/01 14:49:36 [notice] 29#29: gracefully shutting down
+2024/12/01 14:49:36 [notice] 31#31: gracefully shutting down
+2024/12/01 14:49:36 [notice] 31#31: exiting
+2024/12/01 14:49:36 [notice] 32#32: gracefully shutting down
+2024/12/01 14:49:36 [notice] 32#32: exiting
+2024/12/01 14:49:36 [notice] 28#28: gracefully shutting down
+2024/12/01 14:49:36 [notice] 30#30: exit
+2024/12/01 14:49:36 [notice] 29#29: exiting
+2024/12/01 14:49:36 [notice] 31#31: exit
+2024/12/01 14:49:36 [notice] 32#32: exit
+2024/12/01 14:49:36 [notice] 28#28: exiting
+2024/12/01 14:49:36 [notice] 29#29: exit
+2024/12/01 14:49:36 [notice] 28#28: exit
+2024/12/01 14:49:36 [notice] 1#1: signal 17 (SIGCHLD) received from 32
+2024/12/01 14:49:36 [notice] 1#1: worker process 32 exited with code 0
+2024/12/01 14:49:36 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/01 14:49:36 [notice] 1#1: signal 17 (SIGCHLD) received from 29
+2024/12/01 14:49:36 [notice] 1#1: worker process 28 exited with code 0
+2024/12/01 14:49:36 [notice] 1#1: worker process 29 exited with code 0
+2024/12/01 14:49:36 [notice] 1#1: worker process 30 exited with code 0
+2024/12/01 14:49:36 [notice] 1#1: worker process 31 exited with code 0
+2024/12/01 14:49:36 [notice] 1#1: exit
+2024/12/01 14:52:03 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/12/01 14:52:03 [emerg] 1#1: host not found in upstream "django" in /etc/nginx/conf.d/default.conf:30
+2024/12/01 14:52:22 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/12/01 14:52:22 [notice] 1#1: using the "epoll" event method
+2024/12/01 14:52:22 [notice] 1#1: nginx/1.26.1
+2024/12/01 14:52:22 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/12/01 14:52:22 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/12/01 14:52:22 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/12/01 14:52:22 [notice] 1#1: start worker processes
+2024/12/01 14:52:22 [notice] 1#1: start worker process 28
+2024/12/01 14:52:22 [notice] 1#1: start worker process 29
+2024/12/01 14:52:22 [notice] 1#1: start worker process 30
+2024/12/01 14:52:22 [notice] 1#1: start worker process 31
+2024/12/01 14:52:22 [notice] 1#1: start worker process 32
+2024/12/01 14:52:38 [error] 28#28: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 192.168.65.1, server: localhost, request: "GET /api/game/get_all_games/ HTTP/1.1", upstream: "http://172.21.0.4:8000/api/game/get_all_games/", host: "localhost:8080", referrer: "http://localhost:8080/"
+2024/12/01 14:54:08 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/12/01 14:54:08 [notice] 29#29: gracefully shutting down
+2024/12/01 14:54:08 [notice] 29#29: exiting
+2024/12/01 14:54:08 [notice] 32#32: gracefully shutting down
+2024/12/01 14:54:08 [notice] 32#32: exiting
+2024/12/01 14:54:08 [notice] 28#28: gracefully shutting down
+2024/12/01 14:54:08 [notice] 30#30: gracefully shutting down
+2024/12/01 14:54:08 [notice] 30#30: exiting
+2024/12/01 14:54:08 [notice] 31#31: gracefully shutting down
+2024/12/01 14:54:08 [notice] 29#29: exit
+2024/12/01 14:54:08 [notice] 32#32: exit
+2024/12/01 14:54:08 [notice] 28#28: exiting
+2024/12/01 14:54:08 [notice] 30#30: exit
+2024/12/01 14:54:08 [notice] 31#31: exiting
+2024/12/01 14:54:08 [notice] 28#28: exit
+2024/12/01 14:54:08 [notice] 31#31: exit
+2024/12/01 14:54:08 [notice] 1#1: signal 17 (SIGCHLD) received from 29
+2024/12/01 14:54:08 [notice] 1#1: worker process 29 exited with code 0
+2024/12/01 14:54:08 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/01 14:54:08 [notice] 1#1: signal 17 (SIGCHLD) received from 28
+2024/12/01 14:54:08 [notice] 1#1: worker process 28 exited with code 0
+2024/12/01 14:54:08 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/01 14:54:08 [notice] 1#1: signal 17 (SIGCHLD) received from 32
+2024/12/01 14:54:08 [notice] 1#1: worker process 30 exited with code 0
+2024/12/01 14:54:08 [notice] 1#1: worker process 32 exited with code 0
+2024/12/01 14:54:08 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/01 14:54:08 [notice] 1#1: signal 17 (SIGCHLD) received from 31
+2024/12/01 14:54:08 [notice] 1#1: worker process 31 exited with code 0
+2024/12/01 14:54:08 [notice] 1#1: exit
+2024/12/01 15:00:06 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/default.conf:66
+2024/12/01 15:00:06 [notice] 1#1: using the "epoll" event method
+2024/12/01 15:00:06 [notice] 1#1: nginx/1.26.1
+2024/12/01 15:00:06 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/12/01 15:00:06 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/12/01 15:00:06 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/12/01 15:00:06 [notice] 1#1: start worker processes
+2024/12/01 15:00:06 [notice] 1#1: start worker process 28
+2024/12/01 15:00:06 [notice] 1#1: start worker process 29
+2024/12/01 15:00:06 [notice] 1#1: start worker process 30
+2024/12/01 15:00:06 [notice] 1#1: start worker process 31
+2024/12/01 15:00:06 [notice] 1#1: start worker process 32
+2024/12/01 22:16:12 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/12/01 22:16:12 [notice] 28#28: gracefully shutting down
+2024/12/01 22:16:12 [notice] 32#32: gracefully shutting down
+2024/12/01 22:16:12 [notice] 32#32: exiting
+2024/12/01 22:16:12 [notice] 31#31: gracefully shutting down
+2024/12/01 22:16:12 [notice] 29#29: gracefully shutting down
+2024/12/01 22:16:12 [notice] 29#29: exiting
+2024/12/01 22:16:12 [notice] 30#30: gracefully shutting down
+2024/12/01 22:16:12 [notice] 28#28: exiting
+2024/12/01 22:16:12 [notice] 32#32: exit
+2024/12/01 22:16:12 [notice] 31#31: exiting
+2024/12/01 22:16:12 [notice] 29#29: exit
+2024/12/01 22:16:12 [notice] 30#30: exiting
+2024/12/01 22:16:12 [notice] 30#30: exit
+2024/12/01 22:16:12 [notice] 28#28: exit
+2024/12/01 22:16:12 [notice] 31#31: exit
+2024/12/01 22:16:12 [notice] 1#1: signal 17 (SIGCHLD) received from 32
+2024/12/01 22:16:12 [notice] 1#1: worker process 32 exited with code 0
+2024/12/01 22:16:12 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/01 22:16:12 [notice] 1#1: signal 17 (SIGCHLD) received from 29
+2024/12/01 22:16:12 [notice] 1#1: worker process 29 exited with code 0
+2024/12/01 22:16:12 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/01 22:16:12 [notice] 1#1: signal 17 (SIGCHLD) received from 31
+2024/12/01 22:16:12 [notice] 1#1: worker process 30 exited with code 0
+2024/12/01 22:16:12 [notice] 1#1: worker process 31 exited with code 0
+2024/12/01 22:16:12 [notice] 1#1: worker process 28 exited with code 0
+2024/12/01 22:16:12 [notice] 1#1: exit
