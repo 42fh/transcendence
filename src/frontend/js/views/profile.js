@@ -186,34 +186,110 @@ function populatePublicProfileHTML(content, userData) {
   emailElement.style.display = "none";
   phoneElement.style.display = "none";
 
-  const friendshipButton = content.querySelector(".profile__button--add-remove-friend");
+  const friendshipButton = content.querySelector('button[data-action="friend"]');
+  if (!friendshipButton) {
+    console.warn("Friend button not found in template");
+    return;
+  }
+
   const iconSpan = friendshipButton.querySelector(".material-symbols-outlined");
+  if (!iconSpan) {
+    console.warn("Icon span not found in friend button");
+    return;
+  }
 
   if (userData.is_friend) {
     iconSpan.textContent = "do_not_disturb_on";
     friendshipButton.setAttribute("title", "Remove Friend");
+    friendshipButton.dataset.state = "friends";
   } else {
     switch (userData.friend_request_status) {
       case "sent":
         iconSpan.textContent = "hourglass_top";
         friendshipButton.setAttribute("title", "Friend Request Sent. Click to withdraw.");
+        friendshipButton.dataset.state = "pending_sent";
         break;
       case "received":
         iconSpan.textContent = "check_circle";
         friendshipButton.setAttribute("title", "Friend Request Received. Click to accept, reject or ignore.");
+        friendshipButton.dataset.state = "pending_received";
         break;
       default:
         iconSpan.textContent = "add_circle";
         friendshipButton.setAttribute("title", "Add Friend");
+        friendshipButton.dataset.state = "not_friends";
     }
   }
   // Add click handler for friend button
-  friendButton.addEventListener("click", async () => {
-    // TODO: Implement friend request actions
-    // We'll add this functionality next
-    console.log("Friend button clicked:", {
-      is_friend: userData.is_friend,
-      status: userData.friend_request_status,
-    });
-  });
+  //   friendButton.addEventListener("click", async () => {
+  //     // TODO: Implement friend request actions
+  //     // We'll add this functionality next
+  //     console.log("Friend button clicked:", {
+  //       is_friend: userData.is_friend,
+  //       status: userData.friend_request_status,
+  //     });
+  //   });
+  friendshipButton.addEventListener("click", () => handleFriendButtonClick(friendshipButton.dataset.state, userData));
+}
+
+async function handleFriendButtonClick(friendshipButtonDatasetState, userData) {
+  try {
+    switch (friendshipButtonDatasetState) {
+      case "not_friends":
+        // Send friend request
+        const sendResult = await sendFriendRequest(userData.id);
+        if (sendResult.success) {
+          updateFriendButton("pending_sent");
+        }
+        break;
+
+      case "pending_sent":
+        // Withdraw sent request
+        // Open Modal with confirmation
+        // const withdrawResult = await handleFriendRequest(userData.id, "withdraw");
+        // if (withdrawResult.success) {
+        console.log("Withdraw request successful");
+        // }
+        break;
+
+      case "pending_received":
+        // Accept, reject or ignore friend request
+        // Open Modal with options
+        const acceptResult = await acceptFriendRequest(userData.id);
+        if (acceptResult.success) {
+          updateFriendButton("friends");
+        }
+        break;
+
+      case "friends":
+        // Remove friend
+        // Open Modal with confirmation
+        const removeResult = await removeFriend(userData.id);
+        if (removeResult.success) {
+          updateFriendButton("none");
+        }
+        break;
+    }
+  } catch (error) {
+    console.error("Error handling friend action:", error);
+    // Show error to user
+  }
+}
+
+function updateFriendButton(newStatus) {
+  const friendButton = document.getElementById("friend-button");
+  switch (newStatus) {
+    case "none":
+      friendButton.textContent = "Add Friend";
+      break;
+    case "pending_sent":
+      friendButton.textContent = "Cancel Request";
+      break;
+    case "pending_received":
+      friendButton.textContent = "Accept Request";
+      break;
+    case "friends":
+      friendButton.textContent = "Remove Friend";
+      break;
+  }
 }
