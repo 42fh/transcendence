@@ -60,7 +60,8 @@ export function renderModal(templateId, options = {}) {
 
   // Add form handler if provided
   if (options.submitHandler) {
-    const form = modalContent.querySelector("form");
+    const form = modalContentContainer.querySelector("form");
+    console.log("Form found in modal:", !!form);
     if (form) {
       form.addEventListener("submit", options.submitHandler);
     }
