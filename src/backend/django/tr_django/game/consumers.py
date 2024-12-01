@@ -6,28 +6,21 @@ from .gamecordinator.GameCordinator import GameCordinator as GC
 import time
 import msgpack
 import redis.asyncio as redis
+import logging
 
+
+logger = logging.getLogger(__name__) 
 
 class PongConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.last_move_time = 0
-        self.current_pos = 0.5  # should be updated if game is loaded
-
-        self.player_values = {
-            "move_cooldown": 0.1,
-            "move_speed": 0.05,
-            "move_speed_boost": 1.0,  # example for player own values
-            "reverse_controls": False,  # example for player own values
-            "paddle_length": 0.3,  # example for player own values
-        }  # should come from the GameManager
 
     async def connect(self):
         self.game_id = self.scope["url_route"]["kwargs"]["game_id"]
         self.user = self.scope["user"] 
         self.player_id = str(self.user.id)
-        print(f"USER: {self.user} ID: {self.player_id}" )       
         # init channels
         self.game_group = f"game_{self.game_id}"
         channel_key = f"asgi:group:{self.game_group}"
@@ -50,9 +43,8 @@ class PongConsumer(AsyncWebsocketConsumer):
             player_index = await self.game_manager.add_player(self.player_id)
             if not player_index:
                 await self.close(code=1011)
-                print("get instance: Error in add player")
+                logger.error("get instance: Error in add player")
                 return
-            # Initialize game if no players exist with provided settings -> notworking
             if player_count == 0:
                 asyncio.create_task(self.game_manager.start_game())
             self.role = player_index['role']
@@ -61,8 +53,10 @@ class PongConsumer(AsyncWebsocketConsumer):
                 self.current_pos = player_index.get("position")
                 self.player_index = player_index.get("index")
                 self.player_values =  player_index.get("settings") 
-                print(f"Player {self.player_id} connected to game {self.game_id} as player {self.player_index}")
-
+                logger.info(f"Player[{self.player_id}] connected to game[{self.game_id}] as player: {self.player_indexi +1 } index {self.player_indexi +1 }")
+           else
+                logger.info(f"Player[{self.player_id}] connected to game[{self.game_id}] as spectator")
+                 
             await self.accept()
 
             # Send initial game state
@@ -79,12 +73,12 @@ class PongConsumer(AsyncWebsocketConsumer):
                             "game_setup": {
                                 "type": game_type,
                                 "vertices": self.game_manager.vertices,
-                                #'settings': await self.game_manager.redis_conn.get(self.game_manager.settings_key)
                             },
                         }
                     )
                 )
             except Exception as e:
+                logger.error(f"Failed to load initial game state: {str(e)}")
                 await self.send(
                     text_data=json.dumps(
                         {
@@ -95,7 +89,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                 )
 
         except Exception as e:
-            print(f"Error in connect: {e}")
+            logger.error(f"Error in connect: {e}")
             await self.close(code=1011)
 
     # TODO: disconnect could not be called (browser crash etc. so we need a extra test if the client is there
