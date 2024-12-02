@@ -43,7 +43,25 @@ export async function load2FAPage() {
     const userId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
     if (!userId) throw new Error("User ID not found");
 
-    const userData = await fetchUserProfile(userId);
+    const result = await fetchUserProfile(userId);
+
+    if (!result.success) {
+      if (result.status === 404) {
+        localStorage.clear();
+        showToast("Session expired. Please login again.", "error");
+        loadAuthPage();
+        return;
+      }
+
+      if (result.error === "NETWORK_ERROR") {
+        showToast("Network error. Please check your connection.", "error");
+        loadHomePage();
+        return;
+      }
+
+      throw new Error(result.message || "Failed to load profile data");
+    }
+    const userData = result.data;
     console.log("User data fetched:", userData);
 
     if (userData.email == null || userData.email == "") {
@@ -181,7 +199,7 @@ async function handleFormSubmission(form, userId) {
     }
     const response = await updateUserProfile(userId, dataToSend);
     showToast("Profile updated successfully!");
-    loadProfilePage(false);
+    loadProfilePage(userId, false);
   } catch (error) {
     console.error("Error during form submission:", error);
     showToast("Failed to update profile", "error");
@@ -202,7 +220,7 @@ function setupFormSubmission(form, userId) {
 
   if (cancelButton) {
     cancelButton.addEventListener("click", () => {
-      loadProfilePage(false);
+      loadProfilePage(userId, false);
     });
   }
 

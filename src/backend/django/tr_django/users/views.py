@@ -386,6 +386,7 @@ class UserDetailView(View):
                 user_data.update(
                     {
                         "email": user.email,
+                        "two_factor_enabled": user.two_factor_enabled,
                         "telephone_number": user.telephone_number,
                     }
                 )

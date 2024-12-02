@@ -23,6 +23,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         }  # should come from the GameManager
 
     async def connect(self):
+        print("connect")
         self.game_id = self.scope["url_route"]["kwargs"]["game_id"]
         query_string = self.scope["query_string"].decode("utf-8")
         query_params = dict(param.split("=") for param in query_string.split("&"))

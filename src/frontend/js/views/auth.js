@@ -82,7 +82,22 @@ async function handleAuth(form, authFunction) {
   try {
     const result = await authFunction(data);
 
-    const userData = await fetchUserProfile(result.id);
+    let userData = await fetchUserProfile(result.id);
+    if (!userData.success) {
+      if (userData.status === 404 && isOwnProfile) {
+        localStorage.clear();
+        loadAuthPage();
+        return;
+      }
+
+      if (userData.error === "NETWORK_ERROR") {
+        showToast("Network error. Please check your connection.", "error");
+        return;
+      }
+
+      throw new Error(userData.message || "Failed to load profile");
+    }
+    userData = userData.data;
     if (userData.two_factor_enabled && userData.email != "") {
       document.getElementById("login-container").style.display = "none";
       document.getElementById("2fa-container").style.display = "block";
