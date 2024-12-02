@@ -21,8 +21,8 @@ services:
       - transcendence_network
   django:
     build: ./src/backend/django
-    # mind that manage.py is in the tr_django folder
-    command: sh -c "python tr_django/manage.py migrate && python tr_django/manage.py collectstatic --noinput && daphne -b 0.0.0.0 -p 8000 tr_django.asgi:application"
+    # mind that manage.py is in the tr_django folder 
+    command: sh -c "echo Error the command of django must be overwritten"
     env_file:
       - ./.env
     volumes:

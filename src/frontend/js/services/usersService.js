@@ -4,13 +4,24 @@ export async function fetchUserProfile(userId) {
   try {
     const response = await fetch(`${CONFIG.API_BASE_URL}/api/users/${userId}/`);
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      return {
+        success: false,
+        status: response.status,
+        error: response.status === 404 ? "USER_NOT_FOUND" : "SERVER_ERROR",
+        message: await response.text(),
+      };
     }
     const userData = await response.json();
-    return userData;
+    return {
+      success: true,
+      data: userData,
+    };
   } catch (error) {
-    console.error("Error fetching user profile:", error);
-    throw error;
+    return {
+      success: false,
+      error: "NETWORK_ERROR",
+      message: error.message,
+    };
   }
 }
 
@@ -57,14 +68,25 @@ export async function updateUserProfile(userId, userData) {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      return {
+        success: false,
+        status: response.status,
+        error: response.status === 404 ? "USER_NOT_FOUND" : "SERVER_ERROR",
+        message: await response.text(),
+      };
     }
 
     const updatedUser = await response.json();
-    return updatedUser;
+    return {
+      success: true,
+      data: updatedUser,
+    };
   } catch (error) {
-    console.error("Error updating user profile:", error);
-    throw error;
+    return {
+      success: false,
+      error: "NETWORK_ERROR",
+      message: error.message,
+    };
   }
 }
 
@@ -80,15 +102,37 @@ export async function uploadUserAvatar(userId, avatarFile) {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Upload error response:", errorText);
-      throw new Error("Upload failed");
+      return {
+        success: false,
+        status: response.status,
+        error: response.status === 404 ? "USER_NOT_FOUND" : "SERVER_ERROR",
+        message: await response.text(),
+      };
     }
 
     const data = await response.json();
-    return data.avatar;
+    return {
+      success: true,
+      data: data.avatar,
+    };
   } catch (error) {
-    console.error("Error uploading avatar:", error);
+    return {
+      success: false,
+      error: "NETWORK_ERROR",
+      message: error.message,
+    };
+  }
+}
+
+export async function fetchUsers(page = 1, perPage = 10, search = "") {
+  try {
+    const url = `${CONFIG.API_BASE_URL}/api/users/?page=${page}&per_page=${perPage}&search=${search}`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Failed to fetch users");
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching users:", error);
     throw error;
   }
 }

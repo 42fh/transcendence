@@ -93,7 +93,6 @@
       <p id="modal-message" class="modal-message"></p>
       <form id="signup-form" class="modal-form">
         <!-- Message element added here -->
-
         <label for="username">Username</label>
         <input type="text" id="username" name="username" required />
 
@@ -131,6 +130,117 @@
         </div>
       </div>
     </template>
+      
+
+    <!-- Game list Template 
+     (list of games and button to create new game)-->
+    <template id="game-item-template">
+      <div id="games-container" class="page-container--games">
+        <div class="game-item">
+          <p>Game ID: <span id="game-id"></span></p>
+          <p>Mode: <span></span></p>
+          <p>Date: <span></span></p>
+          <p>Duration: <span></span></p>
+          <p>Winner: <span></span></p>
+        </div>
+      </div>
+      <button id="cta__button-settings" style="display: none;">Settings</button>
+    </template>
+
+
+
+
+    <!-- Modal Template -->
+<template id="modal-template">
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <button class="modal-close-btn" aria-label="Close Modal">&times;</button>
+      <div class="modal-content">
+        <h2>Error</h2>
+        <p class="modal-message" id="modal-message">An error occurred. Please try again.</p>
+        <div class="modal-form">
+          <label for="inputField">Example Input:</label>
+          <input type="text" id="inputField" placeholder="Enter some text" />
+          <button type="button" class="form-button" id="submit-form">Submit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+
+<!-- Game Settings Template-->
+<template id="game-settings-template">
+  <p id="status" class="status"></p>
+      <!-- Status message container -->
+      <div id="status" style="display: none;"></div>
+  <div class="tournament-container page-container--settings">
+    <h2>GAME SETTINGS</h2>
+    <div class="tournament-detail-container">
+      <form id="gameForm" class="tournament-detail-section">
+        <div class="game-setting-group">
+          <label for="playerId">Player ID:</label>
+          <input type="text" id="playerId" name="playerId" class="create-tournament-select">
+        </div>
+        <div class="game-setting-group">
+          <label for="numPlayers">Number of Players:</label>
+          <input type="number" id="numPlayers" name="numPlayers" min="2" max="8" class="create-tournament-select">
+        </div>
+        <div class="game-setting-group">
+          <label for="numSides">Number of Sides:</label>
+          <input type="number" id="numSides" name="numSides" min="3" max="100" class="create-tournament-select">
+        </div>
+        <div class="game-setting-group">
+          <label for="numBalls">Number of Balls:</label>
+          <input type="number" id="numBalls" name="numBalls" min="1" max="4" class="create-tournament-select">
+        </div>
+        <div class="game-setting-group">
+          <label for="mode">Select Mode:</label>
+          <select id="mode" name="mode" class="create-tournament-select">
+            <option value="regular">Regular</option>
+            <option value="classic">Classic</option>
+            <option value="circular">Circular</option>
+            <option value="irregular">Irregular</option>
+          </select>
+        </div>
+        <div class="game-setting-group">
+          <label for="shape">Shape:</label>
+          <select id="shape" name="shape" class="create-tournament-select">
+            <option value="regular">Regular</option>
+            <option value="irregular">Irregular</option>
+            <option value="star">Star</option>
+            <option value="crazy">Crazy</option>
+          </select>
+        </div>
+        <div class="game-setting-group">
+          <label for="scoreMode">Score Mode:</label>
+          <select id="scoreMode" name="scoreMode" class="create-tournament-select">
+            <option value="classic">Classic</option>
+            <option value="modern">Modern</option>
+          </select>
+        </div>
+        <div class="game-setting-group">
+          <button type="submit" class="form-button">Create Game</button>
+        </div>
+      </form>
+    </div>
+    <div id="descriptions-container" class="tournament-detail-descriptions">
+      <h3>Game Information</h3>
+      <p><strong>Classic:</strong> Classic 2-player pong with 2 paddles and 2 walls. Maximum players: 2.</p>
+      <p><strong>Regular:</strong> Regular polygon with all sides playable. Maximum players: 4.</p>
+      <p><strong>Circular:</strong> Circular arena with curved paddles and sides. Maximum players: 8.</p>
+      <p><strong>Irregular:</strong> Irregular polygon shape with customizable sides. Maximum players: 6.</p>
+      <ul>
+        <li><strong>Regular Shape:</strong> Standard polygon.</li>
+        <li><strong>Irregular Shape:</strong> Slightly deformed polygon with balanced sides.</li>
+        <li><strong>Star Shape:</strong> Star-like shape with alternating long and short sides.</li>
+        <li><strong>Crazy Shape:</strong> Extreme deformation with sharp transitions.</li>
+      </ul>
+    </div>
+  </div>
+</template>
+
+
 
     <!-- Tournament List Page Template -->
     <template id="tournament-template">
@@ -370,7 +480,7 @@
     </template>
 
     <!-- Chat User List Item Template -->
-    <template id="user-list-item-template">
+    <template id="chat-user-list-item-template">
       <li>
         <div class="chat-user-item-container">
           <span class="chat-user-item"></span>
@@ -399,47 +509,54 @@
         <button class="bottom-nav__item" data-page="profile">
           <span class="bottom-nav__icon material-symbols-outlined">account_circle</span>
         </button>
+        <button class="bottom-nav__item" data-page="users">
+          <span class="bottom-nav__icon material-symbols-outlined">person_search</span>
+        </button>
         <button class="bottom-nav__item" data-page="chat">
           <span class="bottom-nav__icon material-symbols-outlined">chat_bubble</span>
         </button>
       </nav>
     </template>
 
-    <!-- Profile Template -->
+    <!-- Profile Template (used for both 'private' profile and 'public' profile) -->
     <template id="profile-template">
       <div class="page-container page-container--profile">
-        <!-- <div class="profile__header"> -->
         <div class="profile">
           <div class="profile__section profile__section--header">
-            <!-- <div class="profile__avatar-container"> -->
             <div class="profile__avatar-wrapper">
               <img class="profile__avatar" src="" alt="Profile avatar" />
             </div>
-            <!-- <div class="profile__info">
-            <h2 class="profile__username"></h2>
-            <p class="profile__name"></p>
-            <p class="profile__email"></p>
-            <p class="profile__phone"></p>
-          </div> -->
             <div class="profile__info">
-              <h2 class="profile__username"></h2>
-              <p class="profile__info-item profile__info-item--name"></p>
-              <p class="profile__info-item profile__info-item--location"></p>
-              <p class="profile__info-item profile__info-item--email"></p>
-              <p class="profile__info-item profile__info-item--phone"></p>
+              <div class="profile__username-container">
+                <!-- TODO: think about this h2 if it has really to be -->
+                <span class="profile__online-status material-symbols-outlined profile__public-info">circle</span>
+                <h2 class="profile__username"></h2>
+              </div>
+              <!-- Private info will be hidden/shown based on view type -->
+              <p class="profile__info-item profile__info-item--name profile__private-info"></p>
+              <p class="profile__info-item profile__info-item--email profile__private-info"></p>
+              <p class="profile__info-item profile__info-item--phone profile__private-info"></p>
             </div>
           </div>
-
-          <!-- <div class="profile__bio">
-          <h3 class="profile__bio-title">Bio</h3>
-          <p class="profile__bio-text"></p>
-        </div> -->
+          <!-- Public Profile Actions -->
+          <div class="profile__section profile__section--public-actions profile__public-info">
+            <button class="profile__action-button" data-action="friend" title="Add Friend">
+              <span class="material-symbols-outlined">person_add</span>
+            </button>
+            <button class="profile__action-button" data-action="chat" title="Send Message">
+              <span class="material-symbols-outlined">maps_ugc</span>
+            </button>
+            <button class="profile__action-button" data-action="play" title="Challenge to Game">
+              <span class="material-symbols-outlined">play_circle</span>
+            </button>
+            <button class="profile__action-button" data-action="block" title="Block User">
+              <span class="material-symbols-outlined">block</span>
+            </button>
+          </div>
           <div class="profile__section profile__section--bio">
             <h3 class="profile__section-title">Bio</h3>
             <p class="profile__bio-text"></p>
           </div>
-
-          <!-- <div class="profile__stats"> -->
           <div class="profile__section profile__section--stats">
             <div class="profile__stats-item">
               <span class="profile__stats-label">Wins</span>
@@ -454,8 +571,6 @@
               <span class="profile__stats-value profile__stats-ratio"></span>
             </div>
           </div>
-
-          <!-- <div class="profile__matches"> -->
           <div class="profile__section profile__section--matches">
             <h3 class="profile__section-title">Recent Matches</h3>
             <div class="profile__matches-list">
@@ -463,9 +578,8 @@
             </div>
           </div>
 
-          <!-- <div class="profile__actions"> -->
-          <div class="profile__section profile__section--actions">
-            <!-- <button class="profile__edit-button">Edit Profile</button> -->
+          <!-- Private Profile Actions -->
+          <div class="profile__section profile__section--private-actions profile__private-info">
             <button class="profile__button profile__button--edit">Edit Profile</button>
             <button class="profile__button profile__button--2fa">2FA</button>
             <!-- TODO: Add password change button if we decide to implement it -->
@@ -474,6 +588,7 @@
       </div>
     </template>
 
+    <!-- Profile Match Template -->
     <template id="profile-match-template">
       <div class="profile__match-item">
         <span class="profile__match-date"></span>
@@ -611,6 +726,45 @@
               </form>
             </div>
           </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- Users Template -->
+
+    <template id="users-template">
+      <div class="page-container page-container--users">
+        <!-- TODO: Folks around maybe is nicer instead of users -->
+        <h2 class="users-page__title">Users</h2>
+        <div class="users-search">
+          <input type="text" class="users-search__input" placeholder="Search users..." />
+          <!-- <span class="material-symbols-outlined users-search__icon">search</span> -->
+        </div>
+        <div id="users-list" class="users-list"></div>
+        <div id="users-pagination" class="pagination">
+          <button class="pagination__button pagination__button--prev">
+            <span class="material-symbols-outlined">chevron_left</span>
+          </button>
+          <div class="pagination__info">
+            <span class="pagination__current">1</span>
+            <span class="pagination__separator">/</span>
+            <span class="pagination__total">1</span>
+          </div>
+          <button class="pagination__button pagination__button--next">
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+      </div>
+    </template>
+
+    <!-- User List Item Template -->
+    <template id="users-list-item-template">
+      <div class="users-list__item">
+        <img class="users-list__avatar" src="" alt="User avatar" />
+        <div class="users-list__info">
+          <span class="users-list__username"></span>
+          <!-- <span class="users-list__status"></span> -->
+          <span class="users-list__status-indicator"></span>
         </div>
       </div>
     </template>

@@ -10,8 +10,8 @@
 .profile {
   width: 100%;
   padding: var(--spacing-sm);
-  padding: var(--spacing-sm);
   max-width: 800px;
+  max-width: min(90vw, 50em); /* Fluid but with a maximum */
   margin: 0 auto;
 }
 
@@ -21,7 +21,25 @@
   border-radius: var(--profile-border-radius);
   padding: var(--spacing-sm);
   margin-bottom: var(--spacing-sm);
+  /* max-width: 20em; */
+  /* max-width: min(90vw, 50em); */
+  width: 100%; /* Take full width of parent */
+
+  word-wrap: break-word;
+  box-sizing: border-box;
 }
+
+/* @media (min-width: 768px) {
+  .profile__section {
+    max-width: 40em;
+  }
+}
+
+@media (min-width: 1024px) {
+  .profile__section {
+    max-width: min(90vw, 50em);
+  }
+} */
 
 /* Header Section - Mobile First */
 .profile__section--header {
@@ -51,6 +69,24 @@
   object-fit: cover;
 }
 
+.profile__username-container {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.profile__online-status {
+  font-size: 0.8em; /* Remove the crossed-out font-size */
+  /* color: var(--color-success); */
+  color: var(--color-status-online);
+}
+
+.profile__username-container .profile__online-status.material-symbols-outlined {
+  font-size: 0.8em;
+  color: var(--color-status-online);
+  font-variation-settings: "FILL" 1, "wght" 700; /* Filled and bold */
+  /* font-variation-settings: "FILL" 0, "wght" 100; */
+}
 .profile__username {
   font-size: var(--font-size-large);
   color: var(--color-text-primary);
@@ -159,7 +195,7 @@
   margin-top: 1rem;
 }
 
-.profile__match-item {
+/* .profile__match-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -169,6 +205,57 @@
   border-radius: 5px;
   font-size: 0.8rem;
   transition: transform 0.2s ease;
+} */
+
+.profile__match-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  margin: 0.5rem 0;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-small);
+  transition: transform 0.2s ease;
+}
+
+.profile__match-date {
+  color: var(--color-text-secondary);
+  font-size: calc(var(--font-size-small) * 0.9);
+}
+
+.profile__match-opponent {
+  color: var(--color-text-secondary);
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: var(--breakpoint-tablet)) {
+  .profile__match-item {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    gap: calc(var(--spacing-xs) / 2);
+  }
+
+  .profile__match-date {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .profile__match-result {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+  }
+
+  .profile__match-opponent {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    text-align: left;
+  }
 }
 
 /* Actions Section */
@@ -257,4 +344,44 @@
   color: #f44336;
   padding: 2rem;
   font-family: "Press Start 2P", cursive;
+}
+
+/* Visibility Classes */
+.profile__private-info,
+.profile__public-info {
+  display: none;
+}
+
+/* Show/hide based on profile type */
+.profile--private .profile__private-info {
+  display: block;
+}
+
+.profile--private .profile__section--private-actions {
+  display: flex;
+}
+
+.profile--public .profile__public-info {
+  display: block;
+}
+
+.profile--public .profile__section--public-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  flex-wrap: wrap;
+  padding: var(--spacing-sm);
+}
+
+/* Override the base button styles */
+.profile--public .profile__section--public-actions button {
+  padding: 0.5rem 1rem;
+}
+
+/* Keep edit button at bottom */
+.profile__section--private-actions {
+  margin-top: auto; /* This pushes it to the bottom if we use flex column on parent */
+  padding-top: var(--spacing-lg);
 }

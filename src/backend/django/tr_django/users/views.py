@@ -300,6 +300,11 @@ class UsersListView(View):
     """
 
     def get(self, request):
+        # Add authentication check
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Authentication required"}, status=401)
+
+        logger.info("User '%s' is authenticated", request.user.username)
         search = request.GET.get("search", "")
         page = int(request.GET.get("page", 1))
         per_page = int(request.GET.get("per_page", 10))
@@ -356,11 +361,44 @@ class UserDetailView(View):
     """
 
     def get(self, request, user_id):
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Authentication required"}, status=401)
+
         try:
+            # First validate that the user exists
             user = CustomUser.objects.get(id=user_id)
+            is_own_profile = str(request.user.id) == str(user_id)
+
+            # Base data that's always sent
+            user_data = {
+                "id": str(user.id),
+                "username": user.username,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "avatar": user.avatar.url if user.avatar else None,
+                "bio": user.bio,
+                "pronoun": user.pronoun,
+                "is_active": user.is_active,
+            }
+
+            # Add sensitive data only if it's the user's own profile
+            if is_own_profile:
+                user_data.update(
+                    {
+                        "email": user.email,
+                        "telephone_number": user.telephone_number,
+                    }
+                )
 
             try:
                 player = user.player
+                user_data["stats"] = {
+                    "wins": player.wins,
+                    "losses": player.losses,
+                    "win_ratio": player.win_ratio(),
+                    "display_name": player.get_display_name,
+                }
+
                 # Get recent matches
                 recent_matches = []
                 player_stats = player.playergamestats_set.select_related("single_game", "tournament_game").order_by(
@@ -368,18 +406,20 @@ class UserDetailView(View):
                 )[:5]
 
                 for stat in player_stats:
-                    game = stat.game
+                    game = stat.single_game or stat.tournament_game  # Handle both game types
                     if game:
                         match_data = {
                             "game_id": str(game.id),
                             "date": game.start_date,
                             "score": stat.score,
                             "won": game.winner == player if game.winner else None,
-                            "game_type": "tournament" if stat.tournament_game else "single",
+                            "game_type": "tournament" if hasattr(game, "tournament") else "single",
                             "opponent": None,
                         }
 
-                        other_stat = game.playergamestats_set.exclude(player=player).first()
+                        # Get opponent's stats
+                        other_stat = game.playergamestats_set.exclude(player=player).select_related("player").first()
+
                         if other_stat:
                             match_data["opponent"] = {
                                 "username": other_stat.player.username,
@@ -389,33 +429,22 @@ class UserDetailView(View):
 
                         recent_matches.append(match_data)
 
-                user_data = {
-                    "id": str(user.id),
-                    "username": user.username,
-                    "email": user.email,
-                    "first_name": user.first_name,
-                    "last_name": user.last_name,
-                    "avatar": user.avatar.url if user.avatar else None,
-                    "bio": user.bio,
-                    "telephone_number": user.telephone_number,
-                    "pronoun": user.pronoun,
-                    "is_active": user.is_active,
-                    "two_factor_enabled": user.two_factor_enabled,
-                    "visibility_online_status": user.visibility_online_status,
-                    "visibility_user_profile": user.visibility_user_profile,
-                    "stats": {
-                        "wins": player.wins,
-                        "losses": player.losses,
-                        "win_ratio": player.win_ratio(),
-                        "display_name": player.get_display_name,
-                    },
-                    "recent_matches": recent_matches,
-                }
-                return JsonResponse(user_data)
+                user_data["recent_matches"] = recent_matches
+
             except Player.DoesNotExist:
-                return JsonResponse({"error": "Player profile not found"}, status=404)
+                logger.warning(f"Player profile not found for user {user.username}")
+                user_data["stats"] = None
+                user_data["recent_matches"] = []
+
+            logger.debug(f"Returning profile data for user {user.username}, own profile: {is_own_profile}")
+            return JsonResponse(user_data)
+
         except CustomUser.DoesNotExist:
+            logger.warning(f"User not found with ID: {user_id}")
             return JsonResponse({"error": "User not found"}, status=404)
+        except Exception as e:
+            logger.error(f"Error fetching user profile: {str(e)}")
+            return JsonResponse({"error": "Failed to fetch user profile"}, status=500)
 
     def patch(self, request, user_id):
         """Update user details (besides avatar)"""
