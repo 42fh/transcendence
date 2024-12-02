@@ -2053,3 +2053,27 @@
 2024/12/02 17:18:21 [notice] 31#31: exit
 2024/12/02 17:18:21 [notice] 32#32: exit
 2024/12/02 17:18:21 [notice] 33#33: exit
+2024/12/02 17:19:06 [notice] 1#1: using the "epoll" event method
+2024/12/02 17:19:06 [notice] 1#1: nginx/1.26.1
+2024/12/02 17:19:06 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/12/02 17:19:06 [notice] 1#1: OS: Linux 6.10.11-linuxkit
+2024/12/02 17:19:06 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/12/02 17:19:06 [notice] 1#1: start worker processes
+2024/12/02 17:19:06 [notice] 1#1: start worker process 28
+2024/12/02 17:19:06 [notice] 1#1: start worker process 29
+2024/12/02 17:19:06 [notice] 1#1: start worker process 30
+2024/12/02 17:19:06 [notice] 1#1: start worker process 31
+2024/12/02 17:19:06 [notice] 1#1: start worker process 32
+2024/12/02 17:19:06 [notice] 1#1: start worker process 33
+2024/12/02 17:19:06 [notice] 1#1: start worker process 34
+2024/12/02 17:19:06 [notice] 1#1: start worker process 35
+2024/12/02 17:19:50 [error] 28#28: *16 open() "/var/www/media/avatars/test1.jpg" failed (2: No such file or directory), client: 172.18.0.1, server: localhost, request: "GET /media/avatars/test1.jpg HTTP/1.1", host: "localhost:8443", referrer: "http://localhost:8443/"
+2024/12/02 17:19:50 [error] 29#29: *18 open() "/var/www/media/avatars/tests/prime.jpg" failed (2: No such file or directory), client: 172.18.0.1, server: localhost, request: "GET /media/avatars/tests/prime.jpg HTTP/1.1", host: "localhost:8443", referrer: "http://localhost:8443/"
+2024/12/02 17:19:50 [error] 30#30: *19 open() "/var/www/media/avatars/tests/lex.jpg" failed (2: No such file or directory), client: 172.18.0.1, server: localhost, request: "GET /media/avatars/tests/lex.jpg HTTP/1.1", host: "localhost:8443", referrer: "http://localhost:8443/"
+2024/12/02 17:19:50 [error] 30#30: *20 open() "/var/www/media/avatars/tests/elon.jpg" failed (2: No such file or directory), client: 172.18.0.1, server: localhost, request: "GET /media/avatars/tests/elon.jpg HTTP/1.1", host: "localhost:8443", referrer: "http://localhost:8443/"
+2024/12/02 17:19:50 [error] 30#30: *21 open() "/var/www/media/avatars/tests/che.jpg" failed (2: No such file or directory), client: 172.18.0.1, server: localhost, request: "GET /media/avatars/tests/che.jpg HTTP/1.1", host: "localhost:8443", referrer: "http://localhost:8443/"
+2024/12/02 17:20:25 [error] 28#28: *25 open() "/var/www/media/avatars/test1.jpg" failed (2: No such file or directory), client: 172.18.0.1, server: localhost, request: "GET /media/avatars/test1.jpg HTTP/1.1", host: "localhost:8443", referrer: "http://localhost:8443/"
+2024/12/02 17:20:25 [error] 29#29: *27 open() "/var/www/media/avatars/tests/prime.jpg" failed (2: No such file or directory), client: 172.18.0.1, server: localhost, request: "GET /media/avatars/tests/prime.jpg HTTP/1.1", host: "localhost:8443", referrer: "http://localhost:8443/"
+2024/12/02 17:20:25 [error] 29#29: *30 open() "/var/www/media/avatars/tests/che.jpg" failed (2: No such file or directory), client: 172.18.0.1, server: localhost, request: "GET /media/avatars/tests/che.jpg HTTP/1.1", host: "localhost:8443", referrer: "http://localhost:8443/"
+2024/12/02 17:20:25 [error] 30#30: *29 open() "/var/www/media/avatars/tests/elon.jpg" failed (2: No such file or directory), client: 172.18.0.1, server: localhost, request: "GET /media/avatars/tests/elon.jpg HTTP/1.1", host: "localhost:8443", referrer: "http://localhost:8443/"
+2024/12/02 17:20:25 [error] 29#29: *28 open() "/var/www/media/avatars/tests/lex.jpg" failed (2: No such file or directory), client: 172.18.0.1, server: localhost, request: "GET /media/avatars/tests/lex.jpg HTTP/1.1", host: "localhost:8443", referrer: "http://localhost:8443/"

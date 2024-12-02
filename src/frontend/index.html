@@ -413,38 +413,26 @@
 
 
   <template id="chat-home-template">
-    <div>
-      <h3>Users:</h3>
-      <div id="chat-usernames" class="horizontal-scroll">
-        <!-- Space for list of avatars and usernames (x letters max) -->
+    <div class="page-container page-container--users">
+      <h2 class="users-page__title">Chats</h2>
+      <div id="users-list" class="users-list">
+        <!-- Chat contacts will be populated here using users-list-item-template -->
       </div>
-      <h3>Conversations:</h3>
-      <ul id="conversation-list">
-        <!-- conversation list -->
-      </ul>
+      <div id="users-pagination" class="pagination">
+        <button class="pagination__button pagination__button--prev">
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+        <div class="pagination__info">
+          <span class="pagination__current">1</span>
+          <span class="pagination__separator">/</span>
+          <span class="pagination__total">1</span>
+        </div>
+        <button class="pagination__button pagination__button--next">
+          <span class="material-symbols-outlined">chevron_right</span>
+        </button>
+      </div>
     </div>
   </template>
-
-  <template id="user-initial-template">
-    <div class="user-initial">
-      <div class="profile__avatar-container--small ">
-        <img class="user-avatar profile__avatar" src="default-avatar.png" alt="User avatar" />
-      </div>
-      <span class="user-username font-size-small"></span>
-    </div>
-  </template>
-
-  <!-- Chat User List Item Template -->
-  <template id="chat-user-list-item-template">
-    <li>
-      <div class="chat-user-item-container">
-        <span class="chat-user-item"></span>
-        <button class="chat-button-small"></button>
-      </div>
-    </li>
-  </template>
-
-
   <template id="chat-room-template">
     <div>
       <h3>Chat Room</h3>
