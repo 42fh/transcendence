@@ -1,5 +1,5 @@
 
 
-export async function loadGame3D() {
+export async function loadGame2D() {
     console.log("hello game 2d")
 }
