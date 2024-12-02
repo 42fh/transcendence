@@ -1,3 +1,25 @@
+def add_cls_methods(cls):
+    """
+    Decorator that adds class methods to a class.
+    Includes methods for setting up a game 
+    """
+    from .game_setup import setup_game, calculate_vertices, calculate_sides_normals, calculate_inner, calculate_player_side_indices
+
+    methods = {
+        "setup_game": setup_game,
+        "calculate_vertices": calculate_vertices,
+        "calculate_sides_normals": calculate_sides_normals,
+        "calculate_inner" : calculate_inner,
+        "calculate_player_side_indices" : calculate_player_side_indices
+    }
+
+    for name, method in methods.items():
+        setattr(cls, name, method)
+    return cls
+
+
+
+
 def add_game_flow(cls):
     """
     Decorator that adds game flow management methods to a class.

@@ -7,10 +7,110 @@ from .models import Tournament
 import json
 from .services.tournament_service import build_tournament_data
 from datetime import datetime
+import asyncio  
+from .gamecordinator.GameCordinator import GameCordinator
+from django.core.serializers.json import DjangoJSONEncoder
+import json
+from .gamecordinator.game_config import EnumGameMode 
+
 
 
 def transcendance(request):
     return HttpResponse("Initial view for transcendance")
+
+
+@csrf_exempt
+async def create_new_game(request):
+    if request.method == "POST":      
+        if request.content_type != 'application/json':
+            return JsonResponse(
+                {
+                    "error": "Unsupported Media Type",
+                    "message": "This endpoint only accepts application/json payloads."
+                },
+                status=415
+            )
+        
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse(
+                {
+                    "error": "Invalid JSON",
+                    "message": "The JSON payload is malformed."
+                },
+                status=400
+            )
+        game_mode = data.get('mode')
+        if not game_mode:
+            return JsonResponse(
+                {
+                    "error": "Invalid request",
+                    "message": "Game mode is required."
+                },
+                status=400
+            )
+
+        try:
+            game_mode = EnumGameMode(game_mode)
+        except ValueError:
+            return JsonResponse(
+                {
+                    "error": "Invalid game mode",
+                    "message": f"Valid modes are: {[mode.value for mode in EnumGameMode]}"
+                },
+                status=400
+            )
+
+        game_id = await GameCordinator.create_new_game(data)
+        if not game_id:
+                return JsonResponse(
+                    {
+                        "error": "Game Creation Failed",
+                        "message": "Unable to create new game. Please try again."
+                    },
+                    status=500  # Service Unavailable
+                )
+
+        return JsonResponse(
+            {
+                "game_id": game_id,
+                "message": "Game created successfully!",
+            },
+            status=200
+        )
+
+    return JsonResponse(
+        {
+            "error": "Method Not Allowed",
+            "message": "only POST requests are allowed"
+        }, 
+        status=405
+    )
+
+
+@csrf_exempt
+async def get_all_games(request):
+    if request.method == "GET":      
+        games = await GameCordinator.get_all_games()
+        first_item = next(iter(games), None)
+        if first_item and isinstance(first_item, bytes):
+            # If bytes, decode
+            games_list = [member.decode('utf-8') for member in games]
+        else:
+            # If already strings, use directly
+            games_list = list(games)
+    
+        json_string = json.dumps(games_list, cls=DjangoJSONEncoder)
+        return JsonResponse(
+            {
+                "games": json_string,
+                "message": "all game uuids ",
+            }
+        )
+
+    return JsonResponse({"message": "only GET requests are allowed"}, status=400)
+
 
 
 @csrf_exempt
@@ -57,6 +157,7 @@ def create_game_mode(request):
         )
 
     return JsonResponse({"message": "only POST requests are allowed"}, status=400)
+
 
 
 @csrf_exempt

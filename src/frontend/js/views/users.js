@@ -25,7 +25,7 @@ export async function loadUsersPage(addToHistory = true) {
     const content = document.importNode(usersTemplate.content, true);
     mainContent.appendChild(content);
 
-    // Get the search input after template is cloned and added
+    // TODO: Get the search input after template is cloned and added
     // const searchInput = document.querySelector(".users-search__input");
     // if (searchInput) {
     //   searchInput.addEventListener(
@@ -69,7 +69,7 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
         avatarImg.src = user.avatar || ASSETS.IMAGES.DEFAULT_AVATAR;
         avatarImg.onerror = function () {
           this.src = ASSETS.IMAGES.DEFAULT_AVATAR;
-          console.log(`Avatar image failed to load for ${user.username}, using default`);
+          console.warn(`Avatar image failed to load for ${user.username}, using default`);
         };
 
         const username = userElement.querySelector(".users-list__username");
@@ -102,21 +102,12 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
 }
 
 function renderPagination(pagination, container) {
-  console.log("Rendering pagination:", pagination);
-  console.log("Container:", container);
   const { total_pages, page, per_page } = pagination;
 
   const prevButton = container.querySelector(".pagination__button--prev");
   const nextButton = container.querySelector(".pagination__button--next");
   const currentPage = container.querySelector(".pagination__current");
   const totalPages = container.querySelector(".pagination__total");
-
-  console.log("Found elements:", {
-    prevButton: prevButton ? "✓" : "✗",
-    nextButton: nextButton ? "✓" : "✗",
-    currentPage: currentPage ? "✓" : "✗",
-    totalPages: totalPages ? "✓" : "✗",
-  });
 
   if (!prevButton || !nextButton || !currentPage || !totalPages) {
     console.error("Missing pagination elements");
