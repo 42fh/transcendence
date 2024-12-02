@@ -36,5 +36,5 @@ This table documents the available settings for creating a game, detailing their
 | `ball_size`           | Size of the ball as a fraction of the game space.                               | All                                                  | `0.05`                    |
 | `ball_speed`          | Speed of the ball (if implemented in specific game modes).                      | Mode-dependent (check individual implementation)     | `1.5`                     |
 | `polygon_sides`       | Number of sides for a polygonal boundary.                                       | `REGULAR`, `IRREGULAR`                               | `8`                       |
-| `shape`               | Defines the game shape (e.g., "polygon", "circle").                             | `REGULAR`, `IRREGULAR`, `CIRCULAR`                   | `circle`                  |
-| `game_speed`          | Speed of the game overall (affects all elements). 
+| `shape`               | Defines the game shape only relevant for irregular (e.g. "star", crazy).                 	| set in all, used in `IRREGULAR`,                   | `star`                  |
+| `game_speed`          | Speed of the game overall (affects all elements). Not implemented  
