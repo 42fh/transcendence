@@ -22,6 +22,7 @@
 @import "pages/chat.css";
 @import "pages/gameList.css";
 
+@import "pages/users.css";
 
 body {
   background-color: var(--color-background);

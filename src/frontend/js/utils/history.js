@@ -81,6 +81,9 @@ export function initializeHistory() {
               loadTournamentsPage(false);
             }
             break;
+          case "users":
+            loadUsersPage(false);
+            break;
           case "profile":
             // TODO: Implement profile data caching
             // Cache user profiles with timestamp for invalidation

@@ -229,6 +229,11 @@ class UsersListView(View):
     """
 
     def get(self, request):
+        # Add authentication check
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Authentication required"}, status=401)
+
+        logger.info("User '%s' is authenticated", request.user.username)
         search = request.GET.get("search", "")
         page = int(request.GET.get("page", 1))
         per_page = int(request.GET.get("per_page", 10))

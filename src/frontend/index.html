@@ -454,7 +454,7 @@
     </template>
 
     <!-- Chat User List Item Template -->
-    <template id="user-list-item-template">
+    <template id="chat-user-list-item-template">
       <li>
         <div class="chat-user-item-container">
           <span class="chat-user-item"></span>
@@ -482,6 +482,9 @@
         </button>
         <button class="bottom-nav__item" data-page="profile">
           <span class="bottom-nav__icon material-symbols-outlined">account_circle</span>
+        </button>
+        <button class="bottom-nav__item" data-page="users">
+          <span class="bottom-nav__icon material-symbols-outlined">person_search</span>
         </button>
         <button class="bottom-nav__item" data-page="chat">
           <span class="bottom-nav__icon material-symbols-outlined">chat_bubble</span>
@@ -663,6 +666,45 @@
               </form>
             </div>
           </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- Users Template -->
+
+    <template id="users-template">
+      <div class="page-container page-container--users">
+        <!-- TODO: Folks around maybe is nicer instead of users -->
+        <h2 class="users-page__title">Users</h2>
+        <div class="users-search">
+          <input type="text" class="users-search__input" placeholder="Search users..." />
+          <!-- <span class="material-symbols-outlined users-search__icon">search</span> -->
+        </div>
+        <div id="users-list" class="users-list"></div>
+        <div id="users-pagination" class="pagination">
+          <button class="pagination__button pagination__button--prev">
+            <span class="material-symbols-outlined">chevron_left</span>
+          </button>
+          <div class="pagination__info">
+            <span class="pagination__current">1</span>
+            <span class="pagination__separator">/</span>
+            <span class="pagination__total">1</span>
+          </div>
+          <button class="pagination__button pagination__button--next">
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+      </div>
+    </template>
+
+    <!-- User List Item Template -->
+    <template id="users-list-item-template">
+      <div class="users-list__item">
+        <img class="users-list__avatar" src="" alt="User avatar" />
+        <div class="users-list__info">
+          <span class="users-list__username"></span>
+          <!-- <span class="users-list__status"></span> -->
+          <span class="users-list__status-indicator"></span>
         </div>
       </div>
     </template>
