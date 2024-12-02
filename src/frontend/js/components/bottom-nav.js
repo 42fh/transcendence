@@ -2,6 +2,7 @@ import { loadHomePage } from "../views/home.js";
 import { loadTournamentsPage } from "../views/tournaments.js";
 import { loadProfilePage } from "../views/profile.js";
 import { loadChatPage } from "../views/chats.js";
+import { loadUsersPage } from "../views/users.js";
 import { NAVIGATION } from "../config/constants.js";
 
 export function initBottomNav() {
@@ -44,6 +45,7 @@ function handleNavClick(e) {
     tournaments: loadTournamentsPage,
     profile: loadProfilePage,
     chat: loadChatPage,
+    users: loadUsersPage,
   };
 
   if (pageLoaders[page]) {

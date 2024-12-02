@@ -111,7 +111,7 @@ async function loadUserList() {
     const data = await fetchUserList();
     const usersList = document.getElementById("users-list");
     usersList.innerHTML = "";
-    const template = document.getElementById("user-list-item-template");
+    const template = document.getElementById("chat-user-list-item-template");
 
     data.users.forEach((user) => {
       const userElement = document.importNode(template.content, true);
