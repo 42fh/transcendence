@@ -14,19 +14,20 @@ services:
           sleep 1;
         done;
         # Commented out database reset - uncomment if you need a fresh start
-        echo 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;' | python tr_django/manage.py dbshell &&
+        # echo 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;' | python tr_django/manage.py dbshell &&
         python tr_django/manage.py migrate &&
         python tr_django/manage.py seed_users &&
         python tr_django/manage.py seed_tournaments &&
         python tr_django/manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./src/backend/django:/app
-    ports:
-      - "8000:8000"
+      - ./media:/app/media
     environment:
       - Debug=True
       - ENVIRONMENT=development
   nginx:
+    ports:
+      - "8443:443"
     build:
       context: ./src
       dockerfile: ./nginx/Dockerfile
@@ -34,7 +35,6 @@ services:
         ENVIRONMENT: ${ENVIRONMENT}
     volumes:
       - ./src/frontend/:/usr/share/nginx/html
-    ports:
-      - "8080:80"
+      - ./media:/var/www/media
     environment:
       - ENVIRONMENT=development

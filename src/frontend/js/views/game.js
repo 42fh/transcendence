@@ -1,50 +1,66 @@
-import { CONFIG } from "../config/constants.js";
 import { gameSettings } from "./gameSettings.js";
+import { updateActiveNavItem } from "../components/bottom-nav.js";
+import { fetchGames } from "../services/fetchGamesService.js";
 
-export async function gameHome() {
+let currentView = "home";
+
+// Add a function to initialize the settings button
+function initializeSettingsButton() {
+  const settingsButton = document.getElementById("cta__button-settings");
+  if (settingsButton) {
+    // Remove any existing event listeners to prevent multiple bindings
+    settingsButton.removeEventListener("click", handleSettingsClick);
+    settingsButton.addEventListener("click", handleSettingsClick);
+    settingsButton.style.display = "block";
+  }
+}
+
+function handleSettingsClick() {
+  currentView = "settings";
+  showSettings();
+}
+
+export async function loadGameHome(addToHistory = true) {
   try {
-    console.log("gameHome");
-    const response = await fetch(
-      `${CONFIG.API_BASE_URL}/api/game/get_all_games/`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
+    if (addToHistory) {
+      history.pushState(
+        {
+          view: "chat",
         },
-      }
-    );
+        ""
+      );
+      updateActiveNavItem("home");
+    }
 
-    console.log("received -->", response);
+    const template = document.getElementById("game-item-template");
+    if (!template) {
+      throw new Error("Chat template not found");
+    }
 
     const mainContent = document.getElementById("main-content");
-    if (!mainContent) {
-      throw new Error("Main content element not found");
-    }
     mainContent.innerHTML = "";
-    mainContent.style.display = "block";
+    mainContent.appendChild(document.importNode(template.content, true));
 
-    if (!response.ok) {
-      console.log("response not ok");
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    // Initialize settings button before fetching games
+    initializeSettingsButton();
 
-    const contentType = response.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/json")) {
-      const text = await response.text();
-      console.error("Non-JSON response received:", text);
-      throw new TypeError("Expected JSON response");
-    }
+    await initializegameHome();
+  } catch (error) {
+    console.error("Error loading game page", error);
+  }
+}
 
-    const data = await response.json();
-    console.log("Available games:", data);
+async function initializegameHome() {
+  try {
+    console.log("gameHome");
+    const games = await fetchGames();
 
     const gamesContainer = document.getElementById("games-container");
-    if (!gamesContainer) {
-      throw new Error("#games-container element not found");
+    if (gamesContainer) {
+      gamesContainer.innerHTML = "";
+      gamesContainer.style.display = "none";
     }
-    gamesContainer.innerHTML = ""; // Clear existing content
 
-    const games = JSON.parse(data.games);
     games.forEach((gameId) => {
       const template = document.getElementById("game-item-template");
       if (!template) {
@@ -52,29 +68,26 @@ export async function gameHome() {
       }
 
       const gameItem = document.importNode(template.content, true);
-      gameItem.querySelector(".game-id").textContent = gameId;
+      gameItem.getElementById("game-id").textContent = gameId;
 
       gamesContainer.appendChild(gameItem);
     });
 
-    // Only show the settings button if there are games
-    if (games.length > 0) {
-      const settingsButton = document.getElementById("cta__button-settings");
-      settingsButton.style.display = "block"; // Show the button
-      settingsButton.addEventListener("click", () => {
-        // Clear the main content before rendering settings
-        mainContent.innerHTML = ""; // Clear existing content
-        gamesContainer.innerHTML = ""; // Clear games container
-        settingsButton.style.display = "none"; // Hide the settings button
-        gameSettings(); // Call gameSettings to render the settings
-      });
-    }
-
     gamesContainer.style.display = "block";
-
-    // ... rest of the code ...
   } catch (error) {
-    console.error("Error fetching available games:", error);
+    console.error("Error initializing game home:", error);
     throw error;
   }
+}
+
+function showSettings() {
+  const mainContent = document.getElementById("main-content");
+  const gamesContainer = document.getElementById("games-container");
+  const settingsButton = document.getElementById("cta__button-settings");
+
+  mainContent.innerHTML = "";
+  gamesContainer.innerHTML = "";
+  settingsButton.style.display = "none";
+
+  gameSettings();
 }

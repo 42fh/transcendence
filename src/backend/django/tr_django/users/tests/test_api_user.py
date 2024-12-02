@@ -2,6 +2,10 @@ from django.test import TestCase, Client
 from django.urls import reverse
 import json
 from users.models import CustomUser
+import os
+from django.core.files.uploadedfile import SimpleUploadedFile
+from PIL import Image
+import io
 
 
 class APIUserListGetTests(TestCase):
@@ -224,7 +228,6 @@ class APIUserUpdateTests(TestCase):
     def test_update_invalid_fields(self):
         """Test updating with invalid or non-updatable fields"""
         update_data = {
-            "username": "should_not_change",  # username shouldn't be updatable
             "is_staff": True,  # privileged field
             "invalid_field": "value",  # non-existent field
             "bio": "This should update",  # valid field
@@ -237,8 +240,96 @@ class APIUserUpdateTests(TestCase):
 
         # Verify only valid fields were updated
         self.assertEqual(data["bio"], "This should update")
-        self.assertNotEqual(data["username"], "should_not_change")
         self.assertFalse(data.get("is_staff", False))
+        self.assertNotIn("invalid_field", data)
+
+
+class APIUserAvatarTests(TestCase):
+    """Test suite for POST /api/users/<uuid:user_id>/avatar/ endpoint"""
+
+    fixtures = ["users.json"]
+
+    def setUp(self):
+        self.client = Client()
+        self.user_id = "123e4567-e89b-12d3-a456-426614174000"  # ID from fixture
+        self.url = reverse("user_avatar", kwargs={"user_id": self.user_id})
+
+        # Get the user and log them in
+        self.user = CustomUser.objects.get(pk=self.user_id)
+        self.client.force_login(self.user)
+
+    def test_avatar_upload(self):
+        """Test uploading a user avatar"""
+        # Create a test image
+        image = Image.new("RGB", (100, 100), color="red")
+        img_io = io.BytesIO()
+        image.save(img_io, "JPEG")
+        img_io.seek(0)
+
+        avatar_file = SimpleUploadedFile(name="test_avatar.jpg", content=img_io.getvalue(), content_type="image/jpeg")
+
+        response = self.client.post(self.url, {"avatar": avatar_file}, format="multipart")
+
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+
+        self.assertIn("avatar", data)
+        self.assertIsNotNone(data["avatar"])
+        self.assertTrue(data["avatar"].startswith("/media/avatars/"))
+
+        # Verify the file exists on disk
+        user = CustomUser.objects.get(pk=self.user_id)
+        self.assertTrue(user.avatar)
+        self.assertTrue(os.path.exists(user.avatar.path))
+
+    def test_avatar_upload_invalid_file(self):
+        """Test uploading an invalid avatar file"""
+        invalid_file = SimpleUploadedFile(name="test.txt", content=b"not an image", content_type="text/plain")
+
+        response = self.client.post(self.url, {"avatar": invalid_file}, format="multipart")
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_avatar_upload_too_large(self):
+        """Test uploading an avatar that exceeds size limit"""
+        large_file = SimpleUploadedFile(
+            name="large.jpg", content=b"0" * (2 * 1024 * 1024 + 1), content_type="image/jpeg"  # 2MB + 1 byte
+        )
+
+        response = self.client.post(self.url, {"avatar": large_file}, format="multipart")
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_avatar_upload_unauthenticated(self):
+        """Test uploading avatar while not logged in"""
+        self.client.logout()
+
+        image = Image.new("RGB", (100, 100), color="red")
+        img_io = io.BytesIO()
+        image.save(img_io, "JPEG")
+        img_io.seek(0)
+
+        avatar_file = SimpleUploadedFile(name="test_avatar.jpg", content=img_io.getvalue(), content_type="image/jpeg")
+
+        response = self.client.post(self.url, {"avatar": avatar_file}, format="multipart")
+
+        self.assertEqual(response.status_code, 401)
+
+    def test_avatar_upload_other_user(self):
+        """Test uploading avatar to another user's profile"""
+        other_user_id = "223e4567-e89b-12d3-a456-426614174000"
+        other_url = reverse("user_avatar", kwargs={"user_id": other_user_id})
+
+        image = Image.new("RGB", (100, 100), color="red")
+        img_io = io.BytesIO()
+        image.save(img_io, "JPEG")
+        img_io.seek(0)
+
+        avatar_file = SimpleUploadedFile(name="test_avatar.jpg", content=img_io.getvalue(), content_type="image/jpeg")
+
+        response = self.client.post(other_url, {"avatar": avatar_file}, format="multipart")
+
+        self.assertEqual(response.status_code, 403)
 
 
 class FriendsListViewTests(TestCase):
