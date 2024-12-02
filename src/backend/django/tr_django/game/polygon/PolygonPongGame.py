@@ -6,6 +6,7 @@ import time
 
 
 from .method_decorators import (
+    add_cls_methods,
     add_abstract_implementations,
     add_overwriten_methods,
     add_setup,
@@ -22,6 +23,7 @@ from .method_decorators import (
 @add_overwriten_methods
 @AGameManager.register_game_type("polygon")
 @add_abstract_implementations
+@add_cls_methods
 class PolygonPongGame(AGameManager):
     def __init__(self, game_id):
         super().__init__(game_id)

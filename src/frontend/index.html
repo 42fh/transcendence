@@ -68,7 +68,6 @@
       <p id="modal-message" class="modal-message"></p>
       <form id="signup-form" class="modal-form">
         <!-- Message element added here -->
-
         <label for="username">Username</label>
         <input type="text" id="username" name="username" required />
 
@@ -105,6 +104,117 @@
         </div>
       </div>
     </template>
+      
+
+    <!-- Game list Template 
+     (list of games and button to create new game)-->
+    <template id="game-item-template">
+      <div id="games-container" class="page-container--games">
+        <div class="game-item">
+          <p>Game ID: <span id="game-id"></span></p>
+          <p>Mode: <span></span></p>
+          <p>Date: <span></span></p>
+          <p>Duration: <span></span></p>
+          <p>Winner: <span></span></p>
+        </div>
+      </div>
+      <button id="cta__button-settings" style="display: none;">Settings</button>
+    </template>
+
+
+
+
+    <!-- Modal Template -->
+<template id="modal-template">
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <button class="modal-close-btn" aria-label="Close Modal">&times;</button>
+      <div class="modal-content">
+        <h2>Error</h2>
+        <p class="modal-message" id="modal-message">An error occurred. Please try again.</p>
+        <div class="modal-form">
+          <label for="inputField">Example Input:</label>
+          <input type="text" id="inputField" placeholder="Enter some text" />
+          <button type="button" class="form-button" id="submit-form">Submit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+
+<!-- Game Settings Template-->
+<template id="game-settings-template">
+  <p id="status" class="status"></p>
+      <!-- Status message container -->
+      <div id="status" style="display: none;"></div>
+  <div class="tournament-container page-container--settings">
+    <h2>GAME SETTINGS</h2>
+    <div class="tournament-detail-container">
+      <form id="gameForm" class="tournament-detail-section">
+        <div class="game-setting-group">
+          <label for="playerId">Player ID:</label>
+          <input type="text" id="playerId" name="playerId" class="create-tournament-select">
+        </div>
+        <div class="game-setting-group">
+          <label for="numPlayers">Number of Players:</label>
+          <input type="number" id="numPlayers" name="numPlayers" min="2" max="8" class="create-tournament-select">
+        </div>
+        <div class="game-setting-group">
+          <label for="numSides">Number of Sides:</label>
+          <input type="number" id="numSides" name="numSides" min="3" max="100" class="create-tournament-select">
+        </div>
+        <div class="game-setting-group">
+          <label for="numBalls">Number of Balls:</label>
+          <input type="number" id="numBalls" name="numBalls" min="1" max="4" class="create-tournament-select">
+        </div>
+        <div class="game-setting-group">
+          <label for="mode">Select Mode:</label>
+          <select id="mode" name="mode" class="create-tournament-select">
+            <option value="regular">Regular</option>
+            <option value="classic">Classic</option>
+            <option value="circular">Circular</option>
+            <option value="irregular">Irregular</option>
+          </select>
+        </div>
+        <div class="game-setting-group">
+          <label for="shape">Shape:</label>
+          <select id="shape" name="shape" class="create-tournament-select">
+            <option value="regular">Regular</option>
+            <option value="irregular">Irregular</option>
+            <option value="star">Star</option>
+            <option value="crazy">Crazy</option>
+          </select>
+        </div>
+        <div class="game-setting-group">
+          <label for="scoreMode">Score Mode:</label>
+          <select id="scoreMode" name="scoreMode" class="create-tournament-select">
+            <option value="classic">Classic</option>
+            <option value="modern">Modern</option>
+          </select>
+        </div>
+        <div class="game-setting-group">
+          <button type="submit" class="form-button">Create Game</button>
+        </div>
+      </form>
+    </div>
+    <div id="descriptions-container" class="tournament-detail-descriptions">
+      <h3>Game Information</h3>
+      <p><strong>Classic:</strong> Classic 2-player pong with 2 paddles and 2 walls. Maximum players: 2.</p>
+      <p><strong>Regular:</strong> Regular polygon with all sides playable. Maximum players: 4.</p>
+      <p><strong>Circular:</strong> Circular arena with curved paddles and sides. Maximum players: 8.</p>
+      <p><strong>Irregular:</strong> Irregular polygon shape with customizable sides. Maximum players: 6.</p>
+      <ul>
+        <li><strong>Regular Shape:</strong> Standard polygon.</li>
+        <li><strong>Irregular Shape:</strong> Slightly deformed polygon with balanced sides.</li>
+        <li><strong>Star Shape:</strong> Star-like shape with alternating long and short sides.</li>
+        <li><strong>Crazy Shape:</strong> Extreme deformation with sharp transitions.</li>
+      </ul>
+    </div>
+  </div>
+</template>
+
+
 
     <!-- Tournament List Page Template -->
     <template id="tournament-template">

@@ -1,6 +1,7 @@
 # Transcendence
 
 =======
+=======
 **Transcendence** is the final project of the core curriculum at 42 School. After more challenging projects like creating a shell in C or a web server in C++, we are now expected to "transcend" with a full-stack, online multiplayer **Pong** game—which might as well be the final project of any web development bootcamp. Of course, since it's 42, we're required to build the frontend in Vanilla JS, eventually enhacing it with Bootstrap (LOL).
 
 ## Play it online
@@ -86,4 +87,4 @@ The go to `http://localhost:8080`
 1. **Anti-Cheating Mechanisms**:
    - If you press your paddle faster than **300ms**, the game will block your moves.
    - If you change your `player_id` in the browser console, the game will block your moves.
->>>>>>> main
+=======
