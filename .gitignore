@@ -56,3 +56,24 @@ db.sqlite3
 # Docker
 postgres_data/
 /posgtres_data
+
+# Logs
+**/logs/
+*.log
+
+# Ignore all files in media/avatars
+media/avatars/*
+src/backend/django/tests/media/*
+
+# But keep the directories with .gitkeep
+!media/avatars/.gitkeep
+!media/avatars/default/.gitkeep
+!media/avatars/users/.gitkeep
+!media/avatars/tests/.gitkeep
+
+# Keep default images
+!media/avatars/default/default.jpeg
+
+# Keep test images
+!src/backend/django/tests/media/max_fischer.jpeg
+!src/backend/django/tests/media/lex.png

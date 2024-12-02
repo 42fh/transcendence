@@ -26,6 +26,8 @@ help:
 	@echo "  make stop_docker_redis_clean - Stop Redis and remove all data (volume is deleted)."
 	@echo "  make up-dev                  - Start the development environment (using Docker Compose) with automatic build."
 	@echo "  make down-dev                - Stop and remove all containers in the development environment."
+	@echo "  make up                      - Start the production environment (using Docker Compose) with automatic build."
+	@echo "  make down                    - Stop and remove all containers in the production environment."
 	@echo "  make clean                   - Clean up and remove temporary files (e.g., .pyc and __pycache__)."
 	@echo "  make install_dependencies    - Install project dependencies and upgrade pip inside the virtual environment."
 	@echo "  make migrate                 - Apply Django migrations in the specified environment."
@@ -104,11 +106,21 @@ stop_docker_redis_clean:
 # Development environment
 up-dev:
 	@echo "Starting dockerized development environment..."
-	docker compose up --build
+	docker-compose -f docker-compose.yml -f docker-compose.override.yml up --build
 
 # Stop and remove containers for Development
 down-dev:
 	@echo "Stopping dockerized development environment..."
+	docker compose down
+
+# Production environment
+up:
+	@echo "Starting dockerized production environment..."
+	docker-compose -f docker-compose.yml -f docker-compose.production.yml up --build
+
+# Stop and remove containers for Development
+down:
+	@echo "Stopping dockerized production environment..."
 	docker compose down
 
 # Clean up temporary files (extend this based on specific project needs)

@@ -433,6 +433,102 @@ class TestUserAPI(unittest.TestCase):
         data = response.json()
         self.assertTrue(any(friend["username"].startswith(search_term) for friend in data["friends"]))
 
+    def test_avatar_upload(self):
+        """Test avatar upload functionality through the API"""
+        # Create a session
+        session = requests.Session()
+
+        # First create and login as a test user
+        signup_data = {
+            "username": f"testuser_{os.urandom(4).hex()}",
+            "password": "testpass123",
+            "email": "testuser@example.com",
+        }
+
+        # Signup request
+        response = session.post(
+            f"{self.api_url}/auth/signup/", json=signup_data, headers={"Content-Type": "application/json"}
+        )
+        self.assertEqual(response.status_code, 200, "Failed to create user")
+        user_id = response.json()["id"]
+
+        # Use existing image from media folder
+        media_path = os.path.join(os.path.dirname(__file__), "media", "max_fischer.jpeg")
+
+        with open(media_path, "rb") as img_file:
+            files = {"avatar": ("new_avatar.jpg", img_file, "image/jpeg")}
+
+            # Upload avatar
+            response = session.post(f"{self.api_url}/users/{user_id}/avatar/", files=files)
+
+            print(f"Avatar upload response status: {response.status_code}")
+            print(f"Avatar upload response content: {response.text}")
+
+            self.assertEqual(response.status_code, 200)
+            data = response.json()
+
+            # Verify the avatar URL is returned
+            self.assertIn("avatar", data)
+            avatar_url = data["avatar"]
+
+            # Verify the avatar path structure
+            self.assertTrue(avatar_url.startswith("/media/avatars/"))
+            self.assertTrue(avatar_url.endswith(".jpg"))
+
+    def test_avatar_upload_and_retrieve(self):
+        """Test avatar upload with existing image and URL retrieval"""
+        # Create a session
+        session = requests.Session()
+
+        # First create and login as a test user
+        signup_data = {
+            "username": f"testuser_{os.urandom(4).hex()}",
+            "password": "testpass123",
+            "email": "testuser@example.com",
+        }
+
+        # Signup request with headers
+        response = session.post(
+            f"{self.api_url}/auth/signup/", json=signup_data, headers={"Content-Type": "application/json"}
+        )
+        self.assertEqual(response.status_code, 200, "Failed to create user")
+        user_id = response.json()["id"]
+
+        # Use existing image from media folder
+        media_path = os.path.join(os.path.dirname(__file__), "media", "max_fischer.jpeg")
+
+        with open(media_path, "rb") as img_file:
+            files = {"avatar": ("max_fischer.jpeg", img_file, "image/jpeg")}
+
+            # Upload avatar
+            upload_response = session.post(f"{self.api_url}/users/{user_id}/avatar/", files=files)
+
+            print(f"Avatar upload response status: {upload_response.status_code}")
+            print(f"Avatar upload response content: {upload_response.text}")
+
+            self.assertEqual(upload_response.status_code, 200)
+            upload_data = upload_response.json()
+
+            # Verify the avatar URL is returned
+            self.assertIn("avatar", upload_data)
+            avatar_url = upload_data["avatar"]
+            self.assertTrue(avatar_url.startswith("/media/avatars/"))
+            self.assertTrue("max_fischer" in avatar_url)
+            self.assertTrue(avatar_url.endswith(".jpeg"))
+
+            # Now get the user profile to verify the avatar URL is correctly stored
+            profile_response = session.get(
+                f"{self.api_url}/{user_id}/", headers={"Content-Type": "application/json"}  # Remove the extra /users/
+            )
+            self.assertEqual(profile_response.status_code, 200)
+            profile_data = profile_response.json()
+
+            # Verify the avatar URL in the profile matches the upload response
+            self.assertEqual(profile_data["avatar"], avatar_url)
+
+            print(f"Avatar URL from upload: {avatar_url}")
+            print(f"Avatar URL in profile: {profile_data['avatar']}")
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
