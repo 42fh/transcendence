@@ -35,12 +35,14 @@
 }
 
 .modal-button {
-  font-family: var(--button-font-family);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-small);
   background: var(--button-background);
   color: var(--button-color);
   border: var(--button-border);
   border-radius: var(--button-border-radius);
-  padding: var(--button-padding);
+  /* padding: var(--button-padding); */
+  padding: var(--spacing-xs) var(--spacing-sm);
   cursor: pointer;
   transition: var(--button-transition);
 }
@@ -107,7 +109,6 @@
 .modal-button--tertiary {
   background: none;
   border: none;
-  text-decoration: underline;
   padding: 0.5rem;
 }
 

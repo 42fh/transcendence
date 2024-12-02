@@ -64,6 +64,8 @@ export async function withdrawFriendRequest(toUserId) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         to_user_id: toUserId,
+        from_user_id: null,
+        request_type: "sent",
         action: "withdraw",
       }),
     });
@@ -81,6 +83,8 @@ export async function rejectFriendRequest(fromUserId) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         from_user_id: fromUserId,
+        to_user_id: null,
+        request_type: "received",
         action: "reject",
       }),
     });

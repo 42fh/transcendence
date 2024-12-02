@@ -11,7 +11,9 @@
  * @param {string} templateId - ID of the template containing modal content
  * @param {Object} options - Modal configuration
  * @param {Function} [options.setup] - Function to populate modal content
- * @param {Function} [options.submitHandler] - Function to handle form submissions
+ * @param {Function} [options.submitHandler] - Form submit handler (for form modals)
+ * @param {Function} [options.actionHandler] - Button click handler (for action modals)
+ * @param {boolean} [options.isFormModal=false] - Whether this is a form-based modal
  */
 
 export function renderModal(templateId, options = {}) {
@@ -59,13 +61,25 @@ export function renderModal(templateId, options = {}) {
   });
 
   // Add form handler if provided
-  if (options.submitHandler) {
+  if (options.isFormModal && options.submitHandler) {
     const form = modalContentContainer.querySelector("form");
     console.log("Form found in modal:", !!form);
     if (form) {
       form.addEventListener("submit", options.submitHandler);
     }
   }
+
+  // Handle button click for actions modals
+  if (!options.isFormModal && options.actionHandler) {
+    const actionButtons = modalContentContainer.querySelectorAll(".modal-button");
+    actionButtons.forEach((button) => {
+      button.addEventListener("click", (e) => {
+        e.preventDefault();
+        options.actionHandler(e.target.dataset.action);
+      });
+    });
+  }
+
   // Show modal
   modalOverlay.style.visibility = "visible";
   modalOverlay.style.opacity = "1";

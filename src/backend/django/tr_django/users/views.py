@@ -669,40 +669,53 @@ class FriendRequestsView(View):
         Withdraw a friend request previously sent OR reject a received friend request (depending on the request type "sent" or "received")
         The target user is specified in the request body as 'to_user_id' for 'sent' and 'from_user_id' for 'received'
         """
+        print("Received DELETE request at friend-requests/")
+        print("Request body:", request.body)
+
         if not request.user.is_authenticated:
             return JsonResponse({"error": "Authentication required"}, status=401)
 
         try:
             data = json.loads(request.body)
-            to_user_id = data.get("to_user_id")
-            from_user_id = data.get("from_user_id")
+            print("Parsed data:", data)
             request_type = data.get("request_type")
 
-            if not to_user_id:
-                return JsonResponse(
-                    {"error": "Please specify the user whose friend request you want to cancel"}, status=400
-                )
+            if request_type not in ["sent", "received"]:
+                return JsonResponse({"error": "Invalid request type"}, status=400)
 
-            try:
-                to_user = CustomUser.objects.get(id=to_user_id)
-            except CustomUser.DoesNotExist:
-                return JsonResponse({"error": "User not found"}, status=404)
-            try:
-                from_user = CustomUser.objects.get(id=from_user_id)
-            except CustomUser.DoesNotExist:
-                return JsonResponse({"error": "User not found"}, status=404)
-
-            # Check if there's a pending request
             if request_type == "sent":
-                if to_user not in request.user.friend_requests_sent.all():
-                    return JsonResponse({"error": "No pending friend request to this user"}, status=404)
-                request.user.cancel_friend_request(to_user)
-                return JsonResponse({"message": "Friend request cancelled successfully"})
+                to_user_id = data.get("to_user_id")
+                if not to_user_id:
+                    return JsonResponse(
+                        {"error": "Please specify the user whose friend request you want to cancel"}, status=400
+                    )
+                try:
+                    to_user = CustomUser.objects.get(id=to_user_id)
+                    print(f"Found target user: {to_user.username}")
+                    if to_user not in request.user.friend_requests_sent.all():
+                        return JsonResponse({"error": "No pending friend request to this user"}, status=404)
+                    request.user.cancel_friend_request(to_user)
+                    return JsonResponse({"message": "Friend request cancelled successfully"})
+                except CustomUser.DoesNotExist:
+                    print(f"No user found with ID: {to_user_id}")
+                    return JsonResponse({"error": "User not found"}, status=404)
+
             elif request_type == "received":
-                if from_user not in request.user.friend_requests_received.all():
-                    return JsonResponse({"error": "No pending friend request from this user"}, status=404)
-                request.user.reject_friend_request(from_user)
-                return JsonResponse({"message": "Friend request rejected"})
+                from_user_id = data.get("from_user_id")
+                if not from_user_id:
+                    return JsonResponse(
+                        {"error": "Please specify the user whose friend request you want to reject"}, status=400
+                    )
+                try:
+                    from_user = CustomUser.objects.get(id=from_user_id)
+                    print(f"Found user: {from_user.username}")
+                    if from_user not in request.user.friend_requests_received.all():
+                        return JsonResponse({"error": "No pending friend request from this user"}, status=404)
+                    request.user.reject_friend_request(from_user)
+                    return JsonResponse({"message": "Friend request rejected"})
+                except CustomUser.DoesNotExist:
+                    print(f"No user found with ID: {from_user_id}")
+                    return JsonResponse({"error": "User not found"}, status=404)
             else:
                 return JsonResponse({"error": "Invalid request type"}, status=400)
 

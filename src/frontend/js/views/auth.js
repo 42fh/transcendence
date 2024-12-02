@@ -8,15 +8,43 @@ import { loginUser, signupUser, logoutUser } from "../services/authService.js";
 function initAuthListeners() {
   document.getElementById("login-button").addEventListener("click", () => {
     renderModal("login-template", {
+      isFormModal: true,
+      setup: (modalElement) => setupAuthForm(modalElement, "login"),
       submitHandler: handleLogin,
     });
   });
 
   document.getElementById("signup-button").addEventListener("click", () => {
     renderModal("signup-template", {
+      isFormModal: true,
+      setup: (modalElement) => setupAuthForm(modalElement, "signup"),
       submitHandler: handleSignup,
     });
   });
+}
+
+function setupAuthForm(modalElement, type) {
+  const form = modalElement.querySelector("form");
+  const inputs = form.querySelectorAll("input");
+
+  // Clear any existing values and messages
+  inputs.forEach((input) => (input.value = ""));
+  const messageElement = modalElement.querySelector("#modal-message");
+  if (messageElement) {
+    messageElement.textContent = "";
+  }
+
+  // Focus username field
+  const usernameInput = form.querySelector('input[name="username"]');
+  if (usernameInput) {
+    usernameInput.focus();
+  }
+
+  // Set appropriate title
+  const title = modalElement.querySelector("h2");
+  if (title) {
+    title.textContent = type === "login" ? "Login" : "Sign Up";
+  }
 }
 
 export async function loadAuthPage(addToHistory = true) {

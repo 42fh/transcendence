@@ -264,8 +264,8 @@ async function handleFriendshipButtonClick(friendshipButtonDatasetState, userDat
           title: "Withdraw Friend Request",
           message: "Are you sure you want to withdraw your friend request?",
           actions: [
-            { text: "Withdraw Request", value: "confirm", type: "secondary" },
-            { text: "Cancel", value: "tertiary" },
+            { text: "Withdraw", value: "confirm", type: "secondary" },
+            { text: "Cancel", value: "cancel", type: "tertiary" },
           ],
         });
         if (withdrawAction === "confirm") {
@@ -355,9 +355,8 @@ async function handleFriendshipButtonClick(friendshipButtonDatasetState, userDat
 function showFriendshipActionModal({ title, message, actions }) {
   return new Promise((resolve) => {
     renderModal("friendship-action-template", {
-      submitHandler: (event) => {
-        event.preventDefault();
-        const action = event.submitter.dataset.action;
+      isFormModal: false,
+      actionHandler: (action) => {
         closeModal();
         resolve(action);
       },
