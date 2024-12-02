@@ -35,7 +35,27 @@ export async function loadProfileEditPage() {
     const userId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
     if (!userId) throw new Error("User ID not found");
 
-    const userData = await fetchUserProfile(userId);
+    const result = await fetchUserProfile(userId);
+
+    if (!result.success) {
+      if (result.status === 404) {
+        localStorage.clear();
+        showToast("Session expired. Please login again.", "error");
+        loadAuthPage();
+        return;
+      }
+
+      if (result.error === "NETWORK_ERROR") {
+        showToast("Network error. Please check your connection.", "error");
+        loadHomePage();
+        return;
+      }
+
+      throw new Error(result.message || "Failed to load profile data");
+    }
+    const userData = result.data;
+
+    console.log("User data fetched:", userData);
 
     populateFormFields(mainContent, userData);
     setupAvatarUpload(mainContent, userId);
@@ -78,11 +98,27 @@ function handleAvatarUpload(file, avatarButton, avatarImg, userId) {
       avatarButton.textContent = "Uploading...";
       avatarButton.disabled = true;
 
-      const avatarUrl = await uploadUserAvatar(userId, file);
+      //   const result = await uploadUserAvatar(userId, file);
+      const result = await uploadUserAvatar(userId, file);
 
-      avatarImg.src = avatarUrl;
+      if (!result.success) {
+        if (result.status === 404) {
+          localStorage.clear();
+          showToast("Session expired. Please login again.", "error");
+          loadAuthPage();
+          return;
+        }
+
+        if (result.error === "NETWORK_ERROR") {
+          showToast("Network error. Please check your connection.", "error");
+          return;
+        }
+
+        throw new Error(result.message || "Failed to upload avatar");
+      }
+      avatarImg.src = result.data;
       showToast("Avatar updated successfully!");
-      resolve(avatarUrl);
+      resolve(result.data);
     } catch (error) {
       console.error("DEBUG: Avatar upload failed:", error);
 
@@ -154,7 +190,6 @@ async function handleFormSubmission(form, userId) {
   }
   try {
     setFormLoading(form, true);
-    // Approach 1: querySelector
 
     const formInputs = form.querySelectorAll("input, textarea");
     const updatedDataFromInputs = {};
@@ -163,30 +198,26 @@ async function handleFormSubmission(form, userId) {
       updatedDataFromInputs[input.name] = input.value.trim();
     });
 
-    // Try both ways to create FormData
-    const formData = new FormData(form);
-    const manualFormData = new FormData();
-    form.querySelectorAll("input, textarea").forEach((input) => {
-      manualFormData.append(input.name, input.value);
-    });
-    const updatedDataFromFormData = {};
+    const result = await updateUserProfile(userId, updatedDataFromInputs);
 
-    formData.forEach((value, key) => {
-      if (value.trim() !== "") {
-        updatedDataFromFormData[key] = value.trim();
+    if (!result.success) {
+      if (result.status === 404) {
+        localStorage.clear();
+        showToast("Session expired. Please login again.", "error");
+        loadAuthPage();
+        return;
       }
-    });
 
-    const dataToSend = updatedDataFromInputs;
+      if (result.error === "NETWORK_ERROR") {
+        showToast("Network error. Please check your connection.", "error");
+        return;
+      }
 
-    if (Object.keys(dataToSend).length === 0) {
-      console.warn("No data to update");
-      showToast("No changes to save", "warning");
-      return;
+      throw new Error(result.message || "Failed to update profile");
     }
-    const response = await updateUserProfile(userId, dataToSend);
+
     showToast("Profile updated successfully!");
-    loadProfilePage(false);
+    loadProfilePage(userId, false);
   } catch (error) {
     console.error("Error during form submission:", error);
     showToast("Failed to update profile", "error");
@@ -207,7 +238,8 @@ function setupFormSubmission(form, userId) {
 
   if (cancelButton) {
     cancelButton.addEventListener("click", () => {
-      loadProfilePage(false);
+      //   loadProfilePage(false);
+      loadProfilePage(userId, false);
     });
   }
 
