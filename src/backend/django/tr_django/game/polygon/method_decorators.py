@@ -36,6 +36,23 @@ def add_abstract_implementations(cls):
     return cls
 
 
+def add_cls_methods(cls):
+    
+    from .game_setup import calculate_vertices, calculate_sides_normals, calculate_inner
+
+    methods = {
+        "calculate_vertices": calculate_vertices,
+        "calculate_sides_normals": calculate_sides_normals,
+        "calculate_inner" : calculate_inner
+    }
+
+    for name, method in methods.items():
+        setattr(cls, name, method)
+
+    return cls
+
+
+
 def add_overwriten_methods(cls):
     """
     here are the methods which get overwriten

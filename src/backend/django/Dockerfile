@@ -8,6 +8,10 @@ ENV PYTHONUNBUFFERED=1
 # Set the working directory in the container
 WORKDIR /app
 
+# Create media directories
+RUN mkdir -p /app/media/avatars/users /app/media/avatars/default
+
+
 # Copy the requirements.txt from the backend directory
 COPY requirements.txt /app/
 

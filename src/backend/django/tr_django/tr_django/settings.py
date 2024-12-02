@@ -8,7 +8,7 @@ load_dotenv(override=False)
 print(f"POSTGRES_HOST: {os.getenv('POSTGRES_HOST')}")
 print(f"POSTGRES_PORT: {os.getenv('POSTGRES_PORT')}")
 
-ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
+ENVIRONMENT = os.getenv("ENVIRONMENT", "production")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 # ALLOWED_HOSTS = []
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -52,7 +52,7 @@ INSTALLED_APPS = [
 
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+MEDIA_ROOT = "/app/media"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

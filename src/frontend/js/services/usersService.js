@@ -4,13 +4,24 @@ export async function fetchUserProfile(userId) {
   try {
     const response = await fetch(`${CONFIG.API_BASE_URL}/api/users/${userId}/`);
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      return {
+        success: false,
+        status: response.status,
+        error: response.status === 404 ? "USER_NOT_FOUND" : "SERVER_ERROR",
+        message: await response.text(),
+      };
     }
     const userData = await response.json();
-    return userData;
+    return {
+      success: true,
+      data: userData,
+    };
   } catch (error) {
-    console.error("Error fetching user profile:", error);
-    throw error;
+    return {
+      success: false,
+      error: "NETWORK_ERROR",
+      message: error.message,
+    };
   }
 }
 
@@ -44,4 +55,84 @@ export function renderMatchHistory(matches, container) {
 
     container.appendChild(matchElement);
   });
+}
+
+export async function updateUserProfile(userId, userData) {
+  try {
+    const response = await fetch(`${CONFIG.API_BASE_URL}/api/users/${userId}/`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(userData),
+    });
+
+    if (!response.ok) {
+      return {
+        success: false,
+        status: response.status,
+        error: response.status === 404 ? "USER_NOT_FOUND" : "SERVER_ERROR",
+        message: await response.text(),
+      };
+    }
+
+    const updatedUser = await response.json();
+    return {
+      success: true,
+      data: updatedUser,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: "NETWORK_ERROR",
+      message: error.message,
+    };
+  }
+}
+
+export async function uploadUserAvatar(userId, avatarFile) {
+  try {
+    const formData = new FormData();
+    formData.append("avatar", avatarFile);
+
+    const url = `${CONFIG.API_BASE_URL}/api/users/users/${userId}/avatar/`;
+    const response = await fetch(url, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      return {
+        success: false,
+        status: response.status,
+        error: response.status === 404 ? "USER_NOT_FOUND" : "SERVER_ERROR",
+        message: await response.text(),
+      };
+    }
+
+    const data = await response.json();
+    return {
+      success: true,
+      data: data.avatar,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: "NETWORK_ERROR",
+      message: error.message,
+    };
+  }
+}
+
+export async function fetchUsers(page = 1, perPage = 10, search = "") {
+  try {
+    const url = `${CONFIG.API_BASE_URL}/api/users/?page=${page}&per_page=${perPage}&search=${search}`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Failed to fetch users");
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    throw error;
+  }
 }

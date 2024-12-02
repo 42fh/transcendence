@@ -1,0 +1,28 @@
+services:
+  django:
+    command: >
+      sh -c "
+        # Commented out database reset - uncomment if you need a fresh start
+        # echo 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;' | python tr_django/manage.py dbshell &&
+        python tr_django/manage.py migrate &&
+        python tr_django/manage.py seed_users &&
+        python tr_django/manage.py seed_tournaments &&
+        cd tr_django &&
+        daphne -b 0.0.0.0 -p 8000 tr_django.asgi:application" 
+    environment:
+      - Debug=False
+      - ENVIRONMENT=production
+  nginx:
+    ports:
+      - "443:443"
+      - "80:80"
+    build:
+      context: ./src
+      dockerfile: ./nginx/Dockerfile
+      args:
+        ENVIRONMENT: ${ENVIRONMENT}
+    volumes:
+      - ./src/frontend/:/usr/share/nginx/html
+      - ./media:/var/www/media
+    environment:
+      - ENVIRONMENT=production

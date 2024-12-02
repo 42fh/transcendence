@@ -15,6 +15,8 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from uuid import UUID
 from django.core.exceptions import ValidationError
 import uuid
+from django.conf import settings
+import logging
 
 
 logger = logging.getLogger(__name__)
@@ -227,6 +229,11 @@ class UsersListView(View):
     """
 
     def get(self, request):
+        # Add authentication check
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Authentication required"}, status=401)
+
+        logger.info("User '%s' is authenticated", request.user.username)
         search = request.GET.get("search", "")
         page = int(request.GET.get("page", 1))
         per_page = int(request.GET.get("per_page", 10))
@@ -283,17 +290,44 @@ class UserDetailView(View):
     """
 
     def get(self, request, user_id):
-        try:
-            # Validate UUID format
-            try:
-                UUID(str(user_id))
-            except ValueError:
-                return JsonResponse({"error": "Invalid user ID format"}, status=400)
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Authentication required"}, status=401)
 
+        try:
+            # First validate that the user exists
             user = CustomUser.objects.get(id=user_id)
+            is_own_profile = str(request.user.id) == str(user_id)
+
+            # Base data that's always sent
+            user_data = {
+                "id": str(user.id),
+                "username": user.username,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "avatar": user.avatar.url if user.avatar else None,
+                "bio": user.bio,
+                "pronoun": user.pronoun,
+                "is_active": user.is_active,
+            }
+
+            # Add sensitive data only if it's the user's own profile
+            if is_own_profile:
+                user_data.update(
+                    {
+                        "email": user.email,
+                        "telephone_number": user.telephone_number,
+                    }
+                )
 
             try:
                 player = user.player
+                user_data["stats"] = {
+                    "wins": player.wins,
+                    "losses": player.losses,
+                    "win_ratio": player.win_ratio(),
+                    "display_name": player.get_display_name,
+                }
+
                 # Get recent matches
                 recent_matches = []
                 player_stats = player.playergamestats_set.select_related("single_game", "tournament_game").order_by(
@@ -301,18 +335,20 @@ class UserDetailView(View):
                 )[:5]
 
                 for stat in player_stats:
-                    game = stat.game
+                    game = stat.single_game or stat.tournament_game  # Handle both game types
                     if game:
                         match_data = {
                             "game_id": str(game.id),
                             "date": game.start_date,
                             "score": stat.score,
                             "won": game.winner == player if game.winner else None,
-                            "game_type": "tournament" if stat.tournament_game else "single",
+                            "game_type": "tournament" if hasattr(game, "tournament") else "single",
                             "opponent": None,
                         }
 
-                        other_stat = game.playergamestats_set.exclude(player=player).first()
+                        # Get opponent's stats
+                        other_stat = game.playergamestats_set.exclude(player=player).select_related("player").first()
+
                         if other_stat:
                             match_data["opponent"] = {
                                 "username": other_stat.player.username,
@@ -322,51 +358,55 @@ class UserDetailView(View):
 
                         recent_matches.append(match_data)
 
-                user_data = {
-                    "id": str(user.id),
-                    "username": user.username,
-                    "email": user.email,
-                    "first_name": user.first_name,
-                    "last_name": user.last_name,
-                    "avatar": user.avatar.url if user.avatar else None,
-                    "bio": user.bio,
-                    "telephone_number": user.telephone_number,
-                    "pronoun": user.pronoun,
-                    "is_active": user.is_active,
-                    "visibility_online_status": user.visibility_online_status,
-                    "visibility_user_profile": user.visibility_user_profile,
-                    "stats": {
-                        "wins": player.wins,
-                        "losses": player.losses,
-                        "win_ratio": player.win_ratio(),
-                        "display_name": player.get_display_name,
-                    },
-                    "recent_matches": recent_matches,
-                }
-
-                return JsonResponse(user_data)
+                user_data["recent_matches"] = recent_matches
 
             except Player.DoesNotExist:
-                return JsonResponse({"error": "Player profile not found"}, status=404)
+                logger.warning(f"Player profile not found for user {user.username}")
+                user_data["stats"] = None
+                user_data["recent_matches"] = []
+
+            logger.debug(f"Returning profile data for user {user.username}, own profile: {is_own_profile}")
+            return JsonResponse(user_data)
 
         except CustomUser.DoesNotExist:
+            logger.warning(f"User not found with ID: {user_id}")
             return JsonResponse({"error": "User not found"}, status=404)
+        except Exception as e:
+            logger.error(f"Error fetching user profile: {str(e)}")
+            return JsonResponse({"error": "Failed to fetch user profile"}, status=500)
 
     def patch(self, request, user_id):
-        """Handle PATCH request to update user details"""
+        """Update user details (besides avatar)"""
         if not request.user.is_authenticated:
             return JsonResponse({"error": "Not authenticated"}, status=401)
 
-        # Check if user is updating their own profile
         if str(request.user.id) != str(user_id):
             return JsonResponse({"error": "Cannot update other users' profiles"}, status=403)
 
         try:
+            user = CustomUser.objects.get(id=user_id)
+        except CustomUser.DoesNotExist:
+            return JsonResponse({"error": "User not found"}, status=404)
+
+        try:
             data = json.loads(request.body)
-            user = request.user
+
+            print(
+                "Before update:",
+                {
+                    "username": user.username,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                    "email": user.email,
+                    "bio": user.bio,
+                    "telephone_number": user.telephone_number,
+                    "pronoun": user.pronoun,
+                },
+            )
 
             # Fields that can be updated
             updatable_fields = {
+                "username",
                 "first_name",
                 "last_name",
                 "email",
@@ -377,18 +417,27 @@ class UserDetailView(View):
                 "visibility_user_profile",
             }
 
-            # Handle avatar separately if it's in request.FILES
-            if request.FILES.get("avatar"):
-                user.avatar = request.FILES["avatar"]
-
-            # Update other fields if they exist in the request
+            # Update fields if they exist in the request
             for field in updatable_fields:
                 if field in data:
                     setattr(user, field, data[field])
 
             user.save()
 
-            # Return the same format as your GET response
+            print(
+                "After update:",
+                {
+                    "username": user.username,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                    "email": user.email,
+                    "bio": user.bio,
+                    "telephone_number": user.telephone_number,
+                    "pronoun": user.pronoun,
+                },
+            )
+
+            # Return updated user data
             player = user.player
             user_data = {
                 "id": str(user.id),
@@ -410,13 +459,61 @@ class UserDetailView(View):
                     "display_name": player.get_display_name,
                 },
             }
-
             return JsonResponse(user_data)
 
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
         except Exception as e:
+            print("Error updating user:", str(e))
             return JsonResponse({"error": str(e)}, status=400)
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class UserAvatarView(View):
+    """Handle user avatar uploads"""
+
+    ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/jpg"]
+
+    MAX_AVATAR_SIZE = 2 * 1024 * 1024  # 2MB in bytes
+
+    def post(self, request, user_id):
+        """Upload a new avatar"""
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Not authenticated"}, status=401)
+
+        if str(request.user.id) != str(user_id):
+            return JsonResponse({"error": "Cannot update other users' avatars"}, status=403)
+
+        try:
+            user = CustomUser.objects.get(id=user_id)
+        except CustomUser.DoesNotExist:
+            return JsonResponse({"error": "User not found"}, status=404)
+
+        if "avatar" not in request.FILES:
+            return JsonResponse({"error": "No avatar file provided"}, status=400)
+
+        avatar_file = request.FILES["avatar"]
+        # Validate file type
+        if avatar_file.content_type not in self.ALLOWED_TYPES:
+            return JsonResponse(
+                {"error": f"Invalid file type. Allowed types: {', '.join(self.ALLOWED_TYPES)}"}, status=400
+            )
+
+        # Validate file size
+        if avatar_file.size > self.MAX_AVATAR_SIZE:
+            return JsonResponse({"error": f"Avatar size exceeds the limit of {self.MAX_AVATAR_SIZE} bytes"}, status=400)
+
+        # Add debug logging
+        logger.debug(f"Saving avatar to: {settings.MEDIA_ROOT}")
+        logger.debug(f"File name: {avatar_file.name}")
+
+        # Save the new avatar
+        user.avatar = avatar_file
+        user.save()
+        logger.debug(f"Saved avatar path: {user.avatar.path}")
+        logger.debug(f"Saved avatar URL: {user.avatar.url}")
+
+        return JsonResponse({"message": "Avatar updated successfully", "avatar": user.avatar.url})
 
 
 @method_decorator(csrf_exempt, name="dispatch")

@@ -111,7 +111,7 @@ async function loadUserList() {
     const data = await fetchUserList();
     const usersList = document.getElementById("users-list");
     usersList.innerHTML = "";
-    const template = document.getElementById("user-list-item-template");
+    const template = document.getElementById("chat-user-list-item-template");
 
     data.users.forEach((user) => {
       const userElement = document.importNode(template.content, true);
@@ -141,7 +141,11 @@ async function loadUserList() {
           user.is_blocked = !wasBlocked;
         } catch (error) {
           blockButton.textContent = wasBlocked ? "Unblock" : "Block";
-          displayModalError(`Failed to ${wasBlocked ? "unblock" : "block"} user: ${error.message}`);
+          displayModalError(
+            `Failed to ${wasBlocked ? "unblock" : "block"} user: ${
+              error.message
+            }`
+          );
         }
       };
 
@@ -222,11 +226,19 @@ function startChatWith(otherUser) {
 function handleWebSocketMessage(data) {
   if (data.type === chatState.MESSAGE_TYPES.CHAT) {
     const messageType =
-      data.username === "System" ? "system" : data.username === chatState.currentUsername ? "self" : "other";
+      data.username === "System"
+        ? "system"
+        : data.username === chatState.currentUsername
+        ? "self"
+        : "other";
     addMessageToChat(data.username, data.message, messageType);
-  } else if (data.type === chatState.MESSAGE_TYPES.HISTORY && !chatState.messageHistoryLoaded) {
+  } else if (
+    data.type === chatState.MESSAGE_TYPES.HISTORY &&
+    !chatState.messageHistoryLoaded
+  ) {
     data.messages.forEach((msg) => {
-      const messageType = msg.username === chatState.currentUsername ? "self" : "other";
+      const messageType =
+        msg.username === chatState.currentUsername ? "self" : "other";
       addMessageToChat(msg.username, msg.message, messageType);
     });
     chatState.messageHistoryLoaded = true;
@@ -269,7 +281,9 @@ function updateUserList(users) {
   const currentItems = Array.from(userList.children);
 
   users.forEach((username) => {
-    const existingItem = currentItems.find((item) => item.textContent === username);
+    const existingItem = currentItems.find(
+      (item) => item.textContent === username
+    );
     if (!existingItem) {
       const li = document.createElement("li");
       li.className = "chat-conversation-item";
@@ -290,7 +304,11 @@ function sendMessage() {
   const messageInput = document.getElementById("chat-message-input");
   const message = messageInput.value.trim();
 
-  if (message && window.chatSocket && window.chatSocket.readyState === WebSocket.OPEN) {
+  if (
+    message &&
+    window.chatSocket &&
+    window.chatSocket.readyState === WebSocket.OPEN
+  ) {
     try {
       window.chatSocket.send(JSON.stringify({ message }));
       messageInput.value = "";

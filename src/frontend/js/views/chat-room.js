@@ -53,10 +53,8 @@ function initializeChatRoom(chatPartner) {
   const roomName = [currentUser, chatPartner].sort().join("_");
   console.log("Room Name:", roomName);
 
-  const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-  const wsUrl = `${wsProtocol}//${
-    window.location.hostname
-  }:${8000}/ws/chat/${roomName}/`;
+  // const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+  const wsUrl = `ws://${window.location.hostname}:8443/ws/chat/${roomName}/`;
 
   const chatMessages = document.getElementById("chat-messages");
   const messageInput = document.getElementById("chat-message-input");

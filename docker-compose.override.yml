@@ -23,12 +23,13 @@ services:
         python tr_django/manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./src/backend/django:/app
-    ports:
-      - "8000:8000"
+      - ./media:/app/media
     environment:
       - Debug=True
       - ENVIRONMENT=development
   nginx:
+    ports:
+      - "8443:443"
     build:
       context: ./src
       dockerfile: ./nginx/Dockerfile
@@ -36,7 +37,6 @@ services:
         ENVIRONMENT: ${ENVIRONMENT}
     volumes:
       - ./src/frontend/:/usr/share/nginx/html
-    ports:
-      - "8080:80"
+      - ./media:/var/www/media
     environment:
       - ENVIRONMENT=development
