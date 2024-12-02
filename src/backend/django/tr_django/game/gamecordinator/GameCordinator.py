@@ -7,6 +7,11 @@ import uuid
 import asyncio
 from .GameSettingsManager import GameSettingsManager
 import math
+import logging
+
+
+
+logger = logging.getLogger(__name__)
 
 
 class RedisLock:
@@ -183,7 +188,7 @@ class GameCordinator:
             await pipeline.execute()
 
     # view
-
+    #not in use   
     @classmethod
     async def get_all_games(cls):
         """Get all game IDs"""
@@ -195,12 +200,110 @@ class GameCordinator:
         """Get all game IDs"""
         async with await cls.get_redis(cls.REDIS_URL) as redis_conn:
             return await redis_conn.smembers(cls.WAITING_GAMES)
+    
+    @classmethod
+    async def get_running_games(cls):
+        """Get all running game IDs"""
+        async with await cls.get_redis(cls.REDIS_URL) as redis_conn:
+            return await redis_conn.smembers(cls.RUNNING_GAMES)
 
-    def get_running_games(self):
-        pass
 
     @classmethod
-    async def get_detail_from_game(cls, game_id) -> dict:
+    async def _get_games_detail(cls, game_ids: list) -> list:
+        """
+        Shared method to get detailed game information for a list of game IDs
+        """
+        try:
+            # Early return if no games
+            if not game_ids:
+                return []
+                
+            # Get all game settings in batch
+            async with await cls.get_redis_binary(cls.REDIS_GAME_URL) as redis_game:
+                pipe = redis_game.pipeline()
+                for game_id in game_ids:
+                    pipe.get(f"game_settings:{game_id}")
+                settings_results = await pipe.execute()
+                
+            # Get all player counts in batch
+            async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
+                pipe = redis_conn.pipeline()
+                for game_id in game_ids:
+                    pipe.scard(f"game_players:{game_id}")
+                    pipe.keys(f"{cls.BOOKED_USER_PREFIX}*:{game_id}")
+                player_results = await pipe.execute()
+                
+            # Process results
+            detailed_games = []
+            for idx, game_id in enumerate(game_ids):
+                try:
+                    settings_data = settings_results[idx]
+                    if not settings_data:
+                        continue
+                        
+                    game_settings = msgpack.unpackb(settings_data)
+                    current_players = player_results[idx * 2] or 0
+                    reserved_players = len(player_results[idx * 2 + 1]) if player_results[idx * 2 + 1] else 0
+                    
+                    game_info = {
+                        'game_id': game_id,
+                        'mode': game_settings.get('mode'),
+                        'type': game_settings.get('type'),
+                        'sides': game_settings.get('sides'),
+                        'score': game_settings.get('score'),
+                        'num_players': game_settings.get('num_players'),
+                        'min_players': game_settings.get('min_players'),
+                        'initial_ball_speed': game_settings.get('initial_ball_speed'),
+                        'paddle_length': game_settings.get('paddle_length'),
+                        'paddle_width': game_settings.get('paddle_width'),
+                        'ball_size': game_settings.get('ball_size'),
+                        'players': {
+                            'current': current_players,
+                            'reserved': reserved_players,
+                            'total_needed': game_settings.get('num_players', 0)
+                        }
+                    }
+                    detailed_games.append(game_info)
+                    
+                except Exception as e:
+                    print(f"Error processing game {game_id}: {e}")
+                    continue
+                    
+            return detailed_games
+                
+        except Exception as e:
+            print(f"Error getting games detail: {e}")
+            return []
+
+    @classmethod
+    async def get_waiting_games_info(cls) -> list:
+        """Get detailed information for all waiting games"""
+        try:
+            games = await cls.get_waiting_games()
+            game_ids = [game_id.decode('utf-8') if isinstance(game_id, bytes) else game_id 
+                       for game_id in games]
+            return await cls._get_games_detail(game_ids)
+        except Exception as e:
+            print(f"Error getting waiting games info: {e}")
+            return []
+
+    @classmethod
+    async def get_running_games_info(cls) -> list:
+        """Get detailed information for all running games"""
+        try:
+            games = await cls.get_running_games()
+            game_ids = [game_id.decode('utf-8') if isinstance(game_id, bytes) else game_id 
+                       for game_id in games]
+            return await cls._get_games_detail(game_ids)
+        except Exception as e:
+            print(f"Error getting running games info: {e}")
+            return []
+
+
+
+    
+    @classmethod
+    async def get_all_settings_from_game(cls, game_id) -> dict:
         async with await cls.get_redis_binary(cls.REDIS_GAME_URL) as redis_game:
             stored_values = await redis_game.get(f"game_settings:{game_id}")
         return_value = msgpack.unpackb(stored_values)
@@ -216,11 +319,6 @@ class GameCordinator:
         try:
             async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
                 # Check if either key exists using EXISTS command
-                """booked_exists = await redis_conn.exists(f"{cls.BOOKED_USER_PREFIX}{user_id}:*")
-                print("player is booked: ", booked_exists)
-                playing_exists = await redis_conn.exists(f"{cls.PLAYING_USER_PREFIX}{user_id}:*")
-                print("player is playing: ",playing_exists)
-                return bool(booked_exists or playing_exists)"""
                 async for key in redis_conn.scan_iter(
                     f"{cls.BOOKED_USER_PREFIX}{user_id}:*"
                 ):
@@ -276,6 +374,28 @@ class GameCordinator:
         except Exception as e:
             print(f"Error cleaning up invalid bookings: {e}")
             raise
+
+    @classmethod
+    async def get_player_count_info(cls, game_id: str) -> dict:
+        """Get player counts for frontend display - no locks needed"""
+        try:
+            async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
+                pipe = redis_conn.pipeline()
+                pipe.scard(f"game_players:{game_id}")
+                pipe.keys(f"{cls.BOOKED_USER_PREFIX}*:{game_id}")
+                
+                results = await pipe.execute()
+                return {
+                    "status": True,
+                    "current_players": results[0] or 0,
+                    "reserved_players": len(results[1]) if results[1] else 0
+                }
+        except Exception as e:
+            print(f"Error getting player counts: {e}")
+            return {"status": False, "current_players": 0, "reserved_players": 0}
+
+
+
 
     @classmethod
     async def player_situation(cls, game_id: str) -> dict:
@@ -345,9 +465,6 @@ class GameCordinator:
             }
 
     # from AGameManager
-    @classmethod
-    async def leave_game(cls, game_id, player_id):
-        pass
 
     @classmethod
     async def set_to_waiting_game(cls, game_id):
@@ -385,6 +502,55 @@ class GameCordinator:
                     pipe.set(f"game_running:{game_id}", "0")
                     pipe.set(f"game_finished:{game_id}", "1")
                     await pipe.execute()
+
+
+
+
+    # some more calls
+    @classmethod
+    async def cancel_booking(cls, user_id: str) -> dict:
+        """
+        Cancel all bookings for a user, logging if multiple bookings found
+        """
+        try:
+            async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
+                bookings = []
+                async for key in redis_conn.scan_iter(f"{cls.BOOKED_USER_PREFIX}{user_id}:*"):
+                    bookings.append(key)
+
+                if not bookings:
+                    return {
+                        "status": False,
+                        "message": "No booking found for this user"
+                    }
+
+                if len(bookings) > 1:
+                    logger.error(f"User {user_id} had multiple bookings: {bookings}")
+
+                for booking in bookings:
+                    game_id = booking.split(":")[-1]
+                    async with RedisLock(redis_conn, f"{game_id}_player_situation"):
+                        await redis_conn.delete(booking)
+                
+                return {
+                    "status": True,
+                    "message": "Booking(s) cancelled successfully",
+                    "error": "Multiple bookings found and removed" if len(bookings) > 1 else None
+                }
+                
+        except Exception as e:
+            logger.error(f"Error cancelling booking for user {user_id}: {e}")
+            return {
+                "status": False,
+                "message": f"Error cancelling booking: {e}"
+            }
+
+
+
+
+
+
+
 
     # for user managment
     # is user online
