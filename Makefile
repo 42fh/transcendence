@@ -106,7 +106,7 @@ stop_docker_redis_clean:
 # Development environment
 up-dev:
 	@echo "Starting dockerized development environment..."
-	docker-compose -f docker-compose.yml -f docker-compose.override.yml up --build
+	docker compose -f docker-compose.yml -f docker-compose.override.yml up --build
 
 # Stop and remove containers for Development
 down-dev:
@@ -116,7 +116,7 @@ down-dev:
 # Production environment
 up:
 	@echo "Starting dockerized production environment..."
-	docker-compose -f docker-compose.yml -f docker-compose.production.yml up --build
+	docker compose -f docker-compose.yml -f docker-compose.production.yml up --build
 
 # Stop and remove containers for Development
 down:
