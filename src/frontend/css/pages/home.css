@@ -84,3 +84,10 @@
 .home__net-segment--white {
   background-color: white;
 }
+
+/* To be removed when we have the 2D game not linked directly to the home page */
+.home__buttons-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
