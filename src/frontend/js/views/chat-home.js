@@ -73,17 +73,17 @@ async function loadChatList(page = 1, perPage = 10, search = "") {
 
       // Create horizontal user item
       const horizontalUserItem = document.createElement("div");
-      horizontalUserItem.className = "users-horizontal-item";
+      horizontalUserItem.className = "chat-users-horizontal-item";
 
       const horizontalAvatar = document.createElement("img");
-      horizontalAvatar.className = "users-horizontal-avatar";
+      horizontalAvatar.className = "chat-users-horizontal-avatar";
       horizontalAvatar.src = user.avatarUrl || ASSETS.IMAGES.DEFAULT_AVATAR;
       horizontalAvatar.onerror = function () {
         this.src = ASSETS.IMAGES.DEFAULT_AVATAR;
       };
 
       const horizontalUsername = document.createElement("span");
-      horizontalUsername.className = "users-horizontal-username";
+      horizontalUsername.className = "chat-users-horizontal-username";
       horizontalUsername.textContent = user.username;
 
       horizontalUserItem.appendChild(horizontalAvatar);

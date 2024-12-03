@@ -2077,3 +2077,14 @@
 2024/12/02 17:20:25 [error] 29#29: *30 open() "/var/www/media/avatars/tests/che.jpg" failed (2: No such file or directory), client: 172.18.0.1, server: localhost, request: "GET /media/avatars/tests/che.jpg HTTP/1.1", host: "localhost:8443", referrer: "http://localhost:8443/"
 2024/12/02 17:20:25 [error] 30#30: *29 open() "/var/www/media/avatars/tests/elon.jpg" failed (2: No such file or directory), client: 172.18.0.1, server: localhost, request: "GET /media/avatars/tests/elon.jpg HTTP/1.1", host: "localhost:8443", referrer: "http://localhost:8443/"
 2024/12/02 17:20:25 [error] 29#29: *28 open() "/var/www/media/avatars/tests/lex.jpg" failed (2: No such file or directory), client: 172.18.0.1, server: localhost, request: "GET /media/avatars/tests/lex.jpg HTTP/1.1", host: "localhost:8443", referrer: "http://localhost:8443/"
+2024/12/03 22:42:20 [notice] 1#1: using the "epoll" event method
+2024/12/03 22:42:20 [notice] 1#1: nginx/1.26.1
+2024/12/03 22:42:20 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/12/03 22:42:20 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/12/03 22:42:20 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/12/03 22:42:20 [notice] 1#1: start worker processes
+2024/12/03 22:42:20 [notice] 1#1: start worker process 28
+2024/12/03 22:42:20 [notice] 1#1: start worker process 29
+2024/12/03 22:42:20 [notice] 1#1: start worker process 30
+2024/12/03 22:42:20 [notice] 1#1: start worker process 31
+2024/12/03 22:42:20 [notice] 1#1: start worker process 32
