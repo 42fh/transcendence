@@ -8,8 +8,8 @@ export async function loadGame2D(addToHistory = true) {
     let game_2d_is_running = true;
     let game_2d_websocket = new WebSocket(ws_uri);
 
-    game2d_game_id.onopen = () => console.log("game socket opened");
-    game2d_game_id.onmessage = () => console.log("game socket message incoming");
+    game_2d_websocket.onopen = () => console.log("game socket opened");
+    game_2d_websocket.onmessage = () => console.log("game socket message incoming");
 
     addEventListener("popstate", (event) => {
         if (event.state.view == "game2d") {
