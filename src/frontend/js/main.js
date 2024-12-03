@@ -4,8 +4,6 @@ import { initializeTournaments } from "./config/tournaments.js";
 import { initializeHistory } from "./utils/history.js";
 import { CONFIG, LOCAL_STORAGE_KEYS } from "./config/constants.js";
 import { initBottomNav } from "./components/bottom-nav.js";
-// TODO: remove this import later - improved_interface was J's test-game.html entry point
-import { GameInterface2D } from "../test_frontend/2DGame.js";
 
 // Initialize all listeners and data
 document.addEventListener("DOMContentLoaded", () => {
@@ -23,8 +21,6 @@ document.addEventListener("DOMContentLoaded", () => {
     loadHomePage();
   }
 
-  //   initModalListeners();
-  //   initAuthListeners(); // moved to loadAuthPage
   initializeTournaments(CONFIG.CURRENT_SOURCE);
   initializeHistory();
   // TODO: is initBottomBav the correct name, and should be initialised anywaay also if loadAuthPage?

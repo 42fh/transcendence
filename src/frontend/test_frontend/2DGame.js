@@ -6,7 +6,8 @@ export class GameInterface2D {
     this.controller = null;
     this.debugEnabled = false;
     this.gameType = "polygon";
-    this.showSettings = false;
+    // this.showSettings = false;
+    this.showSettings = true;
     this.eventLog = document.getElementById("two-d-game__eventLog");
     this.formData = {
       gameId: "",
@@ -56,7 +57,9 @@ export class GameInterface2D {
   }
 
   initializeInterface() {
+    console.log("Initializing interface");
     // Set initial form values
+    console.log("Setting initial form values");
     Object.entries(this.formData).forEach(([key, value]) => {
       const element = document.getElementById(key);
       if (element) {
@@ -65,50 +68,108 @@ export class GameInterface2D {
     });
 
     // Initialize game type specific fields
+    console.log("Updating game type fields");
     this.updateGameTypeFields();
 
     // Initialize shape description
+    console.log("Updating shape description");
     this.updateShapeDescription();
   }
 
   setupEventListeners() {
+    console.log("Setting up event listeners for 2D game");
     // Toggle settings visibility
-    document.getElementById("two-d-game__toggle-settings").addEventListener("click", () => {
+    const toggleSettingsButton = document.getElementById("two-d-game__toggle-settings");
+    if (!toggleSettingsButton) {
+      console.error("toggleSettingsButton not found");
+      return;
+    }
+    toggleSettingsButton.replaceWith(toggleSettingsButton.cloneNode(true));
+    const newToggleSettingsButton = document.getElementById("two-d-game__toggle-settings");
+
+    newToggleSettingsButton.addEventListener("click", () => {
+      console.log("toggleSettingsButton clicked");
       this.showSettings = !this.showSettings;
       const advancedSettings = document.getElementById("two-d-game__advanced-settings");
       const toggleText = document.getElementById("two-d-game__toggle-text");
       const toggleIcon = document.getElementById("two-d-game__toggle-icon");
 
-      advancedSettings.style.display = this.showSettings ? "block" : "none";
-      toggleText.textContent = this.showSettings ? "Hide Settings" : "Show Settings";
-      toggleIcon.textContent = this.showSettings ? "▼" : "▶";
+      //   console.log("Found elements:", {
+      //     advancedSettings: !!advancedSettings,
+      //     toggleText: !!toggleText,
+      //     toggleIcon: !!toggleIcon,
+      //   });
+
+      if (advancedSettings) {
+        // Force display style
+        advancedSettings.style.cssText = this.showSettings ? "display: block !important" : "display: none !important";
+
+        //   advancedSettings.style.display = this.showSettings ? "block" : "none";
+        console.log("Advanced settings display:", advancedSettings.style.display);
+
+        // Log computed style
+        const computedStyle = window.getComputedStyle(advancedSettings);
+        console.log("Computed display:", computedStyle.display);
+        console.log("Element visibility:", computedStyle.visibility);
+        console.log("Element opacity:", computedStyle.opacity);
+        console.log("Element position:", computedStyle.position);
+
+        // Log element dimensions
+        console.log("Element dimensions:", {
+          offsetHeight: advancedSettings.offsetHeight,
+          clientHeight: advancedSettings.clientHeight,
+          scrollHeight: advancedSettings.scrollHeight,
+        });
+      }
+
+      if (toggleText) toggleText.textContent = this.showSettings ? "Hide Settings" : "Show Settings";
+      if (toggleIcon) toggleIcon.textContent = this.showSettings ? "▼" : "▶";
     });
 
     // Game type change handler
-    document.getElementById("two-d-game__game-type").addEventListener("change", (e) => {
+    const gameTypeInput = document.getElementById("two-d-game__game-type");
+    if (!gameTypeInput) {
+      console.error("gameTypeInput not found");
+      return;
+    }
+    gameTypeInput.addEventListener("change", (e) => {
       this.gameType = e.target.value;
       this.updateGameTypeFields();
     });
 
     // Shape change handler
-    document.getElementById("two-d-game__shape").addEventListener("change", (e) => {
+    const shapeInput = document.getElementById("two-d-game__shape");
+    if (!shapeInput) {
+      console.error("shapeInput not found");
+      return;
+    }
+    shapeInput.addEventListener("change", (e) => {
       this.formData.shape = e.target.value;
       this.updateShapeDescription();
     });
 
     // Form submission
-    document.getElementById("two-d-game__gameForm").addEventListener("submit", (e) => {
+    const gameForm = document.getElementById("two-d-game__gameForm");
+    if (!gameForm) {
+      console.error("gameForm not found");
+      return;
+    }
+    gameForm.addEventListener("submit", (e) => {
       e.preventDefault();
       this.startGame();
     });
 
     // Debug mode toggle
-    document.getElementById("two-d-game__debug-mode").addEventListener("change", (e) => {
+    const debugModeInput = document.getElementById("two-d-game__debug-mode");
+    if (!debugModeInput) {
+      console.error("debugModeInput not found");
+      return;
+    }
+    debugModeInput.addEventListener("change", (e) => {
       this.debugEnabled = e.target.checked;
     });
 
     // Form input change handlers
-    // const inputFields = ["gameId", "playerId", "numPlayers", "numSides", "numBalls", "shape", "scoreMode"].forEach((fieldId) => {
     const inputFields = [
       "two-d-game__game-id",
       "two-d-game__player-id",
@@ -414,6 +475,8 @@ export class GameInterface2D {
 }
 
 // Initialize when DOM is loaded
-document.addEventListener("DOMContentLoaded", () => {
-  new GameInterface2D();
-});
+// We don't want this anymore because we're using the template now
+// We want to initlaize the event listeners only when we click on the 2D game button
+// document.addEventListener("DOMContentLoaded", () => {
+//   new GameInterface2D();
+// });

@@ -23,7 +23,7 @@
 @import "pages/gameList.css";
 
 @import "pages/users.css";
-@import "test_frontend/2Dgame.css";
+@import "../test_frontend/2DGame.css";
 
 body {
   background-color: var(--color-background);
