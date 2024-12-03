@@ -2,7 +2,7 @@ import json
 import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .agame.AGameManager import AGameManager
-from .gamecordinator.GameCordinator import GameCordinator as GC
+from .gamecoordinator.GameCoordinator import GameCoordinator as GC
 import time
 import msgpack
 import redis.asyncio as redis

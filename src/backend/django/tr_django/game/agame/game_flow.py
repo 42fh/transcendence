@@ -3,7 +3,7 @@ import msgpack
 import asyncio
 from .AGameManager import GameStateError
 import math
-from ..gamecordinator.GameCordinator import GameCordinator, RedisLock
+from ..gamecoordinator.GameCoordinator import GameCoordinator, RedisLock
 import logging
 
 logger = logging.getLogger(__name__)
@@ -13,7 +13,7 @@ async def start_game(self):
     """Start game with process-safe checks"""
     try:
         min_players = self.settings.get("min_players")
-        await GameCordinator.set_to_waiting_game(self.game_id)
+        await GameCoordinator.set_to_waiting_game(self.game_id)
         while True:
             player_count = await self.redis_conn.scard(self.players_key)
             if player_count == 0:
@@ -51,7 +51,7 @@ async def start_game(self):
         inner_boundary: {self.inner_boundary}  
         ball_mov: {self.previous_movements, type(self.previous_movements)}"""
         )
-        await GameCordinator.set_to_running_game(self.game_id)
+        await GameCoordinator.set_to_running_game(self.game_id)
         while await self.redis_conn.get(self.running_key) == b"1":
             game_over = await self.update_game()
             if game_over:
@@ -68,7 +68,7 @@ async def end_game(self):
     """End game with process-safe cleanup"""
     try:
         # await self.redis_conn.set(self.running_key, b"0")
-        await GameCordinator.set_to_finished_game(self.game_id)
+        await GameCoordinator.set_to_finished_game(self.game_id)
         # Keep game state briefly for end-game display
         for key in [
             self.state_key,

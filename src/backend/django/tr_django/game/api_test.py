@@ -11,8 +11,8 @@ import asyncio
 
 
 from .consumers import PongConsumer
-from .gamecordinator.GameCordinator import GameCordinator
-from .gamecordinator.game_config import EnumGameMode
+from .gamecoordinator.GameCoordinator import GameCoordinator
+from .gamecoordinator.game_config import EnumGameMode
 from tr_django.asgi import application
 
 
@@ -70,7 +70,7 @@ class IntegratedGameTests(TransactionTestCase):
 
         try:
             # Initialize Redis and flush the database
-            self.redis_conn = await GameCordinator.get_redis(redis_url)
+            self.redis_conn = await GameCoordinator.get_redis(redis_url)
             await self.redis_conn.flushall()
 
             # Create multiple test users with different roles

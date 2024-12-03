@@ -8,10 +8,10 @@ import json
 from .services.tournament_service import build_tournament_data
 from datetime import datetime
 import asyncio
-from .gamecordinator.GameCordinator import GameCordinator, RedisLock
+from .gamecoordinator.GameCoordinator import GameCoordinator, RedisLock
 from django.core.serializers.json import DjangoJSONEncoder
 import json
-from .gamecordinator.game_config import EnumGameMode
+from .gamecoordinator.game_config import EnumGameMode
 from asgiref.sync import sync_to_async
 from django.views.decorators.http import require_http_methods
 from django.utils.decorators import async_only_middleware
@@ -98,12 +98,12 @@ async def create_new_game(request, use_redis_lock: bool = True):
         )
 
     async def create_game_logic():
-        if await GameCordinator.is_player_playing(user_id):
+        if await GameCoordinator.is_player_playing(user_id):
             return JsonResponse(
                 {"error": "Double booking", "message": "Player already in active game"},
                 status=409,
             )
-        game_id = await GameCordinator.create_new_game(data)
+        game_id = await GameCoordinator.create_new_game(data)
         if not game_id:
             return JsonResponse(
                 {
@@ -114,7 +114,7 @@ async def create_new_game(request, use_redis_lock: bool = True):
             )
 
         message = "NEW Game created successfully! Joined Gaime."
-        response = await GameCordinator.join_game(user_id, game_id)
+        response = await GameCoordinator.join_game(user_id, game_id)
 
         if response.get("available", True):
             return JsonResponse(
@@ -133,8 +133,8 @@ async def create_new_game(request, use_redis_lock: bool = True):
 
     try:
         if use_redis_lock:
-            async with await GameCordinator.get_redis(
-                GameCordinator.REDIS_GAME_URL
+            async with await GameCoordinator.get_redis(
+                GameCoordinator.REDIS_GAME_URL
             ) as redis_conn:
                 async with RedisLock(
                     redis_conn, f"player_lock:{async_request.user.id}"
@@ -168,14 +168,14 @@ async def join_game(request, game_id, use_redis_lock: bool = True):
     user_id = await sync_to_async(lambda: request.user.id)()
 
     async def join_logic():
-        if await GameCordinator.is_player_playing(user_id):
+        if await GameCoordinator.is_player_playing(user_id):
             return JsonResponse(
                 {"error": "Double booking", "message": "Player already in active game"},
                 status=409,
             )
         message = "Joined Game! "
 
-        response = await GameCordinator.join_game(user_id, game_id)
+        response = await GameCoordinator.join_game(user_id, game_id)
 
         if response.get("available", True):
             return JsonResponse(
@@ -194,8 +194,8 @@ async def join_game(request, game_id, use_redis_lock: bool = True):
 
     try:
         if use_redis_lock:
-            async with await GameCordinator.get_redis(
-                GameCordinator.REDIS_GAME_URL
+            async with await GameCoordinator.get_redis(
+                GameCoordinator.REDIS_GAME_URL
             ) as redis_conn:
                 async with RedisLock(redis_conn, f"player_lock:{user_id}"):
                     return await join_logic()
@@ -210,7 +210,7 @@ async def join_game(request, game_id, use_redis_lock: bool = True):
 @csrf_exempt
 async def get_all_games(request):
     if request.method == "GET":
-        games = await GameCordinator.get_all_games()
+        games = await GameCoordinator.get_all_games()
         first_item = next(iter(games), None)
         if first_item and isinstance(first_item, bytes):
             # If bytes, decode
@@ -252,9 +252,9 @@ async def debug_create_games(request):
                     'ball_size': 0.02
                 }
                 
-                game_id = await GameCordinator.create_new_game(settings)
+                game_id = await GameCoordinator.create_new_game(settings)
                 if game_id:
-                    await GameCordinator.set_to_waiting_game(game_id)
+                    await GameCoordinator.set_to_waiting_game(game_id)
                     
         return JsonResponse({
             "message": "Debug games created successfully",
@@ -272,7 +272,7 @@ async def debug_create_games(request):
 @csrf_exempt
 async def waiting_games(request):
     if request.method == "GET":
-        games = await GameCordinator.get_waiting_games_info()
+        games = await GameCoordinator.get_waiting_games_info()
         json_string = json.dumps(games, cls=DjangoJSONEncoder)
         return JsonResponse(
             {
@@ -289,7 +289,7 @@ async def waiting_games(request):
 @csrf_exempt
 async def running_games(request):
     if request.method == "GET":
-        games = await GameCordinator.get_running_games_info()
+        games = await GameCoordinator.get_running_games_info()
         json_string = json.dumps(games, cls=DjangoJSONEncoder)
         return JsonResponse(
             {
@@ -305,7 +305,7 @@ async def running_games(request):
 async def get_detail_from_game(request):
     if request.method == "GET":
         param = request.GET.get("game_id")
-        settings = await GameCordinator.get_detail_from_game(param)
+        settings = await GameCoordinator.get_detail_from_game(param)
         json_string = json.dumps(settings, cls=DjangoJSONEncoder)
         return JsonResponse(
             {

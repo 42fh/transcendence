@@ -7,7 +7,7 @@ import time
 import random
 from channels.layers import get_channel_layer
 from .method_decorators import *
-from ..gamecordinator.GameCordinator import GameCordinator as GC
+from ..gamecoordinator.GameCoordinator import GameCoordinator as GC
 from asgiref.sync import async_to_sync
 import logging
 

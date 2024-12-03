@@ -33,7 +33,7 @@ class RedisLock:
         await self.redis_conn.delete(self.lock_key)
 
 
-class GameCordinator:
+class GameCoordinator:
     """creates new games and manages all waiting and running games"""
 
     REDIS_URL = "redis://redis:6379/2"
