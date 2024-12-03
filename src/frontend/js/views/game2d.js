@@ -3,7 +3,7 @@ import { showToast } from "../utils/toast.js";
 
 export async function loadGame2D(addToHistory = true) {
 
-    const game2d_game_id = Math.round(Date.now() / 30);
+    const game2d_game_id = Math.round(Date.now() / 9000);
     const game2d_player_id = Math.random().toString(36).substring(2, 15);
     const ws_uri = `/ws/pong/${game2d_game_id}/?player=${game2d_player_id}&gameId=${game2d_game_id}&playerId=${game2d_player_id}&type=circular&pongType=circular&players=2&balls=1&debug=true&sides=2&shape=undefined&scoreMode=classic`;
     let game_2d_is_running = true;
