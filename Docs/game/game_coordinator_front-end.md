@@ -1,6 +1,10 @@
 # Game Modes Overview
 
-### Game Modes Explanation
+The Game Coordinator is the entity responsible for processing user-defined settings from a request and transferring them to the game engine. It enables the creation of games based on customizable configurations. The Game Coordinator manages multiple concurrent games and players, leveraging Redis for state and data management.
+
+The following settings are available for the front-end to use when communicating with the Game Coordinator. These settings are configured in the front-end component that serves as the counterpart to the Game Coordinator:
+
+### Game Modes:
 
 1. **Classic Mode**:  
    - Traditional Pong with a **16:9 rectangular boundary**.  
@@ -19,7 +23,7 @@
    - **Circular boundary** for smooth, free-flowing play.  
    - Customizable settings for players and ball properties.
 
-# Game Settings Documentation
+# Game Settings:
 
 This table documents the available settings for creating a game, detailing their descriptions, available modes, and example values.
 
