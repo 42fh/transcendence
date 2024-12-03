@@ -7,8 +7,10 @@
 | Get All Games | GET | `/` | Retrieve list of all game IDs (not for production) |
 | Create Game | POST | `/` | Create a new game and reserve player |
 | Join Game | POST | `/{game_id}/player/` | Reserve a place for the player in an existing game |
-| Get Waiting Games | GET | `/waiting` | Retrieve list of waiting game IDs |
-| Get Game Details | GET | `/{game_id}` | Retrieve details for a specific game (not for production) |
+| Get Waiting Games | GET | `/waiting` | Retrieve list of waiting games with data see down  |
+| Get Game Details | GET | `/{game_id}` | get all settings back  |
+
+
 
 
 Note: all endpoints are prefixed with `api/game` in urls.py: `path("api/game/", include("game.urls"))`
