@@ -16,10 +16,9 @@ from .game_config import (
 )
 import asyncio
 
-import logging                                                                                                                                                                      
-logger = logging.getLogger(__name__) 
+import logging
 
-
+logger = logging.getLogger(__name__)
 
 
 class GameSettingsError(Exception):
