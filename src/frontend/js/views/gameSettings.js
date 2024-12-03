@@ -6,7 +6,7 @@ import {
 } from "../config/constants.js";
 import { createNewGame } from "../services/gameSettingsService.js";
 
-export function gameSettings() {
+export function loadGameSettings() {
   const state = {
     formData: { ...DEFAULT_GAME_SETTINGS },
     gameConfigs: GAME_CONFIGS,
