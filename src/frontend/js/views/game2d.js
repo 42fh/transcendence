@@ -3,9 +3,24 @@ import { showToast } from "../utils/toast.js";
 
 export async function loadGame2D(addToHistory = true) {
 
+    const game2d_game_id = Date.now() / 30;
+    const ws_uri = `/ws/pong/${game2d_game_id}/?player=hy7nk2d43ek&gameId=${game2d_game_id}&playerId=hy7nk2d43ek&type=circular&pongType=circular&players=2&balls=1&debug=true&sides=2&shape=undefined&scoreMode=classic`;
+    let game_2d_is_running = true;
+    let game_2d_websocket = new WebSocket(ws_uri);
+
+    game2d_game_id.onopen = () => console.log("game socket opened");
+    game2d_game_id.onmessage = () => console.log("game socket message incoming");
+
     addEventListener("popstate", (event) => {
         if (event.state.view == "game2d") {
-            console.log("game2d popstate ev listener called");
+            console.log("game2d popstate ev listener called, closing all games");
+
+            try {
+                game_2d_websocket.close();
+            } catch (error) {
+                console.log("Websocket not open");
+                console.log(error);
+            }
         }
     });
 
@@ -31,6 +46,7 @@ export async function loadGame2D(addToHistory = true) {
         
         let game2dCanvas = document.getElementById("game2d_canvas");
         let context = game2dCanvas.getContext("2d");
+        context.fillStyle = "rgb(255 255 255)";
         context.fillRect(10, 10, 250, 250);
     
     } catch (error) {
