@@ -230,6 +230,8 @@ async def get_all_games(request):
     return JsonResponse({"message": "only GET requests are allowed"}, status=400)
 
 
+
+# TODO: plug in new waiting game method 
 @async_only_middleware
 @require_http_methods(["GET"])
 @csrf_exempt
