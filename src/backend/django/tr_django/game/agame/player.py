@@ -1,8 +1,8 @@
 import asyncio
 import msgpack
 import redis.asyncio as redis
-from ..gamecordinator.GameCordinator import GameCordinator as GC
-from ..gamecordinator.GameCordinator import RedisLock
+from ..gamecoordinator.GameCoordinator import GameCoordinator as GC
+from ..gamecoordinator.GameCoordinator import RedisLock
 import logging
 
 logger = logging.getLogger(__name__)
