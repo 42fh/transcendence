@@ -15,7 +15,7 @@ from .gamecordinator.game_config import EnumGameMode
 from asgiref.sync import sync_to_async
 from django.views.decorators.http import require_http_methods
 from django.utils.decorators import async_only_middleware
-
+import random
 
 def transcendance(request):
     return HttpResponse("Initial view for transcendance")
@@ -229,24 +229,51 @@ async def get_all_games(request):
 
     return JsonResponse({"message": "only GET requests are allowed"}, status=400)
 
+# for debug 
+@csrf_exempt
+@async_only_middleware
+@require_http_methods(["POST"])
+async def debug_create_games(request):
+    try:
+        sample_modes = ['classic', 'circular', 'regular']
+        sample_types = ['2P', '4P']
+        
+        for mode in sample_modes:
+            for n_type in sample_types:
+                settings = {
+                    'mode': mode,
+                    'sides': (4 if n_type == '4P' else 2) +  random.randint(1, 10),
+                    'score': {'max': 5},
+                    'num_players': 4 if n_type == '4P' else 2,
+                    'min_players': 4 if n_type == '4P' else 2,
+                    'initial_ball_speed': 0.02,
+                    'paddle_length': 0.2,
+                    'paddle_width': 0.02,
+                    'ball_size': 0.02
+                }
+                
+                game_id = await GameCordinator.create_new_game(settings)
+                if game_id:
+                    await GameCordinator.set_to_waiting_game(game_id)
+                    
+        return JsonResponse({
+            "message": "Debug games created successfully",
+            "status": 201
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            "error": str(e),
+            "status": 500
+        })
 
-
-# TODO: plug in new waiting game method 
 @async_only_middleware
 @require_http_methods(["GET"])
 @csrf_exempt
-async def get_waiting_games(request):
+async def waiting_games(request):
     if request.method == "GET":
-        games = await GameCordinator.get_waiting_games()
-        first_item = next(iter(games), None)
-        if first_item and isinstance(first_item, bytes):
-            # If bytes, decode
-            games_list = [member.decode("utf-8") for member in games]
-        else:
-            # If already strings, use directly
-            games_list = list(games)
-
-        json_string = json.dumps(games_list, cls=DjangoJSONEncoder)
+        games = await GameCordinator.get_waiting_games_info()
+        json_string = json.dumps(games, cls=DjangoJSONEncoder)
         return JsonResponse(
             {
                 "games": json_string,
@@ -254,7 +281,24 @@ async def get_waiting_games(request):
             }
         )
 
-    return JsonResponse({"message": "only GET requests are allowed"}, status=400)
+    return JsonResponse({"message": "only GET requests are allowed"}, status=405)
+
+
+@async_only_middleware
+@require_http_methods(["GET"])
+@csrf_exempt
+async def running_games(request):
+    if request.method == "GET":
+        games = await GameCordinator.get_running_games_info()
+        json_string = json.dumps(games, cls=DjangoJSONEncoder)
+        return JsonResponse(
+            {
+                "games": json_string,
+                "message": "all game uuids ",
+            }
+        )
+
+    return JsonResponse({"message": "only GET requests are allowed"}, status=405)
 
 
 @csrf_exempt

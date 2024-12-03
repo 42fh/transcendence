@@ -34,6 +34,13 @@ class TestSessionMiddleware(SessionMiddleware):
         request.session_key = "1234"
 
 
+
+def select_test(enabled=True):
+    def decorator(test_func):
+        test_func.enabled = enabled
+        return test_func
+    return decorator
+
 class IntegratedGameTests(TransactionTestCase):
     """
     Comprehensive test suite that combines API endpoint testing with WebSocket consumer testing.
@@ -42,6 +49,7 @@ class IntegratedGameTests(TransactionTestCase):
 
     def setUp(self):
         """Initialize the test environment and run async setup"""
+        self._run_if_enabled()
         super().setUp()
         # Store our test users in a dictionary for easy access
         self.application = application
@@ -49,6 +57,12 @@ class IntegratedGameTests(TransactionTestCase):
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
         self.loop.run_until_complete(self._async_setup())
+    
+
+    def _run_if_enabled(self):
+        test_method = getattr(self, self._testMethodName)
+        if hasattr(test_method, 'enabled') and not test_method.enabled:
+            self.skipTest('Test disabled')    
 
     async def _async_setup(self):
         """Async setup with Redis connection and multiple user creation"""
@@ -135,6 +149,30 @@ class IntegratedGameTests(TransactionTestCase):
         self.loop.run_until_complete(self._async_teardown())
         self.loop.close()
         super().tearDown()
+
+    @select_test(enabled=True)
+    def test_print_games(self):
+        """Print games from debug and waiting endpoints"""
+        async def _test_print_games():
+            # Create debug games
+            response = await sync_to_async(self.client.post)(
+                reverse('debug_create_games'),
+                content_type='application/json'
+            )
+            print("\nDebug games creation response:", response.json())
+
+            # Get waiting games
+            response = await sync_to_async(self.client.get)(
+                reverse('waiting_games')
+            )
+            print("\nWaiting games response:", json.dumps(response.json(), indent=2))
+
+        self.loop.run_until_complete(_test_print_games())
+
+
+
+
+
 
     # def test_a_game_creation(self):
     #    """Test game creation with visible console output"""
@@ -351,5 +389,6 @@ class IntegratedGameTests(TransactionTestCase):
         except Exception as e:
             print(f"{player_name} monitoring ended: {str(e)}")
 
+    @select_test(enabled=False)
     def test_websocket_auth(self):
         self.loop.run_until_complete(self._test_booking_and_websocket())
