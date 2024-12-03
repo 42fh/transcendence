@@ -53,6 +53,7 @@ export function gameSettings() {
     mainContent.innerHTML = "";
   }
 
+  // The game settings temp
   const settingsTemplate = document.getElementById("game-settings-template");
   if (settingsTemplate) {
     const settingsContent = document.importNode(settingsTemplate.content, true);
