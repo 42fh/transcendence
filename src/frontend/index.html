@@ -148,29 +148,29 @@
   <p id="status" class="status"></p>
       <!-- Status message container -->
       <div id="status" style="display: none;"></div>
-  <div class="tournament-container page-container--settings">
+  <div class="container page-container--settings">
     <h2>GAME SETTINGS</h2>
-    <div class="tournament-detail-container">
-      <form id="gameForm" class="tournament-detail-section">
+    <div>
+      <form id="gameForm"">
         <div class="game-setting-group">
           <label for="playerId">Player ID:</label>
-          <input type="text" id="playerId" name="playerId" class="create-tournament-select">
+          <input type="text" id="playerId" name="playerId" class="form-input">
         </div>
         <div class="game-setting-group">
           <label for="numPlayers">Number of Players:</label>
-          <input type="number" id="numPlayers" name="numPlayers" min="2" max="8" class="create-tournament-select">
+          <input type="number" id="numPlayers" name="numPlayers" min="2" max="8" class="form-input">
         </div>
         <div class="game-setting-group">
           <label for="numSides">Number of Sides:</label>
-          <input type="number" id="numSides" name="numSides" min="3" max="100" class="create-tournament-select">
+          <input type="number" id="numSides" name="numSides" min="3" max="100" class="form-input">
         </div>
         <div class="game-setting-group">
           <label for="numBalls">Number of Balls:</label>
-          <input type="number" id="numBalls" name="numBalls" min="1" max="4" class="create-tournament-select">
+          <input type="number" id="numBalls" name="numBalls" min="1" max="4" class="form-input">
         </div>
         <div class="game-setting-group">
           <label for="mode">Select Mode:</label>
-          <select id="mode" name="mode" class="create-tournament-select">
+          <select id="mode" name="mode" class="form-input">
             <option value="regular">Regular</option>
             <option value="classic">Classic</option>
             <option value="circular">Circular</option>
@@ -179,7 +179,7 @@
         </div>
         <div class="game-setting-group">
           <label for="shape">Shape:</label>
-          <select id="shape" name="shape" class="create-tournament-select">
+          <select id="shape" name="shape" class="form-input">
             <option value="regular">Regular</option>
             <option value="irregular">Irregular</option>
             <option value="star">Star</option>
@@ -188,7 +188,7 @@
         </div>
         <div class="game-setting-group">
           <label for="scoreMode">Score Mode:</label>
-          <select id="scoreMode" name="scoreMode" class="create-tournament-select">
+          <select id="scoreMode" name="scoreMode" class="form-input">
             <option value="classic">Classic</option>
             <option value="modern">Modern</option>
           </select>
@@ -198,7 +198,7 @@
         </div>
       </form>
     </div>
-    <div id="descriptions-container" class="tournament-detail-descriptions">
+    <div id="descriptions-container">
       <h3>Game Information</h3>
       <p><strong>Classic:</strong> Classic 2-player pong with 2 paddles and 2 walls. Maximum players: 2.</p>
       <p><strong>Regular:</strong> Regular polygon with all sides playable. Maximum players: 4.</p>
@@ -311,7 +311,7 @@
           <!-- Tournament Type -->
           <div class="create-tournament-form-group">
             <label class="create-tournament-label" for="tournament-type">TYPE</label>
-            <select class="create-tournament-select" id="tournament-type" name="type" required>
+            <select class="form-input" id="tournament-type" name="type" required>
               <option value="single_elimination">Single Elimination</option>
               <option value="double_elimination">Double Elimination</option>
               <option value="round_robin">Round Robin</option>
@@ -355,7 +355,7 @@
           <!-- Visibility -->
           <div class="create-tournament-form-group">
             <label class="create-tournament-label" for="tournament-visibility">VISIBILITY</label>
-            <select class="create-tournament-select" id="tournament-visibility" name="visibility" required>
+            <select class="form-input" id="tournament-visibility" name="visibility" required>
               <option value="public">Public</option>
               <option value="private">Private</option>
             </select>
@@ -374,7 +374,7 @@
           <!-- Game Mode -->
           <div class="create-tournament-form-group">
             <label class="create-tournament-label" for="game-mode">GAME MODE</label>
-            <select class="create-tournament-select" id="game-mode" name="gameMode" required>
+            <select class="form-input" id="game-mode" name="gameMode" required>
               <option value="1v1">1 vs 1</option>
               <option value="multiplayer">Multiplayer</option>
             </select>

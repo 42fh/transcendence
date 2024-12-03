@@ -1,0 +1,8 @@
+.form-input {
+	padding: 0.8rem;
+	background: transparent;
+	border: 2px solid white;
+	border-radius: 5px;
+	color: white;
+	font-family: "Press Start 2P", cursive;
+  }

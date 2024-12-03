@@ -849,7 +849,6 @@ button:hover {
 }
 
 .create-tournament-input,
-.create-tournament-select,
 .create-tournament-textarea {
   padding: 0.8rem;
   background: transparent;
