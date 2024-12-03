@@ -711,7 +711,7 @@
     <!-- 2D Game Template -->
     <template id="two-d-game-template">
       <!-- <div id="setupContainer" class="setup-container"> -->
-      <div id="two-d-game__setup" class="setup-container">
+      <div id="two-d-game__container-setup" class="two-d-game__container-setup">
         <!-- two-d-game__title is not used -->
         <h1 class="two-d-game__title">2D Pong Setup</h1>
 
@@ -732,22 +732,18 @@
           </div>
 
           <!-- Settings Toggle -->
-          <!-- <button type="button" id="toggleSettings" class="settings-toggle">
-            <span id="toggleText">Show Settings</span>
-            <span id="toggleIcon">▶</span>
-          </button> -->
-          <button type="button" id="two-d-game__toggle-settings" class="two-d-game__toggle-settings">
+          <button type="button" id="two-d-game__toggle-settings" class="two-d-game__toggle-settings two-d-game__button">
             <span id="two-d-game__toggle-text">Show Settings</span>
             <span id="two-d-game__toggle-icon">▶</span>
           </button>
 
           <!-- Advanced Settings Section -->
-          <div id="advancedSettings" class="two-d-game__panel" style="display: none">
+          <div id="two-d-game__advanced-settings" class="two-d-game__panel" style="display: none">
             <h2 class="two-d-game__panel-title">Game Settings</h2>
 
             <div class="two-d-game__form-group">
-              <label for="gameType">Game Type</label>
-              <select id="gameType">
+              <label class="two-d-game__label" for="two-d-game__game-type">Game Type</label>
+              <select id="two-d-game__game-type" class="two-d-game__input">
                 <option value="regular">Regular Pong</option>
                 <option value="circular">Circular Pong</option>
                 <option value="irregular">Irregular Pong</option>
@@ -756,25 +752,25 @@
             </div>
 
             <div class="two-d-game__form-group">
-              <label for="numPlayers">Number of Players</label>
-              <input type="number" id="numPlayers" min="2" max="8" value="2" />
-              <small class="help-text">Min: 2, Max: 8 players</small>
+              <label class="two-d-game__label" for="two-d-game__num-players">Number of Players</label>
+              <input class="two-d-game__input" type="number" id="two-d-game__num-players" min="2" max="8" value="2" />
+              <small class="two-d-game__help-text">Min: 2, Max: 8 players</small>
             </div>
             <div class="two-d-game__form-group polygon-only">
-              <label for="numSides">Number of Sides</label>
-              <input type="number" id="numSides" min="1" max="12" value="2" />
-              <small class="help-text">Min: 3, Max: 12 sides</small>
+              <label class="two-d-game__label" for="two-d-game__num-sides">Number of Sides</label>
+              <input class="two-d-game__input" type="number" id="two-d-game__num-sides" min="1" max="12" value="2" />
+              <small class="two-d-game__help-text">Min: 3, Max: 12 sides</small>
             </div>
 
             <div class="two-d-game__form-group">
-              <label for="numBalls">Number of Balls</label>
-              <input type="number" id="numBalls" min="1" max="4" value="1" />
-              <small class="help-text">Min: 1, Max: 4 balls</small>
+              <label class="two-d-game__label" for="two-d-game__num-balls">Number of Balls</label>
+              <input class="two-d-game__input" type="number" id="two-d-game__num-balls" min="1" max="4" value="1" />
+              <small class="two-d-game__help-text">Min: 1, Max: 4 balls</small>
             </div>
 
             <div class="two-d-game__form-group shape-fields" style="display: none">
-              <label for="shape">Shape</label>
-              <select id="shape">
+              <label class="two-d-game__label" for="two-d-game__shape">Shape</label>
+              <select class="two-d-game__input" id="two-d-game__shape">
                 <option value="regular">Regular</option>
                 <option value="irregular">Irregular</option>
                 <option value="star">Star</option>
@@ -784,8 +780,8 @@
             </div>
 
             <div class="two-d-game__form-group">
-              <label for="scoreMode">Score Mode</label>
-              <select id="scoreMode">
+              <label class="two-d-game__label" for="two-d-game__score-mode">Score Mode</label>
+              <select class="two-d-game__input" id="two-d-game__score-mode">
                 <option value="classic">Classic (First to 11)</option>
                 <option value="timed">Timed (5 minutes)</option>
                 <option value="survival">Survival</option>
@@ -793,61 +789,59 @@
             </div>
 
             <div class="two-d-game__form-group">
-              <label class="checkbox-label">
-                <input type="checkbox" id="debugMode" />
+              <label class="two-d-game__label">
+                <input class="two-d-game__input" type="checkbox" id="two-d-game__debug-mode" />
                 Enable Debug Mode
               </label>
             </div>
           </div>
 
           <!-- Status Message -->
-          <div id="status" class="status" style="display: none"></div>
+          <div id="status" class="two-d-game__status" style="display: none"></div>
 
           <!-- Start Button -->
           <div class="two-d-game__form-group">
-            <button type="submit" class="start-button">Start Game</button>
+            <button type="submit" class="two-d-game__button">Start Game</button>
           </div>
         </form>
       </div>
 
       <!-- Game Container -->
-      <div id="two-d-game__game-container" class="game-container" style="display: none">
-        <div class="game-layout">
-          <div class="game-main">
-            <div class="game-canvas-container">
-              <svg id="pongSvg" viewBox="0 0 300 300"></svg>
+      <div id="two-d-game__container-game" class="two-d-game__container-game" style="display: none">
+        <div class="two-d-game__game-layout">
+          <div class="two-d-game__game-main">
+            <div class="two-d-game__game-canvas-container">
+              <svg id="two-d-game__pong-svg" viewBox="0 0 300 300"></svg>
             </div>
 
             <div class="two-d-game__panel">
               <div class="two-d-game__panel-header">
                 <h3 class="two-d-game__panel-title">Event Log</h3>
               </div>
-              <!-- <div id="eventLog" class="event-log">
-                <div class="log-entry">
-                  <span class="log-message">Waiting for game events...</span>
-                </div> -->
-				<div id="two-d-game__event-log" class="two-d-game__event-log"></div>
-				<span id="two-d-game__event-log-message" class="two-d-game__event-log-message">Waiting for game events...</span>
+              <div id="two-d-game__event-log" class="two-d-game__event-log">
+                <div class="two-d-game__log-entry">
+                  <span id="two-d-game__event-log-message">Waiting for game events...</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="game-sidebar">
+          <div class="two-d-game__game-sidebar">
             <div class="two-d-game__panel">
               <div class="two-d-game__panel-header">
                 <h3 class="two-d-game__panel-title">Game Info</h3>
               </div>
-              <div id="gameInfo" class="game-info"></div>
+              <div id="two-d-game__game-info" class="two-d-game__game-info"></div>
             </div>
 
             <div class="two-d-game__panel">
               <div class="two-d-game__panel-header">
                 <h3 class="two-d-game__panel-title">Scores</h3>
               </div>
-              <div id="scoreDisplay" class="score-display"></div>
+              <div id="two-d-game__score-display" class="two-d-game__score-display"></div>
             </div>
 
-            <div class="controls-info">
+            <div class="two-d-game__controls-info">
               <h3>Controls:</h3>
               <ul>
                 <li>Left Arrow / A: Move paddle left</li>
