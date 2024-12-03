@@ -41,6 +41,7 @@ This endpoint creates a new game and reserves the player for the created game. I
   - `401`: Unauthorized - missing authentication
   - `409`: Player already in an active game
   - `400`: Invalid game mode
+  - `405`: Method not allowd
   - `415`: Invalid content type
   - `500`: Game creation failed
 
@@ -61,29 +62,142 @@ This endpoint reserves a place for the player. If successful, the endpoint retur
     ```
 - **Error Responses**:
   - `401`: Unauthorized - missing authentication
+  - `405`: Method not allowd
   - `409`: Player already in an active game
   - `500`: Join failed
 
-### Get All Games
-**Not for production**
 
-- **URL**: `/`  
-  *(The root URL is already prefixed with `api/game`)*
+### Get Player Count
+This endpoint retrieves the current and reserved player counts for a specific game.
+
+- **URL**: `/api/games/{game_id}/players/count/`
 - **Method**: `GET`
+- **URL Parameters**:
+  - `game_id`: UUID of the game
+
 - **Success Response**:
   - Code: `200`
   - Content:
     ```json
     {
-        "games": "[list of game IDs]",
-        "message": "all game uuids"
+        "player_counts": {
+            "status": true,
+            "current_players": int,
+            "reserved_players": int
+        },
+        "message": "Current player counts retrieved successfully"
     }
     ```
+
+- **Error Responses**:
+  - `405`: Method not allowed
+  - `500`: Server Error
+
+
+### Cancel Booking
+This endpoint cancels all active bookings for the authenticated user.
+
+- **URL**: `/games/booking/cancel/`
+- **Method**: `DELETE`
+- **Authentication Required**: Yes
+
+- **Success Response**:
+  - Code: `200`
+  - Content:
+    ```json
+    {
+        "message": "Booking(s) cancelled successfully",
+        "status": "success",
+        "warning": "Multiple bookings found and removed" // Optional field
+    }
+    ```
+
+- **Error Responses**:
+  - `401`: Unauthorized - missing authentication
+  - `404`: No booking found
+  - `500`: Server Error
+
+## User Managment
+
+### User Online Status
+Manages the online status of users.
+
+- **URL**: `/api/game/user/online/`
+- **Methods**: `GET`, `POST`, `DELETE`
+- **Authentication Required**: Yes
+
+#### GET
+Check if a user is online.
+
+- **Success Response**:
+  - Code: `200`
+  - Content:
+    ```json
+    {
+        "online": boolean,
+        "user_id": string
+    }
+    ```
+
+#### POST
+Set user as online. Refreshes the expiry timer to USER_ONLINE_EXPIRY seconds.
+
+- **Success Response**:
+  - Code: `200`
+  - Content:
+    ```json
+    {
+        "message": "User set to online",
+        "user_id": string
+    }
+    ```
+
+#### DELETE
+Set user as offline.
+
+- **Success Response**:
+  - Code: `200`
+  - Content:
+    ```json
+    {
+        "message": "User set to offline",
+        "user_id": string
+    }
+    ```
+
+#### Error Responses:
+- `401`: Unauthorized - missing authentication
+- `500`: Server error processing request
+
+
+
+
+
+## Data for all followings calls 
+       
+
+game_data = {                                                          
+
+	'game_id': game_id,                                                
+	'mode': game_settings.get('mode'),                                 	
+	'type': game_settings.get('type'),                                 
+	 'sides': game_settings.get('sides'),                               
+	 'score': game_settings.get('score'),                               
+	'num_players': game_settings.get('num_players'),                   
+	'min_players': game_settings.get('min_players'),                   
+	'initial_ball_speed': game_settings.get('initial_ball_speed'),     
+	 'paddle_length': game_settings.get('paddle_length'),               
+	 'paddle_width': game_settings.get('paddle_width'),                 
+	 'ball_size': game_settings.get('ball_size'),                       
+	 'players': {                                                       
+	     'current': current_players,                                    
+	     'reserved': reserved_players,                                  
+	     'total_needed': game_settings.get('num_players', 0)            
+		 }                                    
 
 ### Get Waiting Games
 As soon as the first player (the one who created the game) connects to the game, the game becomes visible through this endpoint.
 
-**Under construction**: For now, only the game ID is returned, but additional information will be included in the future.
 
 - **URL**: `/waiting`  
 - **Method**: `GET`
@@ -92,10 +206,47 @@ As soon as the first player (the one who created the game) connects to the game,
   - Content:
     ```json
     {
-        "games": "[list of waiting game IDs]",
+        "games": game_data,
         "message": "all game uuids"
     }
     ```
+- **Error Responses**:
+  - `405`: Method not allowd     
+
+### Get Running Games
+
+- **URL**: `/running`  
+- **Method**: `GET`
+- **Success Response**:
+  - Code: `200`
+  - Content:
+    ```json
+    {
+        "games": game_data,
+        "message": "all game uuids"
+    }
+    ```
+- **Error Responses**:
+  - `405`: Method not allowd     
+
+
+### Get all Games
+
+- **URL**: `/running`  
+- **Method**: `GET`
+- **Success Response**:
+  - Code: `200`
+  - Content:
+    ```json
+    {
+        "games": game_data,
+        "message": "all game uuids"
+    }
+    ```
+- **Error Responses**:
+  - `405`: Method not allowd     
+
+
 
 ### Get Game Details
 **Not for production**
@@ -113,4 +264,9 @@ As soon as the first player (the one who created the game) connects to the game,
         "message": "this are the settings of the game"
     }
     ```
+
+## Not activated
+
+
+
 
