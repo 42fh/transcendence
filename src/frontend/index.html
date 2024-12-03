@@ -152,7 +152,7 @@
       <div class="tournament-container page-container--settings">
         <h2>GAME SETTINGS</h2>
         <div class="tournament-detail-container">
-          <form id="gameForm" class="tournament-detail-section">
+          <form id="tournament-gameForm" class="tournament-detail-section">
             <div class="game-setting-group">
               <label for="playerId">Player ID:</label>
               <input type="text" id="playerId" name="playerId" class="create-tournament-select" />
@@ -491,45 +491,41 @@
       </nav>
     </template>
 
-    <!-- Profile Template (used for both 'private' profile and 'public' profile) -->
+    <!-- Profile Template -->
     <template id="profile-template">
       <div class="page-container page-container--profile">
+        <!-- <div class="profile__header"> -->
         <div class="profile">
           <div class="profile__section profile__section--header">
+            <!-- <div class="profile__avatar-container"> -->
             <div class="profile__avatar-wrapper">
               <img class="profile__avatar" src="" alt="Profile avatar" />
             </div>
+            <!-- <div class="profile__info">
+            <h2 class="profile__username"></h2>
+            <p class="profile__name"></p>
+            <p class="profile__email"></p>
+            <p class="profile__phone"></p>
+          </div> -->
             <div class="profile__info">
-              <div class="profile__username-container">
-                <!-- TODO: think about this h2 if it has really to be -->
-                <span class="profile__online-status material-symbols-outlined profile__public-info">circle</span>
-                <h2 class="profile__username"></h2>
-              </div>
-              <!-- Private info will be hidden/shown based on view type -->
-              <p class="profile__info-item profile__info-item--name profile__private-info"></p>
-              <p class="profile__info-item profile__info-item--email profile__private-info"></p>
-              <p class="profile__info-item profile__info-item--phone profile__private-info"></p>
+              <h2 class="profile__username"></h2>
+              <p class="profile__info-item profile__info-item--name"></p>
+              <p class="profile__info-item profile__info-item--location"></p>
+              <p class="profile__info-item profile__info-item--email"></p>
+              <p class="profile__info-item profile__info-item--phone"></p>
             </div>
           </div>
-          <!-- Public Profile Actions -->
-          <div class="profile__section profile__section--public-actions profile__public-info">
-            <button class="profile__action-button" data-action="friend" title="Add Friend">
-              <span class="material-symbols-outlined">person_add</span>
-            </button>
-            <button class="profile__action-button" data-action="chat" title="Send Message">
-              <span class="material-symbols-outlined">maps_ugc</span>
-            </button>
-            <button class="profile__action-button" data-action="play" title="Challenge to Game">
-              <span class="material-symbols-outlined">play_circle</span>
-            </button>
-            <button class="profile__action-button" data-action="block" title="Block User">
-              <span class="material-symbols-outlined">block</span>
-            </button>
-          </div>
+
+          <!-- <div class="profile__bio">
+          <h3 class="profile__bio-title">Bio</h3>
+          <p class="profile__bio-text"></p>
+        </div> -->
           <div class="profile__section profile__section--bio">
             <h3 class="profile__section-title">Bio</h3>
             <p class="profile__bio-text"></p>
           </div>
+
+          <!-- <div class="profile__stats"> -->
           <div class="profile__section profile__section--stats">
             <div class="profile__stats-item">
               <span class="profile__stats-label">Wins</span>
@@ -544,6 +540,8 @@
               <span class="profile__stats-value profile__stats-ratio"></span>
             </div>
           </div>
+
+          <!-- <div class="profile__matches"> -->
           <div class="profile__section profile__section--matches">
             <h3 class="profile__section-title">Recent Matches</h3>
             <div class="profile__matches-list">
@@ -551,15 +549,16 @@
             </div>
           </div>
 
-          <!-- Private Profile Actions -->
-          <div class="profile__section profile__section--private-actions profile__private-info">
+          <!-- <div class="profile__actions"> -->
+          <div class="profile__section profile__section--actions">
+            <!-- <button class="profile__edit-button">Edit Profile</button> -->
             <button class="profile__button profile__button--edit">Edit Profile</button>
+            <!-- TODO: Add password change button if we decide to implement it -->
           </div>
         </div>
       </div>
     </template>
 
-    <!-- Profile Match Template -->
     <template id="profile-match-template">
       <div class="profile__match-item">
         <span class="profile__match-date"></span>
@@ -710,35 +709,43 @@
     </template>
 
     <!-- 2D Game Template -->
-    <template id="2d-game-template">
-      <div id="setupContainer" class="setup-container">
-        <h1 class="text-2xl font-bold mb-6">2D Pong Setup</h1>
+    <template id="two-d-game-template">
+      <!-- <div id="setupContainer" class="setup-container"> -->
+      <div id="two-d-game__setup" class="setup-container">
+        <!-- two-d-game__title is not used -->
+        <h1 class="two-d-game__title">2D Pong Setup</h1>
 
-        <form id="gameForm" class="space-y-6">
+        <form id="two-d-game__gameForm">
           <!-- Basic Info Section -->
-          <div class="panel">
-            <h2 class="panel-title">Basic Game Info</h2>
-            <div class="form-group">
-              <label for="gameId">Game ID</label>
-              <input type="text" id="gameId" placeholder="Enter game ID or leave empty for new game" />
+          <div class="two-d-game__panel">
+            <h2 class="two-d-game__panel-title">Basic Game Info</h2>
+            <div class="two-d-game__form-group">
+              <label class="two-d-game__label" for="two-d-game-id">Game ID</label>
+              <input class="two-d-game__input" type="text" id="two-d-game-id" value="auto-generated" />
+              <small class="two-d-game__help-text">Leave empty for new game</small>
             </div>
-            <div class="form-group">
-              <label for="playerId">Player ID</label>
-              <input type="text" id="playerId" placeholder="Enter player ID or leave empty for random" />
+            <div class="two-d-game__form-group">
+              <label class="two-d-game__label" for="two-d-game__player-id">Player ID</label>
+              <input class="two-d-game__input" type="text" id="two-d-game__player-id" disabled />
+              <small class="two-d-game__help-text">Disabled - Using your UserID</small>
             </div>
           </div>
 
           <!-- Settings Toggle -->
-          <button type="button" id="toggleSettings" class="settings-toggle">
+          <!-- <button type="button" id="toggleSettings" class="settings-toggle">
             <span id="toggleText">Show Settings</span>
             <span id="toggleIcon">▶</span>
+          </button> -->
+          <button type="button" id="two-d-game__toggle-settings" class="two-d-game__toggle-settings">
+            <span id="two-d-game__toggle-text">Show Settings</span>
+            <span id="two-d-game__toggle-icon">▶</span>
           </button>
 
           <!-- Advanced Settings Section -->
-          <div id="advancedSettings" class="panel" style="display: none">
-            <h2 class="panel-title">Game Settings</h2>
+          <div id="advancedSettings" class="two-d-game__panel" style="display: none">
+            <h2 class="two-d-game__panel-title">Game Settings</h2>
 
-            <div class="form-group">
+            <div class="two-d-game__form-group">
               <label for="gameType">Game Type</label>
               <select id="gameType">
                 <option value="regular">Regular Pong</option>
@@ -748,24 +755,24 @@
               </select>
             </div>
 
-            <div class="form-group">
+            <div class="two-d-game__form-group">
               <label for="numPlayers">Number of Players</label>
               <input type="number" id="numPlayers" min="2" max="8" value="2" />
               <small class="help-text">Min: 2, Max: 8 players</small>
             </div>
-            <div class="form-group polygon-only">
+            <div class="two-d-game__form-group polygon-only">
               <label for="numSides">Number of Sides</label>
               <input type="number" id="numSides" min="1" max="12" value="2" />
               <small class="help-text">Min: 3, Max: 12 sides</small>
             </div>
 
-            <div class="form-group">
+            <div class="two-d-game__form-group">
               <label for="numBalls">Number of Balls</label>
               <input type="number" id="numBalls" min="1" max="4" value="1" />
               <small class="help-text">Min: 1, Max: 4 balls</small>
             </div>
 
-            <div class="form-group shape-fields" style="display: none">
+            <div class="two-d-game__form-group shape-fields" style="display: none">
               <label for="shape">Shape</label>
               <select id="shape">
                 <option value="regular">Regular</option>
@@ -776,7 +783,7 @@
               <p id="shapeDescription" class="help-text" style="display: none"></p>
             </div>
 
-            <div class="form-group">
+            <div class="two-d-game__form-group">
               <label for="scoreMode">Score Mode</label>
               <select id="scoreMode">
                 <option value="classic">Classic (First to 11)</option>
@@ -785,7 +792,7 @@
               </select>
             </div>
 
-            <div class="form-group">
+            <div class="two-d-game__form-group">
               <label class="checkbox-label">
                 <input type="checkbox" id="debugMode" />
                 Enable Debug Mode
@@ -797,58 +804,45 @@
           <div id="status" class="status" style="display: none"></div>
 
           <!-- Start Button -->
-          <div class="form-group">
+          <div class="two-d-game__form-group">
             <button type="submit" class="start-button">Start Game</button>
           </div>
         </form>
       </div>
 
       <!-- Game Container -->
-      <div id="gameContainer" class="game-container" style="display: none">
+      <div id="two-d-game__game-container" class="game-container" style="display: none">
         <div class="game-layout">
           <div class="game-main">
             <div class="game-canvas-container">
               <svg id="pongSvg" viewBox="0 0 300 300"></svg>
             </div>
 
-            <div class="panel">
-              <div class="panel-header">
-                <svg class="panel-icon" viewBox="0 0 24 24">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                </svg>
-                <h3 class="panel-title">Event Log</h3>
+            <div class="two-d-game__panel">
+              <div class="two-d-game__panel-header">
+                <h3 class="two-d-game__panel-title">Event Log</h3>
               </div>
-              <div id="eventLog" class="event-log">
+              <!-- <div id="eventLog" class="event-log">
                 <div class="log-entry">
                   <span class="log-message">Waiting for game events...</span>
-                </div>
+                </div> -->
+				<div id="two-d-game__event-log" class="two-d-game__event-log"></div>
+				<span id="two-d-game__event-log-message" class="two-d-game__event-log-message">Waiting for game events...</span>
               </div>
             </div>
           </div>
 
           <div class="game-sidebar">
-            <div class="panel">
-              <div class="panel-header">
-                <h3 class="panel-title">Game Info</h3>
+            <div class="two-d-game__panel">
+              <div class="two-d-game__panel-header">
+                <h3 class="two-d-game__panel-title">Game Info</h3>
               </div>
               <div id="gameInfo" class="game-info"></div>
             </div>
 
-            <div class="panel">
-              <div class="panel-header">
-                <svg class="panel-icon" viewBox="0 0 24 24">
-                  <path
-                    d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-7v2h2v-2h-2zm0-8v6h2V7h-2z"
-                  />
-                </svg>
-                <h3 class="panel-title">Error Monitor</h3>
-              </div>
-              <div id="errorLog" class="error-log"></div>
-            </div>
-
-            <div class="panel">
-              <div class="panel-header">
-                <h3 class="panel-title">Scores</h3>
+            <div class="two-d-game__panel">
+              <div class="two-d-game__panel-header">
+                <h3 class="two-d-game__panel-title">Scores</h3>
               </div>
               <div id="scoreDisplay" class="score-display"></div>
             </div>

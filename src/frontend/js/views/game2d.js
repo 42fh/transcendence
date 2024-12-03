@@ -23,7 +23,7 @@ export function load2DGame(addToHistory = true) {
     mainContent.innerHTML = "";
 
     // Get the template
-    const template = document.getElementById("2d-game-template");
+    const template = document.getElementById("two-d-game-template");
     if (!template) {
       throw new Error("2D game template not found");
     }

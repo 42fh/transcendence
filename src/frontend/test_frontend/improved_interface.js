@@ -74,59 +74,56 @@ export class PongInterface {
 
   setupEventListeners() {
     // Toggle settings visibility
-    document.getElementById("toggleSettings").addEventListener("click", () => {
+    document.getElementById("two-d-game__toggle-settings").addEventListener("click", () => {
       this.showSettings = !this.showSettings;
-      const advancedSettings = document.getElementById("advancedSettings");
-      const toggleText = document.getElementById("toggleText");
-      const toggleIcon = document.getElementById("toggleIcon");
+      const advancedSettings = document.getElementById("two-d-game__advanced-settings");
+      const toggleText = document.getElementById("two-d-game__toggle-text");
+      const toggleIcon = document.getElementById("two-d-game__toggle-icon");
 
       advancedSettings.style.display = this.showSettings ? "block" : "none";
-      toggleText.textContent = this.showSettings
-        ? "Hide Settings"
-        : "Show Settings";
+      toggleText.textContent = this.showSettings ? "Hide Settings" : "Show Settings";
       toggleIcon.textContent = this.showSettings ? "▼" : "▶";
     });
 
     // Game type change handler
-    document.getElementById("gameType").addEventListener("change", (e) => {
+    document.getElementById("two-d-game__game-type").addEventListener("change", (e) => {
       this.gameType = e.target.value;
       this.updateGameTypeFields();
     });
 
     // Shape change handler
-    document.getElementById("shape").addEventListener("change", (e) => {
+    document.getElementById("two-d-game__shape").addEventListener("change", (e) => {
       this.formData.shape = e.target.value;
       this.updateShapeDescription();
     });
 
     // Form submission
-    document.getElementById("gameForm").addEventListener("submit", (e) => {
+    document.getElementById("two-d-game__gameForm").addEventListener("submit", (e) => {
       e.preventDefault();
       this.startGame();
     });
 
     // Debug mode toggle
-    document.getElementById("debugMode").addEventListener("change", (e) => {
+    document.getElementById("two-d-game__debug-mode").addEventListener("change", (e) => {
       this.debugEnabled = e.target.checked;
     });
 
     // Form input change handlers
-    [
-      "gameId",
-      "playerId",
-      "numPlayers",
-      "numSides",
-      "numBalls",
-      "shape",
-      "scoreMode",
-    ].forEach((fieldId) => {
+    // const inputFields = ["gameId", "playerId", "numPlayers", "numSides", "numBalls", "shape", "scoreMode"].forEach((fieldId) => {
+    const inputFields = [
+      "two-d-game__game-id",
+      "two-d-game__player-id",
+      "two-d-game__num-players",
+      "two-d-game__num-sides",
+      "two-d-game__num-balls",
+      "two-d-game__shape",
+      "two-d-game__score-mode",
+    ];
+    inputFields.forEach((fieldId) => {
       const element = document.getElementById(fieldId);
       if (element) {
         element.addEventListener("change", (e) => {
-          this.formData[fieldId] =
-            e.target.type === "number"
-              ? parseInt(e.target.value)
-              : e.target.value;
+          this.formData[fieldId] = e.target.type === "number" ? parseInt(e.target.value) : e.target.value;
         });
       }
     });
@@ -155,7 +152,7 @@ export class PongInterface {
     if (!config) return;
 
     // Update number of players max value
-    const numPlayersInput = document.getElementById("numPlayers");
+    const numPlayersInput = document.getElementById("two-d-game__num-players");
     if (numPlayersInput) {
       numPlayersInput.max = config.maxPlayers;
       if (parseInt(numPlayersInput.value) > config.maxPlayers) {
@@ -165,7 +162,7 @@ export class PongInterface {
     }
 
     // Update number of sides based on game type
-    const numSidesInput = document.getElementById("numSides");
+    const numSidesInput = document.getElementById("two-d-game__num-sides");
     if (numSidesInput) {
       numSidesInput.value = config.sides;
       numSidesInput.disabled = this.gameType === "classic";
@@ -181,13 +178,13 @@ export class PongInterface {
     }
 
     // Show/hide shape fields
-    const shapeFields = document.querySelectorAll(".shape-fields");
+    const shapeFields = document.querySelectorAll(".two-d-game__shape-fields");
     shapeFields.forEach((field) => {
       field.style.display = this.gameType === "irregular" ? "block" : "none";
     });
 
     // Update sides field visibility
-    const sidesField = document.getElementById("sidesField");
+    const sidesField = document.getElementById("two-d-game__sides-field");
     if (sidesField) {
       sidesField.style.display = this.gameType !== "classic" ? "block" : "none";
     }
@@ -196,14 +193,14 @@ export class PongInterface {
   }
 
   updateGameDescription() {
-    const descElement = document.getElementById("gameDescription");
+    const descElement = document.getElementById("two-d-game__game-description");
     if (!descElement) return;
 
     const config = this.gameConfigs[this.gameType];
     if (!config) return;
 
     descElement.innerHTML = `
-            <div class="game-description">
+            <div class="two-d-game__game-description">
                 <p>${config.description}</p>
                 <ul>
                     <li>Game Type: ${config.type}</li>
@@ -217,7 +214,7 @@ export class PongInterface {
   }
 
   updateShapeDescription() {
-    const shapeDescElement = document.getElementById("shapeDescription");
+    const shapeDescElement = document.getElementById("two-d-game__shape-description");
     if (!shapeDescElement) return;
 
     const descriptions = {
@@ -228,8 +225,7 @@ export class PongInterface {
     };
 
     shapeDescElement.textContent = descriptions[this.formData.shape] || "";
-    shapeDescElement.style.display =
-      this.formData.shape === "regular" ? "none" : "block";
+    shapeDescElement.style.display = this.formData.shape === "regular" ? "none" : "block";
   }
 
   generateRandomId() {
@@ -245,13 +241,9 @@ export class PongInterface {
     const timestamp = new Date().toLocaleTimeString();
 
     logEntry.innerHTML = `
-            <span class="log-timestamp">[${timestamp}]</span>
-            <span class="log-message">${event.message}</span>
-            ${
-              event.details
-                ? `<div class="log-details">${event.details}</div>`
-                : ""
-            }
+            <span class="two-d-game__log-timestamp">[${timestamp}]</span>
+            <span class="two-d-game__log-message">${event.message}</span>
+            ${event.details ? `<div class="two-d-game__log-details">${event.details}</div>` : ""}
         `;
 
     // Add new entry at the top
@@ -273,23 +265,18 @@ export class PongInterface {
       this.showStatus("Invalid game type selected", true);
       return;
     }
-    const gameId =
-      document.getElementById("gameId").value || this.generateRandomId();
-    const playerId =
-      document.getElementById("playerId").value || this.generateRandomId();
-    const numPlayers = parseInt(document.getElementById("numPlayers").value);
-    const numSides = parseInt(document.getElementById("numSides").value);
-    const numBalls = parseInt(document.getElementById("numBalls").value);
-    const shape = document.getElementById("shape").value;
-    const scoreMode = document.getElementById("scoreMode").value;
-    const debug = document.getElementById("debugMode").checked;
+    const gameId = document.getElementById("two-d-game__game-id").value || this.generateRandomId();
+    const playerId = document.getElementById("two-d-game__player-id").value || this.generateRandomId();
+    const numPlayers = parseInt(document.getElementById("two-d-game__num-players").value);
+    const numSides = parseInt(document.getElementById("two-d-game__num-sides").value);
+    const numBalls = parseInt(document.getElementById("two-d-game__num-balls").value);
+    const shape = document.getElementById("two-d-game__shape").value;
+    const scoreMode = document.getElementById("two-d-game__score-mode").value;
+    const debug = document.getElementById("two-d-game__debug-mode").checked;
 
     // Validation
     if (numPlayers < 2 || numPlayers > config.maxPlayers) {
-      this.showStatus(
-        `Number of players must be between 2 and ${config.maxPlayers}`,
-        true
-      );
+      this.showStatus(`Number of players must be between 2 and ${config.maxPlayers}`, true);
       return;
     }
 
@@ -301,10 +288,7 @@ export class PongInterface {
       }
     } else if (this.gameType !== "classic") {
       if (numSides < 3 || numSides > 8) {
-        this.showStatus(
-          "Number of sides must be between 3 and 8 for polygon modes",
-          true
-        );
+        this.showStatus("Number of sides must be between 3 and 8 for polygon modes", true);
         return;
       }
     }
@@ -315,9 +299,7 @@ export class PongInterface {
     }
 
     try {
-      this.controller = new GameController(null, (event) =>
-        this.logEvent(event)
-      );
+      this.controller = new GameController(null, (event) => this.logEvent(event));
 
       const gameConfig = {
         gameId,
@@ -341,8 +323,8 @@ export class PongInterface {
 
       if (success) {
         // Hide setup and show game
-        document.getElementById("setupContainer").style.display = "none";
-        document.getElementById("gameContainer").style.display = "block";
+        document.getElementById("2d-game__setup").style.display = "none";
+        document.getElementById("2d-game__game").style.display = "block";
 
         this.updateGameInfo(gameConfig);
         this.logEvent({
@@ -363,45 +345,45 @@ export class PongInterface {
   updateGameInfo(config) {
     const gameInfo = document.getElementById("gameInfo");
     gameInfo.innerHTML = `
-            <div class="game-info-item">
-                <span class="game-info-label">Game ID:</span>
+            <div class="two-d-game__game-info-item">
+                <span class="two-d-game__game-info-label">Game ID:</span>
                 <span>${config.gameId}</span>
             </div>
-            <div class="game-info-item">
-                <span class="game-info-label">Player ID:</span>
+            <div class="two-d-game__game-info-item">
+                <span class="two-d-game__game-info-label">Player ID:</span>
                 <span>${config.playerId}</span>
             </div>
-            <div class="game-info-item">
-                <span class="game-info-label">Game Type:</span>
+            <div class="two-d-game__game-info-item">
+                <span class="two-d-game__game-info-label">Game Type:</span>
                 <span>${config.type}</span>
             </div>
-            <div class="game-info-item">
-                <span class="game-info-label">Players:</span>
+            <div class="two-d-game__game-info-item">
+                <span class="two-d-game__game-info-label">Players:</span>
                 <span>${config.players}</span>
             </div>
             ${
               config.sides
                 ? `
-            <div class="game-info-item">
-                <span class="game-info-label">Sides:</span>
+            <div class="two-d-game__game-info-item">
+                <span class="two-d-game__game-info-label">Sides:</span>
                 <span>${config.sides}</span>
             </div>
             `
                 : ""
             }
-            <div class="game-info-item">
-                <span class="game-info-label">Balls:</span>
+            <div class="two-d-game__game-info-item">
+                <span class="two-d-game__game-info-label">Balls:</span>
                 <span>${config.balls}</span>
             </div>
-            <div class="game-info-item">
-                <span class="game-info-label">Score Mode:</span>
+            <div class="two-d-game__game-info-item">
+                <span class="two-d-game__game-info-label">Score Mode:</span>
                 <span>${config.scoreMode}</span>
             </div>
             ${
               config.shape
                 ? `
-            <div class="game-info-item">
-                <span class="game-info-label">Shape:</span>
+            <div class="two-d-game__game-info-item">
+                <span class="two-d-game__game-info-label">Shape:</span>
                 <span>${config.shape}</span>
             </div>
             `
