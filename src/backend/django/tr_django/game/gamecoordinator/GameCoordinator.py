@@ -97,6 +97,7 @@ class GameCoordinator:
     # API from client
 
     # create_game
+        
     @classmethod
     async def create_new_game(cls, settings: Dict) -> str:
         """ """
@@ -109,8 +110,9 @@ class GameCoordinator:
                 await cls.game_setup(redis_conn, settings, game_id)
             return game_id
         except Exception as e:
-            print(f"Error in GameCordinator create_new game: {e}")
+            logger.error(f"Error in GameCordinator create_new game: {e}")
             return False
+
 
     @classmethod
     async def generate_game_id(cls, redis_conn: redis.Redis):
@@ -188,12 +190,6 @@ class GameCoordinator:
             await pipeline.execute()
 
     # view
-    #not in use   
-    @classmethod
-    async def get_all_games(cls):
-        """Get all game IDs"""
-        async with await cls.get_redis(cls.REDIS_URL) as redis_conn:
-            return await redis_conn.smembers(cls.ALL_GAMES)
 
     @classmethod
     async def get_waiting_games(cls):
@@ -266,13 +262,40 @@ class GameCoordinator:
                     detailed_games.append(game_info)
                     
                 except Exception as e:
-                    print(f"Error processing game {game_id}: {e}")
+                    logger.error(f"Error processing game {game_id}: {e}")
                     continue
                     
             return detailed_games
                 
         except Exception as e:
-            print(f"Error getting games detail: {e}")
+            logger.error(f"Error getting games detail: {e}")
+            return []
+
+
+    @classmethod
+    async def get_all_games(cls):
+        """Get all waiting and running game IDs"""
+        try:
+            async with await cls.get_redis(cls.REDIS_URL) as redis_conn:
+                pipe = redis_conn.pipeline()
+                pipe.smembers(cls.WAITING_GAMES)
+                pipe.smembers(cls.RUNNING_GAMES)
+                waiting_games, running_games = await pipe.execute()
+                return set.union(waiting_games, running_games)
+        except Exception as e:
+            logger.error(f"Error getting all games: {e}")
+            return set()
+
+    @classmethod
+    async def get_all_games_info(cls) -> list:
+        """Get detailed information for all active games (waiting and running)"""
+        try:
+            games = await cls.get_all_games()
+            game_ids = [game_id.decode('utf-8') if isinstance(game_id, bytes) else game_id 
+                       for game_id in games]
+            return await cls._get_games_detail(game_ids)
+        except Exception as e:
+            logger.error(f"Error getting all games info: {e}")
             return []
 
     @classmethod
@@ -284,7 +307,7 @@ class GameCoordinator:
                        for game_id in games]
             return await cls._get_games_detail(game_ids)
         except Exception as e:
-            print(f"Error getting waiting games info: {e}")
+            logger.error(f"Error getting waiting games info: {e}")
             return []
 
     @classmethod
@@ -296,7 +319,7 @@ class GameCoordinator:
                        for game_id in games]
             return await cls._get_games_detail(game_ids)
         except Exception as e:
-            print(f"Error getting running games info: {e}")
+            logger.error(f"Error getting running games info: {e}")
             return []
 
 
@@ -322,20 +345,20 @@ class GameCoordinator:
                 async for key in redis_conn.scan_iter(
                     f"{cls.BOOKED_USER_PREFIX}{user_id}:*"
                 ):
-                    print("player is booked: ", key)
+                    logger.debug("player is booked: ", key)
                     return True
 
                 # Check for playing status
                 async for key in redis_conn.scan_iter(
                     f"{cls.PLAYING_USER_PREFIX}{user_id}:*"
                 ):
-                    print("player is playing: ", key)
+                    logger.debug("player is playing: ", key)
                     return True
 
                 return False
 
         except Exception as e:
-            print(f"Error checking player status: {e}")
+            logger.error(f"Error checking player status: {e}")
             return False
 
     @classmethod
@@ -372,7 +395,7 @@ class GameCoordinator:
                 return True
 
         except Exception as e:
-            print(f"Error cleaning up invalid bookings: {e}")
+            logger.error(f"Error cleaning up invalid bookings: {e}")
             raise
 
     @classmethod
@@ -391,7 +414,7 @@ class GameCoordinator:
                     "reserved_players": len(results[1]) if results[1] else 0
                 }
         except Exception as e:
-            print(f"Error getting player counts: {e}")
+            logger.error(f"Error getting player counts: {e}")
             return {"status": False, "current_players": 0, "reserved_players": 0}
 
 
@@ -416,7 +439,7 @@ class GameCoordinator:
                     }
 
         except Exception as e:
-            print(f"Error player_situation: {e}")
+            logger.error(f"Error player_situation: {e}")
             return {"status": False, "current_players": None, "reserved_players": None}
 
     @classmethod
@@ -453,11 +476,11 @@ class GameCoordinator:
                             "",
                             ex=5,  # 5 sec None if tournament
                         )
-                print(f"KEY: {cls.BOOKED_USER_PREFIX}{user_id}:{game_id}")
+                logger.debug(f"KEY: {cls.BOOKED_USER_PREFIX}{user_id}:{game_id}")
                 return {"available": True}
 
         except Exception as e:
-            print(f"Error in join_game: {e}")
+            logger.error(f"Error in join_game: {e}")
             return {
                 "available": False,
                 "message": f"Error in join_game: {e}",
@@ -562,7 +585,7 @@ class GameCoordinator:
                     await redis_conn.exists(f"{cls.USER_ONLINE_PREFIX}{user_id}")
                 )
         except Exception as e:
-            print(f"Error checking online status: {e}")
+            logger.error(f"Error checking online status: {e}")
             return False
 
     @classmethod
@@ -579,7 +602,7 @@ class GameCoordinator:
                     ex=cls.USER_ONLINE_EXPIRY,
                 )
         except Exception as e:
-            print(f"Error setting online status: {e}")
+            logger.error(f"Error setting online status: {e}")
 
     @classmethod
     async def set_user_offline(cls, user_id: str):
@@ -587,4 +610,4 @@ class GameCoordinator:
             async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
                 await redis_conn.delete(f"{cls.USER_ONLINE_PREFIX}{user_id}")
         except Exception as e:
-            print(f"Error setting offline status: {e}")
+            logger.error(f"Error setting offline status: {e}")
