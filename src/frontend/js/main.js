@@ -5,7 +5,7 @@ import { initializeHistory } from "./utils/history.js";
 import { CONFIG, LOCAL_STORAGE_KEYS } from "./config/constants.js";
 import { initBottomNav } from "./components/bottom-nav.js";
 // TODO: remove this import later - improved_interface was J's test-game.html entry point
-import { 2DGameInterface } from "../test_frontend/2DGame.js";
+import { GameInterface2D } from "../test_frontend/2DGame.js";
 
 // Initialize all listeners and data
 document.addEventListener("DOMContentLoaded", () => {

@@ -1,7 +1,7 @@
 import { GameController } from "./gameController.js";
 import { CONFIG } from "./config.js";
 
-export class 2DGameInterface {
+export class GameInterface2D {
   constructor() {
     this.controller = null;
     this.debugEnabled = false;
@@ -415,5 +415,5 @@ export class 2DGameInterface {
 
 // Initialize when DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
-  new 2DGameInterface();
+  new GameInterface2D();
 });
