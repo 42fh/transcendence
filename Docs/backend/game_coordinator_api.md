@@ -8,7 +8,7 @@
 | Create Game | POST | `/` | Create a new game and reserve player |
 | Join Game | POST | `/{game_id}/player/` | Reserve a place for the player in an existing game |
 | Get Waiting Games | GET | `/waiting` | Retrieve list of waiting games with data see down  |
-| Get Game Details | GET | `/{game_id}` | get all settings back  |
+| Get Game Settings | GET | `/{game_id}` | get all settings back  |
 
 
 
@@ -72,7 +72,7 @@ This endpoint reserves a place for the player. If successful, the endpoint retur
 ### Get Player Count
 This endpoint retrieves the current and reserved player counts for a specific game.
 
-- **URL**: `/api/games/{game_id}/players/count/`
+- **URL**: `/{game_id}/players/count/`
 - **Method**: `GET`
 - **URL Parameters**:
   - `game_id`: UUID of the game
@@ -99,7 +99,7 @@ This endpoint retrieves the current and reserved player counts for a specific ga
 ### Cancel Booking
 This endpoint cancels all active bookings for the authenticated user.
 
-- **URL**: `/games/booking/cancel/`
+- **URL**: `/booking/cancel/`
 - **Method**: `DELETE`
 - **Authentication Required**: Yes
 
@@ -124,7 +124,7 @@ This endpoint cancels all active bookings for the authenticated user.
 ### User Online Status
 Manages the online status of users.
 
-- **URL**: `/api/game/user/online/`
+- **URL**: `/user/online/`
 - **Methods**: `GET`, `POST`, `DELETE`
 - **Authentication Required**: Yes
 
@@ -234,7 +234,7 @@ As soon as the first player (the one who created the game) connects to the game,
 
 ### Get all Games
 
-- **URL**: `/running`  
+- **URL**: `/all`  
 - **Method**: `GET`
 - **Success Response**:
   - Code: `200`
@@ -250,7 +250,7 @@ As soon as the first player (the one who created the game) connects to the game,
 
 
 
-### Get Game Details
+### Get Game Settings
 **Not for production**
 
 - **URL**: `/{game_id}`  
