@@ -128,7 +128,7 @@
   background: #45a049;
 }
 
-.two-d-game__toggle-settings {
+/* .two-d-game__toggle-settings {
   background: none;
   border: 1px solid #ddd;
   color: #333;
@@ -139,7 +139,7 @@
   gap: 8px;
   margin: 10px 0;
   padding: 8px;
-}
+} */
 
 /* Status messages */
 .two-d-game__status {

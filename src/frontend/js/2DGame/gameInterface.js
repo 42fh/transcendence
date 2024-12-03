@@ -10,8 +10,8 @@ export class GameInterface2D {
     this.showSettings = true;
     this.eventLog = document.getElementById("two-d-game__eventLog");
     this.formData = {
-      gameId: "",
-      playerId: "",
+      //   gameId: "",
+      //   playerId: "",
       numPlayers: 2,
       numSides: 4,
       numBalls: 1,
@@ -288,9 +288,9 @@ export class GameInterface2D {
     shapeDescElement.style.display = this.formData.shape === "regular" ? "none" : "block";
   }
 
-  generateRandomId() {
-    return Math.random().toString(36).substring(2, 15);
-  }
+  //   generateRandomId() {
+  //     return Math.random().toString(36).substring(2, 15);
+  //   }
 
   logEvent(event) {
     if (!this.eventLog) return;
@@ -325,8 +325,8 @@ export class GameInterface2D {
       this.showStatus("Invalid game type selected", true);
       return;
     }
-    const gameId = document.getElementById("two-d-game__game-id").value || this.generateRandomId();
-    const playerId = document.getElementById("two-d-game__player-id").value || this.generateRandomId();
+    // const gameId = document.getElementById("two-d-game__game-id").value || this.generateRandomId();
+    // const playerId = document.getElementById("two-d-game__player-id").value || this.generateRandomId();
     const numPlayers = parseInt(document.getElementById("two-d-game__num-players").value);
     const numSides = parseInt(document.getElementById("two-d-game__num-sides").value);
     const numBalls = parseInt(document.getElementById("two-d-game__num-balls").value);
@@ -362,8 +362,8 @@ export class GameInterface2D {
       this.controller = new GameController(null, (event) => this.logEvent(event));
 
       const gameConfig = {
-        gameId,
-        playerId,
+        // gameId,
+        // playerId,
         type: config.type, // 'polygon' or 'circular'
         pongType: this.gameType, // actual game variant
         players: numPlayers,

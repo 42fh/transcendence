@@ -1,4 +1,5 @@
-import { createNewGame } from "../services/gameSettingsService.js";
+// import { createNewGame } from "../services/gameSettingsService.js";
+import { createGame } from "../services/gameService.js";
 
 export function gameSettings() {
   console.log("Entering gameSettings");
@@ -83,25 +84,25 @@ export function gameSettings() {
   function setupEventListeners() {
     console.log("Setting up event listeners");
     console.log("print    from setupEventListeners");
-    const toggleSettingsButton = document.getElementById("toggleSettings");
-    if (toggleSettingsButton) {
-      toggleSettingsButton.addEventListener("click", () => {
-        state.showSettings = !state.showSettings;
-        const advancedSettings = document.getElementById("advancedSettings");
-        const toggleText = document.getElementById("toggleText");
-        const toggleIcon = document.getElementById("toggleIcon");
+    // const toggleSettingsButton = document.getElementById("toggleSettings");
+    // if (toggleSettingsButton) {
+    //   toggleSettingsButton.addEventListener("click", () => {
+    //     state.showSettings = !state.showSettings;
+    //     const advancedSettings = document.getElementById("advancedSettings");
+    //     const toggleText = document.getElementById("toggleText");
+    //     const toggleIcon = document.getElementById("toggleIcon");
 
-        if (advancedSettings) {
-          advancedSettings.style.display = state.showSettings ? "block" : "none";
-        }
-        if (toggleText) {
-          toggleText.textContent = state.showSettings ? "Hide Settings" : "Show Settings";
-        }
-        if (toggleIcon) {
-          toggleIcon.textContent = state.showSettings ? "▼" : "▶";
-        }
-      });
-    }
+    //     if (advancedSettings) {
+    //       advancedSettings.style.display = state.showSettings ? "block" : "none";
+    //     }
+    //     if (toggleText) {
+    //       toggleText.textContent = state.showSettings ? "Hide Settings" : "Show Settings";
+    //     }
+    //     if (toggleIcon) {
+    //       toggleIcon.textContent = state.showSettings ? "▼" : "▶";
+    //     }
+    //   });
+    // }
 
     const shapeSelect = document.getElementById("shape");
     if (shapeSelect) {
@@ -171,32 +172,6 @@ export function gameSettings() {
     });
   }
 
-  // Function is not used anymore
-  function logEvent(event) {
-    if (!state.eventLog) return;
-
-    const logEntry = document.createElement("div");
-    logEntry.className = `log-entry ${event.type}`;
-
-    const timestamp = new Date().toLocaleTimeString();
-
-    logEntry.innerHTML = `
-      <span class="log-timestamp">[${timestamp}]</span>
-      <span class="log-message">${event.message}</span>
-      ${event.details ? `<div class="log-details">${event.details}</div>` : ""}
-    `;
-
-    if (state.eventLog.firstChild) {
-      state.eventLog.insertBefore(logEntry, state.eventLog.firstChild);
-    } else {
-      state.eventLog.appendChild(logEntry);
-    }
-
-    while (state.eventLog.children.length > 50) {
-      state.eventLog.removeChild(state.eventLog.lastChild);
-    }
-  }
-
   function showStatus(message, isError = false) {
     const status = document.getElementById("status");
     if (!status) {
@@ -261,7 +236,8 @@ export function gameSettings() {
     console.log("DEBUG: Prepared settings to submit:", settings);
 
     try {
-      const response = await createNewGame(settings);
+      //   const response = await createNewGame(settings);
+      const response = await createGame(settings);
 
       if (response.success) {
         console.log("SUCCESS: Game created successfully:", response);

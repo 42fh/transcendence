@@ -1,5 +1,5 @@
 // websocket.js
-import { CONFIG } from "../js/2DGame/config.js";
+import { CONFIG } from "./config.js";
 export class GameWebSocket {
   constructor(gameId, playerId, onMessage, options = {}) {
     this.gameId = gameId;

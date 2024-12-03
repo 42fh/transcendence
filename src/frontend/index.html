@@ -716,29 +716,8 @@
         <h1 class="two-d-game__title">2D Pong Setup</h1>
 
         <form id="two-d-game__gameForm">
-          <!-- Basic Info Section -->
-          <div class="two-d-game__panel">
-            <h2 class="two-d-game__panel-title">Basic Game Info</h2>
-            <div class="two-d-game__form-group">
-              <label class="two-d-game__label" for="two-d-game-id">Game ID</label>
-              <input class="two-d-game__input" type="text" id="two-d-game-id" value="auto-generated" />
-              <small class="two-d-game__help-text">Leave empty for new game</small>
-            </div>
-            <div class="two-d-game__form-group">
-              <label class="two-d-game__label" for="two-d-game__player-id">Player ID</label>
-              <input class="two-d-game__input" type="text" id="two-d-game__player-id" disabled />
-              <small class="two-d-game__help-text">Disabled - Using your UserID</small>
-            </div>
-          </div>
-
-          <!-- Settings Toggle -->
-          <button type="button" id="two-d-game__toggle-settings" class="two-d-game__toggle-settings two-d-game__button">
-            <span id="two-d-game__toggle-text">Show Settings</span>
-            <span id="two-d-game__toggle-icon">▶</span>
-          </button>
-
           <!-- Advanced Settings Section -->
-          <div id="two-d-game__advanced-settings" class="two-d-game__panel" style="display: none">
+          <div id="two-d-game__advanced-settings" class="two-d-game__panel" style="display: block">
             <h2 class="two-d-game__panel-title">Game Settings</h2>
 
             <div class="two-d-game__form-group">
@@ -756,6 +735,7 @@
               <input class="two-d-game__input" type="number" id="two-d-game__num-players" min="2" max="8" value="2" />
               <small class="two-d-game__help-text">Min: 2, Max: 8 players</small>
             </div>
+
             <div class="two-d-game__form-group polygon-only">
               <label class="two-d-game__label" for="two-d-game__num-sides">Number of Sides</label>
               <input class="two-d-game__input" type="number" id="two-d-game__num-sides" min="1" max="12" value="2" />

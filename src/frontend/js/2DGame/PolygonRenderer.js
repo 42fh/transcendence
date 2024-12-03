@@ -1,5 +1,4 @@
-// PolygonRenderer.js
-import { BasePongRenderer } from "../js/2DGame/BasePongRenderer.js";
+import { BasePongRenderer } from "./BasePongRenderer.js";
 
 export class PolygonRenderer extends BasePongRenderer {
   constructor(config) {

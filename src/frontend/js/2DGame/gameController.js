@@ -1,6 +1,7 @@
 // gameController.js
 import { CONFIG } from "./config.js";
-import { GameAPI } from "./api.js";
+// import { GameAPI } from "./api.js";
+import { createGame, joinGame } from "../services/gameService.js";
 import { GameState } from "./gameState.js";
 import { GameWebSocket } from "./websocket.js";
 import { PolygonRenderer } from "./PolygonRenderer.js";
@@ -19,13 +20,26 @@ export class GameController {
   async initializeGame(gameSettings) {
     try {
       // Create game via API
-      const { gameId, gameSettings: settings } = await GameAPI.createGame(gameSettings);
-      this.gameId = gameId;
-      this.gameState.updateSettings(settings);
+      //   const { gameId, gameSettings: settings } = await GameAPI.createGame(gameSettings);
+      const createResponse = await createGame(gameSettings);
+      if (createResponse.success) {
+        this.gameId = createResponse.gameId;
+        this.gameState.updateSettings(response.gameSettings);
+      } else {
+        console.error("Failed to create game:", createResponse.error);
+        return false;
+      }
 
       // Join game to get player ID
-      const { playerId } = await GameAPI.joinGame(gameId, {});
-      this.playerId = playerId;
+      //   const { playerId } = await GameAPI.joinGame(gameId, {});
+      //   this.playerId = playerId;
+      const joinResponse = await joinGame(this.gameId, {});
+      if (joinResponse.success) {
+        this.playerId = joinResponse.playerId;
+      } else {
+        console.error("Failed to join game:", joinResponse.error);
+        return false;
+      }
 
       // Initialize WebSocket connection with game settings
       this.websocket = new GameWebSocket(gameId, playerId, this.handleMessage.bind(this), {
@@ -44,14 +58,16 @@ export class GameController {
 
   async joinExistingGame(gameId) {
     try {
-      // First get game info to know what type of game we're joining
-      const gameInfo = await GameAPI.getGameInfo(gameId);
-      this.gameState.updateSettings(gameInfo.settings);
-
       // Join game to get player ID
-      const { playerId } = await GameAPI.joinGame(gameId, {});
-      this.gameId = gameId;
-      this.playerId = playerId;
+      //   const { playerId } = await GameAPI.joinGame(gameId, {});
+      const joinResponse = await joinGame(gameId, {});
+      if (joinResponse.success) {
+        this.gameId = gameId;
+        this.playerId = joinResponse.playerId;
+      } else {
+        console.error("Failed to join game:", joinResponse.error);
+        return false;
+      }
 
       // Initialize WebSocket connection
       this.websocket = new GameWebSocket(gameId, playerId, this.handleMessage.bind(this), {

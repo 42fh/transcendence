@@ -1,4 +1,4 @@
-import { BasePongRenderer } from "../js/2DGame/BasePongRenderer.js";
+import { BasePongRenderer } from "./BasePongRenderer.js";
 
 export class CircularRenderer extends BasePongRenderer {
   constructor(config) {
