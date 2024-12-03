@@ -32,13 +32,19 @@ export async function loadChatPage(addToHistory = true) {
 async function loadChatList(page = 1, perPage = 10, search = "") {
   try {
     const data = await fetchUserList(page, perPage, search);
-    if (!data) throw new Error("Failed to fetch chat contacts");
+    if (!data || !data.users) throw new Error("Failed to fetch chat contacts");
 
     const usersList = document.getElementById("users-list");
     const paginationContainer = document.getElementById("users-pagination");
-    const userListItemTemplate = document.getElementById("users-list-item-template");
+    const userListItemTemplate = document.getElementById(
+      "users-list-item-template"
+    );
+    const usersHorizontalContainer = document.getElementById(
+      "users-horizontal-container"
+    );
 
     usersList.innerHTML = "";
+    usersHorizontalContainer.innerHTML = ""; // Clear existing items
 
     // Render chat contacts
     data.users.forEach((user) => {
@@ -54,7 +60,9 @@ async function loadChatList(page = 1, perPage = 10, search = "") {
       const username = userElement.querySelector(".users-list__username");
       username.textContent = user.username;
 
-      const statusIndicator = userElement.querySelector(".users-list__status-indicator");
+      const statusIndicator = userElement.querySelector(
+        ".users-list__status-indicator"
+      );
       // Add online/offline status logic if needed
 
       userElement.addEventListener("click", () => {
@@ -62,10 +70,31 @@ async function loadChatList(page = 1, perPage = 10, search = "") {
       });
 
       usersList.appendChild(userItem);
+
+      // Create horizontal user item
+      const horizontalUserItem = document.createElement("div");
+      horizontalUserItem.className = "users-horizontal-item";
+
+      const horizontalAvatar = document.createElement("img");
+      horizontalAvatar.className = "users-horizontal-avatar";
+      horizontalAvatar.src = user.avatarUrl || ASSETS.IMAGES.DEFAULT_AVATAR;
+      horizontalAvatar.onerror = function () {
+        this.src = ASSETS.IMAGES.DEFAULT_AVATAR;
+      };
+
+      const horizontalUsername = document.createElement("span");
+      horizontalUsername.className = "users-horizontal-username";
+      horizontalUsername.textContent = user.username;
+
+      horizontalUserItem.appendChild(horizontalAvatar);
+      horizontalUserItem.appendChild(horizontalUsername);
+
+      usersHorizontalContainer.appendChild(horizontalUserItem);
     });
 
     // Update pagination
-    renderPagination(data.pagination, paginationContainer);
+    const { total_pages = 1, page: currentPage = 1 } = data.pagination || {};
+    renderPagination({ total_pages, page: currentPage }, paginationContainer);
   } catch (error) {
     console.error("Error loading chat list:", error);
     displayModalError(`Failed to load chat contacts: ${error.message}`);

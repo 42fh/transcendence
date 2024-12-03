@@ -142,3 +142,49 @@
   color: gray;
   cursor: not-allowed;
 }
+
+.users-horizontal-scroll {
+  position: relative; /* Ensure proper stacking context */
+  z-index: 10; /* Higher value to stay on top */
+  width: 100%;
+  overflow-x: auto; /* Allow horizontal scrolling */
+  white-space: nowrap; /* Prevent line breaks */
+  padding: 10px 0; /* Add padding for better appearance */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: add shadow for separation */
+}
+
+.users-horizontal-container {
+  display: flex; /* Use flexbox for horizontal layout */
+  gap: 15px; /* Space between items */
+  overflow-x: scroll; /* Allow horizontal scrolling */
+  scroll-snap-type: x mandatory; /* Optional: for smooth scrolling */
+  scroll-behavior: smooth; /* Optional: for smooth scrolling */
+  padding: 0 10px; /* Padding for better appearance */
+  position: relative; /* Ensures proper layout within the scroll */
+  z-index: 10; /* Matches the scroll container */
+}
+
+.users-horizontal-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  scroll-snap-align: start; /* Optional: for snapping effect */
+  min-width: 70px; /* Minimum width for each item */
+  cursor: pointer; /* Pointer cursor for clickable items */
+}
+
+.users-horizontal-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.users-horizontal-username {
+  margin-top: 5px;
+  font-size: 0.8rem;
+  max-width: 70px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

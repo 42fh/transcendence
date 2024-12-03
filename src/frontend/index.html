@@ -412,9 +412,20 @@
 
 
 
+
+  
+
   <template id="chat-home-template">
     <div class="page-container page-container--users">
       <h2 class="users-page__title">Chats</h2>
+      
+      <!-- New Horizontal Scroll for Users -->
+      <div class="users-horizontal-scroll">
+        <div id="users-horizontal-container" class="users-horizontal-container">
+          <!-- User items will be populated here -->
+        </div>
+      </div>
+
       <div id="users-list" class="users-list">
         <!-- Chat contacts will be populated here using users-list-item-template -->
       </div>
