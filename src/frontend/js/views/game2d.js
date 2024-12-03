@@ -4,12 +4,14 @@ import { showToast } from "../utils/toast.js";
 export async function loadGame2D(addToHistory = true) {
 
     const game2d_game_id = Date.now() / 30;
-    const ws_uri = `/ws/pong/${game2d_game_id}/?player=hy7nk2d43ek&gameId=${game2d_game_id}&playerId=hy7nk2d43ek&type=circular&pongType=circular&players=2&balls=1&debug=true&sides=2&shape=undefined&scoreMode=classic`;
+    const game2d_player_id = Math.random().toString(36).substring(2, 15);
+    const ws_uri = `/ws/pong/${game2d_game_id}/?player=${game2d_player_id}&gameId=${game2d_game_id}&playerId=${game2d_player_id}&type=circular&pongType=circular&players=2&balls=1&debug=true&sides=2&shape=undefined&scoreMode=classic`;
     let game_2d_is_running = true;
     let game_2d_websocket = new WebSocket(ws_uri);
 
     game_2d_websocket.onopen = () => console.log("game socket opened");
     game_2d_websocket.onmessage = () => console.log("game socket message incoming");
+    game_2d_websocket.onclose = () => console.log("game socket closed");
 
     addEventListener("popstate", (event) => {
         if (event.state.view == "game2d") {
