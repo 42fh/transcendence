@@ -1,3 +1,4 @@
+import { showToast } from "../utils/toast.js";
 
 
 export async function loadGame2D(addToHistory = true) {
@@ -26,12 +27,10 @@ export async function loadGame2D(addToHistory = true) {
             throw new Error("Main content element not found");
           }
 
-        mainContent.innerHTML =
-            `< p > hello game2d world</p >
-            <canvas id="game2d_canvas" height="500" width="500"></canvas>`;
+        mainContent.innerHTML = '<p> hello game2d world</p ><canvas id="game2d_canvas" height="500" width="500"></canvas>';
         
-        game2d_canvas = document.getElementById("game2d_canvas");
-        context = game2d_canvas.getContext("2d");
+        let game2dCanvas = document.getElementById("game2d_canvas");
+        let context = game2dCanvas.getContext("2d");
         context.fillRect(10, 10, 250, 250);
     
     } catch (error) {
