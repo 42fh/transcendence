@@ -1,5 +1,6 @@
 import { loadAuthPage } from "../views/auth.js";
 import { loadHomePage } from "../views/home.js";
+import { loadUsersPage } from "../views/users.js";
 import { loadTournamentsPage } from "../views/tournaments.js";
 import { loadTournamentDetailsPage } from "../views/tournament-detail.js";
 import { loadCreateTournamentPage } from "../views/tournament-create.js";
@@ -90,8 +91,8 @@ export function initializeHistory() {
             // Consider different cache durations for own profile vs other users
             const userId = state.userId || localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
 
-            // loadProfilePage(userId, false);
-            loadProfilePage(false);
+            // loadProfilePage(false);
+            loadProfilePage(userId, false);
             break;
           default:
             loadHomePage(false);
@@ -131,8 +132,8 @@ export function initializeHistory() {
         case "profile":
           const userId = event.target.dataset.userId || localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
 
-          // loadProfilePage(userId);
-          loadProfilePage();
+          //   loadProfilePage();
+          loadProfilePage(userId, false);
           break;
         default:
           loadHomePage();

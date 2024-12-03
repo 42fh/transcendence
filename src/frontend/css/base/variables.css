@@ -25,6 +25,10 @@
   --color-hover: rgba(255, 255, 255, 0.2); /* Hover state */
   --color-active: rgba(255, 255, 255, 0.3); /* Active state */
 
+  /* Status Colors */
+  --color-status-online: #4caf50; /* Same as success color for now */
+  --color-status-offline: #888888; /* Using our secondary text color */
+
   /* Typography */
   --font-family-primary: "Press Start 2P", cursive;
   --font-size-base: 16px;

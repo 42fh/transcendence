@@ -491,41 +491,45 @@
       </nav>
     </template>
 
-    <!-- Profile Template -->
+    <!-- Profile Template (used for both 'private' profile and 'public' profile) -->
     <template id="profile-template">
       <div class="page-container page-container--profile">
-        <!-- <div class="profile__header"> -->
         <div class="profile">
           <div class="profile__section profile__section--header">
-            <!-- <div class="profile__avatar-container"> -->
             <div class="profile__avatar-wrapper">
               <img class="profile__avatar" src="" alt="Profile avatar" />
             </div>
-            <!-- <div class="profile__info">
-            <h2 class="profile__username"></h2>
-            <p class="profile__name"></p>
-            <p class="profile__email"></p>
-            <p class="profile__phone"></p>
-          </div> -->
             <div class="profile__info">
-              <h2 class="profile__username"></h2>
-              <p class="profile__info-item profile__info-item--name"></p>
-              <p class="profile__info-item profile__info-item--location"></p>
-              <p class="profile__info-item profile__info-item--email"></p>
-              <p class="profile__info-item profile__info-item--phone"></p>
+              <div class="profile__username-container">
+                <!-- TODO: think about this h2 if it has really to be -->
+                <span class="profile__online-status material-symbols-outlined profile__public-info">circle</span>
+                <h2 class="profile__username"></h2>
+              </div>
+              <!-- Private info will be hidden/shown based on view type -->
+              <p class="profile__info-item profile__info-item--name profile__private-info"></p>
+              <p class="profile__info-item profile__info-item--email profile__private-info"></p>
+              <p class="profile__info-item profile__info-item--phone profile__private-info"></p>
             </div>
           </div>
-
-          <!-- <div class="profile__bio">
-          <h3 class="profile__bio-title">Bio</h3>
-          <p class="profile__bio-text"></p>
-        </div> -->
+          <!-- Public Profile Actions -->
+          <div class="profile__section profile__section--public-actions profile__public-info">
+            <button class="profile__action-button" data-action="friend" title="Add Friend">
+              <span class="material-symbols-outlined">person_add</span>
+            </button>
+            <button class="profile__action-button" data-action="chat" title="Send Message">
+              <span class="material-symbols-outlined">maps_ugc</span>
+            </button>
+            <button class="profile__action-button" data-action="play" title="Challenge to Game">
+              <span class="material-symbols-outlined">play_circle</span>
+            </button>
+            <button class="profile__action-button" data-action="block" title="Block User">
+              <span class="material-symbols-outlined">block</span>
+            </button>
+          </div>
           <div class="profile__section profile__section--bio">
             <h3 class="profile__section-title">Bio</h3>
             <p class="profile__bio-text"></p>
           </div>
-
-          <!-- <div class="profile__stats"> -->
           <div class="profile__section profile__section--stats">
             <div class="profile__stats-item">
               <span class="profile__stats-label">Wins</span>
@@ -540,8 +544,6 @@
               <span class="profile__stats-value profile__stats-ratio"></span>
             </div>
           </div>
-
-          <!-- <div class="profile__matches"> -->
           <div class="profile__section profile__section--matches">
             <h3 class="profile__section-title">Recent Matches</h3>
             <div class="profile__matches-list">
@@ -549,16 +551,15 @@
             </div>
           </div>
 
-          <!-- <div class="profile__actions"> -->
-          <div class="profile__section profile__section--actions">
-            <!-- <button class="profile__edit-button">Edit Profile</button> -->
+          <!-- Private Profile Actions -->
+          <div class="profile__section profile__section--private-actions profile__private-info">
             <button class="profile__button profile__button--edit">Edit Profile</button>
-            <!-- TODO: Add password change button if we decide to implement it -->
           </div>
         </div>
       </div>
     </template>
 
+    <!-- Profile Match Template -->
     <template id="profile-match-template">
       <div class="profile__match-item">
         <span class="profile__match-date"></span>
