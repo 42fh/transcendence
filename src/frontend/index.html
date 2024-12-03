@@ -708,6 +708,162 @@
       </div>
     </template>
 
+    <!-- 2D Game Template -->
+    <template id="2d-game-template">
+      <div id="setupContainer" class="setup-container">
+        <h1 class="text-2xl font-bold mb-6">2D Pong Setup</h1>
+
+        <form id="gameForm" class="space-y-6">
+          <!-- Basic Info Section -->
+          <div class="panel">
+            <h2 class="panel-title">Basic Game Info</h2>
+            <div class="form-group">
+              <label for="gameId">Game ID</label>
+              <input type="text" id="gameId" placeholder="Enter game ID or leave empty for new game" />
+            </div>
+            <div class="form-group">
+              <label for="playerId">Player ID</label>
+              <input type="text" id="playerId" placeholder="Enter player ID or leave empty for random" />
+            </div>
+          </div>
+
+          <!-- Settings Toggle -->
+          <button type="button" id="toggleSettings" class="settings-toggle">
+            <span id="toggleText">Show Settings</span>
+            <span id="toggleIcon">▶</span>
+          </button>
+
+          <!-- Advanced Settings Section -->
+          <div id="advancedSettings" class="panel" style="display: none">
+            <h2 class="panel-title">Game Settings</h2>
+
+            <div class="form-group">
+              <label for="gameType">Game Type</label>
+              <select id="gameType">
+                <option value="regular">Regular Pong</option>
+                <option value="circular">Circular Pong</option>
+                <option value="irregular">Irregular Pong</option>
+                <option value="classic">Classic Pong</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="numPlayers">Number of Players</label>
+              <input type="number" id="numPlayers" min="2" max="8" value="2" />
+              <small class="help-text">Min: 2, Max: 8 players</small>
+            </div>
+            <div class="form-group polygon-only">
+              <label for="numSides">Number of Sides</label>
+              <input type="number" id="numSides" min="1" max="12" value="2" />
+              <small class="help-text">Min: 3, Max: 12 sides</small>
+            </div>
+
+            <div class="form-group">
+              <label for="numBalls">Number of Balls</label>
+              <input type="number" id="numBalls" min="1" max="4" value="1" />
+              <small class="help-text">Min: 1, Max: 4 balls</small>
+            </div>
+
+            <div class="form-group shape-fields" style="display: none">
+              <label for="shape">Shape</label>
+              <select id="shape">
+                <option value="regular">Regular</option>
+                <option value="irregular">Irregular</option>
+                <option value="star">Star</option>
+                <option value="crazy">Crazy</option>
+              </select>
+              <p id="shapeDescription" class="help-text" style="display: none"></p>
+            </div>
+
+            <div class="form-group">
+              <label for="scoreMode">Score Mode</label>
+              <select id="scoreMode">
+                <option value="classic">Classic (First to 11)</option>
+                <option value="timed">Timed (5 minutes)</option>
+                <option value="survival">Survival</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="debugMode" />
+                Enable Debug Mode
+              </label>
+            </div>
+          </div>
+
+          <!-- Status Message -->
+          <div id="status" class="status" style="display: none"></div>
+
+          <!-- Start Button -->
+          <div class="form-group">
+            <button type="submit" class="start-button">Start Game</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Game Container -->
+      <div id="gameContainer" class="game-container" style="display: none">
+        <div class="game-layout">
+          <div class="game-main">
+            <div class="game-canvas-container">
+              <svg id="pongSvg" viewBox="0 0 300 300"></svg>
+            </div>
+
+            <div class="panel">
+              <div class="panel-header">
+                <svg class="panel-icon" viewBox="0 0 24 24">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                </svg>
+                <h3 class="panel-title">Event Log</h3>
+              </div>
+              <div id="eventLog" class="event-log">
+                <div class="log-entry">
+                  <span class="log-message">Waiting for game events...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="game-sidebar">
+            <div class="panel">
+              <div class="panel-header">
+                <h3 class="panel-title">Game Info</h3>
+              </div>
+              <div id="gameInfo" class="game-info"></div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-header">
+                <svg class="panel-icon" viewBox="0 0 24 24">
+                  <path
+                    d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-7v2h2v-2h-2zm0-8v6h2V7h-2z"
+                  />
+                </svg>
+                <h3 class="panel-title">Error Monitor</h3>
+              </div>
+              <div id="errorLog" class="error-log"></div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-header">
+                <h3 class="panel-title">Scores</h3>
+              </div>
+              <div id="scoreDisplay" class="score-display"></div>
+            </div>
+
+            <div class="controls-info">
+              <h3>Controls:</h3>
+              <ul>
+                <li>Left Arrow / A: Move paddle left</li>
+                <li>Right Arrow / D: Move paddle right</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
     <script type="module" src="js/main.js"></script>
   </body>
 </html>

@@ -4,6 +4,8 @@ import { initializeTournaments } from "./config/tournaments.js";
 import { initializeHistory } from "./utils/history.js";
 import { CONFIG, LOCAL_STORAGE_KEYS } from "./config/constants.js";
 import { initBottomNav } from "./components/bottom-nav.js";
+// TODO: remove this import later - improved_interface was J's test-game.html entry point
+import { PongInterface } from "../test_frontend/improved_interface.js";
 
 // Initialize all listeners and data
 document.addEventListener("DOMContentLoaded", () => {
