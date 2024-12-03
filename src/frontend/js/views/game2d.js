@@ -51,7 +51,7 @@ export async function loadGame2D(addToHistory = true) {
         const ball = gameState.balls[0];
         const ballX = (game2dCanvas.width / 2) + (ball.x * game2dCanvas.width / 2);
         const ballY = (game2dCanvas.height / 2) - (ball.y * game2dCanvas.height / 2);
-        const ballSize = ball.size * game2dCanvas.width; // Assume size is a fraction of canvas width
+        const ballSize = ball.size * game2dCanvas.width * 0.2; // Assume size is a fraction of canvas width
 
         context.beginPath();
         context.arc(ballX, ballY, ballSize, 0, 2 * Math.PI);
