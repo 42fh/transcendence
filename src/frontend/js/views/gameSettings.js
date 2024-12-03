@@ -1,48 +1,15 @@
+import {
+  GAME_MODES,
+  DEFAULT_GAME_SETTINGS,
+  PLAYER_LIMITS,
+  GAME_CONFIGS,
+} from "../config/constants.js";
 import { createNewGame } from "../services/gameSettingsService.js";
 
 export function gameSettings() {
   const state = {
-    formData: {
-      playerId: "",
-      numPlayers: 2,
-      numSides: 22,
-      numBalls: 1,
-      shape: "regular",
-      scoreMode: "classic",
-      mode: "regular",
-    },
-    gameConfigs: {
-      classic: {
-        type: "classic",
-        sides: 10,
-        maxPlayers: 2,
-        description: "Classic 2-player pong with 2 paddles and 2 walls",
-      },
-      regular: {
-        type: "classic",
-        sides: 11,
-        maxPlayers: 4,
-        description: "Regular polygon with all sides playable",
-      },
-      circular: {
-        type: "circular",
-        sides: 12,
-        maxPlayers: 8,
-        description: "Circular arena with curved paddles and sides",
-      },
-      irregular: {
-        type: "classic",
-        sides: 13,
-        maxPlayers: 6,
-        description: "Irregular polygon shape with customizable sides",
-        shapes: {
-          regular: "Standard polygon",
-          irregular: "Slightly deformed polygon with balanced sides",
-          star: "Star-like shape with alternating long and short sides",
-          crazy: "Extreme deformation with sharp transitions",
-        },
-      },
-    },
+    formData: { ...DEFAULT_GAME_SETTINGS },
+    gameConfigs: GAME_CONFIGS,
   };
 
   const mainContent = document.getElementById("main-content");
@@ -161,9 +128,12 @@ export function gameSettings() {
       return;
     }
 
-    if (settings.numPlayers < 1 || settings.numPlayers > config.maxPlayers) {
+    if (
+      settings.numPlayers < PLAYER_LIMITS.min ||
+      settings.numPlayers > config.maxPlayers
+    ) {
       showStatus(
-        `Number of players must be between 1 and ${config.maxPlayers}.`,
+        `Number of players must be between ${PLAYER_LIMITS.min} and ${config.maxPlayers}.`,
         true
       );
       return;
