@@ -1,5 +1,5 @@
 /* Layout containers */
-.setup-container {
+.two-d-game__container-setup {
   max-width: 800px;
   margin: 0 auto;
   background: white;
@@ -7,7 +7,7 @@
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-.game-container {
+.two-d-game__container-game {
   display: none;
   max-width: 1400px;
   margin: 0 auto;
@@ -15,19 +15,19 @@
 }
 
 /* Game layout */
-.game-layout {
+.two-d-game__game-layout {
   display: flex;
   gap: 20px;
 }
 
-.game-main {
+.two-d-game__game-main {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-.game-sidebar {
+.two-d-game__game-sidebar {
   width: 320px;
   display: flex;
   flex-direction: column;
@@ -62,7 +62,7 @@
 }
 
 /* Game canvas */
-.game-canvas-container {
+.two-d-game__game-canvas-container {
   aspect-ratio: 1;
   background: white;
   padding: 20px;
@@ -70,7 +70,7 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-#pongSvg {
+#two-d-game__pong-svg {
   width: 100%;
   height: 100%;
   background: #fafafa;
@@ -78,40 +78,20 @@
 }
 
 /* Logs and Monitoring */
-.event-log {
+.two-d-game__event-log {
   height: 200px;
   overflow-y: auto;
   font-family: monospace;
   font-size: 14px;
 }
 
-.error-log {
-  flex-grow: 1;
-  min-height: 200px;
-  overflow-y: auto;
-}
-
-.log-details {
-  margin-left: 20px;
-  font-size: 12px;
-  color: #adb5bd;
-  margin-top: 2px;
-  white-space: pre-wrap;
-  font-family: monospace;
-}
-
-.log-entry {
+.two-d-game__log-entry {
   padding: 8px;
   border-bottom: 1px solid #eee;
 }
 
-.log-entry:last-child {
+.two-d-game__log-entry:last-child {
   border-bottom: none;
-}
-
-.log-timestamp {
-  color: #666;
-  font-size: 0.9em;
 }
 
 /* Setup Form */
@@ -119,14 +99,13 @@
   margin-bottom: 15px;
 }
 
-label {
+.two-d-game__label {
   display: block;
   margin-bottom: 5px;
   font-weight: 600;
 }
 
-input,
-select {
+.two-d-game__input {
   width: 100%;
   padding: 8px;
   border: 1px solid #ddd;
@@ -134,7 +113,7 @@ select {
   font-size: 14px;
 }
 
-button {
+.two-d-game__button {
   background: #4caf50;
   color: white;
   padding: 10px 20px;
@@ -145,11 +124,11 @@ button {
   transition: background-color 0.2s;
 }
 
-button:hover {
+.two-d-game__button:hover {
   background: #45a049;
 }
 
-.settings-toggle {
+.two-d-game__toggle-settings {
   background: none;
   border: 1px solid #ddd;
   color: #333;
@@ -163,66 +142,66 @@ button:hover {
 }
 
 /* Status messages */
-.status {
+.two-d-game__status {
   margin-top: 20px;
   padding: 10px;
   border-radius: 4px;
 }
 
-.error {
+.two-d-game__error {
   background: #ffebee;
   color: #c62828;
   border: 1px solid #ffcdd2;
 }
 
-.success {
+.two-d-game__success {
   background: #e8f5e9;
   color: #2e7d32;
   border: 1px solid #c8e6c9;
 }
 
 /* Score Display */
-.score-display {
+.two-d-game__score-display {
   margin-top: 0;
 }
 
-.score-item {
+.two-d-game__score-item {
   padding: 8px;
   margin: 4px 0;
   background: #f8f9fa;
   border-radius: 4px;
 }
 
-.score-item.current-player {
+.two-d-game__score-item.current-player {
   background: #e3f2fd;
   font-weight: bold;
 }
 
 /* Game Info Display */
-.game-info {
+.two-d-game__game-info {
   font-size: 14px;
 }
 
-.game-info-item {
+.two-d-game__game-info-item {
   display: flex;
   justify-content: space-between;
   padding: 4px 0;
 }
 
-.game-info-label {
+.two-d-game__game-info-label {
   font-weight: 600;
   color: #666;
 }
 
 /* Controls Info */
-.controls-info {
+.two-d-game__controls-info {
   background: #e3f2fd;
   padding: 15px;
   border-radius: 4px;
   margin-top: 20px;
 }
 
-.controls-info ul {
+.two-d-game__controls-info ul {
   margin: 10px 0;
   padding-left: 20px;
 }

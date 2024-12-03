@@ -1,14 +1,13 @@
-// improved_interface.js
 import { GameController } from "./gameController.js";
 import { CONFIG } from "./config.js";
 
-export class PongInterface {
+export class 2DGameInterface {
   constructor() {
     this.controller = null;
     this.debugEnabled = false;
     this.gameType = "polygon";
     this.showSettings = false;
-    this.eventLog = document.getElementById("eventLog");
+    this.eventLog = document.getElementById("two-d-game__eventLog");
     this.formData = {
       gameId: "",
       playerId: "",
@@ -343,7 +342,7 @@ export class PongInterface {
   }
 
   updateGameInfo(config) {
-    const gameInfo = document.getElementById("gameInfo");
+    const gameInfo = document.getElementById("two-d-game__game-info");
     gameInfo.innerHTML = `
             <div class="two-d-game__game-info-item">
                 <span class="two-d-game__game-info-label">Game ID:</span>
@@ -393,7 +392,7 @@ export class PongInterface {
   }
 
   showStatus(message, isError = false) {
-    const status = document.getElementById("status");
+    const status = document.getElementById("two-d-game__status");
     status.textContent = message;
     status.className = `status ${isError ? "error" : "success"}`;
     status.style.display = "block";
@@ -416,5 +415,5 @@ export class PongInterface {
 
 // Initialize when DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
-  new PongInterface();
+  new 2DGameInterface();
 });
