@@ -1,5 +1,5 @@
 import { updateActiveNavItem } from "../components/bottom-nav.js";
-import { GameInterface2D } from "./../../test_frontend/2DGame.js";
+import { GameInterface2D } from "../2DGame/gameInterface.js";
 export function load2DGame(addToHistory = true) {
   console.log("load2DGame function called");
 
