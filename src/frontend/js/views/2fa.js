@@ -125,9 +125,6 @@ async function handleFormSubmission(form, userId) {
   }
   try {
     setFormLoading(form, true);
-    // Approach 1: querySelector
-    console.log("--- Approach 1: querySelector ---");
-
     const formInputs = form.querySelectorAll(
       "input:not([type='radio']), textarea"
     );
@@ -144,52 +141,6 @@ async function handleFormSubmission(form, userId) {
 
     console.log("Data collected via querySelector:", updatedDataFromInputs);
 
-    // Approach 2: FormData
-    console.log("--- Approach 2: FormData ---");
-    // Try both ways to create FormData
-    const formData = new FormData(form);
-    const manualFormData = new FormData();
-    form.querySelectorAll("input, textarea").forEach((input) => {
-      console.log(`Adding to manual FormData: ${input.name} = ${input.value}`);
-      manualFormData.append(input.name, input.value);
-    });
-    const updatedDataFromFormData = {};
-
-    // FormData don't have a .forEach method, so we need to iterate over its entries
-    // ... and it doesn't output directly to the console, so we need to log it separately
-    console.log("FormData:");
-    console.log(formData);
-    console.log("form.elements:");
-    console.log(form.elements);
-
-    console.log("Original FormData entries:");
-    for (let pair of formData.entries()) {
-      console.log(`${pair[0]}: '${pair[1]}'`);
-    }
-
-    console.log("Manual FormData entries:");
-    for (let pair of manualFormData.entries()) {
-      console.log(`${pair[0]}: '${pair[1]}'`);
-    }
-
-    console.log("Collecting form data");
-    formData.forEach((value, key) => {
-      console.log(`Field ${key}:`, {
-        value: value,
-        trimmed: value.trim(),
-        length: value.trim().length,
-      });
-      if (value.trim() !== "") {
-        updatedDataFromFormData[key] = value.trim();
-      }
-    });
-    console.log("Data collected via FormData:", updatedDataFromFormData);
-
-    // Compare results
-    console.log("--- Comparing Results ---");
-    console.log("querySelector approach:", updatedDataFromInputs);
-    console.log("FormData approach:", updatedDataFromFormData);
-
     const dataToSend = updatedDataFromInputs;
 
     if (Object.keys(dataToSend).length === 0) {
@@ -197,7 +148,7 @@ async function handleFormSubmission(form, userId) {
       showToast("No changes to save", "warning");
       return;
     }
-    const response = await updateUserProfile(userId, dataToSend);
+    await updateUserProfile(userId, dataToSend);
     showToast("Profile updated successfully!");
     loadProfilePage(userId, false);
   } catch (error) {
