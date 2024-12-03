@@ -1,8 +1,12 @@
 import { displayModalError } from "../components/modal.js";
 import { updateActiveNavItem } from "../components/bottom-nav.js";
-import { fetchUserList } from "../services/chatService.js";
+import { fetchConversationList } from "../services/chatService.js";
+import { fetchUsers } from "../services/usersService.js";
 import { loadChatRoom } from "./chat-room.js";
 import { ASSETS } from "../config/constants.js";
+
+let conversationUsers = []; // This will hold the users in ongoing conversations
+let currentUser = null; // To store the current logged-in user
 
 export async function loadChatPage(addToHistory = true) {
   try {
@@ -12,7 +16,7 @@ export async function loadChatPage(addToHistory = true) {
     }
 
     const mainContent = document.getElementById("main-content");
-    mainContent.innerHTML = "";
+    mainContent.innerHTML = ""; // Clear previous content
 
     const template = document.getElementById("chat-home-template");
     if (!template) {
@@ -22,74 +26,80 @@ export async function loadChatPage(addToHistory = true) {
     const content = document.importNode(template.content, true);
     mainContent.appendChild(content);
 
+    // Load the current user details (you should retrieve the logged-in user's data)
+    currentUser = await getCurrentUser(); // This is a placeholder; implement this function to get current user details
+
+    // Load chat conversations list (Vertical scroll)
     await loadChatList(1, 10, "");
+
+    // Load users list (Horizontal scroll), filtering out users in conversations with current user
+    await loadUsersList(1, 10, "");
   } catch (error) {
     console.error("Error loading chat home:", error);
     displayModalError("Failed to load chat home");
   }
 }
 
+// Fetch the current logged-in user details
+async function getCurrentUser() {
+  try {
+    const response = await fetch("/api/current-user"); // Replace with your actual API to fetch the current user
+    if (!response.ok) throw new Error("Failed to fetch current user");
+    const data = await response.json();
+    return data.username; // Assuming the response contains a 'username' field
+  } catch (error) {
+    console.error("Error fetching current user:", error);
+    return null; // Handle error appropriately
+  }
+}
+
 async function loadChatList(page = 1, perPage = 10, search = "") {
   try {
-    const data = await fetchUserList(page, perPage, search);
+    const data = await fetchConversationList(page, perPage, search);
     if (!data || !data.users) throw new Error("Failed to fetch chat contacts");
 
     const usersList = document.getElementById("users-list");
     const paginationContainer = document.getElementById("users-pagination");
-    const userListItemTemplate = document.getElementById(
-      "users-list-item-template"
-    );
-    const usersHorizontalContainer = document.getElementById(
-      "users-horizontal-container"
-    );
 
-    usersList.innerHTML = "";
-    usersHorizontalContainer.innerHTML = ""; // Clear existing items
+    usersList.innerHTML = ""; // Clear existing items
 
-    // Render chat contacts
+    // Store the users from conversations
+    conversationUsers = data.users.filter(
+      (user) => user.username !== currentUser
+    ); // Exclude the current user from the conversation list
+    conversationUsers = conversationUsers.map((user) => user.username); // Only store usernames
+
+    // Get the user list item template from HTML
+    const userTemplate = document.getElementById("user-template");
+
+    // Render chat contacts (Vertical List)
     data.users.forEach((user) => {
-      const userItem = document.importNode(userListItemTemplate.content, true);
-      const userElement = userItem.firstElementChild;
+      // Clone the hidden user template and populate data
+      const userItem = userTemplate.cloneNode(true);
+      userItem.style.display = ""; // Make the template visible
 
-      const avatarImg = userElement.querySelector(".users-list__avatar");
+      // Populate user data
+      const avatarImg = userItem.querySelector(".users-list__avatar");
       avatarImg.src = user.avatarUrl || ASSETS.IMAGES.DEFAULT_AVATAR;
       avatarImg.onerror = function () {
         this.src = ASSETS.IMAGES.DEFAULT_AVATAR;
       };
 
-      const username = userElement.querySelector(".users-list__username");
+      const username = userItem.querySelector(".users-list__username");
       username.textContent = user.username;
 
-      const statusIndicator = userElement.querySelector(
+      const statusIndicator = userItem.querySelector(
         ".users-list__status-indicator"
       );
-      // Add online/offline status logic if needed
+      // You can add online/offline status logic here if needed
 
-      userElement.addEventListener("click", () => {
+      // Set up click event for the user item
+      userItem.addEventListener("click", () => {
         loadChatRoom(user.username);
       });
 
+      // Append user item to the vertical list
       usersList.appendChild(userItem);
-
-      // Create horizontal user item
-      const horizontalUserItem = document.createElement("div");
-      horizontalUserItem.className = "chat-users-horizontal-item";
-
-      const horizontalAvatar = document.createElement("img");
-      horizontalAvatar.className = "chat-users-horizontal-avatar";
-      horizontalAvatar.src = user.avatarUrl || ASSETS.IMAGES.DEFAULT_AVATAR;
-      horizontalAvatar.onerror = function () {
-        this.src = ASSETS.IMAGES.DEFAULT_AVATAR;
-      };
-
-      const horizontalUsername = document.createElement("span");
-      horizontalUsername.className = "chat-users-horizontal-username";
-      horizontalUsername.textContent = user.username;
-
-      horizontalUserItem.appendChild(horizontalAvatar);
-      horizontalUserItem.appendChild(horizontalUsername);
-
-      usersHorizontalContainer.appendChild(horizontalUserItem);
     });
 
     // Update pagination
@@ -98,6 +108,65 @@ async function loadChatList(page = 1, perPage = 10, search = "") {
   } catch (error) {
     console.error("Error loading chat list:", error);
     displayModalError(`Failed to load chat contacts: ${error.message}`);
+  }
+}
+
+async function loadUsersList(page = 1, perPage = 10, search = "") {
+  try {
+    const data = await fetchUsers(page, perPage, search);
+    if (!data || !data.users) throw new Error("Failed to fetch users");
+
+    const usersHorizontalContainer = document.getElementById(
+      "users-horizontal-container"
+    );
+
+    usersHorizontalContainer.innerHTML = ""; // Clear existing horizontal items
+
+    // Get the user list item template from HTML
+    const userTemplate = document.getElementById("user-template");
+
+    // Render users for horizontal scroll (excluding those already in conversations with current user)
+    data.users.forEach((user) => {
+      // Skip users who have already had a conversation with the current user
+      if (conversationUsers.includes(user.username)) {
+        return; // Skip users who are already in conversations
+      }
+
+      // Clone the hidden user template and populate data
+      const userItem = userTemplate.cloneNode(true);
+      userItem.style.display = ""; // Make the template visible
+
+      // Populate user data
+      const avatarImg = userItem.querySelector(".users-list__avatar");
+      avatarImg.src = user.avatarUrl || ASSETS.IMAGES.DEFAULT_AVATAR;
+      avatarImg.onerror = function () {
+        this.src = ASSETS.IMAGES.DEFAULT_AVATAR;
+      };
+
+      const username = userItem.querySelector(".users-list__username");
+      username.textContent = user.username;
+
+      const statusIndicator = userItem.querySelector(
+        ".users-list__status-indicator"
+      );
+      // You can add online/offline status logic here if needed
+
+      // Set up click event for the user item
+      userItem.addEventListener("click", () => {
+        loadChatRoom(user.username);
+      });
+
+      // Modify classes for horizontal display
+      userItem.classList.add("chat-users-horizontal-item");
+      avatarImg.classList.add("chat-users-horizontal-avatar");
+      username.classList.add("chat-users-horizontal-username");
+
+      // Append horizontal user item to the container
+      usersHorizontalContainer.appendChild(userItem);
+    });
+  } catch (error) {
+    console.error("Error loading users list:", error);
+    displayModalError(`Failed to load users: ${error.message}`);
   }
 }
 
