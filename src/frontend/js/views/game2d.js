@@ -14,7 +14,7 @@ export async function loadGame2D(addToHistory = true) {
     game_2d_websocket.onclose = () => console.log("game socket closed");
 
     addEventListener("popstate", (event) => {
-        if (event.state.view == "game2d") {
+        if (event.state.view != "game2d") {
             console.log("game2d popstate ev listener called, closing all games");
 
             try {
