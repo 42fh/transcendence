@@ -59,7 +59,7 @@ services:
       - ./src/frontend/:/usr/share/nginx/html
       - ./src/nginx/logs:/var/log/nginx
       - ./media:/var/www/media
-      - ./t.000031.xyz:/etc/letsencrypt/live/t.000031.xyz:ro
+      - ./ft.000031.xyz:/etc/letsencrypt/live/ft.000031.xyz:ro
     # ports:
       # due to the way multiple docker compose files are 
       # merged (e.g. using docker-compose.override.yml) the
