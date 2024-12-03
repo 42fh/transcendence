@@ -423,14 +423,15 @@ async def user_online_status(request):
 
 
 @csrf_exempt
-async def game_settings(request):
+@async_only_middleware
+@require_http_methods(["GET"])
+async def game_settings(request, game_id):
     if request.method == "GET":
-        param = request.GET.get("game_id")
-        settings = await GameCoordinator.get_detail_from_game(param)
+        settings = await GameCoordinator.get_detail_from_game(game_id)
         json_string = json.dumps(settings, cls=DjangoJSONEncoder)
         return JsonResponse(
             {
-                "game_id": param,
+                "game_id": game_id,
                 "settings": json_string,
                 "message": "this are the settings of the game",
             }

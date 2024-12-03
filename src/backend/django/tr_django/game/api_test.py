@@ -150,7 +150,7 @@ class IntegratedGameTests(TransactionTestCase):
         self.loop.close()
         super().tearDown()
 
-    @select_test(enabled=True)
+    @select_test(enabled=False)
     def test_print_games(self):
         """Print games from debug and waiting endpoints"""
         async def _test_print_games():
@@ -234,7 +234,7 @@ class IntegratedGameTests(TransactionTestCase):
         self.client.user = player1
         # Create game and join simultaneously
         response = await sync_to_async(self.client.post)(
-            reverse("create_new_game"),
+            reverse("games"),
             data=json.dumps(self.game_settings),
             content_type="application/json",
         )
@@ -256,11 +256,15 @@ class IntegratedGameTests(TransactionTestCase):
         await sync_to_async(self.client.force_login)(player2)
 
         # First get available games
-        response = await sync_to_async(self.client.get)(reverse("get_waiting_games"))
-        games = response.json()
+        response = await sync_to_async(self.client.get)(reverse("waiting_games"))
+        games_data = response.json()
+        games = json.loads(games_data["games"])
         print("Available games:", games)
-        game_id = json.loads(games["games"])[0]
-        print(game_id)
+    
+        # Extract game_id correctly from the first game in the list
+        game_id = games[0]["game_id"]
+        print(f"Joining game with ID: {game_id}")        
+
         # Join specific game as Player 2
         join_response = await sync_to_async(self.client.get)(
             reverse("join_game", kwargs={"game_id": game_id}),
@@ -389,7 +393,7 @@ class IntegratedGameTests(TransactionTestCase):
         except Exception as e:
             print(f"{player_name} monitoring ended: {str(e)}")
 
-    @select_test(enabled=False)
+    @select_test(enabled=True)
     def test_websocket_auth(self):
         self.loop.run_until_complete(self._test_booking_and_websocket())
 
