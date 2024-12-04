@@ -382,6 +382,7 @@
 
 /* Keep edit button at bottom */
 .profile__section--private-actions {
+  flex-direction: column;
   margin-top: auto; /* This pushes it to the bottom if we use flex column on parent */
   padding-top: var(--spacing-lg);
 }
