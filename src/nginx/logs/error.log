@@ -2167,3 +2167,6 @@
 2024/12/04 13:31:04 [notice] 1#1: worker process 30 exited with code 0
 2024/12/04 13:31:04 [notice] 1#1: worker process 31 exited with code 0
 2024/12/04 13:31:04 [notice] 1#1: exit
+2024/12/04 18:12:08 [emerg] 1#1: cannot load certificate "/etc/letsencrypt/live/t.000031.xyz/fullchain.pem": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/letsencrypt/live/t.000031.xyz/fullchain.pem, r) error:10000080:BIO routines::no such file)
+2024/12/04 18:19:55 [emerg] 1#1: cannot load certificate "/etc/letsencrypt/live/t.000031.xyz/fullchain.pem": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/letsencrypt/live/t.000031.xyz/fullchain.pem, r) error:10000080:BIO routines::no such file)
+2024/12/04 18:23:09 [emerg] 1#1: cannot load certificate "/etc/letsencrypt/live/t.000031.xyz/fullchain.pem": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/letsencrypt/live/t.000031.xyz/fullchain.pem, r) error:10000080:BIO routines::no such file)
