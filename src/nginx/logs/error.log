@@ -2088,3 +2088,82 @@
 2024/12/03 22:42:20 [notice] 1#1: start worker process 30
 2024/12/03 22:42:20 [notice] 1#1: start worker process 31
 2024/12/03 22:42:20 [notice] 1#1: start worker process 32
+2024/12/03 23:50:20 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/12/03 23:50:20 [notice] 28#28: gracefully shutting down
+2024/12/03 23:50:20 [notice] 28#28: exiting
+2024/12/03 23:50:20 [notice] 29#29: gracefully shutting down
+2024/12/03 23:50:20 [notice] 29#29: exiting
+2024/12/03 23:50:20 [notice] 30#30: gracefully shutting down
+2024/12/03 23:50:20 [notice] 31#31: gracefully shutting down
+2024/12/03 23:50:20 [notice] 32#32: gracefully shutting down
+2024/12/03 23:50:20 [notice] 28#28: exit
+2024/12/03 23:50:20 [notice] 29#29: exit
+2024/12/03 23:50:20 [notice] 30#30: exiting
+2024/12/03 23:50:20 [notice] 30#30: exit
+2024/12/03 23:50:20 [notice] 31#31: exiting
+2024/12/03 23:50:20 [notice] 31#31: exit
+2024/12/03 23:50:20 [notice] 1#1: signal 17 (SIGCHLD) received from 28
+2024/12/03 23:50:20 [notice] 1#1: worker process 28 exited with code 0
+2024/12/03 23:50:20 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/03 23:50:20 [notice] 1#1: signal 17 (SIGCHLD) received from 29
+2024/12/03 23:50:20 [notice] 1#1: worker process 29 exited with code 0
+2024/12/03 23:50:20 [notice] 1#1: worker process 30 exited with code 0
+2024/12/03 23:50:20 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/03 23:50:20 [notice] 1#1: signal 17 (SIGCHLD) received from 30
+2024/12/03 23:50:20 [notice] 1#1: worker process 31 exited with code 0
+2024/12/03 23:50:20 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/03 23:50:20 [notice] 1#1: signal 17 (SIGCHLD) received from 31
+2024/12/03 23:51:00 [notice] 1#1: using the "epoll" event method
+2024/12/03 23:51:00 [notice] 1#1: nginx/1.26.1
+2024/12/03 23:51:00 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/12/03 23:51:00 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/12/03 23:51:00 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/12/03 23:51:00 [notice] 1#1: start worker processes
+2024/12/03 23:51:00 [notice] 1#1: start worker process 28
+2024/12/03 23:51:00 [notice] 1#1: start worker process 29
+2024/12/03 23:51:00 [notice] 1#1: start worker process 30
+2024/12/03 23:51:00 [notice] 1#1: start worker process 31
+2024/12/03 23:51:00 [notice] 1#1: start worker process 32
+2024/12/03 23:51:13 [error] 30#30: *3 connect() failed (111: Connection refused) while connecting to upstream, client: 192.168.65.1, server: localhost, request: "GET /api/current-user HTTP/1.1", upstream: "http://172.18.0.4:8000/api/current-user", host: "localhost:8443", referrer: "http://localhost:8443/"
+2024/12/03 23:51:13 [error] 30#30: *3 connect() failed (111: Connection refused) while connecting to upstream, client: 192.168.65.1, server: localhost, request: "GET /api/chat/users/ HTTP/1.1", upstream: "http://172.18.0.4:8000/api/chat/users/", host: "localhost:8443", referrer: "http://localhost:8443/"
+2024/12/03 23:51:13 [error] 30#30: *3 connect() failed (111: Connection refused) while connecting to upstream, client: 192.168.65.1, server: localhost, request: "GET /api/users/?page=1&per_page=10&search= HTTP/1.1", upstream: "http://172.18.0.4:8000/api/users/?page=1&per_page=10&search=", host: "localhost:8443", referrer: "http://localhost:8443/"
+2024/12/03 23:51:20 [error] 30#30: *3 connect() failed (111: Connection refused) while connecting to upstream, client: 192.168.65.1, server: localhost, request: "GET /api/users/03d39e77-492d-4c1a-8dee-c32406968f3d/ HTTP/1.1", upstream: "http://172.18.0.4:8000/api/users/03d39e77-492d-4c1a-8dee-c32406968f3d/", host: "localhost:8443", referrer: "http://localhost:8443/"
+2024/12/03 23:51:50 [error] 29#29: *12 connect() failed (111: Connection refused) while connecting to upstream, client: 192.168.65.1, server: localhost, request: "POST /api/users/auth/login/ HTTP/1.1", upstream: "http://172.18.0.4:8000/api/users/auth/login/", host: "localhost:8443", referrer: "http://localhost:8443/"
+2024/12/03 23:51:52 [error] 29#29: *12 connect() failed (111: Connection refused) while connecting to upstream, client: 192.168.65.1, server: localhost, request: "POST /api/users/auth/login/ HTTP/1.1", upstream: "http://172.18.0.4:8000/api/users/auth/login/", host: "localhost:8443", referrer: "http://localhost:8443/"
+2024/12/04 13:12:27 [notice] 1#1: using the "epoll" event method
+2024/12/04 13:12:27 [notice] 1#1: nginx/1.26.1
+2024/12/04 13:12:27 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/12/04 13:12:27 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/12/04 13:12:27 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/12/04 13:12:27 [notice] 1#1: start worker processes
+2024/12/04 13:12:27 [notice] 1#1: start worker process 28
+2024/12/04 13:12:27 [notice] 1#1: start worker process 29
+2024/12/04 13:12:27 [notice] 1#1: start worker process 30
+2024/12/04 13:12:27 [notice] 1#1: start worker process 31
+2024/12/04 13:12:27 [notice] 1#1: start worker process 32
+2024/12/04 13:31:04 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/12/04 13:31:04 [notice] 31#31: gracefully shutting down
+2024/12/04 13:31:04 [notice] 31#31: exiting
+2024/12/04 13:31:04 [notice] 29#29: gracefully shutting down
+2024/12/04 13:31:04 [notice] 29#29: exiting
+2024/12/04 13:31:04 [notice] 30#30: gracefully shutting down
+2024/12/04 13:31:04 [notice] 30#30: exiting
+2024/12/04 13:31:04 [notice] 32#32: gracefully shutting down
+2024/12/04 13:31:04 [notice] 28#28: gracefully shutting down
+2024/12/04 13:31:04 [notice] 28#28: exiting
+2024/12/04 13:31:04 [notice] 31#31: exit
+2024/12/04 13:31:04 [notice] 29#29: exit
+2024/12/04 13:31:04 [notice] 30#30: exit
+2024/12/04 13:31:04 [notice] 32#32: exiting
+2024/12/04 13:31:04 [notice] 32#32: exit
+2024/12/04 13:31:04 [notice] 28#28: exit
+2024/12/04 13:31:04 [notice] 1#1: signal 17 (SIGCHLD) received from 32
+2024/12/04 13:31:04 [notice] 1#1: worker process 32 exited with code 0
+2024/12/04 13:31:04 [notice] 1#1: worker process 29 exited with code 0
+2024/12/04 13:31:04 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/04 13:31:04 [notice] 1#1: signal 17 (SIGCHLD) received from 29
+2024/12/04 13:31:04 [notice] 1#1: signal 17 (SIGCHLD) received from 28
+2024/12/04 13:31:04 [notice] 1#1: worker process 28 exited with code 0
+2024/12/04 13:31:04 [notice] 1#1: worker process 30 exited with code 0
+2024/12/04 13:31:04 [notice] 1#1: worker process 31 exited with code 0
+2024/12/04 13:31:04 [notice] 1#1: exit
