@@ -8,6 +8,7 @@ bin/
 lib/
 Include/
 pyvenv.cfg
+ssl-keys/
 
 # SSL key
 *.pem
