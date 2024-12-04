@@ -107,16 +107,13 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
       "users-horizontal-container"
     );
 
-    usersHorizontalContainer.innerHTML = ""; // Clear existing horizontal items
-
-    // Get the user list item template from HTML
+    usersHorizontalContainer.innerHTML = "";
     const userTemplate = document.getElementById("user-template");
 
-    // Render users for horizontal scroll (excluding those already in conversations with current user)
     data.users.forEach((user) => {
-      // Skip users who have already had a conversation with the current user
+      // do not show users having a conversation with current user
       if (conversationUsers.includes(user.username)) {
-        return; // Skip users who are already in conversations
+        return;
       }
 
       // Clone the hidden user template and populate data
