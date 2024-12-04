@@ -6,9 +6,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 class GameConfig(AppConfig):
-    default_auto_field = "django.db.models.BigAutoField"
-    name = "game"
 
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'game'  # Your app name is 'game'
+    
     def ready(self):
         # Only run on main process
         if not self.apps.is_installed('django.contrib.admin'):
