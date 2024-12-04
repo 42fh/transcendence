@@ -9,14 +9,15 @@ class Command(BaseCommand):
     help = "Seeds the database with conversations (chatrooms and messages) between the 'dev' user and other users"
 
     def handle(self, *args, **options):
-        self.stdout.write(self.style.SUCCESS("Seeding conversations between 'dev' user and other users..."))
+        self.stdout.write(self.style.SUCCESS("Seeding conversations between 'dev' user and specified users..."))
         dev_user = CustomUser.objects.get(username="dev")
 
-        other_players = Player.objects.exclude(user=dev_user)
+        # Seed with all other users
+        # other_players = Player.objects.exclude(user=dev_user)
+        # Specify the users to seed conversations with:
+        other_players = Player.objects.filter(user__username__in=["ThePrimeagen", "CheGuevara"])
 
-        # Seed a chatroom and messages for each other user
         for player in other_players:
-            # Create or get the chatroom between 'dev' and the other user
             room, created = ChatRoom.objects.create_room(dev_user, player.user)
 
             if created:
