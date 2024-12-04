@@ -15,7 +15,10 @@ from .game_config import (
     DEFAULT_PLAYER,
 )
 import asyncio
-from ..agame.AGameManager import AGameManager
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class GameSettingsError(Exception):
@@ -37,50 +40,45 @@ class GameSettingsManager:
         EnumGameMode.CLASSIC: {"default": DEFAULT_CLASSIC, "fixed": CLASSIC_FIXED},
     }
 
-    # def __init__(self, redis_conn):
-    #    self.redis_conn = redis_conn
-
-    async def create_game_settings(
+    def create_game_settings(
         self, user_settings: Dict[str, Any], game_id: str
     ) -> Dict[str, Any]:
         """ """
+        # it is here because of a circular import situation
+        from ..agame.AGameManager import AGameManager
 
         # 1. step: combine usersettings with default settings
         game_mode = user_settings.get("mode")
         mode_config = self.MODE_CONFIGS[EnumGameMode[game_mode.upper()]]
-        print("mode_config: ", mode_config)
+        logger.debug("mode_config: ", mode_config)
         settings = mode_config["default"].copy()
         filtered_settings = {k: v for k, v in user_settings.items() if k in settings}
         settings.update(filtered_settings)
         settings.update(mode_config["fixed"])
         self.validate_settings(settings)  # validate step 1
-        print("settings after step 1: ", settings)
+        logger.debug("settings after step 1: ", settings)
 
         # 2. step: add player settings
         player_values = DEFAULT_PLAYER.copy()
-        player_values["player_values"]["paddle_length"] = settings["paddle_length"]
-    
+        player_values["player_settings"]["paddle_length"] = settings["paddle_length"]
+
         settings.update(player_values)
-        print("settings after step 2: ", settings)
+        logger.debug("settings after step 2: ", settings)
         try:
             # 3. step: add calculations from AGameManager / PolygonPong / CircularPong
             game_type = settings.get("type", "polygon")
             GameClass = AGameManager.get_game_class(game_type)
             # Calculate active sides for paddles using concrete class
-            print("TYPE: ", GameClass)
-            GameClass.setup_game(settings)
-            print(settings)
+            logger.debug("TYPE: ", GameClass)
+            settings = GameClass.setup_game(settings)
+            logger.debug("GM: ", settings)
+            return settings
+
         except Exception as e:
-            print("creation settings error: ", e)
+            logger.error("creation settings error: ", e)
 
     # here we can add a second dict chain (e.g. min_values) and can then check against this
     def validate_settings(self, settings: Dict[str, Any]) -> None:
-        print(
-            settings.get("num_players"),
-            settings.get("min_players"),
-            settings.get("sides"),
-            settings.get("num_balls"),
-        )
 
         if settings.get("num_players") < 1:
             raise GameSettingsError("num_players must be at least 1")
@@ -97,3 +95,10 @@ class GameSettingsManager:
             value = settings.get(field)
             if value is not None and not (float(0) < value <= float(1)):
                 raise GameSettingsError(f"{field} must be between 0 and 1")
+
+    # create selections for frontend
+
+    def create_selcetions_of_data(
+        self, user_settings: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        pass

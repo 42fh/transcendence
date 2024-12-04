@@ -9,7 +9,7 @@ class EnumGameMode(Enum):
 
 
 DEFAULT_PLAYER = {
-    "player_values": {
+    "player_settings": {
         "move_cooldown": float(0.1),
         "move_speed": float(0.05),
         "move_speed_boost": float(1.0),
@@ -21,7 +21,7 @@ DEFAULT_PLAYER = {
 
 REGULAR_FIXED = {"type": "polygon", "mode": "regular", "shape": "regular"}
 
-IRREGULAR_FIXED = {"type": "polygon", "mode": "regular"}
+IRREGULAR_FIXED = {"type": "polygon", "mode": "irregular"}
 
 DEFAULT_POLYGON = {
     "num_players": int(2),
@@ -47,15 +47,12 @@ DEFAULT_IRREGULAR = {
     "shape": "irregular",
 }
 
-CIRCULAR_FIXED = {
-    "type": "circular",
-    "mode": "circular",
-}
+CIRCULAR_FIXED = {"type": "circular", "mode": "circular", "shape": "circular"}
 
 DEFAULT_CIRCULAR = {
-    "num_players": int(3),
+    "num_players": int(2),
     "num_balls": int(1),
-    "min_players": int(3),
+    "min_players": int(2),
     "initial_ball_speed": float(0.006),
     "sides": int(3),
     "paddle_length": float(0.3),
