@@ -1,62 +1,84 @@
 import { showToast } from "../utils/toast.js";
 
 export async function loadgame_offlinemode(addToHistory = true) {
-    const game_offlinemode_game_id = Math.round(Date.now() / 9000);
-    const game_offlinemode_player_id = Math.random().toString(36).substring(2, 15);
-    const ws_uri = `/ws/pong/${game_offlinemode_game_id}/?player=${game_offlinemode_player_id}&gameId=${game_offlinemode_game_id}&playerId=${game_offlinemode_player_id}&type=circular&pongType=circular&players=2&balls=1&debug=true&sides=2&shape=undefined&scoreMode=classic`;
+    let gameCanvas, context;
+    let paddle1Y = 200, paddle2Y = 200;
+    const paddleHeight = 100, paddleWidth = 10, ballSize = 10;
+    let ballX = 250, ballY = 250, ballSpeedX = 3, ballSpeedY = 2;
+    let player1Score = 0, player2Score = 0;
+    const winningScore = 3;
+    let gameRunning = true;
 
-    let game_2d_is_running = true;
-    let game_2d_websocket = new WebSocket(ws_uri);
-
-    let game_offlinemodeCanvas, context;
-
-    game_2d_websocket.onopen = () => {
-        console.log("game socket opened");
-    };
-
-    game_2d_websocket.onmessage = (event) => {
-        console.log("game socket message incoming");
-        const message = JSON.parse(event.data);
-
-        if (message.type === "game_state") {
-            drawGameState(message.game_state);
-        }
-    };
-
-    game_2d_websocket.onclose = () => {
-        console.log("game socket closed");
-        game_2d_is_running = false;
-    };
-
-    addEventListener("popstate", (event) => {
-        if (event.state.view != "game_offlinemode") {
-            console.log("game_offlinemode popstate ev listener called, closing all games");
-
-            try {
-                game_2d_websocket.close();
-            } catch (error) {
-                console.log("WebSocket not open");
-                console.log(error);
-            }
-        }
-    });
-
-    function drawGameState(gameState) {
+    function drawGameState() {
         if (!context) return;
 
         // Clear canvas
-        context.clearRect(0, 0, game_offlinemodeCanvas.width, game_offlinemodeCanvas.height);
+        context.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
 
-        // Draw the ball
-        const ball = gameState.balls[0];
-        const ballX = (game_offlinemodeCanvas.width / 2) + (ball.x * game_offlinemodeCanvas.width / 2);
-        const ballY = (game_offlinemodeCanvas.height / 2) - (ball.y * game_offlinemodeCanvas.height / 2);
-        const ballSize = ball.size * game_offlinemodeCanvas.width * 0.2; // Assume size is a fraction of canvas width
+        // Draw paddles
+        context.fillStyle = "blue";
+        context.fillRect(10, paddle1Y, paddleWidth, paddleHeight);
+        context.fillStyle = "green";
+        context.fillRect(gameCanvas.width - 20, paddle2Y, paddleWidth, paddleHeight);
 
+        // Draw ball
+        context.fillStyle = "red";
         context.beginPath();
         context.arc(ballX, ballY, ballSize, 0, 2 * Math.PI);
-        context.fillStyle = "red";
         context.fill();
+
+        // Draw scores
+        context.fillStyle = "black";
+        context.font = "20px Arial";
+        context.fillText(`P1: ${player1Score}`, 20, 20);
+        context.fillText(`P2: ${player2Score}`, gameCanvas.width - 80, 20);
+    }
+
+    function moveBall() {
+        if (!gameRunning) return;
+
+        ballX += ballSpeedX;
+        ballY += ballSpeedY;
+
+        // Bounce off top and bottom walls
+        if (ballY <= 0 || ballY >= gameCanvas.height) {
+            ballSpeedY = -ballSpeedY;
+        }
+
+        // Paddle collision
+        if (ballX <= 20 && ballY >= paddle1Y && ballY <= paddle1Y + paddleHeight) {
+            ballSpeedX = -ballSpeedX;
+        } else if (ballX >= gameCanvas.width - 20 && ballY >= paddle2Y && ballY <= paddle2Y + paddleHeight) {
+            ballSpeedX = -ballSpeedX;
+        }
+
+        // Scoring
+        if (ballX <= 0) {
+            player2Score++;
+            resetBall();
+        } else if (ballX >= gameCanvas.width) {
+            player1Score++;
+            resetBall();
+        }
+
+        // Check for winner
+        if (player1Score === winningScore || player2Score === winningScore) {
+            gameRunning = false;
+            showToast(`${player1Score === winningScore ? "Player 1" : "Player 2"} wins!`, true);
+        }
+    }
+
+    function resetBall() {
+        ballX = gameCanvas.width / 2;
+        ballY = gameCanvas.height / 2;
+        ballSpeedX = -ballSpeedX;
+    }
+
+    function handleKeyDown(event) {
+        if (event.key === "a" && paddle1Y > 0) paddle1Y -= 20;
+        if (event.key === "s" && paddle1Y < gameCanvas.height - paddleHeight) paddle1Y += 20;
+        if (event.key === "k" && paddle2Y > 0) paddle2Y -= 20;
+        if (event.key === "l" && paddle2Y < gameCanvas.height - paddleHeight) paddle2Y += 20;
     }
 
     try {
@@ -66,15 +88,22 @@ export async function loadgame_offlinemode(addToHistory = true) {
         }
 
         const mainContent = document.getElementById("main-content");
-        if (!mainContent) {
-            throw new Error("Main content element not found");
-        }
+        if (!mainContent) throw new Error("Main content element not found");
 
         mainContent.innerHTML = '<canvas id="game_offlinemode_canvas" height="500" width="500"></canvas>';
-        game_offlinemodeCanvas = document.getElementById("game_offlinemode_canvas");
-        context = game_offlinemodeCanvas.getContext("2d");
+        gameCanvas = document.getElementById("game_offlinemode_canvas");
+        context = gameCanvas.getContext("2d");
 
-        console.log("game_offlinemode canvas set up");
+        document.addEventListener("keydown", handleKeyDown);
+
+        function gameLoop() {
+            drawGameState();
+            moveBall();
+            if (gameRunning) requestAnimationFrame(gameLoop);
+        }
+
+        resetBall();
+        gameLoop();
     } catch (error) {
         console.error("Error loading game_offlinemode page:", error);
         showToast("Failed to load game_offlinemode", true);
