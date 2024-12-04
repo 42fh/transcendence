@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
@@ -53,19 +52,18 @@ def rooms(request):
 
         # Log the retrieved recent chats
         print(f"DEBUG: Retrieved {recent_chats.count()} recent chats for user: {request.user.username}")
-        for chat in recent_chats:
-            other_user = chat.user2 if chat.user1 == request.user else chat.user1
-            print(f"DEBUG: Chat with user: {other_user.username}")
 
+        # Create a set of users with whom the current user has conversations
         users_with_chats = set()
         for chat in recent_chats:
             other_user = chat.user2 if chat.user1 == request.user else chat.user1
             users_with_chats.add(other_user.username)
 
+        users = users.filter(username__in=users_with_chats)
+
         user_list = []
         for user in users:
             username = user["username"]
-            # Check if the user has a chat and count unread messages
             unread_count = (
                 Message.objects.filter(room__user1=request.user, room__user2__username=username, is_read=False).count()
                 + Message.objects.filter(
@@ -75,12 +73,13 @@ def rooms(request):
 
             user_data = {
                 "username": username,
-                "unread_messages": unread_count,  # New field for unread messages count
+                "unread_messages": unread_count,
             }
             user_list.append(user_data)
-
-        # print(f"XXXDEBUG: Users returned: {user_list}")
-        return JsonResponse({"status": "success", "users": user_list})
+        if user_list:
+            return JsonResponse({"status": "success", "users": user_list})
+        else:
+            return JsonResponse({"status": "success", "users": []})  # Return empty list if no conversations
 
     except Exception as e:
         print(f"DEBUG: Error in users: {str(e)}")
