@@ -14,7 +14,7 @@ import {
   logoutUser,
   sendEmailVerification,
   validateEmailVerification,
-  getJWT,
+  manageJWT,
 } from "../services/authService.js";
 import { showToast } from "../utils/toast.js";
 
@@ -75,11 +75,6 @@ async function handleSignup(event) {
   await handleAuth(event.target, signupUser);
 }
 
-async function storeJWT(data) {
-  const result = await getJWT(data);
-  console.log("JWT token:", result);
-}
-
 async function handleAuth(form, authFunction) {
   const formData = new FormData(form);
   const data = Object.fromEntries(formData);
@@ -88,7 +83,7 @@ async function handleAuth(form, authFunction) {
   try {
     const result = await authFunction(data);
 
-    storeJWT(data);
+    const _accessToken = await manageJWT(data);
 
     let userData = await fetchUserProfile(result.id);
     if (!userData.success) {

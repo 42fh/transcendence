@@ -21,7 +21,6 @@ export async function logoutUser() {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      // Authorization: `Bearer ${accessToken}`,
     },
     cache: "no-store",
   });
@@ -57,9 +56,11 @@ async function handleAuthRequest(data, endpoint) {
 }
 
 export async function sendEmailVerification(userData) {
+  const accessToken = await manageJWT();
   const response = await fetch("/api/users/auth/send-email-verification/", {
     method: "POST",
     headers: {
+      Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(userData),
@@ -75,9 +76,11 @@ export async function sendEmailVerification(userData) {
 }
 
 export async function validateEmailVerification(token) {
+  const accessToken = await manageJWT();
   const response = await fetch(`/api/users/auth/validate-email-verification/`, {
     method: "POST",
     headers: {
+      Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ token }),
@@ -92,20 +95,66 @@ export async function validateEmailVerification(token) {
   return result;
 }
 
-function setSecureCookie(name, value, expirationDays) {
-  const expires = new Date(
-    Date.now() + expirationDays * 24 * 60 * 60 * 1000
-  ).toUTCString();
-  document.cookie = `${name}=${value}; Path=/; Expires=${expires}; SameSite=Strict; Secure; HttpOnly`;
+export async function manageJWT(data = {}) {
+  try {
+    const accessToken = getCookie("access_token");
+    if (accessToken == "expired") {
+      console.log("Access token expired. Refreshing...");
+
+      const refreshToken = getCookie("refresh_token");
+
+      if (refreshToken == "not_found" || refreshToken == "expired") {
+        console.log("Invalid refresh token. Logging in...");
+        const result = await getJWT(data);
+
+        setSecureCookie("access_token", result.access);
+        setSecureCookie("refresh_token", result.refresh, 1440);
+      } else {
+        console.log("Using refresh token to get new access token...");
+        const result = await refreshJWT(refreshToken);
+
+        setSecureCookie("access_token", result.access);
+      }
+    } else if (accessToken == "not_found") {
+      console.log("No access token found. Logging in..");
+      const result = await getJWT(data);
+
+      setSecureCookie("access_token", result.access);
+      setSecureCookie("refresh_token", result.refresh, 1440);
+    }
+    return getCookie("access_token");
+  } catch (error) {
+    console.error("Error managing JWT:", error);
+    logoutUser();
+    displayModalError("Your session has expired");
+    return null;
+  }
 }
 
-function getCookie(name) {
+export function setSecureCookie(name, value, expirationMinutes = 30) {
+  const expires = new Date(
+    Date.now() + expirationMinutes * 60 * 1000
+  ).toUTCString();
+  document.cookie = `${name}=${value}; Path=/; Expires=${expires}; SameSite=Strict; Secure`;
+}
+
+export function getCookie(name) {
   const cookies = document.cookie.split(";");
   for (let cookie of cookies) {
     cookie = cookie.trim();
     if (cookie.startsWith(name + "=")) {
-      return cookie.substring(name.length + 1);
+      const [, value, expiration] = cookie.split("=");
+      if (expiration) {
+        const expirationDate = new Date(parseInt(expiration, 10));
+        if (expirationDate > new Date()) {
+          return value;
+        } else {
+          return "expired";
+        }
+      } else {
+        return value;
+      }
     }
   }
-  return null;
+  return "not_found";
 }

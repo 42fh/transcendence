@@ -154,6 +154,8 @@ class SendEmailVerificationView(APIView):
     https://docs.djangoproject.com/en/5.1/topics/email/
     """
 
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         if not request.user.is_authenticated:
             return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -183,6 +185,8 @@ class ValidateEmailVerificationView(APIView):
     """
     View to handle email verification.
     """
+
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         if not request.user.is_authenticated:
@@ -360,6 +364,8 @@ class UserDetailView(APIView):
     GET: View for getting detailed user information including game stats and match history
     PATCH: View for updating user details
     """
+
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, user_id):
         if not request.user.is_authenticated:
@@ -547,6 +553,8 @@ class UserDetailView(APIView):
 class UserAvatarView(APIView):
     """Handle user avatar uploads"""
 
+    permission_classes = [IsAuthenticated]
+
     ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/jpg"]
 
     MAX_AVATAR_SIZE = 2 * 1024 * 1024  # 2MB in bytes
@@ -594,6 +602,8 @@ class UserAvatarView(APIView):
 @method_decorator(csrf_exempt, name="dispatch")
 class FriendsListView(View):
     """View for listing a user's friends with pagination and search capabilities"""
+
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, user_id):
         try:
@@ -663,6 +673,8 @@ class FriendRequestsView(View):
     PATCH: {"from_user_id": "<uuid>", "action": "accept" | "reject"}
     DELETE: {"to_user_id": "<uuid>"}
     """
+
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         """List friend requests (both sent and received)"""

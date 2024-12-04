@@ -3,6 +3,7 @@ import { tournaments } from "../config/tournaments.js";
 import { showToast } from "../utils/toast.js";
 import { loadTournamentsPage } from "../views/tournaments.js";
 import { updateGlobalTournaments } from "../store/globals.js";
+import { manageJWT } from "./authService.js";
 // Fetch and enhance tournaments
 export async function fetchTournaments(source = CONFIG.CURRENT_SOURCE) {
   try {
@@ -10,7 +11,17 @@ export async function fetchTournaments(source = CONFIG.CURRENT_SOURCE) {
 
     switch (source) {
       case CONFIG.DATA_SOURCE.API:
-        const response = await fetch(`${CONFIG.API_BASE_URL}${CONFIG.API_ENDPOINTS.TOURNAMENTS}`);
+        const accessToken = await manageJWT();
+
+        const response = await fetch(
+          `${CONFIG.API_BASE_URL}${CONFIG.API_ENDPOINTS.TOURNAMENTS}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -45,9 +56,16 @@ export function enhanceTournament(tournament) {
 
   return {
     ...tournament,
-    isRegistrationOpen: checkRegistrationOpen(tournament.closingRegistrationDate),
-    timeLeftToRegistration: calculateTimeLeft(tournament.closingRegistrationDate),
-    isUserEnrolled: checkUserEnrollment(tournament.participants, localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME)),
+    isRegistrationOpen: checkRegistrationOpen(
+      tournament.closingRegistrationDate
+    ),
+    timeLeftToRegistration: calculateTimeLeft(
+      tournament.closingRegistrationDate
+    ),
+    isUserEnrolled: checkUserEnrollment(
+      tournament.participants,
+      localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME)
+    ),
   };
 }
 
@@ -84,12 +102,18 @@ export async function handleTournamentAction(tournament, isEnrolled) {
 
     switch (CONFIG.CURRENT_SOURCE) {
       case CONFIG.DATA_SOURCE.API:
-        const response = await fetch(`${CONFIG.API_BASE_URL}/api/game/tournaments/${tournament.id}/enrollment/`, {
-          method: isEnrolled ? "DELETE" : "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+        const accessToken = await manageJWT();
+
+        const response = await fetch(
+          `${CONFIG.API_BASE_URL}/api/game/tournaments/${tournament.id}/enrollment/`,
+          {
+            method: isEnrolled ? "DELETE" : "POST",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
         if (!response.ok) {
           const error = await response.json();
@@ -105,7 +129,9 @@ export async function handleTournamentAction(tournament, isEnrolled) {
         }
 
         if (isEnrolled) {
-          foundTournament.participants = foundTournament.participants.filter((p) => p !== username);
+          foundTournament.participants = foundTournament.participants.filter(
+            (p) => p !== username
+          );
         } else {
           if (!foundTournament.participants.includes(username)) {
             foundTournament.participants.push(username);
@@ -130,13 +156,19 @@ export async function handleCreateTournamentSubmit(tournamentData) {
   try {
     switch (CONFIG.CURRENT_SOURCE) {
       case CONFIG.DATA_SOURCE.API:
-        const response = await fetch(`${CONFIG.API_BASE_URL}/api/game/tournaments/`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(tournamentData),
-        });
+        const accessToken = await manageJWT();
+
+        const response = await fetch(
+          `${CONFIG.API_BASE_URL}/api/game/tournaments/`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(tournamentData),
+          }
+        );
 
         if (!response.ok) {
           const error = await response.json();
