@@ -96,7 +96,7 @@ export async function loadgame_offlinemode(addToHistory = true) {
         const mainContent = document.getElementById("main-content");
         if (!mainContent) throw new Error("Main content element not found");
 
-        mainContent.innerHTML = '<br><h>Play Pong offline</h><br><p>left player: press A and S </p><p>right player: press K and L </p><br><canvas id="game_offlinemode_canvas" height="500" width="500"></canvas>';
+        mainContent.innerHTML = '<br><h>Play Pong offline</h><br><p>left player: press A and S </p><p>right player: press K and L </p><br><canvas id="game_offlinemode_canvas" height="500" width="500"></canvas><br><p>question: do you manage to catch the ball and win? </p>';
         gameCanvas = document.getElementById("game_offlinemode_canvas");
         context = gameCanvas.getContext("2d");
 
