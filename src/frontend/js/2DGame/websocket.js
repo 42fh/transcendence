@@ -1,5 +1,5 @@
-// websocket.js
-import { CONFIG } from "./config.js";
+import { OLD_CONFIG } from "../config/constants.js";
+
 export class GameWebSocket {
   constructor(gameId, playerId, onMessage, options = {}) {
     this.gameId = gameId;
@@ -18,7 +18,7 @@ export class GameWebSocket {
       ...this.options,
     }).toString();
 
-    const url = `${CONFIG.WS_BASE_URL}/pong/${this.gameId}/?${queryParams}`;
+    const url = `${OLD_CONFIG.WS_BASE_URL}/pong/${this.gameId}/?${queryParams}`;
     this.ws = new WebSocket(url);
     this.ws.onopen = () => {
       console.log("WebSocket connected");

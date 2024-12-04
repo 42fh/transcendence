@@ -1,57 +1,14 @@
 import { GameController } from "./gameController.js";
-import { CONFIG } from "./config.js";
+import { CONFIG } from "../config/constants.js";
 
 export class GameInterface2D {
   constructor() {
     this.controller = null;
     this.debugEnabled = false;
-    this.gameType = "polygon";
-    // this.showSettings = false;
-    this.showSettings = true;
+    this.gameType = "classic";
     this.eventLog = document.getElementById("two-d-game__eventLog");
-    this.formData = {
-      //   gameId: "",
-      //   playerId: "",
-      numPlayers: 2,
-      numSides: 4,
-      numBalls: 1,
-      shape: "regular",
-      scoreMode: "classic",
-      pongType: "classic",
-    };
-    // Game type configurations
-    this.gameConfigs = {
-      classic: {
-        type: "polygon",
-        sides: 4,
-        maxPlayers: 2,
-        description: "Classic 2-player pong with 2 paddles and 2 walls",
-      },
-      regular: {
-        type: "polygon",
-        sides: 4,
-        maxPlayers: 4,
-        description: "Regular polygon with all sides playable",
-      },
-      circular: {
-        type: "circular",
-        sides: 8, // Default number of sides for circular
-        maxPlayers: 8,
-        description: "Circular arena with curved paddles and sides",
-      },
-      irregular: {
-        type: "polygon",
-        sides: 6,
-        maxPlayers: 6,
-        description: "Irregular polygon shape with customizable sides",
-        shapes: {
-          regular: "Standard polygon",
-          irregular: "Slightly deformed polygon with balanced sides",
-          star: "Star-like shape with alternating long and short sides",
-          crazy: "Extreme deformation with sharp transitions",
-        },
-      },
-    };
+    this.formData = { ...CONFIG.DEFAULT_GAME_SETTINGS };
+    this.gameConfigs = CONFIG.GAME_CONFIGS;
     this.setupEventListeners();
     this.initializeInterface();
   }

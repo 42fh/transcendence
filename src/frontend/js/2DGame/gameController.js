@@ -1,6 +1,4 @@
-// gameController.js
-import { CONFIG } from "./config.js";
-// import { GameAPI } from "./api.js";
+import { OLD_CONFIG } from "../config/constants.js";
 import { createGame, joinGame } from "../services/gameService.js";
 import { GameState } from "./gameState.js";
 import { GameWebSocket } from "./websocket.js";
@@ -194,10 +192,10 @@ export class GameController {
   initializeRenderer(gameType) {
     // Factory pattern for renderer creation
     switch (gameType) {
-      case CONFIG.GAME_MODES.POLYGON:
+      case OLD_CONFIG.GAME_MODES.POLYGON:
         this.renderer = new PolygonRenderer();
         break;
-      case CONFIG.GAME_MODES.CIRCULAR:
+      case OLD_CONFIG.GAME_MODES.CIRCULAR:
         this.renderer = new CircularRenderer();
         break;
       default:
