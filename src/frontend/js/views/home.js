@@ -4,7 +4,7 @@ import { loadTournamentsPage } from "./tournaments.js";
 import { updateActiveNavItem } from "../components/bottom-nav.js";
 import { loadChatPage } from "./chats.js";
 import { loadGame3D } from "./game3d.js";
-import { loadGame2D } from "./game2d.js";
+import { loadgame_offlinemode } from "./loadgame_offlinemode.js";
 import { loadGameHome } from "./game.js";
 
 export function loadHomePage(addToHistory = true) {
@@ -52,7 +52,7 @@ export function loadHomePage(addToHistory = true) {
 
     const playButton2d = document.getElementById("home__button-play2d");
     if (playButton2d) {
-      playButton2d.addEventListener("click", loadGame2D);
+      playButton2d.addEventListener("click", loadgame_offlinemode);
     }
 
     const ctaButton = document.getElementById("home__button-cta");
