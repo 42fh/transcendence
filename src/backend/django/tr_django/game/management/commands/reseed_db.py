@@ -22,4 +22,6 @@ class Command(BaseCommand):
         # Run seed_tournaments command instead of loading fixtures
         call_command("seed_tournaments")
 
-        self.stdout.write(self.style.SUCCESS("Database reset and reseeded successfully!"))
+        self.stdout.write(
+            self.style.SUCCESS("Database reset and reseeded successfully!")
+        )

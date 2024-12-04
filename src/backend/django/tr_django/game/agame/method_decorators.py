@@ -1,23 +1,29 @@
 def add_cls_methods(cls):
     """
     Decorator that adds class methods to a class.
-    Includes methods for setting up a game 
+    Includes methods for setting up a game
     """
-    from .game_setup import setup_game, calculate_vertices, calculate_sides_normals, calculate_inner, calculate_player_side_indices
+    from .game_setup import (
+        setup_game,
+        calculate_vertices,
+        calculate_sides_normals,
+        calculate_inner,
+        calculate_player_side_indices,
+        set_initial_state,
+    )
 
     methods = {
         "setup_game": setup_game,
         "calculate_vertices": calculate_vertices,
         "calculate_sides_normals": calculate_sides_normals,
-        "calculate_inner" : calculate_inner,
-        "calculate_player_side_indices" : calculate_player_side_indices
+        "calculate_inner": calculate_inner,
+        "calculate_player_side_indices": calculate_player_side_indices,
+        "set_initial_state": set_initial_state,
     }
 
     for name, method in methods.items():
         setattr(cls, name, method)
     return cls
-
-
 
 
 def add_game_flow(cls):
@@ -66,6 +72,7 @@ def add_game_logic(cls):
         apply_ball_bounce_effect,
         collision_miss,
         check_winner,
+        initialize_cycle_data,
     )
 
     methods = {
@@ -92,24 +99,12 @@ def add_game_logic(cls):
         "apply_ball_bounce_effect": apply_ball_bounce_effect,
         "collision_miss": collision_miss,
         "check_winner": check_winner,
+        "initialize_cycle_data": initialize_cycle_data,
     }
 
     for name, method in methods.items():
         setattr(cls, name, method)
 
-    return cls
-
-
-def add_event_flow(cls):
-    """
-    cyyle_date and events
-    """
-    from .event_flow import initialize_cycle_data
-
-    methods = {"initialize_cycle_data": initialize_cycle_data}
-
-    for name, method in methods.items():
-        setattr(cls, name, method)
     return cls
 
 
@@ -143,12 +138,10 @@ def add_initial(cls):
     """
     initial
     """
-    from .initial import initialize, initialize_new_game, create_initial_state
+    from .initial import initialize
 
     methods = {
         "initialize": initialize,
-        "initialize_new_game": initialize_new_game,
-        "create_initial_state": create_initial_state,
     }
 
     for name, method in methods.items():
@@ -191,18 +184,10 @@ def add_redis(cls):
     """
     from .redis import (
         setup_connections,
-        store_vertices,
-        get_vertices,
-        acquire_lock,
-        release_lock,
     )
 
     methods = {
         "setup_connections": setup_connections,
-        "store_vertices": store_vertices,
-        "get_vertices": get_vertices,
-        "acquire_lock": acquire_lock,
-        "release_lock": release_lock,
     }
 
     for name, method in methods.items():
