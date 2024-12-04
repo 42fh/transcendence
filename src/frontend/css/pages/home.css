@@ -44,6 +44,13 @@
   margin: 0 auto;
 }
 
+.home__buttonsetleft {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centers the p's horizontally */
+  justify-content: center; /* (Optional) Centers the p's vertically */
+}
+
 /* .home__net {
 	  display: flex;
 	  flex-direction: column; 
