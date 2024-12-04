@@ -4,11 +4,11 @@
 
 | Endpoint | Method | URL | Description |
 |----------|--------|-----|-------------|
-| Get All Games | GET | `/` | Retrieve list of all game IDs (not for production) |
-| Create Game | POST | `/` | Create a new game and reserve player |
+| Get All Games | GET | `/all/` | Retrieve list of all game IDs (not for production) |
+| Create Game | POST | `/games/` | Create a new game and reserve player |
 | Join Game | POST | `/{game_id}/player/` | Reserve a place for the player in an existing game |
-| Get Waiting Games | GET | `/waiting` | Retrieve list of waiting games with data see down  |
-| Get Game Settings | GET | `/{game_id}` | get all settings back  |
+| Get Waiting Games | GET | `/waiting/` | Retrieve list of waiting games with data see down  |
+| Get Game Settings | GET | `/{game_id}/` | get all settings back  |
 
 
 
@@ -18,7 +18,7 @@ Note: all endpoints are prefixed with `api/game` in urls.py: `path("api/game/", 
 ### Create Game
 This endpoint creates a new game and reserves the player for the created game. If successful, the endpoint returns the websocket URLs, and the client only has to connect to them.
 
-- **URL**: `/`  
+- **URL**: `/games/`  
   *(The root URL is already prefixed with `api/game`)*
 - **Method**: `POST`
 - **Content-Type**: `application/json`
@@ -50,7 +50,7 @@ This endpoint creates a new game and reserves the player for the created game. I
 ### Join Game
 This endpoint reserves a place for the player. If successful, the endpoint returns the websocket URLs, and the client only has to connect to them.
 
-- **URL**: `/{game_id}/player/`
+- **URL**: `/{game_id}/join/`
 - **Method**: `POST`
 - **Success Response**:
   - Code: `201`
@@ -201,7 +201,7 @@ game_data = {
 As soon as the first player (the one who created the game) connects to the game, the game becomes visible through this endpoint.
 
 
-- **URL**: `/waiting`  
+- **URL**: `/waiting/`  
 - **Method**: `GET`
 - **Success Response**:
   - Code: `200`
@@ -217,7 +217,7 @@ As soon as the first player (the one who created the game) connects to the game,
 
 ### Get Running Games
 
-- **URL**: `/running`  
+- **URL**: `/running/`  
 - **Method**: `GET`
 - **Success Response**:
   - Code: `200`
@@ -234,7 +234,7 @@ As soon as the first player (the one who created the game) connects to the game,
 
 ### Get all Games
 
-- **URL**: `/all`  
+- **URL**: `/all/`  
 - **Method**: `GET`
 - **Success Response**:
   - Code: `200`
@@ -253,7 +253,7 @@ As soon as the first player (the one who created the game) connects to the game,
 ### Get Game Settings
 **Not for production**
 
-- **URL**: `/{game_id}`  
+- **URL**: `/{game_id}/`  
 - **Method**: `GET`
 - **Query Parameters**: `game_id`
 - **Success Response**:
