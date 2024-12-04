@@ -1,11 +1,39 @@
 import { CONFIG } from "../config/constants.js";
 
 /**
- * Fetches all available games
- * @returns {Promise<Array>} List of game IDs
+ * Fetches all waiting games from the server
+ *
+ * @returns {Promise<Array<GameInfo>>} Array of game information objects
+ *
+ * @typedef {Object} GameInfo
+ * @property {string} game_id - Unique identifier for the game
+ * @property {string} mode - Game mode (classic, circular, regular)
+ * @property {string} type - Game type (polygon or circular)
+ * @property {number} sides - Number of sides in the game arena
+ * @property {Object} score - Score configuration
+ * @property {number} num_players - Total number of players needed
+ * @property {number} min_players - Minimum players required to start
+ * @property {number} initial_ball_speed - Initial speed of the ball
+ * @property {number} paddle_length - Length of the paddles
+ * @property {number} paddle_width - Width of the paddles
+ * @property {number} ball_size - Size of the ball
+ * @property {Object} players - Current player counts
+ * @property {number} players.current - Number of currently connected players
+ * @property {number} players.reserved - Number of players with reservations
+ * @property {number} players.total_needed - Total players needed for the game
+ *
+ * @throws {Error} If the server request fails
+ *
+ * @example
+ * try {
+ *   const games = await fetchWaitingGames();
+ *   console.log(games[0].mode); // "classic"
+ *   console.log(games[0].players.current); // 1
+ * } catch (error) {
+ *   console.error("Failed to fetch games:", error);
+ * }
  */
-
-export async function fetchGames() {
+export async function fetchWaitingGames() {
   try {
     const response = await fetch(`${CONFIG.API_BASE_URL}/api/game/waiting/`, {
       method: "GET",
@@ -29,7 +57,7 @@ export async function fetchGames() {
     const data = await response.json();
     return JSON.parse(data.games);
   } catch (error) {
-    console.error("Error fetching available games:", error);
+    console.error("Error fetching waiting games:", error);
     throw error;
   }
 }
@@ -68,7 +96,7 @@ export async function createGame(gameConfig) {
  */
 export async function joinGame(gameId) {
   try {
-    const response = await fetch(`${CONFIG.API_BASE_URL}/api/game/join_game/${gameId}/`, {
+    const response = await fetch(`${CONFIG.API_BASE_URL}/api/game//${gameId}/join`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

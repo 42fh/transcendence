@@ -711,7 +711,7 @@
     <!-- 2D Game Setup Template -->
     <template id="two-d-game__setup-template">
       <div class="two-d-game__container">
-        <form class="two-d-game__form">
+        <form class="two-d-game__form" id="two-d-game__form">
           <div class="two-d-game__form-group">
             <label class="two-d-game__label" for="two-d-game__game-type">Game Type</label>
             <select class="two-d-game__select" id="two-d-game__game-type" disabled>
@@ -752,15 +752,7 @@
 
           <div class="two-d-game__form-group">
             <label class="two-d-game__label" for="two-d-game__num-balls">Number of Balls</label>
-            <input
-              class="two-d-game__input"
-              type="number"
-              id="two-d-game__num-balls"
-              min="1"
-              max="4"
-              value="1"
-              disabled
-            />
+            <input class="two-d-game__input" type="number" id="two-d-game__num-balls" value="1" />
             <small class="two-d-game__help-text">Min: 1, Max: 4 balls</small>
           </div>
 

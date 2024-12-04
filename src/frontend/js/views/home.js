@@ -5,7 +5,7 @@ import { updateActiveNavItem } from "../components/bottom-nav.js";
 import { loadChatPage } from "./chats.js";
 import { loadGame3D } from "./game3d.js";
 import { loadGameHome } from "./game.js";
-import { load2DGame } from "./2DGame.js";
+import { loadGameSetupPage } from "./gameSetup.js";
 
 export function loadHomePage(addToHistory = true) {
   try {
@@ -62,7 +62,7 @@ export function loadHomePage(addToHistory = true) {
       console.log("Adding click listener to 2D button");
       twoDButton.addEventListener("click", () => {
         console.log("2D button clicked!"); // This should show when button is clicked
-        load2DGame();
+        loadGameSetupPage();
       });
     } else {
       console.error("2D button not found in DOM");

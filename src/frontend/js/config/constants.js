@@ -46,48 +46,6 @@ export const PROFILE_ICONS = {
   CHAT: "maps_ugc", // Alternative: 'chat_bubble'
 };
 
-export const GAME_CONFIGS = {
-  classic: {
-    type: "polygon",
-    sides: 4,
-    maxPlayers: 2,
-    description: "Classic 2-player pong with 2 paddles and 2 walls",
-  },
-  regular: {
-    type: "polygon",
-    sides: 4,
-    maxPlayers: 4,
-    description: "Regular polygon with all sides playable",
-  },
-  circular: {
-    type: "circular",
-    sides: 8,
-    maxPlayers: 8,
-    description: "Circular arena with curved paddles and sides",
-  },
-  irregular: {
-    type: "polygon",
-    sides: 6,
-    maxPlayers: 6,
-    description: "Irregular polygon shape with customizable sides",
-    shapes: {
-      regular: "Standard polygon",
-      irregular: "Slightly deformed polygon with balanced sides",
-      star: "Star-like shape with alternating long and short sides",
-      crazy: "Extreme deformation with sharp transitions",
-    },
-  },
-};
-
-export const DEFAULT_GAME_SETTINGS = {
-  numPlayers: 2,
-  numSides: 4,
-  numBalls: 1,
-  shape: "regular",
-  scoreMode: "classic",
-  pongType: "classic",
-};
-
 /* The config file in the test_frontend  */
 export const OLD_CONFIG = {
   API_BASE_URL: "/api", // Base URL for REST API calls
@@ -100,5 +58,195 @@ export const OLD_CONFIG = {
     PLAYERS: 2,
     BALLS: 1,
     DEBUG: false,
+  },
+};
+
+// export const DEFAULT_GAME_SETTINGS = {
+//   numPlayers: 2,
+//   numSides: 4,
+//   numBalls: 1,
+//   shape: "regular",
+//   scoreMode: "classic",
+//   pongType: "classic",
+// };
+
+export const GAME_2D_CONFIG_TYPE_DEFAULT = "classic";
+
+// export const DEFAULT_GAME_2D_SETTING_INPUT_CONSTRAINTS = {
+//   players: {
+//     min: 2,
+//     max: 8,
+//     disabled: true,
+//     value: 2,
+//     getHelpText: function () {
+//       return `Min: ${this.min}, Max: ${this.max} players`;
+//     },
+//   },
+//   sides: {
+//     min: 3,
+//     max: 12,
+//     disabled: true,
+//     value: 4,
+//     getHelpText: function () {
+//       return `Min: ${this.min}, Max: ${this.max} sides`;
+//     },
+//   },
+//   balls: {
+//     min: 1,
+//     max: 4,
+//     disabled: true,
+//     value: 1,
+//     getHelpText: function () {
+//       return `Min: ${this.min}, Max: ${this.max} balls`;
+//     },
+//   },
+// };
+
+export const GAME_2D_CONFIG_TYPES = {
+  classic: {
+    type: "polygon",
+    sides: 4,
+    players: 2,
+    description: "Classic 2-player pong with 2 paddles and 4 walls",
+    input_constraints: {
+      players: {
+        min: 2,
+        max: 2,
+        disabled: true, // Classic always has 2 players
+        value: 2,
+        getHelpText: function () {
+          return `Min: ${this.min}, Max: ${this.max} players`;
+        },
+      },
+      sides: {
+        min: 4,
+        max: 4,
+        disabled: true, // Classic always has 4 sides
+        value: 4,
+        getHelpText: function () {
+          return `Min: ${this.min}, Max: ${this.max} sides`;
+        },
+      },
+      balls: {
+        min: 1,
+        max: 1,
+        disabled: true, // Classic always has 1 ball
+        value: 1,
+        getHelpText: function () {
+          return `Min: ${this.min}, Max: ${this.max} balls`;
+        },
+      },
+    },
+  },
+  regular: {
+    type: "polygon",
+    sides: 4,
+    players: 4,
+    description: "Regular polygon with all sides playable",
+    input_constraints: {
+      players: {
+        min: 2,
+        max: 4,
+        disabled: false, // Players can be configured
+        value: 4,
+        getHelpText: function () {
+          return `Min: ${this.min}, Max: ${this.max} players`;
+        },
+      },
+      sides: {
+        min: 3,
+        max: 8,
+        disabled: false, // Sides can be configured
+        value: 4,
+        getHelpText: function () {
+          return `Min: ${this.min}, Max: ${this.max} sides`;
+        },
+      },
+      balls: {
+        min: 1,
+        max: 4,
+        disabled: false,
+        value: 1,
+        getHelpText: function () {
+          return `Min: ${this.min}, Max: ${this.max} balls`;
+        },
+      },
+    },
+  },
+  circular: {
+    type: "circular",
+    sides: 8,
+    players: 8,
+    description: "Circular arena with curved paddles and sides",
+    input_constraints: {
+      players: {
+        min: 2,
+        max: 8,
+        disabled: false,
+        value: 8,
+        getHelpText: function () {
+          return `Min: ${this.min}, Max: ${this.max} players`;
+        },
+      },
+      sides: {
+        min: 2,
+        max: 12,
+        disabled: false,
+        value: 8,
+        getHelpText: function () {
+          return `Min: ${this.min}, Max: ${this.max} sides`;
+        },
+      },
+      balls: {
+        min: 1,
+        max: 4,
+        disabled: false,
+        value: 1,
+        getHelpText: function () {
+          return `Min: ${this.min}, Max: ${this.max} balls`;
+        },
+      },
+    },
+  },
+  irregular: {
+    type: "polygon",
+    sides: 6,
+    players: 6,
+    description: "Irregular polygon shape with customizable sides",
+    input_constraints: {
+      players: {
+        min: 2,
+        max: 6,
+        disabled: false,
+        value: 6,
+        getHelpText: function () {
+          return `Min: ${this.min}, Max: ${this.max} players`;
+        },
+      },
+      sides: {
+        min: 3,
+        max: 8,
+        disabled: false,
+        value: 6,
+        getHelpText: function () {
+          return `Min: ${this.min}, Max: ${this.max} sides`;
+        },
+      },
+      balls: {
+        min: 1,
+        max: 4,
+        disabled: false,
+        value: 1,
+        getHelpText: function () {
+          return `Min: ${this.min}, Max: ${this.max} balls`;
+        },
+      },
+    },
+    shapes: {
+      regular: "Standard polygon",
+      irregular: "Slightly deformed polygon with balanced sides",
+      star: "Star-like shape with alternating long and short sides",
+      crazy: "Extreme deformation with sharp transitions",
+    },
   },
 };
