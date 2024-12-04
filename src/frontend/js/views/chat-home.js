@@ -5,8 +5,11 @@ import { fetchUsers } from "../services/usersService.js";
 import { loadChatRoom } from "./chat-room.js";
 import { ASSETS } from "../config/constants.js";
 
-let conversationUsers = []; // This will hold the users in ongoing conversations
-let currentUser = null; // To store the current logged-in user
+let conversationUsers = [];
+
+const LOCAL_STORAGE_KEYS = {
+  USER_ID: "user_id",
+};
 
 export async function loadChatPage(addToHistory = true) {
   try {
@@ -16,7 +19,7 @@ export async function loadChatPage(addToHistory = true) {
     }
 
     const mainContent = document.getElementById("main-content");
-    mainContent.innerHTML = ""; // Clear previous content
+    mainContent.innerHTML = "";
 
     const template = document.getElementById("chat-home-template");
     if (!template) {
@@ -26,10 +29,6 @@ export async function loadChatPage(addToHistory = true) {
     const content = document.importNode(template.content, true);
     mainContent.appendChild(content);
 
-    // Load the current user details (you should retrieve the logged-in user's data)
-    currentUser = await getCurrentUser(); // This is a placeholder; implement this function to get current user details
-
-    // Load chat conversations list (Vertical scroll)
     await loadChatList(1, 10, "");
 
     // Load users list (Horizontal scroll), filtering out users in conversations with current user
@@ -37,19 +36,6 @@ export async function loadChatPage(addToHistory = true) {
   } catch (error) {
     console.error("Error loading chat home:", error);
     displayModalError("Failed to load chat home");
-  }
-}
-
-// Fetch the current logged-in user details
-async function getCurrentUser() {
-  try {
-    const response = await fetch("/api/current-user"); // Replace with your actual API to fetch the current user
-    if (!response.ok) throw new Error("Failed to fetch current user");
-    const data = await response.json();
-    return data.username; // Assuming the response contains a 'username' field
-  } catch (error) {
-    console.error("Error fetching current user:", error);
-    return null; // Handle error appropriately
   }
 }
 
@@ -65,7 +51,8 @@ async function loadChatList(page = 1, perPage = 10, search = "") {
 
     // Store the users from conversations
     conversationUsers = data.users.filter(
-      (user) => user.username !== currentUser
+      (user) =>
+        user.username !== localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID)
     ); // Exclude the current user from the conversation list
     conversationUsers = conversationUsers.map((user) => user.username); // Only store usernames
 

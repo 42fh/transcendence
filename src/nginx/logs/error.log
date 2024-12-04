@@ -2170,6 +2170,7 @@
 2024/12/04 18:12:08 [emerg] 1#1: cannot load certificate "/etc/letsencrypt/live/t.000031.xyz/fullchain.pem": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/letsencrypt/live/t.000031.xyz/fullchain.pem, r) error:10000080:BIO routines::no such file)
 2024/12/04 18:19:55 [emerg] 1#1: cannot load certificate "/etc/letsencrypt/live/t.000031.xyz/fullchain.pem": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/letsencrypt/live/t.000031.xyz/fullchain.pem, r) error:10000080:BIO routines::no such file)
 2024/12/04 18:23:09 [emerg] 1#1: cannot load certificate "/etc/letsencrypt/live/t.000031.xyz/fullchain.pem": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/letsencrypt/live/t.000031.xyz/fullchain.pem, r) error:10000080:BIO routines::no such file)
+<<<<<<< Updated upstream
 2024/12/04 19:08:04 [notice] 1#1: using the "epoll" event method
 2024/12/04 19:08:04 [notice] 1#1: nginx/1.26.1
 2024/12/04 19:08:04 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
@@ -2219,3 +2220,12 @@
 2024/12/04 19:11:12 [notice] 1#1: start worker process 30
 2024/12/04 19:11:12 [notice] 1#1: start worker process 31
 2024/12/04 19:11:12 [notice] 1#1: start worker process 32
+=======
+2024/12/04 18:42:24 [emerg] 1#1: cannot load certificate "/etc/letsencrypt/live/t.000031.xyz/fullchain.pem": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/letsencrypt/live/t.000031.xyz/fullchain.pem, r) error:10000080:BIO routines::no such file)
+2024/12/04 18:45:07 [emerg] 1#1: cannot load certificate "/etc/letsencrypt/live/t.000031.xyz/fullchain.pem": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/letsencrypt/live/t.000031.xyz/fullchain.pem, r) error:10000080:BIO routines::no such file)
+2024/12/04 18:46:56 [emerg] 1#1: cannot load certificate "/etc/letsencrypt/live/t.000031.xyz/fullchain.pem": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/letsencrypt/live/t.000031.xyz/fullchain.pem, r) error:10000080:BIO routines::no such file)
+2024/12/04 18:47:59 [emerg] 1#1: cannot load certificate "/etc/letsencrypt/live/t.000031.xyz/fullchain.pem": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/letsencrypt/live/t.000031.xyz/fullchain.pem, r) error:10000080:BIO routines::no such file)
+2024/12/04 19:00:51 [emerg] 1#1: cannot load certificate "/etc/letsencrypt/live/t.000031.xyz/fullchain.pem": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/letsencrypt/live/t.000031.xyz/fullchain.pem, r) error:10000080:BIO routines::no such file)
+2024/12/04 19:03:18 [emerg] 1#1: cannot load certificate "/etc/letsencrypt/live/t.000031.xyz/fullchain.pem": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/letsencrypt/live/t.000031.xyz/fullchain.pem, r) error:10000080:BIO routines::no such file)
+2024/12/04 19:04:01 [emerg] 1#1: cannot load certificate "/etc/letsencrypt/live/t.000031.xyz/fullchain.pem": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/letsencrypt/live/t.000031.xyz/fullchain.pem, r) error:10000080:BIO routines::no such file)
+>>>>>>> Stashed changes
