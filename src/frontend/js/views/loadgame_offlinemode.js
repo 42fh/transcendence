@@ -15,21 +15,26 @@ export async function loadgame_offlinemode(addToHistory = true) {
         // Clear canvas
         context.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
 
+        // Draw border
+        context.strokeStyle = "white";
+        context.lineWidth = 2;
+        context.strokeRect(0, 0, gameCanvas.width, gameCanvas.height);
+
         // Draw paddles
-        context.fillStyle = "blue";
+        context.fillStyle = "white";
         context.fillRect(10, paddle1Y, paddleWidth, paddleHeight);
-        context.fillStyle = "green";
+        context.fillStyle = "white";
         context.fillRect(gameCanvas.width - 20, paddle2Y, paddleWidth, paddleHeight);
 
         // Draw ball
-        context.fillStyle = "red";
+        context.fillStyle = "white";
         context.beginPath();
         context.arc(ballX, ballY, ballSize, 0, 2 * Math.PI);
         context.fill();
 
         // Draw scores
-        context.fillStyle = "black";
-        context.font = "20px Arial";
+        context.fillStyle = "white";
+        context.font = "20px Monospace";
         context.fillText(`P1: ${player1Score}`, 20, 20);
         context.fillText(`P2: ${player2Score}`, gameCanvas.width - 80, 20);
     }
