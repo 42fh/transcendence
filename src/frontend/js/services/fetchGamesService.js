@@ -2,15 +2,15 @@ import { CONFIG } from "../config/constants.js";
 
 export async function fetchGames() {
   try {
-    const response = await fetch(
-      `${CONFIG.API_BASE_URL}/api/game/get_all_games/`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const endpoint = `${CONFIG.API_BASE_URL}/api/game/`;
+    console.log("Sending request to endpoint:", endpoint);
+
+    const response = await fetch(endpoint, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
     if (!response.ok) {
       console.log("response not ok");
