@@ -439,7 +439,8 @@ async def all_games(request):
     return JsonResponse({"message": "only GET requests are allowed"}, status=405)
 
 
-# ----------------
+# ----------------  Tournament and Game  -> database?
+
 
 
 @csrf_exempt
@@ -464,60 +465,6 @@ def create_game(request):
         )
 
     return JsonResponse({"message": "only POST requests are allowed"}, status=400)
-
-
-@csrf_exempt
-def create_game_mode(request):
-    if request.method == "POST":
-        name = request.POST.get("name")
-        description = request.POST.get("description")
-
-        # check if game mode already exists
-        if GameMode.objects.filter(name=name).exists():
-            return JsonResponse({"message": "GameMode already exists"}, status=400)
-
-        game_mode = GameMode.objects.create(name=name, description=description)
-
-        return JsonResponse(
-            {
-                "game_mode_id": game_mode.id,
-                "message": "GameMode created successfully!",
-            }
-        )
-
-    return JsonResponse({"message": "only POST requests are allowed"}, status=400)
-
-
-@csrf_exempt
-def get_games(request):
-    games = Game.objects.all()
-    games_list = []
-    for game in games:
-        games_list.append(
-            {
-                "id": game.id,
-                "date": game.date,
-                "duration": game.duration if game.duration else None,
-                "mode": game.mode.name if game.mode else None,
-                "winner": game.winner.username if game.winner else None,
-            }
-        )
-    return JsonResponse(games_list, safe=False)
-
-
-@csrf_exempt
-def get_game_modes(request):
-    game_modes = GameMode.objects.all()
-    game_modes_list = []
-    for game_mode in game_modes:
-        game_modes_list.append(
-            {
-                "id": game_mode.id,
-                "name": game_mode.name,
-                "description": game_mode.description,
-            }
-        )
-    return JsonResponse(game_modes_list, safe=False)
 
 
 # TODO: we have a naming issue here.

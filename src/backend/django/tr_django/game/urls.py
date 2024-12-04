@@ -16,10 +16,6 @@ urlpatterns = [
     path("<str:game_id>/players/count/", views.player_count, name="player_count"),
     path("<str:game_id>/", views.game_settings, name="game_settings"),
     path("", views.transcendance, name="transcendance_home"),
-    path("create_game/", views.create_game, name="create_game"),
-    path("create_game_mode/", views.create_game_mode, name="create_game_mode"),
-    path("get_games/", views.get_games, name="get_games"),
-    path("get_game_modes/", views.get_game_modes, name="get_game_modes"),
     path(
         "tournaments/<int:tournament_id>/enrollment/",
         views.tournament_enrollment,
