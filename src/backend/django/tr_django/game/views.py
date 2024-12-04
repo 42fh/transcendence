@@ -17,6 +17,7 @@ from django.views.decorators.http import require_http_methods
 from django.utils.decorators import async_only_middleware
 import random
 
+
 def transcendance(request):
     return HttpResponse("Initial view for transcendance")
 
@@ -229,43 +230,41 @@ async def get_all_games(request):
 
     return JsonResponse({"message": "only GET requests are allowed"}, status=400)
 
-# for debug 
+
+# for debug
 @csrf_exempt
 @async_only_middleware
 @require_http_methods(["POST"])
 async def debug_create_games(request):
     try:
-        sample_modes = ['classic', 'circular', 'regular']
-        sample_types = ['2P', '4P']
-        
+        sample_modes = ["classic", "circular", "regular"]
+        sample_types = ["2P", "4P"]
+
         for mode in sample_modes:
             for n_type in sample_types:
                 settings = {
-                    'mode': mode,
-                    'sides': (4 if n_type == '4P' else 2) +  random.randint(1, 10),
-                    'score': {'max': 5},
-                    'num_players': 4 if n_type == '4P' else 2,
-                    'min_players': 4 if n_type == '4P' else 2,
-                    'initial_ball_speed': 0.02,
-                    'paddle_length': 0.2,
-                    'paddle_width': 0.02,
-                    'ball_size': 0.02
+                    "mode": mode,
+                    "sides": (4 if n_type == "4P" else 2) + random.randint(1, 10),
+                    "score": {"max": 5},
+                    "num_players": 4 if n_type == "4P" else 2,
+                    "min_players": 4 if n_type == "4P" else 2,
+                    "initial_ball_speed": 0.02,
+                    "paddle_length": 0.2,
+                    "paddle_width": 0.02,
+                    "ball_size": 0.02,
                 }
-                
+
                 game_id = await GameCoordinator.create_new_game(settings)
                 if game_id:
                     await GameCoordinator.set_to_waiting_game(game_id)
-                    
-        return JsonResponse({
-            "message": "Debug games created successfully",
-            "status": 201
-        })
-        
+
+        return JsonResponse(
+            {"message": "Debug games created successfully", "status": 201}
+        )
+
     except Exception as e:
-        return JsonResponse({
-            "error": str(e),
-            "status": 500
-        })
+        return JsonResponse({"error": str(e), "status": 500})
+
 
 @async_only_middleware
 @require_http_methods(["GET"])
@@ -301,7 +300,6 @@ async def running_games(request):
     return JsonResponse({"message": "only GET requests are allowed"}, status=405)
 
 
-
 @csrf_exempt
 @async_only_middleware
 @require_http_methods(["GET"])
@@ -311,22 +309,27 @@ async def player_count(request, game_id):
         try:
             count_info = await GameCoordinator.get_player_count_info(game_id)
             if count_info["status"]:
-                return JsonResponse({
-                    "player_counts": count_info,
-                    "message": "Current player counts retrieved successfully"
-                })
+                return JsonResponse(
+                    {
+                        "player_counts": count_info,
+                        "message": "Current player counts retrieved successfully",
+                    }
+                )
             else:
-                return JsonResponse({
-                    "error": "Failed to retrieve player counts",
-                    "message": "Unable to get current player counts"
-                }, status=500)
-                
+                return JsonResponse(
+                    {
+                        "error": "Failed to retrieve player counts",
+                        "message": "Unable to get current player counts",
+                    },
+                    status=500,
+                )
+
         except Exception as e:
-            return JsonResponse({
-                "error": str(e),
-                "message": "Error retrieving player counts"
-            }, status=500)
-            
+            return JsonResponse(
+                {"error": str(e), "message": "Error retrieving player counts"},
+                status=500,
+            )
+
     return JsonResponse({"message": "only GET requests are allowed"}, status=405)
 
 
@@ -339,40 +342,32 @@ async def cancel_booking(request):
         return JsonResponse(
             {
                 "error": "Unauthorized - missing authentication",
-                "message": "Only logged in users can cancel bookings"
+                "message": "Only logged in users can cancel bookings",
             },
-            status=401
+            status=401,
         )
-    
+
     user_id = request.user.id
     try:
         result = await GameCoordinator.cancel_booking(str(user_id))
-        
+
         if result["status"]:
             status_code = 200
-            response_data = {
-                "message": result["message"],
-                "status": "success"
-            }
+            response_data = {"message": result["message"], "status": "success"}
             if result.get("error"):
                 response_data["warning"] = result["error"]
         else:
             status_code = 404
-            response_data = {
-                "message": result["message"],
-                "status": "error"
-            }
-            
+            response_data = {"message": result["message"], "status": "error"}
+
         return JsonResponse(response_data, status=status_code)
-        
+
     except Exception as e:
         return JsonResponse(
-            {
-                "error": str(e),
-                "message": "Server error while cancelling booking"
-            },
-            status=500
+            {"error": str(e), "message": "Server error while cancelling booking"},
+            status=500,
         )
+
 
 @csrf_exempt
 @async_only_middleware
@@ -385,52 +380,40 @@ async def user_online_status(request):
     """
     if not request.user.is_authenticated:
         return JsonResponse(
-            {"error": "Unauthorized", "message": "Authentication required"},
-            status=401
+            {"error": "Unauthorized", "message": "Authentication required"}, status=401
         )
-    
+
     user_id = str(request.user.id)
-    
+
     try:
         if request.method == "GET":
             is_online = await GameCoordinator.is_user_online(user_id)
-            return JsonResponse({
-                "online": is_online,
-                "user_id": user_id
-            })
-            
+            return JsonResponse({"online": is_online, "user_id": user_id})
+
         elif request.method == "POST":
             await GameCoordinator.set_user_online(user_id)
-            return JsonResponse({
-                "message": "User set to online",
-                "user_id": user_id
-            })
-            
+            return JsonResponse({"message": "User set to online", "user_id": user_id})
+
         elif request.method == "DELETE":
             await GameCoordinator.set_user_offline(user_id)
-            return JsonResponse({
-                "message": "User set to offline",
-                "user_id": user_id
-            })
-            
+            return JsonResponse({"message": "User set to offline", "user_id": user_id})
+
     except Exception as e:
-        return JsonResponse({
-            "error": str(e),
-            "message": "Failed to process request"
-        }, status=500)
-
-
+        return JsonResponse(
+            {"error": str(e), "message": "Failed to process request"}, status=500
+        )
 
 
 @csrf_exempt
-async def game_settings(request):
+@async_only_middleware
+@require_http_methods(["GET"])
+async def game_settings(request, game_id):
     if request.method == "GET":
-        param = request.GET.get("game_id")
-        settings = await GameCoordinator.get_detail_from_game(param)
+        settings = await GameCoordinator.get_detail_from_game(game_id)
         json_string = json.dumps(settings, cls=DjangoJSONEncoder)
         return JsonResponse(
             {
-                "game_id": param,
+                "game_id": game_id,
                 "settings": json_string,
                 "message": "this are the settings of the game",
             }
@@ -456,8 +439,8 @@ async def all_games(request):
     return JsonResponse({"message": "only GET requests are allowed"}, status=405)
 
 
-
 # ----------------
+
 
 @csrf_exempt
 def create_game(request):

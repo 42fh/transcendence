@@ -5,10 +5,17 @@ urlpatterns = [
     path("waiting/", views.waiting_games, name="waiting_games"),
     path("running/", views.running_games, name="running_games"),
     path("all/", views.all_games, name="all_games"),
-    path("games/", views.create_game, name="create_game"),  # POST: create new game
+    path("games/", views.create_new_game, name="games"),  # POST: create new game
     path("booking/cancel/", views.cancel_booking, name="cancel_booking"),
+    path("", views.transcendance, name="transcendance_home"),
+    # online status user
     path("user/online/", views.user_online_status, name="user_online_status"),
-    path("debug/create/", views.debug_create_games, name="debug_create_games"),  # POST: create sample games for testing
+    # debug api
+    path("debug/create/", views.debug_create_games, name="debug_create_games"),
+    path("<str:game_id>/join/", views.join_game, name="join_game"),
+    path("<str:game_id>/players/count/", views.player_count, name="player_count"),
+    path("<str:game_id>/", views.game_settings, name="game_settings"),
+    path("", views.transcendance, name="transcendance_home"),
     path("create_game/", views.create_game, name="create_game"),
     path("create_game_mode/", views.create_game_mode, name="create_game_mode"),
     path("get_games/", views.get_games, name="get_games"),

@@ -34,12 +34,13 @@ class TestSessionMiddleware(SessionMiddleware):
         request.session_key = "1234"
 
 
-
 def select_test(enabled=True):
     def decorator(test_func):
         test_func.enabled = enabled
         return test_func
+
     return decorator
+
 
 class IntegratedGameTests(TransactionTestCase):
     """
@@ -57,12 +58,11 @@ class IntegratedGameTests(TransactionTestCase):
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
         self.loop.run_until_complete(self._async_setup())
-    
 
     def _run_if_enabled(self):
         test_method = getattr(self, self._testMethodName)
-        if hasattr(test_method, 'enabled') and not test_method.enabled:
-            self.skipTest('Test disabled')    
+        if hasattr(test_method, "enabled") and not test_method.enabled:
+            self.skipTest("Test disabled")
 
     async def _async_setup(self):
         """Async setup with Redis connection and multiple user creation"""
@@ -150,29 +150,22 @@ class IntegratedGameTests(TransactionTestCase):
         self.loop.close()
         super().tearDown()
 
-    @select_test(enabled=True)
+    @select_test(enabled=False)
     def test_print_games(self):
         """Print games from debug and waiting endpoints"""
+
         async def _test_print_games():
             # Create debug games
             response = await sync_to_async(self.client.post)(
-                reverse('debug_create_games'),
-                content_type='application/json'
+                reverse("debug_create_games"), content_type="application/json"
             )
             print("\nDebug games creation response:", response.json())
 
             # Get waiting games
-            response = await sync_to_async(self.client.get)(
-                reverse('waiting_games')
-            )
+            response = await sync_to_async(self.client.get)(reverse("waiting_games"))
             print("\nWaiting games response:", json.dumps(response.json(), indent=2))
 
         self.loop.run_until_complete(_test_print_games())
-
-
-
-
-
 
     # def test_a_game_creation(self):
     #    """Test game creation with visible console output"""
@@ -234,7 +227,7 @@ class IntegratedGameTests(TransactionTestCase):
         self.client.user = player1
         # Create game and join simultaneously
         response = await sync_to_async(self.client.post)(
-            reverse("create_new_game"),
+            reverse("games"),
             data=json.dumps(self.game_settings),
             content_type="application/json",
         )
@@ -256,11 +249,15 @@ class IntegratedGameTests(TransactionTestCase):
         await sync_to_async(self.client.force_login)(player2)
 
         # First get available games
-        response = await sync_to_async(self.client.get)(reverse("get_waiting_games"))
-        games = response.json()
+        response = await sync_to_async(self.client.get)(reverse("waiting_games"))
+        games_data = response.json()
+        games = json.loads(games_data["games"])
         print("Available games:", games)
-        game_id = json.loads(games["games"])[0]
-        print(game_id)
+
+        # Extract game_id correctly from the first game in the list
+        game_id = games[0]["game_id"]
+        print(f"Joining game with ID: {game_id}")
+
         # Join specific game as Player 2
         join_response = await sync_to_async(self.client.get)(
             reverse("join_game", kwargs={"game_id": game_id}),
@@ -389,117 +386,110 @@ class IntegratedGameTests(TransactionTestCase):
         except Exception as e:
             print(f"{player_name} monitoring ended: {str(e)}")
 
-    @select_test(enabled=False)
+    @select_test(enabled=True)
     def test_websocket_auth(self):
         self.loop.run_until_complete(self._test_booking_and_websocket())
-
 
     @select_test(enabled=False)
     def test_user_online_status(self):
         """Test user online status endpoints"""
+
         async def _test_user_online_status():
             # Login user
             player1 = self.test_users["player1"]
             await sync_to_async(self.client.force_login)(player1)
-            
+
             # Test setting user online
             response = await sync_to_async(self.client.post)(
-                reverse('user_online_status'),
-                content_type='application/json'
+                reverse("user_online_status"), content_type="application/json"
             )
             self.assertEqual(response.status_code, 200)
-            
+
             # Test checking online status
             response = await sync_to_async(self.client.get)(
-                reverse('user_online_status')
+                reverse("user_online_status")
             )
             self.assertEqual(response.status_code, 200)
             data = response.json()
-            self.assertTrue(data['online'])
-            
+            self.assertTrue(data["online"])
+
             # Test setting user offline
             response = await sync_to_async(self.client.delete)(
-                reverse('user_online_status')
+                reverse("user_online_status")
             )
             self.assertEqual(response.status_code, 200)
-            
+
             # Verify user is offline
             response = await sync_to_async(self.client.get)(
-                reverse('user_online_status')
+                reverse("user_online_status")
             )
             data = response.json()
-            self.assertFalse(data['online'])
+            self.assertFalse(data["online"])
 
         self.loop.run_until_complete(_test_user_online_status())
-
-
-
-
 
     @select_test(enabled=False)
     def test_player_count_endpoint(self):
         """Test the player count endpoint functionality"""
+
         async def _test_player_count():
             print("\nStarting player count endpoint test")
-            
+
             # First create a game
             response = await sync_to_async(self.client.post)(
-                reverse('debug_create_games'),
-                content_type='application/json'
+                reverse("debug_create_games"), content_type="application/json"
             )
             self.assertEqual(response.status_code, 201)
-            
+
             # Get the game ID from waiting games
-            response = await sync_to_async(self.client.get)(
-                reverse('waiting_games')
-            )
-            games = json.loads(response.json()['games'])
+            response = await sync_to_async(self.client.get)(reverse("waiting_games"))
+            games = json.loads(response.json()["games"])
             self.assertTrue(len(games) > 0)
-            game_id = games[0]['game_id']
-            
+            game_id = games[0]["game_id"]
+
             print(f"\nTesting player count for game: {game_id}")
-            
+
             # Test player count endpoint
             response = await sync_to_async(self.client.get)(
-                reverse('player_count', kwargs={'game_id': game_id})
+                reverse("player_count", kwargs={"game_id": game_id})
             )
-            
+
             print(f"\nPlayer count response status: {response.status_code}")
             print(f"Player count response: {json.dumps(response.json(), indent=2)}")
-            
+
             # Verify response structure and status
             self.assertEqual(response.status_code, 200)
             data = response.json()
-            self.assertIn('player_counts', data)
-            self.assertIn('message', data)
-            
+            self.assertIn("player_counts", data)
+            self.assertIn("message", data)
+
             # Verify player counts structure
-            player_counts = data['player_counts']
-            self.assertIn('status', player_counts)
-            self.assertIn('current_players', player_counts)
-            self.assertIn('reserved_players', player_counts)
-            self.assertTrue(isinstance(player_counts['current_players'], int))
-            self.assertTrue(isinstance(player_counts['reserved_players'], int))
-            
+            player_counts = data["player_counts"]
+            self.assertIn("status", player_counts)
+            self.assertIn("current_players", player_counts)
+            self.assertIn("reserved_players", player_counts)
+            self.assertTrue(isinstance(player_counts["current_players"], int))
+            self.assertTrue(isinstance(player_counts["reserved_players"], int))
+
             # Test with invalid game ID
             print("\nTesting with invalid game ID")
             invalid_game_id = "nonexistent-game-id"
             response = await sync_to_async(self.client.get)(
-                reverse('player_count', kwargs={'game_id': invalid_game_id})
+                reverse("player_count", kwargs={"game_id": invalid_game_id})
             )
             print(f"Invalid game ID response: {json.dumps(response.json(), indent=2)}")
-            
+
             # The endpoint should still return a valid response with zero counts
             self.assertEqual(response.status_code, 200)
             data = response.json()
-            player_counts = data['player_counts']
-            self.assertEqual(player_counts['current_players'], 0)
-            self.assertEqual(player_counts['reserved_players'], 0)
-            
+            player_counts = data["player_counts"]
+            self.assertEqual(player_counts["current_players"], 0)
+            self.assertEqual(player_counts["reserved_players"], 0)
+
             # Test invalid HTTP method
             print("\nTesting invalid HTTP method (POST)")
             response = await sync_to_async(self.client.post)(
-                reverse('player_count', kwargs={'game_id': game_id})
+                reverse("player_count", kwargs={"game_id": game_id})
             )
             self.assertEqual(response.status_code, 405)
             print(f"Invalid method response: {json.dumps(response.json(), indent=2)}")
@@ -509,33 +499,34 @@ class IntegratedGameTests(TransactionTestCase):
     @select_test(enabled=False)
     def test_cancel_booking(self):
         """Test cancelling a booking"""
+
         async def _test_cancel_booking():
             # First create a game and book it
             response = await sync_to_async(self.client.post)(
-                reverse('create_new_game'),
+                reverse("create_new_game"),
                 data=json.dumps(self.game_settings),
-                content_type='application/json'
+                content_type="application/json",
             )
             self.assertEqual(response.status_code, 201)
-            
+
             # Login the user
             player1 = self.test_users["player1"]
             await sync_to_async(self.client.force_login)(player1)
-            
+
             # Try to cancel the booking
             response = await sync_to_async(self.client.delete)(
-                reverse('cancel_booking')
+                reverse("cancel_booking")
             )
-            
+
             # Check response
             self.assertEqual(response.status_code, 200)
             data = response.json()
             self.assertEqual(data["status"], "success")
             self.assertIn("message", data)
-            
+
             # Try cancelling again - should get 404 as no booking exists
             response = await sync_to_async(self.client.delete)(
-                reverse('cancel_booking')
+                reverse("cancel_booking")
             )
             self.assertEqual(response.status_code, 404)
 
