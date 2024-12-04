@@ -710,16 +710,11 @@
 
     <!-- 2D Game Setup Template -->
     <template id="two-d-game__setup-template">
-      <!-- <div id="two-d-game__container-setup" class="two-d-game__container-setup"> -->
       <div class="two-d-game__container">
-        <!-- <form id="two-d-game__gameForm"> -->
         <form class="two-d-game__form">
-          <!-- Advanced Settings Section -->
-          <!-- <div id="two-d-game__advanced-settings" class="two-d-game__panel"> -->
           <div class="two-d-game__form-group">
-            <!-- <label for="two-d-game__game-type">Game Type</label> -->
             <label class="two-d-game__label" for="two-d-game__game-type">Game Type</label>
-            <select class="two-d-game__select" id="two-d-game__game-type">
+            <select class="two-d-game__select" id="two-d-game__game-type" disabled>
               <option value="regular">Regular Pong</option>
               <option value="circular">Circular Pong</option>
               <option value="irregular">Irregular Pong</option>
@@ -728,21 +723,44 @@
           </div>
 
           <div class="two-d-game__form-group">
-            <!-- <label for="two-d-game__num-players">Number of Players</label> -->
             <label class="two-d-game__label" for="two-d-game__num-players">Number of Players</label>
-            <input class="two-d-game__input" type="number" id="two-d-game__num-players" min="2" max="8" value="2" />
+            <input
+              class="two-d-game__input"
+              type="number"
+              id="two-d-game__num-players"
+              min="2"
+              max="8"
+              value="2"
+              disabled
+            />
             <small class="two-d-game__help-text">Min: 2, Max: 8 players</small>
           </div>
 
           <div class="two-d-game__form-group polygon-only">
             <label class="two-d-game__label" for="two-d-game__num-sides">Number of Sides</label>
-            <input class="two-d-game__input" type="number" id="two-d-game__num-sides" min="3" max="12" value="4" />
+            <input
+              class="two-d-game__input"
+              type="number"
+              id="two-d-game__num-sides"
+              min="3"
+              max="12"
+              value="4"
+              disabled
+            />
             <small class="two-d-game__help-text">Min: 3, Max: 12 sides</small>
           </div>
 
           <div class="two-d-game__form-group">
             <label class="two-d-game__label" for="two-d-game__num-balls">Number of Balls</label>
-            <input class="two-d-game__input" type="number" id="two-d-game__num-balls" min="1" max="4" value="1" />
+            <input
+              class="two-d-game__input"
+              type="number"
+              id="two-d-game__num-balls"
+              min="1"
+              max="4"
+              value="1"
+              disabled
+            />
             <small class="two-d-game__help-text">Min: 1, Max: 4 balls</small>
           </div>
 
@@ -762,7 +780,6 @@
             </div>
           </div>
 
-          <!-- Start Button -->
           <div class="two-d-game__form-group">
             <button type="submit" class="two-d-game__button">Start Game</button>
           </div>
