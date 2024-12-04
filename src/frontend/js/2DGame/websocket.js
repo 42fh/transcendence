@@ -1,5 +1,3 @@
-import { OLD_CONFIG } from "../config/constants.js";
-
 export class GameWebSocket {
   constructor(gameId, playerId, onMessage, options = {}) {
     this.gameId = gameId;
@@ -18,7 +16,14 @@ export class GameWebSocket {
       ...this.options,
     }).toString();
 
-    const url = `${OLD_CONFIG.WS_BASE_URL}/pong/${this.gameId}/?${queryParams}`;
+    // Not needed cause the Fetch API is used to get the WebSocket URL and the server is running on the same domain
+    // const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+    // const host = window.location.host;
+    // const url = `${wsScheme}://${host}/ws/pong/${this.gameId}/?${queryParams}`;
+    const wsUrl = `/ws/pong/${this.gameId}/?${queryParams}`;
+
+    console.log("Connection to WebSocket:", wsUrl);
+
     this.ws = new WebSocket(url);
     this.ws.onopen = () => {
       console.log("WebSocket connected");
@@ -26,13 +31,17 @@ export class GameWebSocket {
     };
 
     this.ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      this.onMessage(data);
+      try {
+        const data = JSON.parse(event.data);
+        this.onMessage(data);
+      } catch (error) {
+        console.error("Error processing message:", error);
+      }
     };
 
     this.ws.onclose = () => {
       console.log("WebSocket closed");
-      // this.handleReconnect();
+      this.handleReconnect();
     };
 
     this.ws.onerror = (error) => {
@@ -43,19 +52,34 @@ export class GameWebSocket {
   handleReconnect() {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
-      setTimeout(() => this.connect(), 1000 * this.reconnectAttempts);
+      const delay = 1000 * this.reconnectAttempts;
+      console.log(`Attempting to reconnect in ${delay}ms...`);
+      setTimeout(() => this.connect(), delay);
     }
   }
 
   sendMessage(message) {
     if (this.ws?.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify(message));
+      try {
+        this.ws.send(JSON.stringify(message));
+      } catch (error) {
+        console.error("Error sending WebSocket message:", error);
+      }
+    } else {
+      console.warn("WebSocket is not open, message not sent");
     }
   }
 
   disconnect() {
     if (this.ws) {
       this.ws.close();
+    }
+  }
+
+  disconnect() {
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
     }
   }
 }
