@@ -23,7 +23,7 @@ export function load2DGame(addToHistory = true) {
     mainContent.innerHTML = "";
 
     // Get the template
-    const template = document.getElementById("two-d-game-template");
+    const template = document.getElementById("two-d-game__setup-template");
     if (!template) {
       throw new Error("2D game template not found");
     }
@@ -33,24 +33,6 @@ export function load2DGame(addToHistory = true) {
 
     // Add it to the main content
     mainContent.appendChild(gameContent);
-
-    // Verify elements exist after append
-    console.log("Checking for toggle settings button:", document.getElementById("two-d-game__toggle-settings"));
-
-    // Small delay to ensure DOM is updated
-    // requestAnimationFrame(() => {
-    //   console.log("Initializing game interface...");
-    //   const gameInterface = new GameInterface2D();
-
-    //   // Only initialize if the required elements exist
-    //   const toggleButton = document.getElementById("two-d-game__toggle-settings");
-    //   if (toggleButton) {
-    //     gameInterface.initializeInterface();
-    //     gameInterface.setupEventListeners();
-    //   } else {
-    //     console.error("Required game elements not found after template load");
-    //   }
-    // });
 
     const gameInterface = new GameInterface2D();
     console.log("gameInterface initialized");

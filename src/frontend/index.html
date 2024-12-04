@@ -708,76 +708,59 @@
       </div>
     </template>
 
-    <!-- 2D Game Template -->
-    <template id="two-d-game-template">
-      <!-- <div id="setupContainer" class="setup-container"> -->
-      <div id="two-d-game__container-setup" class="two-d-game__container-setup">
-        <!-- two-d-game__title is not used -->
-        <h1 class="two-d-game__title">2D Pong Setup</h1>
-
-        <form id="two-d-game__gameForm">
+    <!-- 2D Game Setup Template -->
+    <template id="two-d-game__setup-template">
+      <!-- <div id="two-d-game__container-setup" class="two-d-game__container-setup"> -->
+      <div class="two-d-game__container">
+        <!-- <form id="two-d-game__gameForm"> -->
+        <form class="two-d-game__form">
           <!-- Advanced Settings Section -->
-          <div id="two-d-game__advanced-settings" class="two-d-game__panel" style="display: block">
-            <h2 class="two-d-game__panel-title">Game Settings</h2>
-
-            <div class="two-d-game__form-group">
-              <label class="two-d-game__label" for="two-d-game__game-type">Game Type</label>
-              <select id="two-d-game__game-type" class="two-d-game__input">
-                <option value="regular">Regular Pong</option>
-                <option value="circular">Circular Pong</option>
-                <option value="irregular">Irregular Pong</option>
-                <option value="classic">Classic Pong</option>
-              </select>
-            </div>
-
-            <div class="two-d-game__form-group">
-              <label class="two-d-game__label" for="two-d-game__num-players">Number of Players</label>
-              <input class="two-d-game__input" type="number" id="two-d-game__num-players" min="2" max="8" value="2" />
-              <small class="two-d-game__help-text">Min: 2, Max: 8 players</small>
-            </div>
-
-            <div class="two-d-game__form-group polygon-only">
-              <label class="two-d-game__label" for="two-d-game__num-sides">Number of Sides</label>
-              <input class="two-d-game__input" type="number" id="two-d-game__num-sides" min="1" max="12" value="2" />
-              <small class="two-d-game__help-text">Min: 3, Max: 12 sides</small>
-            </div>
-
-            <div class="two-d-game__form-group">
-              <label class="two-d-game__label" for="two-d-game__num-balls">Number of Balls</label>
-              <input class="two-d-game__input" type="number" id="two-d-game__num-balls" min="1" max="4" value="1" />
-              <small class="two-d-game__help-text">Min: 1, Max: 4 balls</small>
-            </div>
-
-            <div class="two-d-game__form-group shape-fields" style="display: none">
-              <label class="two-d-game__label" for="two-d-game__shape">Shape</label>
-              <select class="two-d-game__input" id="two-d-game__shape">
-                <option value="regular">Regular</option>
-                <option value="irregular">Irregular</option>
-                <option value="star">Star</option>
-                <option value="crazy">Crazy</option>
-              </select>
-              <p id="shapeDescription" class="help-text" style="display: none"></p>
-            </div>
-
-            <div class="two-d-game__form-group">
-              <label class="two-d-game__label" for="two-d-game__score-mode">Score Mode</label>
-              <select class="two-d-game__input" id="two-d-game__score-mode">
-                <option value="classic">Classic (First to 11)</option>
-                <option value="timed">Timed (5 minutes)</option>
-                <option value="survival">Survival</option>
-              </select>
-            </div>
-
-            <div class="two-d-game__form-group">
-              <label class="two-d-game__label">
-                <input class="two-d-game__input" type="checkbox" id="two-d-game__debug-mode" />
-                Enable Debug Mode
-              </label>
-            </div>
+          <!-- <div id="two-d-game__advanced-settings" class="two-d-game__panel"> -->
+          <div class="two-d-game__form-group">
+            <!-- <label for="two-d-game__game-type">Game Type</label> -->
+            <label class="two-d-game__label" for="two-d-game__game-type">Game Type</label>
+            <select class="two-d-game__select" id="two-d-game__game-type">
+              <option value="regular">Regular Pong</option>
+              <option value="circular">Circular Pong</option>
+              <option value="irregular">Irregular Pong</option>
+              <option value="classic">Classic Pong</option>
+            </select>
           </div>
 
-          <!-- Status Message -->
-          <div id="status" class="two-d-game__status" style="display: none"></div>
+          <div class="two-d-game__form-group">
+            <!-- <label for="two-d-game__num-players">Number of Players</label> -->
+            <label class="two-d-game__label" for="two-d-game__num-players">Number of Players</label>
+            <input class="two-d-game__input" type="number" id="two-d-game__num-players" min="2" max="8" value="2" />
+            <small class="two-d-game__help-text">Min: 2, Max: 8 players</small>
+          </div>
+
+          <div class="two-d-game__form-group polygon-only">
+            <label class="two-d-game__label" for="two-d-game__num-sides">Number of Sides</label>
+            <input class="two-d-game__input" type="number" id="two-d-game__num-sides" min="3" max="12" value="4" />
+            <small class="two-d-game__help-text">Min: 3, Max: 12 sides</small>
+          </div>
+
+          <div class="two-d-game__form-group">
+            <label class="two-d-game__label" for="two-d-game__num-balls">Number of Balls</label>
+            <input class="two-d-game__input" type="number" id="two-d-game__num-balls" min="1" max="4" value="1" />
+            <small class="two-d-game__help-text">Min: 1, Max: 4 balls</small>
+          </div>
+
+          <div class="two-d-game__form-group">
+            <label class="two-d-game__label" for="two-d-game__score-mode">Score Mode</label>
+            <select class="two-d-game__select" id="two-d-game__score-mode">
+              <option value="classic">Classic (First to 11)</option>
+              <option value="timed">Timed (5 minutes)</option>
+              <option value="survival">Survival</option>
+            </select>
+          </div>
+
+          <div class="two-d-game__form-group">
+            <div class="two-d-game__checkbox-container">
+              <input type="checkbox" id="two-d-game__debug-mode" class="two-d-game__checkbox" />
+              <label class="two-d-game__checkbox-label" for="two-d-game__debug-mode"> Enable Debug Mode </label>
+            </div>
+          </div>
 
           <!-- Start Button -->
           <div class="two-d-game__form-group">
@@ -785,7 +768,10 @@
           </div>
         </form>
       </div>
+    </template>
 
+    <!-- 2D Game Game Template -->
+    <template id="two-d-game__game-template">
       <!-- Game Container -->
       <div id="two-d-game__container-game" class="two-d-game__container-game" style="display: none">
         <div class="two-d-game__game-layout">
