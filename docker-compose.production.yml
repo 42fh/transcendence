@@ -14,8 +14,7 @@ services:
       - ENVIRONMENT=production
   nginx:
     ports:
-      - "443:443"
-      - "80:80"
+      - "${PORT:-8443}:443"
     build:
       context: ./src
       dockerfile: ./nginx/Dockerfile

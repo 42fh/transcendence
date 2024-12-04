@@ -13,7 +13,9 @@ class Command(BaseCommand):
 
         # Check if tournaments already exist
         if Tournament.objects.exists():
-            self.stdout.write(self.style.SUCCESS("Tournaments already seeded, skipping..."))
+            self.stdout.write(
+                self.style.SUCCESS("Tournaments already seeded, skipping...")
+            )
             return
 
         self.stdout.write("Seeding tournaments...")
@@ -53,7 +55,8 @@ class Command(BaseCommand):
                 "name": "42 NETWORK",
                 "description": "Lorem ipsum dolor sit amet...",
                 "start_registration": now,
-                "end_registration": now + timedelta(minutes=30),  # 10 minutes before start
+                "end_registration": now
+                + timedelta(minutes=30),  # 10 minutes before start
                 "start_date": now + timedelta(minutes=40),  # 40 minutes from now
                 "type": "single_elimination",
                 "start_mode": "fixed",
@@ -65,7 +68,8 @@ class Command(BaseCommand):
                 "name": "42 BERLIN",
                 "description": "Lorem ipsum dolor sit amet...",
                 "start_registration": now - timedelta(days=1),  # closed yesterday
-                "end_registration": now - timedelta(minutes=30),  # closed 30 minutes ago
+                "end_registration": now
+                - timedelta(minutes=30),  # closed 30 minutes ago
                 "start_date": now - timedelta(minutes=30),  # started 30 minutes ago
                 "type": "single_elimination",
                 "start_mode": "fixed",
@@ -77,7 +81,9 @@ class Command(BaseCommand):
 
         for data in tournaments_data:
             Tournament.objects.create(**data)
-            self.stdout.write(self.style.SUCCESS(f'Successfully created tournament "{data["name"]}"'))
+            self.stdout.write(
+                self.style.SUCCESS(f'Successfully created tournament "{data["name"]}"')
+            )
 
         # Then create the timetable for Berlin tournament
         berlin_tournament = Tournament.objects.get(name="42 BERLIN")
@@ -126,4 +132,6 @@ class Command(BaseCommand):
             scheduled_time=timezone.now() + timedelta(days=2),
         )
 
-        self.stdout.write(self.style.SUCCESS("Successfully created tournament timetable"))
+        self.stdout.write(
+            self.style.SUCCESS("Successfully created tournament timetable")
+        )

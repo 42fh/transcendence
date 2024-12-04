@@ -38,32 +38,57 @@
     </div>
   </template>
 
-  <!-- Auth Template -->
-  <template id="auth-template">
-    <div class="auth-container">
-      <h1>PONG</h1>
-      <div class="auth-buttons">
-        <button id="login-button" class="auth-button">Login</button>
-        <button id="signup-button" class="auth-button">Sign Up</button>
+    <!-- Auth Template -->
+    <template id="auth-template">
+      <div class="auth-container" id="auth-container">
+        <h1>PONG</h1>
+        <div class="auth-buttons">
+          <button id="login-button" class="auth-button">Login</button>
+          <button id="signup-button" class="auth-button">Sign Up</button>
+        </div>
       </div>
-    </div>
-  </template>
+    </template>
 
-  <!-- Login Form Template -->
-  <template id="login-template">
-    <p id="modal-message" class="modal-message"></p>
-    <form id="login-form" class="modal-form">
-      <!-- Message element added here -->
+    <!-- Login Form Template -->
+    <template id="login-template">
+      <p id="modal-message" class="modal-message"></p>
+      <div id="login-container">
+        <form id="login-form" class="modal-form">
+          <!-- Message element added here -->
 
-      <label for="username">Username</label>
-      <input type="text" id="username" name="username" required />
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" required />
 
-      <label for="password">Password</label>
-      <input type="password" id="password" name="password" required />
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required />
 
-      <button type="submit" class="auth-form__button">Log In</button>
-    </form>
-  </template>
+          <button type="submit" class="auth-form__button">Log In</button>
+        </form>
+      </div>
+      <div id="2fa-container" style="display: none;">
+        <form id="2fa-form" class="modal-form">
+          <!-- Message element added here -->
+  
+          <label for="code">Enter the code sent to your email</label>
+          <input type="text" id="code" name="code" required />
+
+          <div class="resend-section">
+            <span id="countdown">1:00</span>
+            <button 
+              type="button" 
+              id="resend-button" 
+              class="auth-form__button" 
+              disabled
+            >
+              Resend Code
+            </button>
+          </div>      
+  
+          <button type="submit" id="2fa-login" class="auth-form__button">Log In</button>
+        </form>
+      </div>
+
+    </template>
 
   <!-- Signup Form Template -->
   <template id="signup-template">
@@ -88,25 +113,26 @@
     <div class="page-container page-container--home">
       <h1 class="page-container__title page-container__title--home">PONG</h1>
 
-      <div class="home__content">
-        <button id="home__button-play" class="home__button button--neon">PLAY</button>
-        <div class="home__net">
-          <div class="home__net-segment home__net-segment--black"></div>
-          <div class="home__net-segment home__net-segment--white"></div>
-          <div class="home__net-segment home__net-segment--black"></div>
-          <div class="home__net-segment home__net-segment--white"></div>
-          <div class="home__net-segment home__net-segment--black"></div>
-          <div class="home__net-segment home__net-segment--white"></div>
-          <div class="home__net-segment home__net-segment--black"></div>
-          <div class="home__net-segment home__net-segment--white"></div>
-          <div class="home__net-segment home__net-segment--black"></div>
-          <div class="home__net-segment home__net-segment--white"></div>
+        <div class="home__content">
+          <button id="logout-button">Logout</button>
+          <button id="home__button-play" class="home__button button--neon">PLAY</button>
+          <div class="home__net">
+            <div class="home__net-segment home__net-segment--black"></div>
+            <div class="home__net-segment home__net-segment--white"></div>
+            <div class="home__net-segment home__net-segment--black"></div>
+            <div class="home__net-segment home__net-segment--white"></div>
+            <div class="home__net-segment home__net-segment--black"></div>
+            <div class="home__net-segment home__net-segment--white"></div>
+            <div class="home__net-segment home__net-segment--black"></div>
+            <div class="home__net-segment home__net-segment--white"></div>
+            <div class="home__net-segment home__net-segment--black"></div>
+            <div class="home__net-segment home__net-segment--white"></div>
+          </div>
+          <button id="home__button-cta" class="home__button button--gradient">CTA</button>
         </div>
-        <button id="home__button-cta" class="home__button button--gradient">CTA</button>
       </div>
-    </div>
-  </template>
-
+    </template>
+      
 
   <!-- Game list Template 
      (list of games and button to create new game)-->
@@ -573,6 +599,15 @@
       </div>
     </div>
   </template>
+          <!-- Private Profile Actions -->
+          <div class="profile__section profile__section--private-actions profile__private-info">
+            <button class="profile__button profile__button--edit">Edit Profile</button>
+            <button class="profile__button profile__button--2fa">2FA</button>
+            <!-- TODO: Add password change button if we decide to implement it -->
+          </div>
+        </div>
+      </div>
+    </template>
 
   <!-- Profile Match Template -->
   <template id="profile-match-template">
@@ -636,81 +671,112 @@
           <textarea id="bio" class="profile-edit__textarea" name="bio" rows="4" maxlength="500"></textarea>
         </div>
 
-        <div class="profile-edit__buttons">
-          <button type="button" class="profile-edit__button profile-edit__button--cancel">Cancel</button>
-          <button type="submit" class="profile-edit__button profile-edit__button--save">Save</button>
-        </div>
-      </form>
-    </div>
-  </template>
-
-  <!-- 3D Game -->
-  <template id="3d-game-template">
-    <canvas class="webgl"></canvas>
-    <div class="end-screen">
-      <h1 class="title"></h1>
-      <div class="scores"></div>
-      <button class="exit-button">Exit Game</button>
-    </div>
-    <div class="game-menu-overlay" id="menu">
-      <div class="game-menu-container">
-        <div class="card bg-dark text-light">
-          <div class="card-header">
-            <h2 class="text-center mb-0">Game Setup</h2>
+          <div class="profile-edit__buttons">
+            <button type="button" class="profile-edit__button profile-edit__button--cancel">Cancel</button>
+            <button type="submit" class="profile-edit__button profile-edit__button--save">Save</button>
           </div>
-          <div class="card-body">
-            <form id="gameSetupForm">
-              <div class="mb-4">
-                <label for="gameType">Game Type</label>
-                <input type="text" id="gameType" />
-              </div>
+        </form>
+      </div>
+    </template>
 
-              <div class="mb-4">
-                <label for="gameId">Game ID</label>
-                <input type="text" id="gameId" />
+    <!-- 2FA Edit Template -->
+    <template id="2fa-edit-template">
+      <div class="profile-edit">
+        <h2 class="profile-edit__title">Edit 2FA</h2>
+        <p class="email-warning" style="display: none">Email is not set</p>
+        <form class="profile-edit__form">
+          <div class="profile-edit__field form-field">
+            <label class="profile-edit__label form-label" for="email">Email</label>
+            <input type="email" id="email" class="profile-edit__input form-input" name="email" />
+          </div>
+          <div class="profile-edit__field form-field radio-form">
+            <label class="profile-edit__label form-label">2FA Authentication</label>
+            <div class="profile-edit__radio-group">
+              <div class="profile-edit__radio-item">
+                <input type="radio" id="2fa-enabled" name="2fa" value="enabled" class="profile-edit__radio" />
+                <label for="2fa-enabled" class="profile-edit__radio-label">Enabled</label>
               </div>
+              <div class="profile-edit__radio-item">
+                <input type="radio" id="2fa-disabled" name="2fa" value="disabled" class="profile-edit__radio" />
+                <label for="2fa-disabled" class="profile-edit__radio-label">Disabled</label>
+              </div>
+            </div>
+          </div>
+          <div class="profile-edit__buttons">
+            <button type="button" class="profile-edit__button profile-edit__button--cancel">Cancel</button>
+            <button type="submit" class="profile-edit__button profile-edit__button--save">Save</button>
+          </div>
+        </form>
+      </div>
+    </template>
 
-              <div class="mb-4">
-                <label for="playerCount">Player count</label>
-                <input type="text" id="playerCount" />
-              </div>
+    <!-- 3D Game -->
+    <template id="3d-game-template">
+      <canvas class="webgl"></canvas>
+      <div class="end-screen">
+        <h1 class="title"></h1>
+        <div class="scores"></div>
+        <button class="exit-button">Exit Game</button>
+      </div>
+      <div class="game-menu-overlay" id="menu">
+        <div class="game-menu-container">
+          <div class="card bg-dark text-light">
+            <div class="card-header">
+              <h2 class="text-center mb-0">Game Setup</h2>
+            </div>
+            <div class="card-body">
+              <form id="gameSetupForm">
+                <div class="mb-4">
+                  <label for="gameType">Game Type</label>
+                  <input type="text" id="gameType" />
+                </div>
 
-              <div class="text-center">
-                <div class="joinGame btn btn-primary">Join</div>
-              </div>
-            </form>
+                <div class="mb-4">
+                  <label for="gameId">Game ID</label>
+                  <input type="text" id="gameId" />
+                </div>
+
+                <div class="mb-4">
+                  <label for="playerCount">Player count</label>
+                  <input type="text" id="playerCount" />
+                </div>
+
+                <div class="text-center">
+                  <div class="joinGame btn btn-primary">Join</div>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </template>
+    </template>
 
-  <!-- Users Template -->
+    <!-- Users Template -->
 
-  <template id="users-template">
-    <div class="page-container page-container--users">
-      <!-- TODO: Folks around maybe is nicer instead of users -->
-      <h2 class="users-page__title">Users</h2>
-      <div class="users-search">
-        <input type="text" class="users-search__input" placeholder="Search users..." />
-        <!-- <span class="material-symbols-outlined users-search__icon">search</span> -->
-      </div>
-      <div id="users-list" class="users-list"></div>
-      <div id="users-pagination" class="pagination">
-        <button class="pagination__button pagination__button--prev">
-          <span class="material-symbols-outlined">chevron_left</span>
-        </button>
-        <div class="pagination__info">
-          <span class="pagination__current">1</span>
-          <span class="pagination__separator">/</span>
-          <span class="pagination__total">1</span>
+    <template id="users-template">
+      <div class="page-container page-container--users">
+        <!-- TODO: Folks around maybe is nicer instead of users -->
+        <h2 class="users-page__title">Users</h2>
+        <div class="users-search">
+          <input type="text" class="users-search__input" placeholder="Search users..." />
+          <!-- <span class="material-symbols-outlined users-search__icon">search</span> -->
         </div>
-        <button class="pagination__button pagination__button--next">
-          <span class="material-symbols-outlined">chevron_right</span>
-        </button>
+        <div id="users-list" class="users-list"></div>
+        <div id="users-pagination" class="pagination">
+          <button class="pagination__button pagination__button--prev">
+            <span class="material-symbols-outlined">chevron_left</span>
+          </button>
+          <div class="pagination__info">
+            <span class="pagination__current">1</span>
+            <span class="pagination__separator">/</span>
+            <span class="pagination__total">1</span>
+          </div>
+          <button class="pagination__button pagination__button--next">
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
       </div>
-    </div>
-  </template>
+    </template>
 
   <!-- User List Item Template -->
   <template id="users-list-item-template">

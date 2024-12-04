@@ -72,6 +72,13 @@ SESSION_COOKIE_SECURE = True  # for HTTPS
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+
 if ENVIRONMENT == "production":
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
@@ -165,10 +172,24 @@ USE_TZ = True
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {message}",
+            "style": "{",
+        },
+    },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
+            "formatter": "verbose",
         },
+        # docker file has to change to store t in a file
+        #"game_file": {
+        #    "class": "logging.FileHandler",
+        #    "filename": "logs/game.log",
+        #    "formatter": "verbose",
+        #}
+
     },
     "loggers": {
         "users": {  # This matches 'users' app logs
@@ -176,6 +197,11 @@ LOGGING = {
             "level": "DEBUG",  # or 'INFO'
             "propagate": True,
         },
+        "game": {
+            "handlers": ["console"],
+            "level": "INFO", # or "DEBUG"
+            "propagate": False,
+        }
     },
     "root": {
         "handlers": ["console"],
