@@ -134,6 +134,21 @@ button:hover {
   animation: neonPulse 1.5s infinite;
 }
 
+.button--red {
+  background: transparent;
+  color: #ff5d5d;
+  font-family: "Press Start 2P", cursive;
+  padding: 15px 40px;
+  border: 2px solid #fff;
+  border-radius: 5px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
 .button--neon:hover {
   background: rgba(255, 255, 255, 0.1);
   color: rgb(255, 166, 0);
