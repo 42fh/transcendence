@@ -34,7 +34,7 @@ export async function loadgame_offlinemode(addToHistory = true) {
 
         // Draw scores
         context.fillStyle = "white";
-        context.font = "20px Monospace";
+        context.font = "20px Press Start 2P, Monospace";
         context.fillText(`P1: ${player1Score}`, 20, 20);
         context.fillText(`P2: ${player2Score}`, gameCanvas.width - 80, 20);
     }
@@ -95,7 +95,7 @@ export async function loadgame_offlinemode(addToHistory = true) {
         const mainContent = document.getElementById("main-content");
         if (!mainContent) throw new Error("Main content element not found");
 
-        mainContent.innerHTML = '<canvas id="game_offlinemode_canvas" height="500" width="500"></canvas>';
+        mainContent.innerHTML = '<h2>Play Pong offline</h2><p>left player: press A and S </p><p>right player: press K and L </p><canvas id="game_offlinemode_canvas" height="500" width="500"></canvas>';
         gameCanvas = document.getElementById("game_offlinemode_canvas");
         context = gameCanvas.getContext("2d");
 
