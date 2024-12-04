@@ -25,7 +25,7 @@ export async function createNewGame(gameSettings) {
 
 export async function fetchAvailableGames() {
   try {
-    const response = await fetch(`${CONFIG.API_BASE_URL}/get_all_games/`, {
+    const response = await fetch(`${CONFIG.API_BASE_URL}/waiting/`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
