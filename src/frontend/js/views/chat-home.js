@@ -47,14 +47,18 @@ async function loadChatList(page = 1, perPage = 10, search = "") {
     const usersList = document.getElementById("users-list");
     const paginationContainer = document.getElementById("users-pagination");
 
-    usersList.innerHTML = ""; // Clear existing items
+    usersList.innerHTML = "";
 
-    // Store the users from conversations
+    // console.log("Printing conversation list before", conversationUsers);
     conversationUsers = data.users.filter(
       (user) =>
         user.username !== localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID)
     ); // Exclude the current user from the conversation list
     conversationUsers = conversationUsers.map((user) => user.username); // Only store usernames
+    console.log(
+      "Printing conversation list from loadChatList",
+      conversationUsers
+    );
 
     // Get the user list item template from HTML
     const userTemplate = document.getElementById("user-template");
@@ -110,6 +114,7 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
     usersHorizontalContainer.innerHTML = "";
     const userTemplate = document.getElementById("user-template");
 
+    //TODO: Blocked users should also be filtered out
     data.users.forEach((user) => {
       // do not show users having a conversation with current user
       if (conversationUsers.includes(user.username)) {

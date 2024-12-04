@@ -1,7 +1,12 @@
 export async function fetchConversationList() {
   const response = await fetch("/api/chat/users/");
+  // console.log("Printing response from fetchConversationList: ");
+  // console.log(response);
   if (!response.ok) throw new Error("Failed to get user list");
-  return response.json();
+
+  const data = await response.json();
+  console.log("Fetched conversation list:", data);
+  return data;
 }
 
 export async function toggleBlockUser(username, isCurrentlyBlocked, csrfToken) {

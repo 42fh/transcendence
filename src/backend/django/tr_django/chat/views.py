@@ -38,6 +38,9 @@ def rooms(request):
         )
         print(f"DEBUG: Retrieved {len(users)} users after filtering blocked users")
 
+        # Log the current user
+        print(f"DEBUG: Current user: {request.user.username}")
+
         recent_chats = (
             ChatRoom.objects.filter(
                 (models.Q(user1=request.user) | models.Q(user2=request.user))
@@ -47,7 +50,12 @@ def rooms(request):
             .select_related("user1", "user2")
             .order_by("-last_message_at")
         )
-        print(f"DEBUG: Retrieved {recent_chats.count()} recent chats")
+
+        # Log the retrieved recent chats
+        print(f"DEBUG: Retrieved {recent_chats.count()} recent chats for user: {request.user.username}")
+        for chat in recent_chats:
+            other_user = chat.user2 if chat.user1 == request.user else chat.user1
+            print(f"DEBUG: Chat with user: {other_user.username}")
 
         users_with_chats = set()
         for chat in recent_chats:
@@ -71,6 +79,7 @@ def rooms(request):
             }
             user_list.append(user_data)
 
+        # print(f"XXXDEBUG: Users returned: {user_list}")
         return JsonResponse({"status": "success", "users": user_list})
 
     except Exception as e:
