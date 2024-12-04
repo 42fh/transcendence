@@ -4,7 +4,7 @@ export async function loadgame_offlinemode(addToHistory = true) {
     let gameCanvas, context;
     let paddle1Y = 200, paddle2Y = 200;
     const paddleHeight = 100, paddleWidth = 10, ballSize = 10;
-    let ballX = 250, ballY = 250, ballSpeedX = 3, ballSpeedY = 2;
+    let ballX = 250, ballY = 250, ballSpeedX = 2.1, ballSpeedY = 1.4;
     let player1Score = 0, player2Score = 0;
     const winningScore = 3;
     let gameRunning = true;
