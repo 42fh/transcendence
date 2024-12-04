@@ -16,18 +16,27 @@ export class GameWebSocket {
       ...this.options,
     }).toString();
 
-    // Not needed cause the Fetch API is used to get the WebSocket URL and the server is running on the same domain
-    // const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
-    // const host = window.location.host;
-    // const url = `${wsScheme}://${host}/ws/pong/${this.gameId}/?${queryParams}`;
     const wsUrl = `/ws/pong/${this.gameId}/?${queryParams}`;
 
     console.log("Connection to WebSocket:", wsUrl);
 
-    this.ws = new WebSocket(url);
+    if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
+      console.warn("WebSocket is already open or connecting");
+      return;
+    }
+
+    this.ws = new WebSocket(wsUrl);
+
     this.ws.onopen = () => {
       console.log("WebSocket connected");
       this.reconnectAttempts = 0;
+
+      // Start a heartbeat mechanism
+      this.heartbeatInterval = setInterval(() => {
+        if (this.ws?.readyState === WebSocket.OPEN) {
+          this.sendMessage({ type: "heartbeat" });
+        }
+      }, 30000); // Send heartbeat every 30 seconds
     };
 
     this.ws.onmessage = (event) => {
@@ -50,12 +59,18 @@ export class GameWebSocket {
   }
 
   handleReconnect() {
-    if (this.reconnectAttempts < this.maxReconnectAttempts) {
-      this.reconnectAttempts++;
-      const delay = 1000 * this.reconnectAttempts;
-      console.log(`Attempting to reconnect in ${delay}ms...`);
-      setTimeout(() => this.connect(), delay);
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+      console.error("Max reconnection attempts reached");
+      if (this.options.onReconnectFail) {
+        this.options.onReconnectFail();
+      }
+      return;
     }
+
+    this.reconnectAttempts++;
+    const delay = 1000 * this.reconnectAttempts;
+    console.log(`Attempting to reconnect in ${delay}ms...`);
+    setTimeout(() => this.connect(), delay);
   }
 
   sendMessage(message) {
@@ -73,13 +88,8 @@ export class GameWebSocket {
   disconnect() {
     if (this.ws) {
       this.ws.close();
-    }
-  }
-
-  disconnect() {
-    if (this.ws) {
-      this.ws.close();
       this.ws = null;
+      clearInterval(this.heartbeatInterval);
     }
   }
 }
