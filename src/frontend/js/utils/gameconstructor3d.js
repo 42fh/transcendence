@@ -143,9 +143,6 @@ export default class GameConstructor {
 
       const success = await this.directConnect(gameId, {
         ...gameConfig,
-        onMessage: (data) => {
-          console.log(JSON.stringify(data));
-        },
       });
 
       console.log("Connected to game", success);
