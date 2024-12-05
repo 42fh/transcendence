@@ -121,7 +121,7 @@ export async function uploadUserAvatar(userId, avatarFile) {
 
     const accessToken = await manageJWT();
 
-    const url = `${CONFIG.API_BASE_URL}/api/users/users/${userId}/avatar/`;
+    const url = `${CONFIG.API_BASE_URL}/api/users/${userId}/avatar/`;
     const response = await fetch(url, {
       method: "POST",
       headers: {

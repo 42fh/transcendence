@@ -112,8 +112,10 @@
         <h1 class="page-container__title page-container__title--home">PONG</h1>
 
         <div class="home__content">
-          <button id="logout-button">Logout</button>
-          <button id="home__button-play" class="home__button button--neon">PLAY</button>
+          <div class="home__buttonsetleft">
+            <button id="home__button-logout" class="home__button button--red">Logout</button>
+            <button id="home__button-play" class="home__button button--neon">PLAY</button>
+          </div>
           <div class="home__net">
             <div class="home__net-segment home__net-segment--black"></div>
             <div class="home__net-segment home__net-segment--white"></div>
@@ -581,7 +583,7 @@
           <!-- Private Profile Actions -->
           <div class="profile__section profile__section--private-actions profile__private-info">
             <button class="profile__button profile__button--edit">Edit Profile</button>
-            <button class="profile__button profile__button--2fa">2FA</button>
+            <button class="profile__button profile__button--2fa">2FA Settings</button>
             <!-- TODO: Add password change button if we decide to implement it -->
           </div>
         </div>
