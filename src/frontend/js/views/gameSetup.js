@@ -1,12 +1,10 @@
 import { updateActiveNavItem } from "../components/bottom-nav.js";
 import { GameInterface2D } from "../2DGame/gameInterface.js";
-// import { INPUT_CONSTRAINTS } from "../config/constants.js";
-import { GAME_2D_CONFIG_TYPES } from "../config/constants.js";
-import { GAME_2D_CONFIG_TYPE_DEFAULT } from "../config/constants.js";
-// import { showToast } from "../components/toast.js";
+import { GAME_2D_CONFIG_TYPES, GAME_2D_CONFIG_TYPE_DEFAULT } from "../config/constants.js";
 import { showToast } from "../utils/toast.js";
 import { fetchWaitingGames, createGame } from "../services/gameService.js";
 import { loadGame2DPage } from "./game2D.js";
+import { initializeGameStructs } from "../store/globals.js";
 
 export function loadGameSetupPage(addToHistory = true) {
   console.log("loadGameSetupPage function called");
@@ -279,7 +277,7 @@ function findMatchingGame(games, formData) {
   console.log("matchingGame", matchingGame);
   return matchingGame;
 }
-
+// Note this fucntion is meant to be used if you want to join or create a certain type of game not to join a specific waiting gamej
 async function handleStartGame(gameInterface) {
   const formData = collectFormData();
   const isValid = validateFormData(formData);
@@ -288,29 +286,12 @@ async function handleStartGame(gameInterface) {
     return;
   }
   try {
-    const games = await fetchWaitingGames();
-    let result;
-    console.log("games", games);
+    const result = await findOrCreateGame(formData);
 
-    const matchingGameId = findMatchingGame(games, formData);
-    console.log("matchingGameId", matchingGameId);
-    if (matchingGameId) {
-      gameId = matchingGameId;
-      result = await joinGame(gameId);
-    } else {
-      const gameSettings = {
-        mode: formData.gameType,
-        num_players: formData.numPlayers,
-        num_sides: formData.numSides,
-        num_balls: formData.numBalls,
-        score_mode: formData.scoreMode,
-        debug: formData.debug,
-      };
-      result = await createGame(gameSettings);
-    }
     if (result.success) {
       console.log("result", result);
       try {
+        initializeGameStructs(result.game_id, formData);
         loadGame2DPage(result.game_id, result.ws_url, formData);
       } catch (error) {
         console.error("Error loading 2D game page:", error);
@@ -324,4 +305,22 @@ async function handleStartGame(gameInterface) {
     console.error("Error handling start game:", error);
     showToast("Error handling start game", true);
   }
+}
+
+async function findOrCreateGame(formData) {
+  const games = await fetchWaitingGames();
+  const matchingGameId = findMatchingGame(games, formData);
+
+  if (matchingGameId) {
+    return await joinGame(matchingGameId);
+  }
+
+  return await createGame({
+    mode: formData.gameType,
+    num_players: formData.numPlayers,
+    num_sides: formData.numSides,
+    num_balls: formData.numBalls,
+    score_mode: formData.scoreMode,
+    debug: formData.debug,
+  });
 }
