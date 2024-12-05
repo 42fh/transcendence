@@ -4,10 +4,8 @@ import { fetchConversationList } from "../services/chatService.js";
 import { fetchUsers } from "../services/usersService.js";
 import { loadChatRoom } from "./chat-room.js";
 import { ASSETS } from "../config/constants.js";
-import {
-  setupNotificationListener,
-  addNotificationToContainer,
-} from "./notificationHandler.js";
+import { setupNotificationListener } from "./notificationHandler.js";
+import { showToast } from "../utils/toast.js";
 
 let conversationUsers = [];
 let notificationSocket = null;
@@ -34,7 +32,7 @@ export async function loadChatPage(addToHistory = true) {
     const content = document.importNode(template.content, true);
     mainContent.appendChild(content);
 
-    addNotificationToContainer("test");
+    showToast("Testing 2", false);
 
     console.log("Whole Local Storage:", localStorage);
 
