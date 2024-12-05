@@ -4,7 +4,7 @@ import { fetchConversationList } from "../services/chatService.js";
 import { fetchUsers } from "../services/usersService.js";
 import { loadChatRoom } from "./chat-room.js";
 import { ASSETS } from "../config/constants.js";
-import { setupNotificationListener } from "./notificationHandler.js";
+import { setupNotificationListener } from "../utils/notifications.js";
 import { showToast } from "../utils/toast.js";
 
 let conversationUsers = [];

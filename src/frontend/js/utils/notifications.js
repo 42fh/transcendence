@@ -1,4 +1,4 @@
-import { showToast } from "../utils/toast.js";
+import { showToast } from "./toast.js";
 
 export function setupNotificationListener(wsUrl) {
   if (!wsUrl) {
@@ -24,7 +24,6 @@ export function setupNotificationListener(wsUrl) {
         const data = JSON.parse(event.data);
         console.log("Received WebSocket message:", data);
 
-        // Check if it's a notification
         if (data.type === "send_notification") {
           showToast(data.notification.message, false);
         }
