@@ -172,3 +172,41 @@ def get_or_create_chat_room(self):
     except Exception as e:
         print(f"DEBUG: Error in get_or_create_chat_room: {str(e)}")
         raise
+
+
+@login_required
+def notifications(request):
+    try:
+        if request.method == "GET":
+            notifications = Notification.objects.filter(user=request.user).order_by("-created_at")
+
+            notification_list = []
+            for notification in notifications:
+                notification_list.append(
+                    {
+                        "id": notification.id,
+                        "message": notification.message,
+                        "created_at": notification.created_at.isoformat(),
+                        "is_read": notification.is_read,
+                    }
+                )
+
+            return JsonResponse({"status": "success", "notifications": notification_list})
+
+        elif request.method == "POST":
+            # Create a new notification
+            data = json.loads(request.body)
+            message = data.get("message")
+
+            if not message:
+                return JsonResponse({"status": "error", "message": "Message is required"}, status=400)
+
+            Notification.objects.create(user=request.user, message=message)
+
+            return JsonResponse({"status": "success", "message": "Notification created successfully"})
+
+        else:
+            return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
+
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
