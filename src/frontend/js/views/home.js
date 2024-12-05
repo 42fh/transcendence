@@ -39,7 +39,7 @@ export function loadHomePage(addToHistory = true) {
       bottomNavContainer.style.display = "block";
     }
 
-    const logoutButton = document.getElementById("logout-button");
+    const logoutButton = document.getElementById("home__button-logout");
     if (logoutButton) {
       logoutButton.addEventListener("click", handleLogout);
     }
