@@ -14,18 +14,22 @@ def create_message_notification(sender, instance, created, **kwargs):
     Signal handler to create a notification and send it via WebSocket
     whenever a new message is created in the database.
     """
+    print(f"DEBUG: Signal triggered for Message ID: {instance.id}")
     if created:
         try:
             logger.debug(f"New message detected: {instance.id}, sender: {instance.sender}, room: {instance.room}")
 
+            # Determine the recipient of the message
             recipient = instance.room.user2 if instance.sender == instance.room.user1 else instance.room.user1
             logger.debug(f"Recipient determined: {recipient.username}")
 
+            # Create the notification
             notification = Notification.objects.create(
                 user=recipient, message=f"New message from {instance.sender.username}: {instance.content[:50]}"
             )
             logger.info(f"Notification created: {notification.id} for user: {recipient.username}")
 
+            # Send the notification via WebSocket
             channel_layer = get_channel_layer()
             async_to_sync(channel_layer.group_send)(
                 f"notifications_{recipient.username}",

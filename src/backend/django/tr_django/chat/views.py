@@ -2,16 +2,12 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from .models import ChatRoom, Message, BlockedUser, Notification
+from .models import ChatRoom, Message, BlockedUser
 from django.views.decorators.csrf import csrf_exempt
 from users.models import CustomUser
 import json
 from django.utils import timezone
 from channels.db import database_sync_to_async
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
 
 
 @login_required
@@ -176,37 +172,3 @@ def get_or_create_chat_room(self):
     except Exception as e:
         print(f"DEBUG: Error in get_or_create_chat_room: {str(e)}")
         raise
-
-
-@receiver(post_save, sender=Message)
-def create_message_notification(sender, instance, created, **kwargs):
-    if created:
-        # Debug: Log when a new message is created
-        print(f"DEBUG: New message created by {instance.sender.username} in room {instance.room.room_id}")
-
-        # Determine the recipient based on the room and sender
-        room = instance.room
-        recipient = room.user2 if instance.sender == room.user1 else room.user1
-
-        # Create a system notification
-        notification = Notification.objects.create(
-            user=recipient, message=f"New message from {instance.sender.username}"
-        )
-        print(f"DEBUG: Notification created for {recipient.username}: {notification.message}")
-
-        # Send notification through WebSocket as a system message
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            f"notifications_{recipient.username}",
-            {
-                "type": "send_notification",
-                "username": "system",  # Explicitly set system username
-                "notification": {
-                    "id": notification.id,
-                    "message": notification.message,
-                    "created_at": notification.created_at.isoformat(),
-                },
-            },
-        )
-        print(f"DEBUG: Notification sent to {recipient.username} via WebSocket")
-        print(f"DEBUG: WbSocket at address: {recipient.username}")
