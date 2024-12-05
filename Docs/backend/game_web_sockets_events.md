@@ -201,57 +201,103 @@ Field Types:
 - Miss specific:
   - `scoring_player`: Integer - Index of player who scored
 
-#### 1.4 Player Joined
+#### 1.4 **Player Joined**
 
 ```json
 {
-    "type": "player_joined",
-    "player_id": string,
-    "player_index": number,
-    "current_players": number
+  "type": "player_joined",
+  "player_id": "player123",
+  "player_index": 1,
+  "current_players": 3
 }
 ```
 
-#### Game Finished
+#### 1.5 **Game Finished**
 
 ```json
 {
-    "type": "game_finished",
-    "game_state": {...},
-    "winner": "you|other"
+  "type": "game_finished",
+  "game_state": {
+    "balls": [
+      {
+        "x": 0.0,
+        "y": 0.0,
+        "velocity_x": 0.0,
+        "velocity_y": 0.0,
+        "size": 0.1
+      }
+    ],
+    "paddles": [
+      {
+        "position": 0.5,
+        "active": true,
+        "side_index": 0
+      }
+    ],
+    "scores": [10, 8],
+    "dimensions": {
+      "paddle_length": 0.3,
+      "paddle_width": 0.2
+    },
+    "game_type": "classic"
+  },
+  "winner": "you"
 }
 ```
 
-#### Waiting
+- `winner`: String ("you" or "other") - Indicates if receiving player won
+
+#### 1.6 Waiting
 
 ```json
 {
-    "type": "waiting",
-    "current_players": number,
-    "required_players": number
+  "type": "waiting",
+  "current_players": 1,
+  "required_players": 2
 }
 ```
 
-#### Error
+Field Types:
+
+- `type`: String ("waiting") - Indicates game is in waiting state, i.e more players are needed
+- `current_players`: Integer - Number of players currently connected
+- `required_players`: Integer - Minimum number of players needed to start
+
+#### 1.7 Error
 
 ```json
 {
-    "type": "error",
-    "message": string
+  "type": "error",
+  "message": "Invalid game state detected",
+  "details": "Detailed error description"
 }
 ```
 
-### Client → Server Events
+Field Types:
+
+- `type`: String ("error") - Indicates an error event
+- `message`: String - Brief error message describing what went wrong
+- `details`: String (optional) - Detailed description of the error
+
+### 2. Client → Server Events
 
 #### Move Paddle
 
 ```json
 {
-    "action": "move_paddle",
-    "direction": "left|right",
-    "user_id": string
+  "action": "move_paddle",
+  "direction": "right",
+  "user_id": "player123"
 }
 ```
+
+Field Types:
+
+- `action`: String ("move_paddle") - Specifies the action to move the paddle.
+- `direction`: String - Direction to move the paddle. Possible values:
+  - `"left"`: Move the paddle to the left.
+  - `"right"`: Move the paddle to the right.
+- `user_id`: String - Unique identifier of the user making the request. This ensures the server knows which player's paddle to move.
 
 ### Connection Management
 
