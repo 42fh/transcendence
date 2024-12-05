@@ -287,23 +287,21 @@ async function handleStartGame(gameInterface) {
   }
   try {
     const result = await findOrCreateGame(formData);
-
-    if (result.success) {
-      console.log("result", result);
-      try {
-        initializeGameStructs(result.game_id, formData);
-        loadGame2DPage(result.game_id, result.ws_url, formData);
-      } catch (error) {
-        console.error("Error loading 2D game page:", error);
-        showToast("Error loading 2D game page", true);
-      }
-    } else {
-      showToast("Failed to join game", true);
-      return;
-    }
+    await handleStartGameAndJoinGameResult(result, formData);
   } catch (error) {
     console.error("Error handling start game:", error);
     showToast("Error handling start game", true);
+  }
+}
+
+// For joining existing games from the game list
+async function handleJoinGame(gameId, formData) {
+  try {
+    const result = await joinGame(gameId);
+    await initializeAndLoadGame(result, formData);
+  } catch (error) {
+    console.error("Error joining game:", error);
+    showToast("Error joining game", true);
   }
 }
 
@@ -322,5 +320,50 @@ async function findOrCreateGame(formData) {
     num_balls: formData.numBalls,
     score_mode: formData.scoreMode,
     debug: formData.debug,
+  });
+}
+
+async function handleStartGameAndJoinGameResult(result, formData) {
+  if (result.success) {
+    try {
+      initializeGameStructs(result.game_id, formData);
+      await loadGame2DPage(result.game_id, result.ws_url, formData);
+    } catch (error) {
+      console.error("Error loading 2D game page:", error);
+      showToast("Error loading 2D game page", true);
+      throw error;
+    }
+  } else {
+    showToast("Failed to join game", true);
+    throw new Error("Failed to join game");
+  }
+}
+
+// TODO: implement this in the game setup page
+function createGameList(games) {
+  const gamesList = document.getElementById("games-list");
+  gamesList.innerHTML = "";
+
+  games.forEach((game) => {
+    const gameElement = document.createElement("div");
+    gameElement.className = "game-item";
+    gameElement.innerHTML = `
+            <span>Game ${game.id}</span>
+            <button class="join-button">Join</button>
+        `;
+
+    gameElement.querySelector(".join-button").addEventListener("click", async () => {
+      // Get form data based on game settings
+      const formData = {
+        gameType: game.mode,
+        numPlayers: game.num_players,
+        numBalls: game.num_balls,
+        scoreMode: game.score_mode,
+      };
+
+      await handleJoinGame(game.id, formData);
+    });
+
+    gamesList.appendChild(gameElement);
   });
 }
