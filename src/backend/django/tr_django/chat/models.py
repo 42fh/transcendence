@@ -3,9 +3,6 @@ from django.conf import settings
 from django.utils import timezone
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
-from django.db.models.signals import post_save
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
 
 
 class ChatRoomManager(models.Manager):
@@ -113,37 +110,3 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification for {self.user.username}: {self.message[:50]}"
-
-
-# Signal handler to create a notification and send it via WebSocket
-# listens for post_save signal on the Message model.
-# Executes when a new Message is created (created=True)   ---> IS there other otions?
-@receiver(post_save, sender=Message)
-def create_message_notification(sender, instance, created, **kwargs):
-    if created:
-        # Determine the recipient based on the room and sender
-        room = instance.room
-        if instance.sender == room.user1:
-            recipient = room.user2
-        else:
-            recipient = room.user1
-
-        # Create a system notification
-        notification = Notification.objects.create(
-            user=recipient, message=f"New message from {instance.sender.username}"
-        )
-
-        # Send notification through WebSocket as a system message
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            f"notifications_{recipient.username}",
-            {
-                "type": "send_notification",
-                "username": "system",  # Explicitly set system username
-                "notification": {
-                    "id": notification.id,
-                    "message": notification.message,
-                    "created_at": notification.created_at.isoformat(),
-                },
-            },
-        )
