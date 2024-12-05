@@ -1,11 +1,20 @@
 .page-container--chat {
-  /* To be implemented */
-  display: grid;
-  grid-template-columns: 1fr 3fr;
+  padding: 1rem;
+  /* min-height: calc(100vh - var(--bottom-nav-height)); */
+  height: calc(100vh - var(--bottom-nav-height));
+
+  position: fixed;
+  top: 0;
+  left: 2rem;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 1rem 0 1rem;
 }
 
-/* Chats page */
-
+.chat-page__title {
+  margin: 0.4rem;
+}
 .chat-clickable-item {
   cursor: pointer;
 }

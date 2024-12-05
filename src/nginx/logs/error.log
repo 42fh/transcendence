@@ -3241,3 +3241,14 @@
 2024/12/05 15:08:48 [notice] 1#1: worker process 31 exited with code 0
 2024/12/05 15:08:48 [notice] 1#1: worker process 32 exited with code 0
 2024/12/05 15:08:48 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/05 18:22:45 [notice] 1#1: using the "epoll" event method
+2024/12/05 18:22:45 [notice] 1#1: nginx/1.26.1
+2024/12/05 18:22:45 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/12/05 18:22:45 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/12/05 18:22:45 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/12/05 18:22:45 [notice] 1#1: start worker processes
+2024/12/05 18:22:45 [notice] 1#1: start worker process 27
+2024/12/05 18:22:45 [notice] 1#1: start worker process 28
+2024/12/05 18:22:45 [notice] 1#1: start worker process 29
+2024/12/05 18:22:45 [notice] 1#1: start worker process 30
+2024/12/05 18:22:45 [notice] 1#1: start worker process 31
