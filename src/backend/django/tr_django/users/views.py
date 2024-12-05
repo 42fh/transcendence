@@ -4,6 +4,7 @@ import json
 import logging
 import random
 import os
+import requests
 from dotenv import load_dotenv
 from django.utils import timezone
 from datetime import timedelta
@@ -25,7 +26,9 @@ import logging
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
+from django.shortcuts import redirect
 
+from django.contrib.auth.models import User
 
 logger = logging.getLogger(__name__)
 load_dotenv(override=False)
@@ -291,6 +294,59 @@ class DeleteUserView(View):
         except Exception as e:
             logger.error(f"Error anonymizing user account: {str(e)}")
             return JsonResponse({"error": "Failed to delete account"}, status=500)
+
+
+def login_with_42(request):
+    print("fhdebug login_with_42 view called");
+    base_url = "https://api.intra.42.fr/oauth/authorize"
+    params = {
+        "client_id": settings.FORTYTWO_CLIENT_ID,
+        "redirect_uri": settings.FORTYTWO_REDIRECT_URI,
+        "response_type": "code",
+        "scope": "public",
+    }
+    query_string = "&".join([f"{key}={value}" for key, value in params.items()])
+    return redirect(f"{base_url}?{query_string}")
+
+
+def callback(request):
+    print("fhdebug callback view called");
+    code = request.GET.get('code')
+    print("fhdebug code received: ", code);
+    if not code:
+        return redirect("/")
+
+    # Exchange the code for an access token
+    token_url = "https://api.intra.42.fr/oauth/token"
+    data = {
+        "grant_type": "authorization_code",
+        "client_id": settings.FORTYTWO_CLIENT_ID,
+        "client_secret": settings.FORTYTWO_CLIENT_SECRET,
+        "code": code,
+        "redirect_uri": settings.FORTYTWO_REDIRECT_URI,
+    }
+
+    response = requests.post(token_url, data=data)
+    if response.status_code != 200:
+        return JsonResponse({"error": "Failed to obtain access token"}, status=403)
+
+    access_token = response.json().get("access_token")
+
+    # Fetch user information
+    user_info_url = "https://api.intra.42.fr/v2/me"
+    headers = {"Authorization": f"Bearer {access_token}"}
+    user_info_response = requests.get(user_info_url, headers=headers)
+    if user_info_response.status_code != 200:
+        return JsonResponse({"error": "Failed to fetch user info"}, status=403)
+
+    user_data = user_info_response.json()
+
+    # Create or log in the user
+    username = user_data["login"]
+    user, created = User.objects.get_or_create(username=username)
+    login(request, user)
+
+    return redirect('/')  # Redirect to a post-login page
 
 
 @method_decorator(csrf_exempt, name="dispatch")

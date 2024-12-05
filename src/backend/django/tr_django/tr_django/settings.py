@@ -34,6 +34,12 @@ else:
     # ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1']
 
 
+# oauth2 settings for remote authentication
+FORTYTWO_CLIENT_ID = 'u-s4t2ud-2397a8445813a8bd425ec3441329f32177defe7fafc399f865dd3beb020e14b9'
+FORTYTWO_CLIENT_SECRET = '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'
+FORTYTWO_REDIRECT_URI = 'https://r.000031.xyz/auth/oauth2/redirection'
+
+
 # Application definition
 
 INSTALLED_APPS = [
