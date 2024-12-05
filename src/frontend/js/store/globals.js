@@ -22,29 +22,22 @@ export const gameConfig = {
   },
 };
 
-// Dynamic game state
+// Game state
 /**
- * @typedef {Object} Player
- * @property {string} id - Player's unique identifier
- * @property {number} position - Player's position in the game
- * @property {boolean} active - Whether the player is currently active
- * @property {Object} values - Player-specific values (e.g., score, health)
- */
-
-/**
- * @typedef {Object} DynamicGameState
- * @property {Object} currentState - Current game state (positions, scores, etc.)
+ * @typedef {Object} GameState
+ * @property {Array<Object>} balls - Array of ball objects with positions and states
+ * @property {Array<Object>} paddles - Array of paddle objects with positions and states
+ * @property {Array<number>} scores - Array of player scores
+ * @property {Array<Object>} [vertices] - Optional array of vertex positions for polygon games
  * @property {Map<string, Player>} players - Map of players by ID
  * @property {Player} currentPlayer - The player using this client
  */
 
-/** @type {DynamicGameState} */
+/** @type {GameState} */
 export const gameState = {
-  currentState: {
-    balls: [],
-    paddles: [],
-    scores: [],
-  },
+  balls: [],
+  paddles: [],
+  scores: [],
   players: new Map(),
   currentPlayer: {
     id: "",
@@ -78,4 +71,39 @@ export function updateGlobalTournaments(tournaments) {
 
 export function getGlobalTournaments() {
   return globalTournaments;
+}
+
+/**
+ * Updates the current game state.
+ * @param {Object} newState - The new state of the game.
+ */
+export function updateGameState(newState) {
+  gameState.currentState = newState;
+}
+
+/**
+ * Updates the player values in the game state.
+ * @param {Object} values - An object containing player values keyed by player ID.
+ */
+export function updatePlayerValues(values) {
+  if (!values) return;
+
+  // Update current player values if they exist
+  if (values[gameState.currentPlayer.id]) {
+    gameState.currentPlayer.values = values[gameState.currentPlayer.id];
+  }
+
+  // Update all player values in the map
+  Object.entries(values).forEach(([playerId, playerValues]) => {
+    if (!gameState.players.has(playerId)) {
+      gameState.players.set(playerId, {
+        id: playerId,
+        values: playerValues,
+        active: true,
+      });
+    } else {
+      const player = gameState.players.get(playerId);
+      player.values = playerValues;
+    }
+  });
 }
