@@ -251,3 +251,11 @@
   color: var(--color-text);
   font-size: 0.8rem;
 }
+
+
+.chat-message-system {
+  background-color: #f0f0f0;
+  font-style: italic;
+  color: #666;
+  border-left: 3px solid #999;
+}

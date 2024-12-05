@@ -219,3 +219,37 @@ class ChatConsumer(AsyncWebsocketConsumer):
         return BlockedUser.objects.filter(
             models.Q(user=sender, blocked_user=recipient) | models.Q(user=recipient, blocked_user=sender)
         ).exists()
+
+
+class NotificationConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        try:
+            print(f"Connection attempt for user: {self.scope['user']}")
+            if self.scope["user"] is None or self.scope["user"].is_anonymous:
+                print("Anonymous user connection rejected")
+                await self.close()
+                return
+
+            self.group_name = f"notifications_{self.scope['user'].username}"
+            await self.channel_layer.group_add(self.group_name, self.channel_name)
+            await self.accept()
+            print(f"Notification WebSocket connected for {self.scope['user'].username}")
+        except Exception as e:
+            print(f"Connection error: {e}")
+            await self.close()
+
+    async def disconnect(self, close_code):
+        # Remove user from the group
+        if hasattr(self, "group_name"):
+            await self.channel_layer.group_discard(self.group_name, self.channel_name)
+        print(f"Notification WebSocket disconnected: {close_code}")
+
+    async def send_notification(self, event):
+        # Send notification to WebSocket
+        notification = event.get("notification", {})
+
+        await self.send(
+            text_data=json.dumps(
+                {"type": "send_notification", "username": event.get("username", "system"), "notification": notification}
+            )
+        )

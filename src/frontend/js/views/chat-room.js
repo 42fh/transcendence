@@ -1,5 +1,4 @@
 import { initializeChatWebSocket } from "../services/chatSocketService.js";
-import { displayModalError } from "../components/modal.js";
 
 export function loadChatRoom(chatPartner) {
   history.pushState(
@@ -61,18 +60,31 @@ function initializeChatRoom(chatPartner) {
 
   try {
     const handlers = {
-      addMessageToChat: (username, message, type) => {
+      addMessageToChat: (username, message, type, isSystemMessage = false) => {
         const template = document.getElementById("chat-message-template");
         const messageElement = document.importNode(template.content, true);
 
         const messageDiv = messageElement.querySelector(".chat-message");
+
+        // Special styling for system messages
+        if (isSystemMessage) {
+          messageDiv.classList.add("chat-message-system");
+          type = "system";
+        }
+
         messageDiv.classList.add(`chat-message-${type}`);
         const usernameElement = messageDiv.querySelector(
           ".chat-message-username"
         );
         const textElement = messageDiv.querySelector(".chat-message-text");
 
-        usernameElement.textContent = `${username}:`;
+        // Hide username for system messages
+        if (isSystemMessage) {
+          usernameElement.style.display = "none";
+        } else {
+          usernameElement.textContent = `${username}:`;
+        }
+
         textElement.textContent = message;
 
         chatMessages.appendChild(messageElement);
@@ -81,22 +93,38 @@ function initializeChatRoom(chatPartner) {
       handleWebSocketMessage: (data) => {
         console.log("Received WebSocket message:", data);
         if (data.type === "chat_message") {
+          const isSystemMessage = data.username === "system";
+
           handlers.addMessageToChat(
             data.username,
             data.message,
-            data.username === currentUser ? "self" : "other"
+            data.username === currentUser ? "self" : "other",
+            isSystemMessage
           );
         } else if (data.type === "message_history") {
           console.log("Processing history messages:", data.messages);
           data.messages.forEach((msg) => {
-            console.log("Processing message:", msg);
+            const isSystemMessage = msg.username === "system";
+
             handlers.addMessageToChat(
               msg.username,
               msg.message,
-              msg.username === currentUser ? "self" : "other"
+              msg.username === currentUser ? "self" : "other",
+              isSystemMessage
             );
           });
           handlers.state.messageHistoryLoaded = true;
+        } else if (data.type === "send_notification") {
+          // Debug: Log the received notification
+          console.log("DEBUG: Notification received:", data.notification);
+
+          // This ensures notifications come through as system messages
+          handlers.addMessageToChat(
+            "system",
+            data.notification.message,
+            "system",
+            true
+          );
         }
       },
       state: {
@@ -111,8 +139,30 @@ function initializeChatRoom(chatPartner) {
     displayModalError(`Failed to connect to chat: ${error.message}`);
   }
 
-  sendButton.onclick = () => sendMessage(chatPartner);
+  // Prevent system user from sending messages
+  sendButton.onclick = () => {
+    const messageInput = document.getElementById("chat-message-input");
+    const message = messageInput.value.trim();
+
+    if (message === "" || currentUser === "system") {
+      return;
+    }
+
+    const messageData = {
+      type: "chat_message",
+      username: currentUser,
+      message: message,
+      chatPartner: chatPartner,
+    };
+
+    chatSocket.send(JSON.stringify(messageData));
+    messageInput.value = "";
+  };
+
+  // Similar prevention for Enter key
   messageInput.onkeyup = (e) => {
-    if (e.key === "Enter") sendMessage(chatPartner);
+    if (e.key === "Enter" && currentUser !== "system") {
+      sendMessage(chatPartner);
+    }
   };
 }

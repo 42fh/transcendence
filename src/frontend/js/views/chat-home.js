@@ -4,8 +4,13 @@ import { fetchConversationList } from "../services/chatService.js";
 import { fetchUsers } from "../services/usersService.js";
 import { loadChatRoom } from "./chat-room.js";
 import { ASSETS } from "../config/constants.js";
+import {
+  setupNotificationListener,
+  addNotificationToContainer,
+} from "./notificationHandler.js";
 
 let conversationUsers = [];
+let notificationSocket = null;
 
 const LOCAL_STORAGE_KEYS = {
   USER_ID: "user_id",
@@ -28,6 +33,38 @@ export async function loadChatPage(addToHistory = true) {
 
     const content = document.importNode(template.content, true);
     mainContent.appendChild(content);
+
+    addNotificationToContainer("test");
+
+    console.log("Whole Local Storage:", localStorage);
+
+    const currentUser = localStorage.getItem("pongUsername");
+    if (currentUser) {
+      const wsUrlprev = `/ws/notifications/${currentUser}/`;
+      const wsUrl =
+        window.location.protocol === "https:"
+          ? `wss://${window.location.host}/ws/notifications/${currentUser}/`
+          : `ws://${window.location.host}/ws/notifications/${currentUser}/`;
+
+      console.log("wsurl:", wsUrl);
+      console.log("wsUrlprev:", wsUrlprev);
+
+      if (notificationSocket) {
+        try {
+          notificationSocket.close();
+        } catch (closeError) {
+          console.warn(
+            "Error closing existing notification socket:",
+            closeError
+          );
+        }
+      }
+
+      // Set up new notification socket
+      notificationSocket = setupNotificationListener(wsUrl);
+    } else {
+      console.error("No current user found for notifications");
+    }
 
     await loadChatList(1, 10, "");
 

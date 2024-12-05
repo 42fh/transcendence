@@ -121,19 +121,25 @@ class Notification(models.Model):
 @receiver(post_save, sender=Message)
 def create_message_notification(sender, instance, created, **kwargs):
     if created:
-        # Create notification for message recipient
-        recipient = instance.room.user2 if instance.sender == instance.room.user1 else instance.room.user1
+        # Determine the recipient based on the room and sender
+        room = instance.room
+        if instance.sender == room.user1:
+            recipient = room.user2
+        else:
+            recipient = room.user1
 
+        # Create a system notification
         notification = Notification.objects.create(
-            user=recipient, message=f"New message from {instance.sender.username}: {instance.content[:50]}"
+            user=recipient, message=f"New message from {instance.sender.username}"
         )
 
-        # Send notification through WebSocket
+        # Send notification through WebSocket as a system message
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
             f"notifications_{recipient.username}",
             {
                 "type": "send_notification",
+                "username": "system",  # Explicitly set system username
                 "notification": {
                     "id": notification.id,
                     "message": notification.message,
