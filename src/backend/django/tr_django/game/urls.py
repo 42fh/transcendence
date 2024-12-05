@@ -16,15 +16,16 @@ urlpatterns = [
     path("<str:game_id>/players/count/", views.player_count, name="player_count"),
     path("<str:game_id>/", views.game_settings, name="game_settings"),
     path("", views.transcendance, name="transcendance_home"),
+    path("tournaments/", views.all_tournaments, name="all_tournaments"),
     path(
         "tournaments/<int:tournament_id>/enrollment/",
         views.tournament_enrollment,
         name="tournament_enrollment",
     ),
+    path('tournament/debug/', views.debug_tournament, name="debug_tournament"),
     path(
         "tournaments/<int:tournament_id>/",
         views.single_tournament,
         name="single_tournament",
     ),
-    path("tournaments/", views.all_tournaments, name="all_tournaments"),
 ]

@@ -16,7 +16,7 @@ from asgiref.sync import sync_to_async
 from django.views.decorators.http import require_http_methods
 from django.utils.decorators import async_only_middleware
 import random
-
+from .tournamentmanager.utils import get_test_tournament_data
 
 def transcendance(request):
     return HttpResponse("Initial view for transcendance")
@@ -438,6 +438,94 @@ async def all_games(request):
 
     return JsonResponse({"message": "only GET requests are allowed"}, status=405)
 
+# ------ new Tournament
+from .tournamentmanager.TournamentManager import TournamentManager
+
+
+#@require_http_methods(["GET", "POST"])
+@csrf_exempt
+def all_tournaments(request):
+    if request.method == "GET":
+        tournament_list = Tournament.objects.all()
+        data = [build_tournament_data(t) for t in tournament_list]
+        return JsonResponse({"tournaments": data})
+        
+    elif request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            creator = Player.objects.get(user=request.user)
+            result = TournamentManager.create_tournament(data, data.get("game_settings", {}), creator)
+            
+            if result["status"]:
+                tournament = Tournament.objects.get(pk=result["tournament_id"])
+                return JsonResponse({
+                    "message": "Tournament created successfully",
+                    "tournament": build_tournament_data(tournament)
+                })
+            return JsonResponse({"error": result["message"]}, status=400)
+            
+        except (json.JSONDecodeError, Player.DoesNotExist) as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+@require_http_methods(["POST", "DELETE"])
+@csrf_exempt
+def tournament_enrollment(request, tournament_id):
+    try:
+        player = Player.objects.get(user=request.user)
+        
+        if request.method == "POST":
+            result = TournamentManager.add_player(tournament_id, player)
+        elif request.method == "DELETE":
+            result = TournamentManager.remove_player(tournament_id, player)
+        else:
+            return JsonResponse({"error": "Method not allowed"}, status=405)
+            
+        return JsonResponse(result, status=400 if not result["status"] else 200)
+        
+    except Player.DoesNotExist:
+        return JsonResponse({"error": "Player profile not found"}, status=400)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def debug_tournament(request):
+    """Debug endpoint to create tournament with sample data and get schedule"""
+    from datetime import timedelta   
+    try:
+        creator = Player.objects.get(user=request.user)
+        data = None
+        
+        if request.body:
+            try:
+                data = json.loads(request.body)
+            except json.JSONDecodeError:
+                pass
+                
+        tournament_data = get_test_tournament_data(data)
+        result = TournamentManager.create_tournament(tournament_data, {}, creator)
+        if not result["status"]:
+            return JsonResponse(result, status=400)
+        print("debug: " ,result)   
+        tournament_id = result["tournament_id"]
+        
+        # Add 4 sample players
+        sample_players = Player.objects.all()[:4]
+        print ("players: ", sample_players)
+        for player in sample_players:
+            result = TournamentManager.add_player(tournament_id, player)
+            print("debug2: ", result)
+        # Get schedule
+        schedule = TournamentManager.get_game_schedule(tournament_id)
+        
+        return JsonResponse({
+            "tournament_id": tournament_id,
+            "schedule": schedule
+        })
+        
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+
 
 # ----------------  Tournament and Game  -> database?
 
@@ -467,79 +555,6 @@ def create_game(request):
     return JsonResponse({"message": "only POST requests are allowed"}, status=400)
 
 
-# TODO: we have a naming issue here.
-@csrf_exempt
-def all_tournaments(request):
-    """
-    GET: List all tournaments
-    POST: Create a new tournament
-    """
-    if request.method == "GET":
-        tournament_list = Tournament.objects.all()
-        data = [build_tournament_data(t) for t in tournament_list]
-        return JsonResponse({"tournaments": data})
-    elif request.method == "POST":
-        return create_tournament(request)
-
-    return JsonResponse({"error": "Method not allowed"}, status=405)
-
-
-def create_tournament(request):
-    """Helper function to handle tournament creation logic"""
-    try:
-        data = json.loads(request.body)
-
-        # Get the Player instance associated with the user
-        try:
-            creator = Player.objects.get(user=request.user)
-        except Player.DoesNotExist:
-            return JsonResponse({"error": "Player profile not found"}, status=400)
-
-        # Convert frontend dates to backend format
-        start_date = timezone.make_aware(
-            datetime.fromisoformat(data["startingDate"].replace("Z", "+00:00"))
-        )
-        reg_start = timezone.make_aware(
-            datetime.fromisoformat(data["registrationStart"].replace("Z", "+00:00"))
-        )
-        reg_end = timezone.make_aware(
-            datetime.fromisoformat(data["registrationClose"].replace("Z", "+00:00"))
-        )
-
-        # Create tournament
-        tournament = Tournament.objects.create(
-            name=data["name"],
-            description=data["description"],
-            start_registration=reg_start,
-            end_registration=reg_end,
-            start_date=start_date,
-            type=data["type"].lower().replace(" ", "_"),
-            start_mode=Tournament.START_MODE_FIXED,
-            is_public=data["visibility"] == "public",
-            creator=creator,
-            min_participants=2,
-            max_participants=8,
-        )
-
-        # Handle private tournament allowed users
-        if data["visibility"] == "private" and data.get("allowedUsers"):
-            allowed_players = Player.objects.filter(
-                user__username__in=data["allowedUsers"]
-            )
-            tournament.allowed_players.set(allowed_players)
-
-        return JsonResponse(
-            {
-                "message": "Tournament created successfully",
-                "tournament": build_tournament_data(tournament),
-            }
-        )
-
-    except (json.JSONDecodeError, KeyError) as e:
-        return JsonResponse({"error": f"Invalid request data: {str(e)}"}, status=400)
-    except Exception as e:
-        return JsonResponse({"error": f"Server error: {str(e)}"}, status=500)
-
 
 @csrf_exempt
 def single_tournament(request, tournament_id):
@@ -568,33 +583,3 @@ def single_tournament(request, tournament_id):
     return JsonResponse({"error": "Method not allowed"}, status=405)
 
 
-@csrf_exempt
-def tournament_enrollment(request, tournament_id):
-    """
-    POST: Enroll in tournament
-    DELETE: Leave tournament
-    """
-    try:
-        tournament = Tournament.objects.get(pk=tournament_id)
-    except Tournament.DoesNotExist:
-        return JsonResponse({"error": "Tournament not found"}, status=404)
-
-    # Get the Player instance associated with the user
-    try:
-        player = Player.objects.get(user=request.user)
-    except Player.DoesNotExist:
-        return JsonResponse({"error": "Player profile not found"}, status=400)
-
-    if request.method == "POST":
-        if tournament.participants.filter(user=request.user).exists():
-            return JsonResponse({"error": "Already enrolled in tournament"}, status=400)
-        tournament.participants.add(player)
-        return JsonResponse({"message": f"Successfully enrolled in {tournament.name}"})
-
-    elif request.method == "DELETE":
-        if not tournament.participants.filter(user=request.user).exists():
-            return JsonResponse({"error": "Not enrolled in tournament"}, status=400)
-        tournament.participants.remove(player)
-        return JsonResponse({"message": f"Successfully left {tournament.name}"})
-
-    return JsonResponse({"error": "Method not allowed"}, status=405)
