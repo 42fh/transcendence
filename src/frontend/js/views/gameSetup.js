@@ -257,7 +257,8 @@ function validateFormData(formData) {
  * @returns {string|null} gameId of matching game or null if no match found
  */
 function findMatchingGame(games, formData) {
-  return (
+  console.log("findMatchingGame", games, formData);
+  const matchingGame =
     games.find(
       (game) =>
         // Match game mode
@@ -274,8 +275,9 @@ function findMatchingGame(games, formData) {
         // && game.score_mode === formData.scoreMode
         // Ensure there's room for more players
         game.players.current + game.players.reserved < game.players.total_needed
-    )?.game_id || null
-  );
+    )?.game_id || null;
+  console.log("matchingGame", matchingGame);
+  return matchingGame;
 }
 
 async function handleStartGame(gameInterface) {
@@ -291,6 +293,7 @@ async function handleStartGame(gameInterface) {
     console.log("games", games);
 
     const matchingGameId = findMatchingGame(games, formData);
+    console.log("matchingGameId", matchingGameId);
     if (matchingGameId) {
       gameId = matchingGameId;
       result = await joinGame(gameId);

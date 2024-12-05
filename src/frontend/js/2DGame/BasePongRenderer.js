@@ -1,4 +1,3 @@
-// BasePongRenderer.js
 export class BasePongRenderer {
   constructor(
     config = {

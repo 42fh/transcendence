@@ -1,8 +1,10 @@
 import { updateActiveNavItem } from "../components/bottom-nav.js";
 import { GameWebSocket } from "../2DGame/websocket.js";
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
+import { GAME_2D_CONFIG_TYPES } from "../config/gameConfigs.js";
 
 export async function loadGame2DPage(gameId, wsUrl, formData, addToHistory = true) {
+  console.log("Entered loadGame2DPage");
   try {
     if (addToHistory) {
       history.pushState(
@@ -13,6 +15,11 @@ export async function loadGame2DPage(gameId, wsUrl, formData, addToHistory = tru
         ""
       );
       updateActiveNavItem("home");
+    }
+    // We check if the game type exists
+    if (!GAME_2D_CONFIG_TYPES[formData.gameType]) {
+      showToast("Invalid game type selected", "error");
+      throw new Error("Invalid game type selected");
     }
 
     const template = document.getElementById("two-d-game__game-template");
