@@ -100,13 +100,12 @@ Use this message to control paddle position during gameplay.
 {
     "action": "move_paddle",
     "direction": "left" | "right",
-    "user_id": "<player_id>"
 }
 ```
 
 #### Constraints:
 - Direction must be either "left" or "right"
-- user_id must match your assigned player_id
+- user_id must match your assigned player_id -> user_id camo from  scope
 - Must respect movement cooldown
 - Cannot move beyond paddle length boundaries
 - Game must be running
