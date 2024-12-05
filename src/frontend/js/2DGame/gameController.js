@@ -5,6 +5,33 @@ import { GameWebSocket } from "./websocket.js";
 import { PolygonRenderer } from "./PolygonRenderer.js";
 import { CircularRenderer } from "./CircularRenderer.js";
 
+/**
+ * GameController class manages the game state and communication with the server.
+ * It handles WebSocket messages and updates the game state accordingly.
+ *
+ * @class
+ * @param {Object} renderer - The renderer used to display the game.
+ * @param {Function} [onEvent=null] - Callback function for handling game events.
+ *
+ * @property {GameState} gameState - The current state of the game.
+ * @property {Object} renderer - The renderer used to display the game.
+ * @property {WebSocket|null} websocket - The WebSocket connection to the server.
+ * @property {string|null} gameId - The ID of the current game.
+ * @property {string|null} playerId - The ID of the current player.
+ * @property {Function|null} onEvent - Callback function for handling game events.
+ *
+ * The onEvent callback is used to notify the UI of game events. It receives an event object
+ * with the following properties:
+ * - type: {string} The type of the event (e.g., "info", "game", "error").
+ * - message: {string} A brief message describing the event.
+ * - details: {string} Additional details about the event.
+ *
+ * Example usage:
+ * const controller = new GameController(renderer, (event) => {
+ *     console.log(`${event.type}: ${event.message}`);
+ *     updateEventLog(event);
+ * });
+ */
 export class GameController {
   constructor(renderer, onEvent = null) {
     this.gameState = new GameState();
