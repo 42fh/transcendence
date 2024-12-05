@@ -6,7 +6,7 @@ import { GAME_2D_CONFIG_TYPE_DEFAULT } from "../config/constants.js";
 // import { showToast } from "../components/toast.js";
 import { showToast } from "../utils/toast.js";
 import { fetchWaitingGames, createGame } from "../services/gameService.js";
-import { loadGame2DPage } from "./game2d.js";
+import { loadGame2DPage } from "./game2D.js";
 
 export function loadGameSetupPage(addToHistory = true) {
   console.log("loadGameSetupPage function called");
@@ -288,6 +288,7 @@ async function handleStartGame(gameInterface) {
   try {
     const games = await fetchWaitingGames();
     let result;
+    console.log("games", games);
 
     const matchingGameId = findMatchingGame(games, formData);
     if (matchingGameId) {
@@ -305,6 +306,7 @@ async function handleStartGame(gameInterface) {
       result = await createGame(gameSettings);
     }
     if (result.success) {
+      console.log("result", result);
       try {
         loadGame2DPage(result.game_id, result.ws_url, formData);
       } catch (error) {

@@ -121,8 +121,11 @@ async def create_new_game(request, use_redis_lock: bool = True):
             return JsonResponse(
                 {
                     "available": True,
-                    "ws_url": f"ws://localhost:8000/ws/game/{game_id}/",
+                    "game_id": game_id,
+                    "ws_url": f"/ws/game/{game_id}/",
+                    "full_ws_url": f"ws://localhost:8000/ws/game/{game_id}/",
                     "message": message,
+                    "settings": data,
                 },
                 status=201,
             )
@@ -134,12 +137,8 @@ async def create_new_game(request, use_redis_lock: bool = True):
 
     try:
         if use_redis_lock:
-            async with await GameCoordinator.get_redis(
-                GameCoordinator.REDIS_GAME_URL
-            ) as redis_conn:
-                async with RedisLock(
-                    redis_conn, f"player_lock:{async_request.user.id}"
-                ):
+            async with await GameCoordinator.get_redis(GameCoordinator.REDIS_GAME_URL) as redis_conn:
+                async with RedisLock(redis_conn, f"player_lock:{async_request.user.id}"):
                     return await create_game_logic()
         return await create_game_logic()
 
@@ -151,6 +150,14 @@ async def create_new_game(request, use_redis_lock: bool = True):
 @async_only_middleware
 @require_http_methods(["GET"])
 async def join_game(request, game_id, use_redis_lock: bool = True):
+    print("join_game", game_id)
+    print("request", request)
+    print("This is a new print!")
+    print()
+    print()
+    print()
+    print()
+    print()
 
     if request.method != "GET":
         return JsonResponse(
@@ -182,7 +189,9 @@ async def join_game(request, game_id, use_redis_lock: bool = True):
             return JsonResponse(
                 {
                     "available": True,
-                    "ws_url": f"ws://localhost:8000/ws/game/{game_id}/",
+                    "game_id": game_id,
+                    "ws_url": f"/ws/game/{game_id}/",
+                    "full_ws_url": f"ws://localhost:8000/ws/game/{game_id}/",
                     "message": message,
                 },
                 status=201,
@@ -195,9 +204,7 @@ async def join_game(request, game_id, use_redis_lock: bool = True):
 
     try:
         if use_redis_lock:
-            async with await GameCoordinator.get_redis(
-                GameCoordinator.REDIS_GAME_URL
-            ) as redis_conn:
+            async with await GameCoordinator.get_redis(GameCoordinator.REDIS_GAME_URL) as redis_conn:
                 async with RedisLock(redis_conn, f"player_lock:{user_id}"):
                     return await join_logic()
         return await join_logic()
@@ -258,9 +265,7 @@ async def debug_create_games(request):
                 if game_id:
                     await GameCoordinator.set_to_waiting_game(game_id)
 
-        return JsonResponse(
-            {"message": "Debug games created successfully", "status": 201}
-        )
+        return JsonResponse({"message": "Debug games created successfully", "status": 201})
 
     except Exception as e:
         return JsonResponse({"error": str(e), "status": 500})
@@ -379,9 +384,7 @@ async def user_online_status(request):
     DELETE: Set user as offline
     """
     if not request.user.is_authenticated:
-        return JsonResponse(
-            {"error": "Unauthorized", "message": "Authentication required"}, status=401
-        )
+        return JsonResponse({"error": "Unauthorized", "message": "Authentication required"}, status=401)
 
     user_id = str(request.user.id)
 
@@ -399,9 +402,7 @@ async def user_online_status(request):
             return JsonResponse({"message": "User set to offline", "user_id": user_id})
 
     except Exception as e:
-        return JsonResponse(
-            {"error": str(e), "message": "Failed to process request"}, status=500
-        )
+        return JsonResponse({"error": str(e), "message": "Failed to process request"}, status=500)
 
 
 @csrf_exempt
@@ -549,15 +550,9 @@ def create_tournament(request):
             return JsonResponse({"error": "Player profile not found"}, status=400)
 
         # Convert frontend dates to backend format
-        start_date = timezone.make_aware(
-            datetime.fromisoformat(data["startingDate"].replace("Z", "+00:00"))
-        )
-        reg_start = timezone.make_aware(
-            datetime.fromisoformat(data["registrationStart"].replace("Z", "+00:00"))
-        )
-        reg_end = timezone.make_aware(
-            datetime.fromisoformat(data["registrationClose"].replace("Z", "+00:00"))
-        )
+        start_date = timezone.make_aware(datetime.fromisoformat(data["startingDate"].replace("Z", "+00:00")))
+        reg_start = timezone.make_aware(datetime.fromisoformat(data["registrationStart"].replace("Z", "+00:00")))
+        reg_end = timezone.make_aware(datetime.fromisoformat(data["registrationClose"].replace("Z", "+00:00")))
 
         # Create tournament
         tournament = Tournament.objects.create(
@@ -576,9 +571,7 @@ def create_tournament(request):
 
         # Handle private tournament allowed users
         if data["visibility"] == "private" and data.get("allowedUsers"):
-            allowed_players = Player.objects.filter(
-                user__username__in=data["allowedUsers"]
-            )
+            allowed_players = Player.objects.filter(user__username__in=data["allowedUsers"])
             tournament.allowed_players.set(allowed_players)
 
         return JsonResponse(
@@ -610,13 +603,9 @@ def single_tournament(request, tournament_id):
         data = build_tournament_data(tournament)
         return JsonResponse(data)
     elif request.method in ["PUT", "PATCH"]:
-        return JsonResponse(
-            {"message": "Tournament update not implemented yet"}, status=501
-        )
+        return JsonResponse({"message": "Tournament update not implemented yet"}, status=501)
     elif request.method == "DELETE":
-        return JsonResponse(
-            {"message": "Tournament deletion not implemented yet"}, status=501
-        )
+        return JsonResponse({"message": "Tournament deletion not implemented yet"}, status=501)
 
     return JsonResponse({"error": "Method not allowed"}, status=405)
 

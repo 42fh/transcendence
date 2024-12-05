@@ -1,5 +1,11 @@
 export class GameWebSocket {
   constructor(gameId, playerId, onMessage, options = {}) {
+    console.log("GameWebSocket constructor params:", {
+      gameId,
+      playerId,
+      options,
+    });
+
     this.gameId = gameId;
     this.playerId = playerId;
     this.onMessage = onMessage;
@@ -10,7 +16,28 @@ export class GameWebSocket {
   }
 
   connect() {
+    console.log("GameWebSocket connecting with:", {
+      gameId: this.gameId,
+      playerId: this.playerId,
+      options: this.options,
+    });
     // Build query parameters
+    // Validate required parameters
+    if (!this.gameId || this.gameId === "undefined") {
+      console.error("Invalid game ID. Connection aborted.");
+      if (this.options.onReconnectFail) {
+        this.options.onReconnectFail();
+      }
+      return;
+    }
+
+    if (!this.playerId) {
+      console.error("Invalid player ID. Connection aborted.");
+      if (this.options.onReconnectFail) {
+        this.options.onReconnectFail();
+      }
+      return;
+    }
     const queryParams = new URLSearchParams({
       player: this.playerId,
       ...this.options,

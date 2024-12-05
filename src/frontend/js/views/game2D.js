@@ -1,5 +1,6 @@
 import { updateActiveNavItem } from "../components/bottom-nav.js";
 import { GameWebSocket } from "../2DGame/websocket.js";
+import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 
 export async function loadGame2DPage(gameId, wsUrl, formData, addToHistory = true) {
   try {
@@ -23,8 +24,10 @@ export async function loadGame2DPage(gameId, wsUrl, formData, addToHistory = tru
     mainContent.innerHTML = "";
     mainContent.appendChild(document.importNode(template.content, true));
 
+    const userId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
+
     // Initialize WebSocket connection immediately
-    const ws = new GameWebSocket(gameId, wsUrl, handleGameMessage, {
+    const ws = new GameWebSocket(gameId, userId, handleGameMessage, {
       type: formData.gameType,
       players: formData.numPlayers,
       balls: formData.numBalls,
