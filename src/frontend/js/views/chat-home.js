@@ -6,6 +6,7 @@ import { loadChatRoom } from "./chat-room.js";
 import { ASSETS } from "../config/constants.js";
 import { setupNotificationListener } from "../utils/notifications.js";
 import { showToast } from "../utils/toast.js";
+import { fetchNotifications } from "../services/chatNotificationService.js";
 
 let conversationUsers = [];
 let notificationSocket = null;
@@ -19,6 +20,12 @@ export async function loadChatPage(addToHistory = true) {
     if (addToHistory) {
       history.pushState({ view: "chat-home" }, "");
       updateActiveNavItem("chat");
+    }
+
+    try {
+      fetchNotifications();
+    } catch (error) {
+      console.error("Error with fetchNotifications");
     }
 
     const mainContent = document.getElementById("main-content");

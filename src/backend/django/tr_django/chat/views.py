@@ -174,39 +174,41 @@ def get_or_create_chat_room(self):
         raise
 
 
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+
+
 @login_required
 def notifications(request):
     try:
         if request.method == "GET":
-            notifications = Notification.objects.filter(user=request.user).order_by("-created_at")
+            # Hardcoded notifications for testing
+            notification_list = [
+                {
+                    "id": 1,
+                    "message": "You have a new message from John.",
+                    "created_at": "2024-12-05T14:30:00Z",  # Example ISO 8601 timestamp
+                    "is_read": False,
+                },
+                {
+                    "id": 2,
+                    "message": "Your profile has been updated successfully.",
+                    "created_at": "2024-12-04T10:15:00Z",
+                    "is_read": True,
+                },
+                {
+                    "id": 3,
+                    "message": "You have a new friend request from Alice.",
+                    "created_at": "2024-12-03T08:00:00Z",
+                    "is_read": False,
+                },
+            ]
 
-            notification_list = []
-            for notification in notifications:
-                notification_list.append(
-                    {
-                        "id": notification.id,
-                        "message": notification.message,
-                        "created_at": notification.created_at.isoformat(),
-                        "is_read": notification.is_read,
-                    }
-                )
-
+            # Return the hardcoded response
             return JsonResponse({"status": "success", "notifications": notification_list})
 
-        elif request.method == "POST":
-            # Create a new notification
-            data = json.loads(request.body)
-            message = data.get("message")
-
-            if not message:
-                return JsonResponse({"status": "error", "message": "Message is required"}, status=400)
-
-            Notification.objects.create(user=request.user, message=message)
-
-            return JsonResponse({"status": "success", "message": "Notification created successfully"})
-
-        else:
-            return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
+        # If the request method is not GET, return 405 Method Not Allowed
+        return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
 
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
