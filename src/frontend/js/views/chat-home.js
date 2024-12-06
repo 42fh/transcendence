@@ -6,7 +6,7 @@ import { loadChatRoom } from "./chat-room.js";
 import { ASSETS } from "../config/constants.js";
 import { setupNotificationListener } from "../utils/notifications.js";
 import { showToast } from "../utils/toast.js";
-import { fetchNotifications } from "../services/chatNotificationService.js";
+import { renderNotifications } from "./chatNotification.js";
 
 let conversationUsers = [];
 let notificationSocket = null;
@@ -23,9 +23,12 @@ export async function loadChatPage(addToHistory = true) {
     }
 
     try {
-      fetchNotifications();
+      const chatHomeTemplate = document.querySelector("#chat-home-template");
+      const chatHomeContent = chatHomeTemplate.content.cloneNode(true);
+      document.getElementById("main-content").appendChild(chatHomeContent);
+      await renderNotifications();
     } catch (error) {
-      console.error("Error with fetchNotifications");
+      console.error("Error with renderNotifications");
     }
 
     const mainContent = document.getElementById("main-content");

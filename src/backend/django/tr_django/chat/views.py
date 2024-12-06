@@ -8,6 +8,7 @@ from users.models import CustomUser
 import json
 from django.utils import timezone
 from channels.db import database_sync_to_async
+from django.http import JsonResponse
 
 
 @login_required
@@ -172,10 +173,6 @@ def get_or_create_chat_room(self):
     except Exception as e:
         print(f"DEBUG: Error in get_or_create_chat_room: {str(e)}")
         raise
-
-
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
 
 
 @login_required

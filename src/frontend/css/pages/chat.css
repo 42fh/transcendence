@@ -268,3 +268,45 @@
   color: #666;
   border-left: 3px solid #999;
 }
+
+.notification-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  font-size: 0.8rem;
+
+}
+
+.notification-item.is-unread {
+  /* background-color: #f0f0f0; */
+  font-weight: bold;
+  color:rgb(255, 255, 255)
+}
+
+.notification-item.is-read {
+  /* background-color: #ffffff; */
+  color:rgb(90, 90, 90)
+
+}
+
+.notification-message {
+  flex-grow: 1;
+  margin-right: 10px;
+}
+
+.notification-date {
+  color: #888;
+  font-size: 0.8em;
+}
+
+.notification-empty,
+.notification-error {
+  text-align: center;
+  color: #666;
+  padding: 20px;
+}
+
+.notification-error {
+  color: #d32f2f;
+}

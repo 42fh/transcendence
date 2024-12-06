@@ -3353,3 +3353,80 @@
 2024/12/05 21:21:25 [notice] 1#1: start worker process 29
 2024/12/05 21:21:25 [notice] 1#1: start worker process 30
 2024/12/05 21:21:25 [notice] 1#1: start worker process 31
+2024/12/05 23:53:18 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/12/05 23:53:18 [notice] 27#27: gracefully shutting down
+2024/12/05 23:53:18 [notice] 30#30: gracefully shutting down
+2024/12/05 23:53:18 [notice] 31#31: gracefully shutting down
+2024/12/05 23:53:18 [notice] 31#31: exiting
+2024/12/05 23:53:18 [notice] 29#29: gracefully shutting down
+2024/12/05 23:53:18 [notice] 28#28: gracefully shutting down
+2024/12/05 23:53:18 [notice] 27#27: exiting
+2024/12/05 23:53:18 [notice] 30#30: exiting
+2024/12/05 23:53:18 [notice] 31#31: exit
+2024/12/05 23:53:18 [notice] 29#29: exiting
+2024/12/05 23:53:18 [notice] 27#27: exit
+2024/12/05 23:53:18 [notice] 30#30: exit
+2024/12/05 23:53:18 [notice] 29#29: exit
+2024/12/05 23:53:18 [notice] 1#1: signal 17 (SIGCHLD) received from 27
+2024/12/05 23:53:18 [notice] 1#1: worker process 27 exited with code 0
+2024/12/05 23:53:18 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/05 23:53:18 [notice] 1#1: signal 17 (SIGCHLD) received from 30
+2024/12/05 23:53:18 [notice] 1#1: worker process 29 exited with code 0
+2024/12/05 23:53:18 [notice] 1#1: worker process 30 exited with code 0
+2024/12/05 23:53:18 [notice] 1#1: worker process 31 exited with code 0
+2024/12/05 23:53:18 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/05 23:53:48 [notice] 1#1: using the "epoll" event method
+2024/12/05 23:53:48 [notice] 1#1: nginx/1.26.1
+2024/12/05 23:53:48 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/12/05 23:53:48 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/12/05 23:53:48 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/12/05 23:53:48 [notice] 1#1: start worker processes
+2024/12/05 23:53:48 [notice] 1#1: start worker process 28
+2024/12/05 23:53:48 [notice] 1#1: start worker process 29
+2024/12/05 23:53:48 [notice] 1#1: start worker process 30
+2024/12/05 23:53:48 [notice] 1#1: start worker process 31
+2024/12/05 23:53:48 [notice] 1#1: start worker process 32
+2024/12/06 00:10:30 [error] 30#30: *65 open() "/usr/share/nginx/html/path/to/your/javascript-file.js" failed (2: No such file or directory), client: 192.168.65.1, server: localhost, request: "GET /path/to/your/javascript-file.js HTTP/1.1", host: "localhost:8443", referrer: "http://localhost:8443/"
+2024/12/06 00:13:28 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/12/06 00:13:28 [notice] 28#28: gracefully shutting down
+2024/12/06 00:13:28 [notice] 28#28: exiting
+2024/12/06 00:13:28 [notice] 29#29: gracefully shutting down
+2024/12/06 00:13:28 [notice] 30#30: gracefully shutting down
+2024/12/06 00:13:28 [notice] 32#32: gracefully shutting down
+2024/12/06 00:13:28 [notice] 31#31: gracefully shutting down
+2024/12/06 00:13:28 [notice] 28#28: exit
+2024/12/06 00:13:28 [notice] 30#30: exiting
+2024/12/06 00:13:28 [notice] 32#32: exiting
+2024/12/06 00:13:28 [notice] 31#31: exiting
+2024/12/06 00:13:28 [notice] 30#30: exit
+2024/12/06 00:13:28 [notice] 32#32: exit
+2024/12/06 00:13:28 [notice] 31#31: exit
+2024/12/06 00:13:28 [notice] 1#1: signal 17 (SIGCHLD) received from 28
+2024/12/06 00:13:28 [notice] 1#1: worker process 28 exited with code 0
+2024/12/06 00:13:28 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/06 00:13:28 [notice] 1#1: signal 17 (SIGCHLD) received from 31
+2024/12/06 00:13:28 [notice] 1#1: worker process 30 exited with code 0
+2024/12/06 00:13:28 [notice] 1#1: worker process 31 exited with code 0
+2024/12/06 00:13:28 [notice] 1#1: worker process 32 exited with code 0
+2024/12/06 00:13:28 [notice] 1#1: signal 17 (SIGCHLD) received from 32
+2024/12/06 00:13:28 [notice] 1#1: signal 29 (SIGIO) received
+2024/12/06 00:13:49 [notice] 1#1: using the "epoll" event method
+2024/12/06 00:13:49 [notice] 1#1: nginx/1.26.1
+2024/12/06 00:13:49 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/12/06 00:13:49 [notice] 1#1: OS: Linux 6.4.16-linuxkit
+2024/12/06 00:13:49 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/12/06 00:13:49 [notice] 1#1: start worker processes
+2024/12/06 00:13:49 [notice] 1#1: start worker process 28
+2024/12/06 00:13:49 [notice] 1#1: start worker process 29
+2024/12/06 00:13:49 [notice] 1#1: start worker process 30
+2024/12/06 00:13:49 [notice] 1#1: start worker process 31
+2024/12/06 00:13:49 [notice] 1#1: start worker process 32
+2024/12/06 00:14:01 [error] 28#28: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 192.168.65.1, server: localhost, request: "GET /api/chat/users/ HTTP/1.1", upstream: "http://172.19.0.4:8000/api/chat/users/", host: "localhost:8443", referrer: "http://localhost:8443/"
+2024/12/06 00:14:01 [error] 28#28: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 192.168.65.1, server: localhost, request: "GET /api/users/?page=1&per_page=10&search= HTTP/1.1", upstream: "http://172.19.0.4:8000/api/users/?page=1&per_page=10&search=", host: "localhost:8443", referrer: "http://localhost:8443/"
+2024/12/06 00:14:01 [error] 30#30: *4 connect() failed (111: Connection refused) while connecting to upstream, client: 192.168.65.1, server: localhost, request: "GET /ws/notifications/dev/ HTTP/1.1", upstream: "http://172.19.0.4:8000/ws/notifications/dev/", host: "localhost:8443"
+2024/12/06 00:14:05 [error] 28#28: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 192.168.65.1, server: localhost, request: "GET /api/chat/users/ HTTP/1.1", upstream: "http://172.19.0.4:8000/api/chat/users/", host: "localhost:8443", referrer: "http://localhost:8443/"
+2024/12/06 00:14:05 [error] 31#31: *7 connect() failed (111: Connection refused) while connecting to upstream, client: 192.168.65.1, server: localhost, request: "GET /ws/notifications/dev/ HTTP/1.1", upstream: "http://172.19.0.4:8000/ws/notifications/dev/", host: "localhost:8443"
+2024/12/06 00:14:05 [error] 28#28: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 192.168.65.1, server: localhost, request: "GET /api/users/?page=1&per_page=10&search= HTTP/1.1", upstream: "http://172.19.0.4:8000/api/users/?page=1&per_page=10&search=", host: "localhost:8443", referrer: "http://localhost:8443/"
+2024/12/06 00:14:09 [error] 28#28: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 192.168.65.1, server: localhost, request: "GET /api/chat/users/ HTTP/1.1", upstream: "http://172.19.0.4:8000/api/chat/users/", host: "localhost:8443", referrer: "http://localhost:8443/"
+2024/12/06 00:14:09 [error] 32#32: *12 connect() failed (111: Connection refused) while connecting to upstream, client: 192.168.65.1, server: localhost, request: "GET /ws/notifications/dev/ HTTP/1.1", upstream: "http://172.19.0.4:8000/ws/notifications/dev/", host: "localhost:8443"
+2024/12/06 00:14:09 [error] 28#28: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 192.168.65.1, server: localhost, request: "GET /api/users/?page=1&per_page=10&search= HTTP/1.1", upstream: "http://172.19.0.4:8000/api/users/?page=1&per_page=10&search=", host: "localhost:8443", referrer: "http://localhost:8443/"
