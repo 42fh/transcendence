@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Renderer Test</title>
+    <style>
+      .test-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
+      svg {
+        border: 1px solid #ccc;
+        background: #f0f0f0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="test-container">
+      <div>
+        <h3>Normal State</h3>
+        <svg id="normalState" width="300" height="300"></svg>
+      </div>
+      <div>
+        <h3>Collision State</h3>
+        <svg id="collisionState" width="300" height="300"></svg>
+      </div>
+    </div>
+    <script type="module" src="./renderer.js"></script>
+    <script type="module" src="./renderer.test.js"></script>
+  </body>
+</html>
