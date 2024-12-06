@@ -1,8 +1,9 @@
 // TODO: Implement game controller functional
 // TODO: Rename maybe to gameCore.js
 // Import necessary dependencies
-import { gameState, gameConfig, updateGameState, initializeRenderer } from "../store/globals.js";
-
+import { gameState, gameConfig, updateGameState } from "../store/globals.js";
+import { updateGameContext, initializeRenderer, updateRenderer } from "./renderer.js";
+import { disconnectGameSocket } from "../services/gameSocketService.js";
 export function handleGameMessage(message, onEvent = null) {
   try {
     switch (message.type) {
