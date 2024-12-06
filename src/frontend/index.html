@@ -865,7 +865,14 @@
               <div class="two-d-game__panel-header">
                 <h3 class="two-d-game__panel-title">Scores</h3>
               </div>
-              <div id="two-d-game__score-display" class="two-d-game__score-display"></div>
+              <div id="two-d-game__score-display" class="two-d-game__score-display">
+                <template id="two-d-game__score-item-template">
+                  <div class="two-d-game__score-item">
+                    <span class="two-d-game__player-name"></span>
+                    <span class="two-d-game__player-score"></span>
+                  </div>
+                </template>
+              </div>
             </div>
 
             <div class="two-d-game__controls-info">

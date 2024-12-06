@@ -80,9 +80,43 @@ export const gameState = {
 };
 
 /**
+ * @typedef {Object} Player
+ * @property {string} id - Player ID
+ * @property {string} username - Player username
+ * @property {number} index - Player's position index in the game (0-based)
+ * @property {number} score - Player's score
+ * @property {string} role - Player role ("player" or "spectator")
+ * @property {boolean} isCurrentPlayer - Whether the player is the current player
+ * @property {boolean} isActive - Whether the player is active
+ *
+ * @example
+ * const player = {
+ *   id: "123",
+ *   username: "John Doe",
+ *   index: 0,
+ *   score: 0,
+ *   role: "player",
+ *   isCurrentPlayer: false,
+ *   isActive: true,
+ * };
+ */
+
+export const defaultPlayer = {
+  id: "",
+  username: "",
+  index: 0,
+  score: 0,
+  role: "player",
+  isCurrentPlayer: false,
+  isActive: false,
+};
+
+/**
  * @typedef {Object} GameContext
  * @property {GameState} game_state - The current state of the game
  * @property {string} role - Player role ("player" or "spectator")
+ * @property {Array<Player>} players - Array of player objects
+ * @property {Array<Player>} spectators - Array of spectator objects
  * @property {number|null} player_index - Player's position in the game (null for spectators)
  * @property {string} message - System message for the player
  * @property {PlayerValues} player_values - Player-specific settings
@@ -93,6 +127,8 @@ export const gameState = {
 export const gameContext = {
   game_state: gameState,
   role: "spectator",
+  players: [],
+  spectators: [],
   player_index: null,
   message: "Welcome to the game!",
   player_values: {
@@ -170,7 +206,6 @@ export function updatePlayerValues(values) {
  * @property {Array<Object>} vertices - Vertex positions for polygon games
  * @property {Object|null} state - Current game state
  * @property {HTMLElement|null} svg - SVG element for rendering
- * @property {HTMLElement|null} scoreList - Element for displaying scores
  * @property {string|null} type - Type of renderer ("polygon" or "circular")
  * @property {RendererConfig} config - Renderer configuration
  */
@@ -182,7 +217,6 @@ export const nastyGlobalRendererState = {
   vertices: [],
   state: null,
   svg: null,
-  scoreList: null,
   type: null,
 
   // Configuration

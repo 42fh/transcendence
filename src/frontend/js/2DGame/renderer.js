@@ -1,4 +1,4 @@
-import { nastyGlobalRendererState as renderer } from "./../store/globals.js";
+import { nastyGlobalRendererState as renderer, gameContext } from "./../store/globals.js";
 
 /**
  * Initializes the renderer with all necessary data from the initial state message
@@ -10,7 +10,8 @@ export function initializeRenderer(message) {
   // Note: Vertices set only in initial state message
   renderer.vertices = message.game_setup.vertices || [];
   renderer.svg = document.getElementById("pongSvg");
-  renderer.scoreList = document.getElementById("scoreDisplay");
+  renderer.playerIndex = message.player_index;
+  //   renderer.scoreList = document.getElementById("scoreDisplay");
   updateRenderer(message);
   if (!renderer.svg) {
     throw new Error("SVG element not found");
@@ -57,21 +58,37 @@ export function createSVGElement(type, attributes) {
 
 /**
  * Renders the score display
- * @param {RendererState} renderer - The renderer state object
  */
-export function renderScores(renderer) {
-  if (!renderer.scoreList || !renderer.state.scores) return;
+export function renderScores() {
+  const scoreDisplay = document.getElementById("two-d-game__score-list");
+  if (!scoreDisplay || !gameContext.players.length) {
+    console.warn("Score display not found or no players available", {
+      scoreDisplay,
+      players: gameContext.players,
+    });
+    return;
+  }
 
-  renderer.scoreList.innerHTML = "<h3>Scores</h3>";
-  renderer.state.scores.forEach((score, index) => {
-    const scoreItem = document.createElement("div");
-    scoreItem.className = "two-d-game__score-item";
-    if (index === renderer.playerIndex) {
-      scoreItem.classList.add("current-player");
-    }
-    scoreItem.innerHTML = `Player ${index + 1}: ${score}`;
-    renderer.scoreList.appendChild(scoreItem);
-  });
+  scoreDisplay.innerHTML = "";
+  const template = document.getElementById("two-d-game__score-item-template");
+
+  gameContext.players
+    .sort((a, b) => a.index - b.index) // Ensure consistent display order
+    .forEach((player) => {
+      const scoreItem = template.content.cloneNode(true);
+      const container = scoreItem.querySelector(".two-d-game__score-item");
+
+      if (player.isCurrentPlayer) {
+        container.classList.add("two-d-game__score-item--current");
+      }
+
+      container.querySelector(".two-d-game__player-name").textContent = player.isCurrentPlayer
+        ? "You"
+        : player.username;
+      container.querySelector(".two-d-game__player-score").textContent = player.score.toString();
+
+      scoreDisplay.appendChild(scoreItem);
+    });
 }
 
 /**
@@ -79,7 +96,13 @@ export function renderScores(renderer) {
  * @param {RendererState} renderer - The renderer state object
  */
 export function renderBalls(renderer) {
-  if (!renderer.svg || !renderer.state.balls) return;
+  if (!renderer.svg || !renderer.state.balls) {
+    console.warn("No SVG element or balls available for rendering", {
+      svg: renderer.svg,
+      balls: renderer.state.balls,
+    });
+    return;
+  }
 
   renderer.state.balls.forEach((ball) => {
     const ballX = renderer.config.center + ball.x * renderer.config.scale;
