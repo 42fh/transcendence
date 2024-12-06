@@ -150,14 +150,6 @@ async def create_new_game(request, use_redis_lock: bool = True):
 @async_only_middleware
 @require_http_methods(["GET"])
 async def join_game(request, game_id, use_redis_lock: bool = True):
-    print("join_game", game_id)
-    print("request", request)
-    print("This is a new print!")
-    print()
-    print()
-    print()
-    print()
-    print()
 
     if request.method != "GET":
         return JsonResponse(
