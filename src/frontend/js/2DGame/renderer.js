@@ -30,15 +30,13 @@ export function updateRenderer(message) {
 
   renderer.playerIndex = message.player_index;
   renderer.state = message.game_state;
-}
 
-/**
- * Updates renderer with new game state
- * @param {RendererState} renderer - The renderer state object
- * @param {Object} gameState - New game state
- */
-export function updateRenderer(renderer, gameState) {
-  renderer.state = gameState;
+  // Update scores in game context
+  if (message.game_state.scores) {
+    gameContext.players.forEach((player) => {
+      player.score = message.game_state.scores[player.index] || 0;
+    });
+  }
   render(renderer);
 }
 
@@ -148,13 +146,37 @@ export function showGameOver(renderer, isWinner) {
  * @param {RendererState} renderer - The renderer state object
  */
 export function render(renderer) {
-  if (renderer.type === "polygon") {
-    renderPolygonGame(renderer);
-  } else if (renderer.type === "circular") {
-    renderCircularGame(renderer);
+  if (!renderer.type) {
+    console.warn("Renderer not initialized");
+    return;
+  }
+
+  try {
+    switch (renderer.type) {
+      case "polygon":
+        renderPolygonGame(renderer);
+        break;
+      case "circular":
+        // renderCircularGame(renderer);
+        console.warn("Circular game not implemented");
+        break;
+      default:
+        console.warn(`Unknown renderer type: ${renderer.type}`);
+    }
+  } catch (error) {
+    console.error("Error in render:", error);
+    showError(renderer, {
+      type: "render",
+      message: "Failed to render game",
+      details: error.message,
+    });
   }
 }
 
+/**
+ * Renders the polygon game type
+ * @param {RendererState} renderer - The renderer state object
+ */
 export function renderPolygonGame(renderer) {
   // Validate required data is available
   if (!renderer.state || !renderer.svg || !renderer.vertices || renderer.vertices.length === 0) {
@@ -167,11 +189,11 @@ export function renderPolygonGame(renderer) {
   }
 
   // Log render debug info
-  console.log("Rendering polygon with:", {
-    verticesCount: renderer.vertices.length,
-    paddlesCount: renderer.state.paddles.length,
-    svgElement: renderer.svg.id,
-  });
+  //   console.log("Rendering polygon with:", {
+  //     verticesCount: renderer.vertices.length,
+  //     paddlesCount: renderer.state.paddles.length,
+  //     svgElement: renderer.svg.id,
+  //   });
 
   // Clear previous render
   renderer.svg.innerHTML = "";
@@ -179,9 +201,10 @@ export function renderPolygonGame(renderer) {
   try {
     // Render components
     renderPolygonOutline(renderer);
-    renderer.state.paddles.forEach((paddle) => {
-      renderPaddle(renderer, paddle, paddle.side_index);
-    });
+    // renderer.state.paddles.forEach((paddle) => {
+    //   renderPaddle(renderer, paddle, paddle.side_index);
+    // });
+    renderPaddles(renderer);
     renderBalls(renderer);
     renderScores(renderer);
   } catch (error) {
@@ -200,6 +223,133 @@ function transformVertices(renderer, vertices) {
     x: renderer.config.center + vertex.x * renderer.config.scale,
     y: renderer.config.center - vertex.y * renderer.config.scale,
   }));
+}
+
+/**
+ * Renders a single paddle on its assigned side
+ * @param {RendererState} renderer - The renderer state object
+ * @param {Object} paddle - Paddle data from game state
+ * @param {number} sideIndex - Index of the side where paddle should be rendered
+ * @param {boolean} debug - Flag to show debug information
+ */
+export function renderPaddle(renderer, paddle, sideIndex, debug = false) {
+  // Skip inactive paddles
+  if (!paddle.active || !renderer.vertices) return;
+
+  // Transform vertices
+  const transformedVertices = transformVertices(renderer, renderer.vertices);
+  const startVertex = transformedVertices[sideIndex];
+  const endVertex = transformedVertices[(sideIndex + 1) % transformedVertices.length];
+
+  // Calculate paddle geometry
+  const sideX = endVertex.x - startVertex.x;
+  const sideY = endVertex.y - startVertex.y;
+  const sideLength = Math.sqrt(sideX * sideX + sideY * sideY);
+
+  // Calculate normalized vectors
+  const normalizedSideX = sideX / sideLength;
+  const normalizedSideY = sideY / sideLength;
+  const normalX = sideY / sideLength;
+  const normalY = -sideX / sideLength;
+
+  // Calculate paddle position and dimensions
+  const paddleX = startVertex.x + sideX * paddle.position;
+  const paddleY = startVertex.y + sideY * paddle.position;
+  const paddleLength = renderer.state.dimensions.paddle_length * sideLength;
+  const paddleWidth = renderer.state.dimensions.paddle_width * renderer.config.scale;
+  const hitZoneWidth =
+    (renderer.state.dimensions.paddle_width + (renderer.state.dimensions.ball_size || 0.1) * 2) * renderer.config.scale;
+
+  // Determine paddle state
+  const isCurrentPlayer = renderer.state.paddles.indexOf(paddle) === renderer.playerIndex;
+
+  // Render paddle
+  const paddlePoints = calculatePaddlePoints(
+    paddleX,
+    paddleY,
+    normalizedSideX,
+    normalizedSideY,
+    normalX,
+    normalY,
+    paddleLength,
+    paddleWidth
+  );
+
+  renderer.svg.appendChild(
+    createSVGElement("polygon", {
+      points: paddlePoints,
+      fill: isCurrentPlayer ? "rgba(255,165,0,0.6)" : "rgba(0,0,255,0.6)",
+      stroke: isCurrentPlayer ? "orange" : "blue",
+      "stroke-width": "1",
+    })
+  );
+
+  if (debug) {
+    const isColliding = renderer.state.collision?.side_index === paddle.side_index;
+
+    // Render hit zone if debug mode is on
+    const hitZonePoints = calculatePaddlePoints(
+      paddleX,
+      paddleY,
+      normalizedSideX,
+      normalizedSideY,
+      normalX,
+      normalY,
+      paddleLength,
+      hitZoneWidth
+    );
+
+    renderer.svg.appendChild(
+      createSVGElement("polygon", {
+        points: hitZonePoints,
+        fill: isColliding ? "rgba(255,0,0,0.1)" : "rgba(0,255,0,0.1)",
+        stroke: isColliding ? "red" : "green",
+        "stroke-width": "1",
+        "stroke-dasharray": "4",
+      })
+    );
+
+    // Add paddle label
+    const labelX = paddleX + normalX * (hitZoneWidth + 20);
+    const labelY = paddleY + normalY * (hitZoneWidth + 20);
+    const playerIndex = renderer.state.paddles.indexOf(paddle);
+
+    renderer.svg.appendChild(
+      createSVGElement("text", {
+        x: labelX,
+        y: labelY,
+        "text-anchor": "middle",
+        "dominant-baseline": "middle",
+        fill: isCurrentPlayer ? "orange" : "blue",
+        "font-size": "12px",
+        textContent: `P${playerIndex + 1}`,
+      })
+    );
+  }
+}
+
+// Update the renderPaddles function to pass the debug flag
+export function renderPaddles(renderer) {
+  if (!renderer.state?.paddles) {
+    console.warn("No paddles available for rendering");
+    return;
+  }
+
+  renderer.state.paddles.forEach((paddle) => {
+    renderPaddle(renderer, paddle, paddle.side_index, renderer.config.debug);
+  });
+}
+
+/**
+ * Helper function to calculate paddle points
+ */
+function calculatePaddlePoints(x, y, normalizedSideX, normalizedSideY, normalX, normalY, length, width) {
+  return [
+    `${x - (normalizedSideX * length) / 2},${y - (normalizedSideY * length) / 2}`,
+    `${x + (normalizedSideX * length) / 2},${y + (normalizedSideY * length) / 2}`,
+    `${x + (normalizedSideX * length) / 2 + normalX * width},${y + (normalizedSideY * length) / 2 + normalY * width}`,
+    `${x - (normalizedSideX * length) / 2 + normalX * width},${y - (normalizedSideY * length) / 2 + normalY * width}`,
+  ].join(" ");
 }
 
 export function renderPolygonOutline(renderer) {
