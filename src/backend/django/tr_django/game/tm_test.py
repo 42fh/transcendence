@@ -53,7 +53,7 @@ class TournamentNotificationTest(TestCase):
             self.skipTest("Test disabled")
 
 
-    @select_test(enabled=False)
+    @select_test(enabled=True)
     def test_tournament_flow(self):
         print("\n=== Starting Tournament Flow Test ===")
         

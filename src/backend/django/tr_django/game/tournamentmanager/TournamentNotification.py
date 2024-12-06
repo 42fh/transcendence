@@ -14,7 +14,7 @@ class TournamentNotificationConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.tournament_id = self.scope["url_route"]["kwargs"]["tournament_id"]
         self.group_name = f"tournament_{self.tournament_id}"
-        
+        self.player_id =  self.scope["user"].player.id
         # Check if user is authenticated
         if not self.scope["user"].is_authenticated:
             await self.close(code=4001)  # Custom code: Not authenticated
@@ -39,13 +39,15 @@ class TournamentNotificationConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
     async def tournament_notification(self, event):
-        await self.send(text_data=json.dumps(event["message"]))
+        if "player_id" not in message or self.player_id == message["player_id"]:
+            await self.send(text_data=json.dumps(event["message"]))
 
 class TournamentNotifier:
     NOTIFICATION_TYPES = {
         "PLAYER_JOINED": "player_joined",
         "PLAYER_LEFT": "player_left", 
         "GAME_READY": "game_ready",
+        "WAITING_OPPONENT": "waiting_opponent",
         "GAME_NEEDS_PLAYERS": "game_needs_players",
         "SPECTATE_AVAILABLE": "spectate_available"
     }
@@ -61,11 +63,22 @@ class TournamentNotifier:
             "username": username
         })
 
-    async def game_ready(self, game_id, ws_url):
+    async def waiting_for_opponent(self, game_id: int, message: str):
+        await self.notify({
+            "type": self.NOTIFICATION_TYPES["WAITING_OPPONENT"],
+            "game_id": game_id,
+            "message": message,
+            "player_id": player_id
+        })
+
+
+
+    async def game_ready(self, game_id, ws_url, player_id):
         await self.notify({
             "type": self.NOTIFICATION_TYPES["GAME_READY"],
             "game_id": game_id,
-            "ws_url": ws_url
+            "ws_url": ws_url,
+            "player_id": player_id
         })
 
     async def game_needs_players(self, game_id):

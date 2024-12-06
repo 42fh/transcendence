@@ -9,7 +9,6 @@ from typing import List, Dict
 from django.utils import timezone
 from datetime import timedelta
 import random
-from ..models import Tournament, TournamentGame, TournamentGameSchedule, Player
 import math
 import logging
 
@@ -47,6 +46,7 @@ class TournamentManager:
     @classmethod
     def create_tournament(cls, tournament_data: Dict, game_settings: Dict, creator: Player) -> Dict:
         """Creates tournament with game settings and returns status dict"""
+        from ..models import Tournament, TournamentGame, TournamentGameSchedule, Player
         try:
             start_date = timezone.make_aware(datetime.fromisoformat(tournament_data["startingDate"].replace("Z", "+00:00"))) 
             reg_start = timezone.make_aware( 
@@ -177,16 +177,9 @@ class TournamentManager:
             cls._create_single_elimination_bracket(tournament)
         elif tournament.type == Tournament.TYPE_ROUND_ROBIN:
             cls._create_round_robin_schedule(tournament)
-        elif tournament.type == Tournament.TYPE_KNOCKOUT:
-            cls._create_knockout_bracket(tournament)
-        elif tournament.type == Tournament.TYPE_DOUBLE_ELIMINATION:
-            cls._create_double_elimination_bracket(tournament)
-
-        tournament.save()
         
-        # Notify players that tournament is starting for this we need the Gamecordinator
-        notifier = TournamentNotifier(tournament.id)
-        # async_to_sync(notifier.game_ready)()
+        tournament.save()
+        cls.create_rounds(tournament.id)        
 
     @classmethod
     def get_game_schedule(cls, tournament_id: int) -> Dict:
@@ -248,12 +241,9 @@ class TournamentManager:
             }
 
     @classmethod
-    def create_rounds(cls, tournament_id: int): 
+    def create_rounds(cls, tournament_id: str): 
         """
-        Checks all rounds in tournament and creates/updates games as needed.
-        - Creates GameCoordinator games for full tournament games
-        - Notifies players of game status
-        - Handles tournament completion
+        Unified round creation and game status management for all tournament types.
         """
         try:
             tournament = Tournament.objects.get(pk=tournament_id)
@@ -261,22 +251,39 @@ class TournamentManager:
                 tournament=tournament
             ).select_related('game').order_by('round_number')
             
-            tournament_completed = True  # Flag to track if all games are complete
-            games_started = 0  # Counter for started games
+            tournament_completed = True
+            games_started = 0
             
+            # First handle completed games
+            for schedule in games:
+                game = schedule.game
+                if game.status == 'FINISHED':
+                    game.get_game_logic().handle_game_completion()
+
+            # Then check for games that can be started
             for schedule in games:
                 game = schedule.game
                 players = list(game.players.all())
                 
-                # Skip if game empty or completed
-                if not players or game.status == TournamentGame.COMPLETED:
+                if not players or game.status == 'FINISHED':
                     continue
                     
-                tournament_completed = False  # At least one game not complete
-                    
-                # If game has all required players
+                tournament_completed = False
+
                 if len(players) == tournament.max_participants:
-                    if game.status != TournamentGame.IN_PROGRESS:  # Don't recreate if already running
+                    # Check if any players are in a READY game
+                    players_in_ready = any(
+                        TournamentGame.objects.filter(
+                            players=player,
+                            status='READY'
+                        ).exists() for player in players
+                    )
+                    
+                    if not players_in_ready and game.status == 'DRAFT':
+                        game.status = 'READY'
+                        game.save()
+                    
+                    if game.status == 'READY':
                         response = GameCoordinator.create_tournament_game(
                             real_game_id=game.id,
                             tournament_id=tournament_id,
@@ -285,46 +292,49 @@ class TournamentManager:
                         )
                         
                         if response["status"] == "running":
-                            game.status = TournamentGame.IN_PROGRESS
+                            game.status = 'ACTIVE'
                             game.save()
                             games_started += 1
                             
                             # Notify players
                             notifier = TournamentNotifier(tournament_id)
                             for player_id, ws_url in response["player_urls"]:
-                                async_to_sync(notifier.game_ready)(game.id, ws_url)
+                                async_to_sync(notifier.game_ready)(game.id, ws_url, player_id)
                 else:
+                    # Players waiting for opponents
                     tournament_completed = False
-                    # Game waiting for players
                     notifier = TournamentNotifier(tournament_id)
-                    async_to_sync(notifier.game_needs_players)(game.id)
-                    
-                    # Get list of running games for spectating
-                    running_games = games.filter(
-                        game__status=TournamentGame.IN_PROGRESS
-                    )
-                    for running_game in running_games:
-                        async_to_sync(notifier.spectate_available)(
-                            running_game.game.id,
-                            f"ws/game/{tournament_id}:{running_game.game.id}/"
+                    for player in players:
+                        async_to_sync(notifier.waiting_for_opponent)(
+                            game.id,
+                            f"Waiting for opponent in Game {schedule.match_number} (Round {schedule.round_number})",
+                            player.id
                         )
+
             if tournament_completed:
                 tournament.status = Tournament.STATUS_COMPLETED
                 tournament.save()
-                # Notify tournament completion
                 notifier = TournamentNotifier(tournament_id)
                 async_to_sync(notifier.tournament_complete)(tournament_id)
-            logger.info(f"status: {True} //  message: Rounds processed. {games_started} new games started. // tournament_completed: {tournament_completed} ")
-            return 
-            
+
+            return {
+                "status": True,
+                "games_started": games_started,
+                "tournament_completed": tournament_completed
+            }
+                
         except Tournament.DoesNotExist:
-            logger.error(f"status: {False} //  message: Tournament not found")
-            return 
+            return {
+                "status": False,
+                "message": "Tournament not found",
+                "error_code": "NOT_FOUND"
+            }
         except Exception as e:
-            logger.error(f"status: {False} //  message: Error processing rounds: {str(e)}")
-            return 
-
-
+            return {
+                "status": False,
+                "message": f"Error processing rounds: {str(e)}",
+                "error_code": "SERVER_ERROR"
+            }
 
     @classmethod
     def _create_single_elimination_bracket(cls, tournament: Tournament):
@@ -419,16 +429,15 @@ class TournamentManager:
 
     @classmethod
     def _create_round_robin_schedule(cls, tournament: Tournament):
-        """Creates a round robin tournament schedule"""
         players = list(tournament.participants.all())
         if len(players) % 2:
-            players.append(None)  # Add bye if odd number of players
+            players.append(None)  
             
         n = len(players)
         rounds = n - 1
         matches_per_round = n // 2
         game_time = tournament.start_date
-        
+
         for round_num in range(rounds):
             for match in range(matches_per_round):
                 player1_idx = (round_num + match) % (n - 1)
@@ -439,25 +448,22 @@ class TournamentManager:
                 player1 = players[player1_idx]
                 player2 = players[player2_idx]
                 
-                if player1 and player2:  # Skip if either player is None (bye)
+                if player1 and player2:
                     game = TournamentGame.objects.create(
                         game_type=TournamentGame.GAME_TYPE_ROUND_ROBIN,
-                        status=TournamentGame.READY,
+                        status=TournamentGame.READY if round_num == 0 else TournamentGame.DRAFT,
                         start_date=game_time,
-                        group_number=1  # All players in same group for simple round robin
+                        group_number=1
                     )
                     game.players.add(player1, player2)
                     
                     TournamentGameSchedule.objects.create(
                         tournament=tournament,
-                        game=game,
+                        game=game, 
                         round_number=round_num + 1,
                         match_number=match + 1,
                         scheduled_time=game_time
                     )
                     game_time += timedelta(minutes=30)
             
-            # Rotate players for next round
             players.insert(1, players.pop())
-
-

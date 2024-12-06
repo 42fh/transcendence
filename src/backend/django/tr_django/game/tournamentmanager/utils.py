@@ -12,7 +12,7 @@ def get_base_tournament_data() -> Dict:
         "start_date": now + timedelta(days=4),
         "registration_start": now, 
         "registration_end": now + timedelta(days=3),
-        "type": "single_elimination",
+        "type": "round_robin",
         "visibility": "public",
         "game_mode": "1v1",
         "min_participants": 2,
