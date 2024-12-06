@@ -331,7 +331,7 @@ def callback(request):
     if response.status_code != 200:
         print("fhdebug: ", response.text)
         return JsonResponse({"error": "Failed to obtain access token"}, status=403)
-
+    
     access_token = response.json().get("access_token")
 
     # Fetch user information
@@ -345,7 +345,11 @@ def callback(request):
 
     # Create or log in the user
     username = user_data["login"]
-    user, created = User.objects.get_or_create(username=username)
+
+    # user = CustomUser.objects.create(username=username, password=make_password(password))
+
+    # user, created = User.objects.get_or_create(username=username)
+    user, created = CustomUser.objects.get_or_create(username=f"42_{username}")
     login(request, user)
 
     return redirect('/')  # Redirect to a post-login page
