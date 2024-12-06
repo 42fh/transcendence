@@ -12,8 +12,21 @@ export async function getJWT(data) {
   return handleAuthRequest(data, "/api/token/");
 }
 
-export async function refreshJWT(data) {
-  return handleAuthRequest(data, "/api/token/refresh/");
+export async function refreshJWT(token) {
+  const response = await fetch("/api/token/refresh/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ refresh: token }),
+  });
+
+  if (!response.ok) {
+    const result = await response.json();
+    throw new Error(result.error || "Token refresh failed");
+  }
+
+  return response.json();
 }
 
 export async function logoutUser() {
@@ -95,12 +108,12 @@ export async function manageJWT(data = {}) {
   try {
     const accessToken = getCookie("access_token");
     if (accessToken == "expired") {
-      console.log("Access token expired. Refreshing...");
+      console.log("Access token expired.");
 
       const refreshToken = getCookie("refresh_token");
 
       if (refreshToken == "not_found" || refreshToken == "expired") {
-        console.log("Invalid refresh token. Logging in...");
+        console.log("No refresh token found. Logging in...");
         const result = await getJWT(data);
 
         setSecureCookie("access_token", result.access);
@@ -112,11 +125,19 @@ export async function manageJWT(data = {}) {
         setSecureCookie("access_token", result.access);
       }
     } else if (accessToken == "not_found") {
-      console.log("No access token found. Logging in..");
-      const result = await getJWT(data);
+      console.log("No access token found.");
 
-      setSecureCookie("access_token", result.access);
-      setSecureCookie("refresh_token", result.refresh, 1440);
+      const refreshToken = getCookie("refresh_token");
+      if (refreshToken == "not_found" || refreshToken == "expired") {
+        console.log("No refresh token found. Logging in...");
+        const result = await getJWT(data);
+        setSecureCookie("refresh_token", result.refresh, 1440);
+        setSecureCookie("access_token", result.access);
+      } else {
+        console.log("Using refresh token to get new access token...");
+        const result = await refreshJWT(refreshToken);
+        setSecureCookie("access_token", result.access);
+      }
     }
     return getCookie("access_token");
   } catch (error) {
