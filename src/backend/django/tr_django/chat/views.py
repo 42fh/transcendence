@@ -2,13 +2,27 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from .models import ChatRoom, Message, BlockedUser
+from .models import ChatRoom, Message, BlockedUser, Notification
 from django.views.decorators.csrf import csrf_exempt
 from users.models import CustomUser
 import json
 from django.utils import timezone
 from channels.db import database_sync_to_async
 from django.http import JsonResponse
+from django.conf import settings
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+import json
+import logging
+
+from django.conf import settings
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+import json
+import traceback
+import sys
+
+logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -176,36 +190,72 @@ def get_or_create_chat_room(self):
 
 
 @login_required
+@csrf_exempt
 def notifications(request):
     try:
+        logger.debug("Notifications view accessed")
+        logger.debug(f"User authenticated: {request.user}")
+        logger.debug(f"User ID: {request.user.id}")
+
         if request.method == "GET":
-            # Hardcoded notifications for testing
-            notification_list = [
-                {
-                    "id": 1,
-                    "message": "You have a new message from John.",
-                    "created_at": "2024-12-05T14:30:00Z",  # Example ISO 8601 timestamp
-                    "is_read": False,
-                },
-                {
-                    "id": 2,
-                    "message": "Your profile has been updated successfully.",
-                    "created_at": "2024-12-04T10:15:00Z",
-                    "is_read": True,
-                },
-                {
-                    "id": 3,
-                    "message": "You have a new friend request from Alice.",
-                    "created_at": "2024-12-03T08:00:00Z",
-                    "is_read": False,
-                },
-            ]
+            try:
+                notifications = Notification.objects.filter(user=request.user).values(
+                    "id", "message", "created_at", "is_read"
+                )
+                logger.debug(f"Notifications found: {list(notifications)}")
 
-            # Return the hardcoded response
-            return JsonResponse({"status": "success", "notifications": notification_list})
+                notification_list = list(notifications)
 
-        # If the request method is not GET, return 405 Method Not Allowed
+                for notification in notification_list:
+                    notification["created_at"] = notification["created_at"].isoformat()
+
+                return JsonResponse({"status": "success", "notifications": notification_list})
+            except Exception as query_error:
+                logger.error("Error querying notifications", exc_info=True)
+                return JsonResponse(
+                    {"status": "error", "message": f"Database query error: {str(query_error)}"}, status=500
+                )
+
+        elif request.method == "PATCH":
+            try:
+                body = json.loads(request.body)
+                notification_id = body.get("id")
+                is_read = body.get("is_read")
+
+                if notification_id is None or is_read is None:
+                    return JsonResponse({"status": "error", "message": "Missing id or is_read field"}, status=400)
+
+                notification = Notification.objects.get(id=notification_id, user=request.user)
+                notification.is_read = is_read
+                notification.save()
+
+                return JsonResponse({"status": "success", "message": "Notification updated successfully"})
+            except Notification.DoesNotExist:
+                logger.warning("Notification not found for update", exc_info=True)
+                return JsonResponse({"status": "error", "message": "Notification not found"}, status=404)
+            except Exception as e:
+                logger.error("Error updating notification", exc_info=True)
+                return JsonResponse({"status": "error", "message": f"Internal server error: {str(e)}"}, status=500)
+
+        elif request.method == "POST":
+            try:
+                body = json.loads(request.body)
+                message = body.get("message")
+
+                if not message:
+                    return JsonResponse({"status": "error", "message": "Missing message field"}, status=400)
+
+                notification = Notification.objects.create(user=request.user, message=message)
+
+                return JsonResponse(
+                    {"status": "success", "message": "Notification created successfully", "id": notification.id}
+                )
+            except Exception as e:
+                logger.error("Error creating notification", exc_info=True)
+                return JsonResponse({"status": "error", "message": f"Internal server error: {str(e)}"}, status=500)
+
         return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
 
     except Exception as e:
-        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+        logger.error("Unexpected error in notifications view", exc_info=True)
+        return JsonResponse({"status": "error", "message": f"Internal server error: {str(e)}"}, status=500)
