@@ -1,8 +1,19 @@
 import { CONFIG } from "../config/constants.js";
+import { manageJWT } from "./authService.js";
 
 export async function fetchUserProfile(userId) {
   try {
-    const response = await fetch(`${CONFIG.API_BASE_URL}/api/users/${userId}/`);
+    const accessToken = await manageJWT();
+
+    const response = await fetch(
+      `${CONFIG.API_BASE_URL}/api/users/${userId}/`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
     if (!response.ok) {
       return {
         success: false,
@@ -33,7 +44,8 @@ export function formatWinRatio(wins, losses) {
 
 export function renderMatchHistory(matches, container) {
   if (!matches || matches.length === 0) {
-    container.innerHTML = '<p class="profile__matches-empty">No recent matches</p>';
+    container.innerHTML =
+      '<p class="profile__matches-empty">No recent matches</p>';
     return;
   }
 
@@ -46,12 +58,18 @@ export function renderMatchHistory(matches, container) {
     const matchItem = matchElement.querySelector(".profile__match-item");
 
     // Add won/lost class
-    matchItem.classList.add(match.won ? "profile__match-item--won" : "profile__match-item--lost");
+    matchItem.classList.add(
+      match.won ? "profile__match-item--won" : "profile__match-item--lost"
+    );
 
     // Fill in the data
-    matchItem.querySelector(".profile__match-date").textContent = new Date(match.date).toLocaleDateString();
+    matchItem.querySelector(".profile__match-date").textContent = new Date(
+      match.date
+    ).toLocaleDateString();
     matchItem.querySelector(".profile__match-result").textContent = match.score;
-    matchItem.querySelector(".profile__match-opponent").textContent = `vs ${match.opponent?.username || "Unknown"}`;
+    matchItem.querySelector(".profile__match-opponent").textContent = `vs ${
+      match.opponent?.username || "Unknown"
+    }`;
 
     container.appendChild(matchElement);
   });
@@ -59,13 +77,19 @@ export function renderMatchHistory(matches, container) {
 
 export async function updateUserProfile(userId, userData) {
   try {
-    const response = await fetch(`${CONFIG.API_BASE_URL}/api/users/${userId}/`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(userData),
-    });
+    const accessToken = await manageJWT();
+
+    const response = await fetch(
+      `${CONFIG.API_BASE_URL}/api/users/${userId}/`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
+      }
+    );
 
     if (!response.ok) {
       return {
@@ -95,9 +119,15 @@ export async function uploadUserAvatar(userId, avatarFile) {
     const formData = new FormData();
     formData.append("avatar", avatarFile);
 
+    const accessToken = await manageJWT();
+
     const url = `${CONFIG.API_BASE_URL}/api/users/${userId}/avatar/`;
     const response = await fetch(url, {
       method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
       body: formData,
     });
 
@@ -126,8 +156,15 @@ export async function uploadUserAvatar(userId, avatarFile) {
 
 export async function fetchUsers(page = 1, perPage = 10, search = "") {
   try {
+    const accessToken = await manageJWT();
+
     const url = `${CONFIG.API_BASE_URL}/api/users/?page=${page}&per_page=${perPage}&search=${search}`;
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
     if (!response.ok) throw new Error("Failed to fetch users");
     const data = await response.json();
     return data;
