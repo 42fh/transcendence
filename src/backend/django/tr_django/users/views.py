@@ -27,6 +27,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from django.shortcuts import redirect
+from urllib.parse import quote
 
 from django.contrib.auth.models import User
 
@@ -308,6 +309,7 @@ def login_with_42(request):
     query_string = "&".join([f"{key}={value}" for key, value in params.items()])
     return redirect(f"{base_url}?{query_string}")
 
+# https://api.intra.42.fr/oauth/authorize?client_id={client_id}&redirect_uri=http%3A%2F%2Flocalhost.000031.xyz:8080%2Fapi%2Foauth2%2Fredirection&response_type=code
 
 def callback(request):
     print("fhdebug callback view called");
@@ -323,7 +325,7 @@ def callback(request):
         "client_id": settings.FORTYTWO_CLIENT_ID,
         "client_secret": settings.FORTYTWO_CLIENT_SECRET,
         "code": code,
-        "redirect_uri": settings.FORTYTWO_REDIRECT_URI,
+        "redirect_uri": quote(settings.FORTYTWO_REDIRECT_URI),
     }
 
     response = requests.post(token_url, data=data)
