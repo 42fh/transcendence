@@ -7,6 +7,10 @@ export class CircularRenderer extends BasePongRenderer {
     this.vertices = [];
   }
 
+  initialize(gameState) {
+    super.initialize(gameState);
+  }
+
   generateSectorGeometry(paddle, index) {
     // Calculate total number of sectors and sector size
     const sectorSize = (2 * Math.PI) / this.state.paddles.length;

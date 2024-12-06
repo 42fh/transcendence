@@ -1,7 +1,7 @@
 // TODO: Implement game controller functional
 // TODO: Rename maybe to gameCore.js
 // Import necessary dependencies
-import { gameState, gameConfig } from "../store/globals.js";
+import { gameState, gameConfig, updateGameState, initializeRenderer } from "../store/globals.js";
 
 export function handleGameMessage(message, onEvent = null) {
   try {
@@ -33,7 +33,8 @@ export function handleGameMessage(message, onEvent = null) {
 
 function handleInitialState(message, onEvent) {
   gameState.currentState = message.game_state;
-  // Additional initialization logic if needed
+
+  initializeRenderer(message.game_setup.type);
 
   if (onEvent) {
     onEvent({
@@ -42,6 +43,12 @@ function handleInitialState(message, onEvent) {
       details: `Player ${gameState.currentPlayer.id} joined game ${gameConfig.gameId}`,
     });
   }
+}
+
+function handleGameState(message) {
+  //   gameState.currentState = message.game_state;
+  updateGameState(message.game_state);
+  if (renderer.type) renderer.update(message.game_state);
 }
 
 function handleGameEvent(message, onEvent) {
