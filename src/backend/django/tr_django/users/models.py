@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
 from datetime import timedelta
-
+from django.db.models import Q
 
 class CustomUser(AbstractUser):
     """
@@ -13,11 +13,8 @@ class CustomUser(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     # Optional email field for now, but it could be made mandatory later.
     # When making it mandatory, remove `null=True` and `blank=True`.
-    # Email field is currently not enforcing uniqueness.
-    # TODO: When implementing email verification system, change unique=False to True
-    # and consider adding a conditional unique constraint to allow multiple NULL values.
     email = models.EmailField(
-        unique=False,  # Explicitly not enforcing uniqueness for now
+        unique=True,
         null=True,
         blank=True,
         error_messages={
@@ -47,8 +44,13 @@ class CustomUser(AbstractUser):
             ("Hardware Token", "Hardware Token"),
             ("Biometric", "Biometric Authentication"),
         ],
-        default="TOTP",
+        default="Email",
     )
+    # Stores the user's 2FA code, which is used to verify the user's identity.
+    # It should expire after a certain time and be used only once.
+    two_factor_code = models.CharField(max_length=6, null=True, blank=True)
+    two_factor_code_expires_at = models.DateTimeField(null=True)
+    
     # Stores the user's secret key for generating 2FA codes,
     # typically used in TOTP (Time-based One-Time Password) algorithms.
     # This key is unique to the user and is used to create time-based codes.
@@ -173,6 +175,15 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return str(self.username)
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['email'],
+                condition=Q(email__isnull=False),
+                name='unique_email_when_not_null'
+            )
+        ]
 
 
 class VisibilityGroup(models.Model):

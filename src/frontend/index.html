@@ -38,7 +38,7 @@
 
     <!-- Auth Template -->
     <template id="auth-template">
-      <div class="auth-container">
+      <div class="auth-container" id="auth-container">
         <h1>PONG</h1>
         <div class="auth-buttons">
           <button id="login-button" class="auth-button">Login</button>
@@ -50,17 +50,42 @@
     <!-- Login Form Template -->
     <template id="login-template">
       <p id="modal-message" class="modal-message"></p>
-      <form id="login-form" class="modal-form">
-        <!-- Message element added here -->
+      <div id="login-container">
+        <form id="login-form" class="modal-form">
+          <!-- Message element added here -->
 
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username" required />
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" required />
 
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" required />
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required />
 
-        <button type="submit" class="auth-form__button">Log In</button>
-      </form>
+          <button type="submit" class="auth-form__button">Log In</button>
+        </form>
+      </div>
+      <div id="2fa-container" style="display: none;">
+        <form id="2fa-form" class="modal-form">
+          <!-- Message element added here -->
+  
+          <label for="code">Enter the code sent to your email</label>
+          <input type="text" id="code" name="code" required />
+
+          <div class="resend-section">
+            <span id="countdown">1:00</span>
+            <button 
+              type="button" 
+              id="resend-button" 
+              class="auth-form__button" 
+              disabled
+            >
+              Resend Code
+            </button>
+          </div>      
+  
+          <button type="submit" id="2fa-login" class="auth-form__button">Log In</button>
+        </form>
+      </div>
+
     </template>
 
     <!-- Signup Form Template -->
@@ -87,9 +112,11 @@
         <h1 class="page-container__title page-container__title--home">PONG</h1>
 
         <div class="home__content">
-          <button id="home__button-play" class="home__button button--neon">PLAY</button>
-          <br>
-          <button id="home__button-playoffline" class="home__button button--neon">PLAY OFFLINE</button>
+          <div class="home__buttonsetleft">
+            <button id="home__button-logout" class="home__button button--red">Logout</button>
+            <button id="home__button-play" class="home__button button--neon">PLAY</button>
+            <button id="home__button-playoffline" class="home__button button--neon">PLAY OFFLINE</button>
+          </div>
           <div class="home__net">
             <div class="home__net-segment home__net-segment--black"></div>
             <div class="home__net-segment home__net-segment--white"></div>
@@ -557,6 +584,8 @@
           <!-- Private Profile Actions -->
           <div class="profile__section profile__section--private-actions profile__private-info">
             <button class="profile__button profile__button--edit">Edit Profile</button>
+            <button class="profile__button profile__button--2fa">2FA Settings</button>
+            <!-- TODO: Add password change button if we decide to implement it -->
           </div>
         </div>
       </div>
@@ -624,6 +653,37 @@
             <textarea id="bio" class="profile-edit__textarea" name="bio" rows="4" maxlength="500"></textarea>
           </div>
 
+          <div class="profile-edit__buttons">
+            <button type="button" class="profile-edit__button profile-edit__button--cancel">Cancel</button>
+            <button type="submit" class="profile-edit__button profile-edit__button--save">Save</button>
+          </div>
+        </form>
+      </div>
+    </template>
+
+    <!-- 2FA Edit Template -->
+    <template id="2fa-edit-template">
+      <div class="profile-edit">
+        <h2 class="profile-edit__title">Edit 2FA</h2>
+        <p class="email-warning" style="display: none">Email is not set</p>
+        <form class="profile-edit__form">
+          <div class="profile-edit__field form-field">
+            <label class="profile-edit__label form-label" for="email">Email</label>
+            <input type="email" id="email" class="profile-edit__input form-input" name="email" />
+          </div>
+          <div class="profile-edit__field form-field radio-form">
+            <label class="profile-edit__label form-label">2FA Authentication</label>
+            <div class="profile-edit__radio-group">
+              <div class="profile-edit__radio-item">
+                <input type="radio" id="2fa-enabled" name="2fa" value="enabled" class="profile-edit__radio" />
+                <label for="2fa-enabled" class="profile-edit__radio-label">Enabled</label>
+              </div>
+              <div class="profile-edit__radio-item">
+                <input type="radio" id="2fa-disabled" name="2fa" value="disabled" class="profile-edit__radio" />
+                <label for="2fa-disabled" class="profile-edit__radio-label">Disabled</label>
+              </div>
+            </div>
+          </div>
           <div class="profile-edit__buttons">
             <button type="button" class="profile-edit__button profile-edit__button--cancel">Cancel</button>
             <button type="submit" class="profile-edit__button profile-edit__button--save">Save</button>

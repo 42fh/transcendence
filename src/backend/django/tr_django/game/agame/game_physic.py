@@ -1,5 +1,6 @@
 import random
 import math
+from .ball_utils import BallUtils
 
 
 def reset_ball(self, ball, ball_index, speed=0.006):
@@ -11,14 +12,8 @@ def reset_ball(self, ball, ball_index, speed=0.006):
     Returns:
         dict: Updated ball object
     """
-    angle = random.uniform(0, 2 * math.pi)
-    ball.update(
-        {
-            "x": float(0),
-            "y": float(0),
-            "velocity_x": float(speed * math.cos(angle)),
-            "velocity_y": float(speed * math.sin(angle)),
-        }
+    BallUtils.reset_ball_position(
+        ball, self.active_sides, self.settings.get("initial_speed", speed)
     )
-    return ball
 
+    return ball

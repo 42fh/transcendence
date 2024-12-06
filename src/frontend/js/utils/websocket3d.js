@@ -17,6 +17,7 @@ export default class GameWebSocket {
       ...this.options,
     }).toString();
     const url = `${CONFIG.WS_BASE_URL}/pong/${this.gameId}/?${queryParams}`;
+    console.log("Connecting to WebSocket:", url);
     this.ws = new WebSocket(url);
     this.ws.onopen = () => {
       console.log("WebSocket connected");
