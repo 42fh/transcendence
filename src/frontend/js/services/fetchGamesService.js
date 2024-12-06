@@ -2,7 +2,7 @@ import { CONFIG } from "../config/constants.js";
 
 export async function fetchGames() {
   try {
-    const endpoint = `${CONFIG.API_BASE_URL}/api/game/`;
+    const endpoint = `${CONFIG.API_BASE_URL}/api/game/all/`;
     console.log("Sending request to endpoint:", endpoint);
 
     const response = await fetch(endpoint, {
@@ -16,6 +16,8 @@ export async function fetchGames() {
       console.log("response not ok");
       throw new Error(`HTTP error! status: ${response.status}`);
     }
+
+    console.log("response from api ", response);
 
     const contentType = response.headers.get("content-type");
     if (!contentType || !contentType.includes("application/json")) {

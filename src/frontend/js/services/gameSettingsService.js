@@ -3,7 +3,7 @@ import { CONFIG } from "../config/constants.js";
 export async function createNewGame(gameConfig) {
   try {
     const response = await fetch(
-      `${CONFIG.API_BASE_URL}/api/game/create_new_game/`,
+      `${CONFIG.API_BASE_URL}/api/game/games/`,
       {
         method: "POST",
         headers: {
