@@ -18,6 +18,10 @@ from django.utils.decorators import async_only_middleware
 import random
 from .tournamentmanager.utils import get_test_tournament_data
 
+
+
+
+
 def transcendance(request):
     return HttpResponse("Initial view for transcendance")
 
@@ -442,7 +446,7 @@ async def all_games(request):
 from .tournamentmanager.TournamentManager import TournamentManager
 
 
-#@require_http_methods(["GET", "POST"])
+@require_http_methods(["GET", "POST"])
 @csrf_exempt
 def all_tournaments(request):
     if request.method == "GET":
@@ -455,12 +459,12 @@ def all_tournaments(request):
             data = json.loads(request.body)
             creator = Player.objects.get(user=request.user)
             result = TournamentManager.create_tournament(data, data.get("game_settings", {}), creator)
-            
             if result["status"]:
                 tournament = Tournament.objects.get(pk=result["tournament_id"])
                 return JsonResponse({
                     "message": "Tournament created successfully",
-                    "tournament": build_tournament_data(tournament)
+                    "tournament": build_tournament_data(tournament),
+                    "player": result
                 })
             return JsonResponse({"error": result["message"]}, status=400)
             
@@ -489,18 +493,9 @@ def tournament_enrollment(request, tournament_id):
 @require_http_methods(["POST"])
 def debug_tournament(request):
     """Debug endpoint to create tournament with sample data and get schedule"""
-    from datetime import timedelta   
     try:
         creator = Player.objects.get(user=request.user)
-        data = None
-        
-        if request.body:
-            try:
-                data = json.loads(request.body)
-            except json.JSONDecodeError:
-                pass
-                
-        tournament_data = get_test_tournament_data(data)
+        tournament_data = get_test_tournament_data()
         result = TournamentManager.create_tournament(tournament_data, {}, creator)
         if not result["status"]:
             return JsonResponse(result, status=400)

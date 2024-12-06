@@ -54,6 +54,7 @@ class GameCoordinator:
     # invidual Player Managment
     BOOKED_USER_PREFIX = "booked_"
     PLAYING_USER_PREFIX = "playing_"
+    TOURNAMENT_USER_PREFIX = "tournament_"
 
     # user online
     USER_ONLINE_PREFIX = "user_online_"
@@ -186,6 +187,49 @@ class GameCoordinator:
             )
 
             await pipeline.execute()
+
+    @classmethod
+    async def create_tournament_game(cls, real_game_id: int, tournament_id: int, players: list, game_settings: dict) -> dict:
+        """Create tournament game with pre-assigned players"""
+        try:
+            game_id = None
+            async with await cls.get_redis(cls.REDIS_URL) as redis_conn:
+                async with RedisLock(redis_conn, cls.LOCK_KEYS["game_id"]):
+                    game_id = await cls.generate_game_id(redis_conn)
+                    
+            if not game_id:
+                return {"status": "error", "message": "Failed to generate game ID"}
+
+            # Setup base game
+            await cls.game_setup(redis_conn, game_settings, game_id)
+            
+            # Set tournament flags
+            async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
+                pipe = redis_conn.pipeline()
+                pipe.set(f"game_is_tournament:{game_id}", "1")
+                pipe.set(f"tournament_game:{game_id}", str(real_game_id))
+                pipe.set(f"tournament_id:{game_id}", str(tournament_id))
+                await pipe.execute()
+
+                # Pre-book players with no expiry
+                for player in players:
+                    booking_key = f"{cls.TOURNAMENT_USER_PREFIX}{player.user.id}:{game_id}"
+                    await redis_conn.set(booking_key, "1")
+
+            # Generate player URLs
+            player_urls = [(p.id, f"ws/game/{game_id}/") for p in players]
+            
+            return {
+                "status": "running",
+                "game_id": game_id,
+                "player_urls": player_urls
+            }
+
+        except Exception as e:
+            logger.error(f"Error creating tournament game: {e}")
+            return {"status": "error", "message": str(e)}
+
+
 
     # view
 

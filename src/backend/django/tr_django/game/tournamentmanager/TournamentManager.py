@@ -11,6 +11,13 @@ from datetime import timedelta
 import random
 from ..models import Tournament, TournamentGame, TournamentGameSchedule, Player
 import math
+import logging
+
+
+logger = logging.getLogger(__name__)
+
+
+
 
 class RedisSyncLock:
     def __init__(self, redis_conn: redis.Redis, lock_key: str, timeout: int = 10):
@@ -41,13 +48,19 @@ class TournamentManager:
     def create_tournament(cls, tournament_data: Dict, game_settings: Dict, creator: Player) -> Dict:
         """Creates tournament with game settings and returns status dict"""
         try:
-            print("foo")
+            start_date = timezone.make_aware(datetime.fromisoformat(tournament_data["startingDate"].replace("Z", "+00:00"))) 
+            reg_start = timezone.make_aware( 
+                 datetime.fromisoformat(tournament_data["registrationStart"].replace("Z", "+00:00")) 
+            ) 
+            reg_end = timezone.make_aware( 
+                datetime.fromisoformat(tournament_data["registrationClose"].replace("Z", "+00:00")) 
+            ) 
             tournament = Tournament.objects.create(
                 name=tournament_data["name"],
                 description=tournament_data.get("description"),
-                start_registration=tournament_data["registration_start"],
-                end_registration=tournament_data["registration_close"],
-                start_date=tournament_data["start_date"],
+                start_registration=reg_start,
+                end_registration=reg_end,
+                start_date=start_date,
                 type=tournament_data["type"],
                 start_mode=Tournament.START_MODE_FIXED,
                 is_public=tournament_data.get("visibility", "public") == "public",
@@ -61,12 +74,9 @@ class TournamentManager:
 
             tournament.full_clean()
             tournament.save()
-
-            return {
-                "status": True, 
-                "tournament_id": tournament.id,
-            }
-
+            response = {"status": True, "tournament_id": tournament.id}
+            response.update(cls.add_player(tournament.id, creator))
+            return response
         except Exception as e:
             return {
                 "status": False,
@@ -98,8 +108,8 @@ class TournamentManager:
                 
                     # Schedule async notification
                     notifier = TournamentNotifier(tournament_id)
-                    async_to_sync(notifier.player_joined)(player.display_name) 
-                    print("debug3: ", tournament.participants.count(), tournament.max_participants) 
+                    async_to_sync(notifier.player_joined)(player.username) 
+                    logger.debug(f"Tournament: booked in: {tournament.participants.count()} full with: {tournament.max_participants}") 
                     # Check if tournament is ready to start matchmaking
                     if tournament.participants.count() == tournament.max_participants:
                         cls.start_matchmaking(tournament)
@@ -174,9 +184,9 @@ class TournamentManager:
 
         tournament.save()
         
-        # Notify players that tournament is starting
+        # Notify players that tournament is starting for this we need the Gamecordinator
         notifier = TournamentNotifier(tournament.id)
-        async_to_sync(notifier.game_ready)()
+        # async_to_sync(notifier.game_ready)()
 
     @classmethod
     def get_game_schedule(cls, tournament_id: int) -> Dict:
@@ -236,6 +246,83 @@ class TournamentManager:
                 'message': f'Error getting schedule: {str(e)}',
                 'error_code': 'SERVER_ERROR' 
             }
+
+    @classmethod
+    def create_rounds(cls, tournament_id: int): 
+        """
+        Checks all rounds in tournament and creates/updates games as needed.
+        - Creates GameCoordinator games for full tournament games
+        - Notifies players of game status
+        - Handles tournament completion
+        """
+        try:
+            tournament = Tournament.objects.get(pk=tournament_id)
+            games = TournamentGameSchedule.objects.filter(
+                tournament=tournament
+            ).select_related('game').order_by('round_number')
+            
+            tournament_completed = True  # Flag to track if all games are complete
+            games_started = 0  # Counter for started games
+            
+            for schedule in games:
+                game = schedule.game
+                players = list(game.players.all())
+                
+                # Skip if game empty or completed
+                if not players or game.status == TournamentGame.COMPLETED:
+                    continue
+                    
+                tournament_completed = False  # At least one game not complete
+                    
+                # If game has all required players
+                if len(players) == tournament.max_participants:
+                    if game.status != TournamentGame.IN_PROGRESS:  # Don't recreate if already running
+                        response = GameCoordinator.create_tournament_game(
+                            real_game_id=game.id,
+                            tournament_id=tournament_id,
+                            players=players,
+                            game_settings={"mode": "classic"}
+                        )
+                        
+                        if response["status"] == "running":
+                            game.status = TournamentGame.IN_PROGRESS
+                            game.save()
+                            games_started += 1
+                            
+                            # Notify players
+                            notifier = TournamentNotifier(tournament_id)
+                            for player_id, ws_url in response["player_urls"]:
+                                async_to_sync(notifier.game_ready)(game.id, ws_url)
+                else:
+                    tournament_completed = False
+                    # Game waiting for players
+                    notifier = TournamentNotifier(tournament_id)
+                    async_to_sync(notifier.game_needs_players)(game.id)
+                    
+                    # Get list of running games for spectating
+                    running_games = games.filter(
+                        game__status=TournamentGame.IN_PROGRESS
+                    )
+                    for running_game in running_games:
+                        async_to_sync(notifier.spectate_available)(
+                            running_game.game.id,
+                            f"ws/game/{tournament_id}:{running_game.game.id}/"
+                        )
+            if tournament_completed:
+                tournament.status = Tournament.STATUS_COMPLETED
+                tournament.save()
+                # Notify tournament completion
+                notifier = TournamentNotifier(tournament_id)
+                async_to_sync(notifier.tournament_complete)(tournament_id)
+            logger.info(f"status: {True} //  message: Rounds processed. {games_started} new games started. // tournament_completed: {tournament_completed} ")
+            return 
+            
+        except Tournament.DoesNotExist:
+            logger.error(f"status: {False} //  message: Tournament not found")
+            return 
+        except Exception as e:
+            logger.error(f"status: {False} //  message: Error processing rounds: {str(e)}")
+            return 
 
 
 

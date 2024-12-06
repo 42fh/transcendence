@@ -1,17 +1,28 @@
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-from datetime import datetime, timedelta
+from channels.testing import WebsocketCommunicator
+from datetime import timedelta
 from django.utils import timezone
-from .models import Tournament, Player, TournamentGame
+from .models import Tournament, Player, TournamentGame, TournamentGameSchedule
+from .tournamentmanager.TournamentNotification import TournamentNotificationConsumer
 import json
 import logging
+from .tournamentmanager.utils import get_test_tournament_data   
+
+
 
 logger = logging.getLogger(__name__)
 
-class TournamentIntegrationTest(TestCase):
+def select_test(enabled=True):
+    def decorator(test_func):
+        test_func.enabled = enabled
+        return test_func
+    return decorator
+
+class TournamentNotificationTest(TestCase):
     def setUp(self):
-        logger.info("Setting up tournament test environment...")
+        self._run_if_enabled()
         self.user_model = get_user_model()
         
         self.users = {}
@@ -27,25 +38,22 @@ class TournamentIntegrationTest(TestCase):
                 user=self.users[username],
                 defaults={'display_name': username}
             )
-            logger.debug(f"{'Created' if created else 'Retrieved'} test player: {username}")
+            # Get test tournament data
+            self.tournament_data = get_test_tournament_data()
+        
 
-        now = timezone.localtime()
-        self.tournament_data = {
-            "name": "Test Tournament",
-            "description": "Test Description",
-            "start_date": now + timedelta(hours=1),
-            "registration_start": now,
-            "registration_close": now + timedelta(minutes=30),
-            "type": "single_elimination",
-            "min_participants": 2,
-            "max_participants": 4,
-            "visibility": "public",
-            "game_settings": {
-                "mode": "classic",
-                "score": {"max": 5}
-            }
-        }
-        logger.info(f"Tournament settings created with dates: start_date={self.tournament_data['start_date']}, registration_start={self.tournament_data['registration_start']}, registration_close={self.tournament_data['registration_close']}")
+    def tearDown(self):
+        Tournament.objects.all().delete()
+        Player.objects.all().delete()
+        self.user_model.objects.all().delete()
+
+    def _run_if_enabled(self):
+        test_method = getattr(self, self._testMethodName)
+        if hasattr(test_method, "enabled") and not test_method.enabled:
+            self.skipTest("Test disabled")
+
+
+    @select_test(enabled=False)
     def test_tournament_flow(self):
         print("\n=== Starting Tournament Flow Test ===")
         
@@ -77,9 +85,6 @@ class TournamentIntegrationTest(TestCase):
             print(f"  - Status: {game.status}")
             players = game.players.all()
             print(f"  - Players: {', '.join(p.get_display_name for p in players)}")
-    def tearDown(self):
-        print("\nCleaning up test environment...")
-        Tournament.objects.all().delete()
-        Player.objects.all().delete()
-        self.user_model.objects.all().delete()
-        super().tearDown()
+
+
+

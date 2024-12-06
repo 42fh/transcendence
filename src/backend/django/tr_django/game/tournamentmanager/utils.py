@@ -1,30 +1,37 @@
-from django.utils import timezone
-import datetime
 from datetime import timedelta
+from django.utils import timezone
+from typing import Dict
 
-
-
-def get_test_tournament_data(override_data=None):
+def get_base_tournament_data() -> Dict:
+    """Creates base tournament data with current time"""
     now = timezone.now()
-    override_data = override_data or {}
     
-    # Ensure datetime fields are datetime objects, not strings
-    start_date = override_data.get('start_date', now + timedelta(hours=1.01))
-    registration_start = override_data.get('registration_start', now) 
-    registration_close = override_data.get('registration_close', now + timedelta(hours=1))
-    default_data = {
-        "name": override_data.get('name', "Debug Tournament"),
-        "description": override_data.get('description', "Test tournament"),
-        "type": override_data.get('type', "single_elimination"),
-        "start_date": start_date,
-        "registration_start": registration_start,
-        "registration_close": registration_close,
-        "min_participants": override_data.get('min_participants', 2),
-        "max_participants": override_data.get('max_participants', 4),
-        "visibility": override_data.get('visibility', "public"),
-        "game_settings": override_data.get('game_settings', {
-            "mode": "classic",
-            "score": {"max": 5}
-        })
+    return {
+        "name": "Test Tournament",
+        "description": "Test tournament description",
+        "start_date": now + timedelta(days=4),
+        "registration_start": now, 
+        "registration_end": now + timedelta(days=3),
+        "type": "single_elimination",
+        "visibility": "public",
+        "game_mode": "1v1",
+        "min_participants": 2,
+        "max_participants": 4
     }
-    return default_data
+
+def get_test_tournament_data() -> Dict:
+    """Converts internal test data to frontend JSON format"""
+    data = get_base_tournament_data()
+    
+    return {
+        "name": data["name"],
+        "description": data["description"],
+        "startingDate": data["start_date"].replace(tzinfo=None).isoformat(),
+        "registrationStart": data["registration_start"].replace(tzinfo=None).isoformat(), 
+        "registrationClose": data["registration_end"].replace(tzinfo=None).isoformat(),
+        "type": data["type"],
+        "visibility": data["visibility"],
+        "gameMode": data["game_mode"],
+        "min_participants": data["min_participants"],
+        "max_participants": data["max_participants"]
+    }

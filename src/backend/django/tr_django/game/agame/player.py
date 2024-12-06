@@ -25,11 +25,16 @@ async def add_player(self, player_id):
         current_count = await self.redis_conn.scard(self.players_key)
         if current_count >= max_players:
             return {"role": "spectator", "message": "Game full - joining as spectator"}
-        # Check if player is booked
+        # Check if player is booked regulat or in a tournamnet
         booking_key = f"{GC.BOOKED_USER_PREFIX}{player_id}:{self.game_id}"
-        logger.debug(f"{booking_key}")
-        is_booked = await self.redis_conn.exists(booking_key)
-        if not is_booked:
+        tournament_key = f"{GC.TOURNAMENT_USER_PREFIX}{player_id}:{self.game_id}"
+        logger.debug(f"KEYS: {booking_key} / {tournament_key}")
+        pipeline = self.redis_conn.pipeline()
+        pipeline.exists(booking_key)
+        pipeline.exists(tournament_key)
+        is_booked, is_tournament_player = await pipeline.execute()
+
+        if not (is_booked or is_tournament_player):
             return {
                 "role": "spectator",
                 "message": "No booking found - joining as spectator",
@@ -38,7 +43,9 @@ async def add_player(self, player_id):
         async with RedisLock(self.redis_conn, f"{self.game_id}_player_situation"):
             pipeline = self.redis_conn.pipeline()
             pipeline.sadd(self.players_key, player_id)
+            pipeline.set(f"{GC.PLAYING_USER_PREFIX}{player_id}:{self.game_id}", "1")
             pipeline.delete(booking_key)
+            pipeline.delete(tournament_key)
             await pipeline.execute()
             return {
                 "role": "player",
