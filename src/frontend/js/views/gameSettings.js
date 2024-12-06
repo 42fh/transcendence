@@ -144,11 +144,17 @@ export function loadGameSettings() {
 
       if (response.success) {
         showStatus("Game created successfully!", false);
+
+        // ws_url is stored in localStorage
+        localStorage.setItem("ws_url", response.ws_url);
+        // Show websocket address for visual debugging
+        showStatus(`WebSocket address: ${response.ws_url}`, false);
       } else {
         showStatus(response.message || "Failed to create game.", true);
       }
     } catch (error) {
       showStatus("Error creating game: " + error.message, true);
     }
+
   }
 }

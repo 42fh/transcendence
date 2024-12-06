@@ -14,6 +14,8 @@ export async function createNewGame(gameConfig) {
     );
 
     const data = await response.json();
+    console.log("response from api (should include websocket url)", data);
+
 
     return {
       success: response.ok,
