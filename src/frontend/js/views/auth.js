@@ -84,7 +84,7 @@ async function handleAuth(form, authFunction) {
   try {
     const result = await authFunction(data);
 
-    const _accessToken = await manageJWT(data);
+    const _accessToken = await manageJWT(data, true);
 
     let userData = await fetchUserProfile(result.id);
     if (!userData.success) {

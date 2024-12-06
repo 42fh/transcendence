@@ -1,4 +1,5 @@
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
+import { handleLogout } from "../views/auth.js";
 
 export async function loginUser(data) {
   return handleAuthRequest(data, "/api/users/auth/login/");
@@ -104,45 +105,39 @@ export async function validateEmailVerification(token) {
   return result;
 }
 
-export async function manageJWT(data = {}) {
+async function loginJWT(data) {
+  const result = await getJWT(data);
+  setSecureCookie("refresh_token", result.refresh, 1440);
+  setSecureCookie("access_token", result.access);
+}
+
+async function getNewAccessToken(refreshToken) {
+  console.log("Using refresh token to get new access token...");
+  const result = await refreshJWT(refreshToken);
+  setSecureCookie("access_token", result.access);
+}
+
+export async function manageJWT(data = {}, login = false) {
   try {
     const accessToken = getCookie("access_token");
-    if (accessToken == "expired") {
-      console.log("Access token expired.");
+    const refreshToken = getCookie("refresh_token");
 
-      const refreshToken = getCookie("refresh_token");
-
+    if (accessToken == "expired" || accessToken == "not_found") {
+      console.log("Access token expired or not found");
       if (refreshToken == "not_found" || refreshToken == "expired") {
-        console.log("No refresh token found. Logging in...");
-        const result = await getJWT(data);
-
-        setSecureCookie("access_token", result.access);
-        setSecureCookie("refresh_token", result.refresh, 1440);
+        if (login) {
+          await loginJWT(data);
+        } else {
+          throw new Error("No refresh token found");
+        }
       } else {
-        console.log("Using refresh token to get new access token...");
-        const result = await refreshJWT(refreshToken);
-
-        setSecureCookie("access_token", result.access);
-      }
-    } else if (accessToken == "not_found") {
-      console.log("No access token found.");
-
-      const refreshToken = getCookie("refresh_token");
-      if (refreshToken == "not_found" || refreshToken == "expired") {
-        console.log("No refresh token found. Logging in...");
-        const result = await getJWT(data);
-        setSecureCookie("refresh_token", result.refresh, 1440);
-        setSecureCookie("access_token", result.access);
-      } else {
-        console.log("Using refresh token to get new access token...");
-        const result = await refreshJWT(refreshToken);
-        setSecureCookie("access_token", result.access);
+        await getNewAccessToken(refreshToken);
       }
     }
     return getCookie("access_token");
   } catch (error) {
     console.error("Error managing JWT:", error);
-    logoutUser();
+    await handleLogout();
     displayModalError("Your session has expired");
     return null;
   }
