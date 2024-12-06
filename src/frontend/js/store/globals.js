@@ -176,7 +176,7 @@ export function updatePlayerValues(values) {
  */
 
 /** @type {RendererState} */
-export const renderer = {
+export const nastyGlobalRendererState = {
   // Base attributes
   playerIndex: null,
   vertices: [],
@@ -192,38 +192,6 @@ export const renderer = {
     center: 150,
   },
 };
-
-/**
- * Initializes the renderer with all necessary data from the initial state message
- * @param {Object} message - Initial state message from server
- */
-export function initializeRenderer(message) {
-  renderer.type = message.game_setup.type;
-  renderer.playerIndex = message.player_index;
-  renderer.vertices = message.game_setup.vertices || message.game_state?.vertices || [];
-  renderer.state = message.game_state;
-  renderer.svg = document.getElementById("pongSvg");
-  renderer.scoreList = document.getElementById("scoreDisplay");
-
-  if (!renderer.svg) {
-    throw new Error("SVG element not found");
-  }
-}
-
-/**
- * Updates renderer with initial state data
- * @param {Object} message - Initial state message from server
- */
-export function updateRenderer(message) {
-  if (!renderer.type) {
-    console.warn("Renderer not initialized");
-    return;
-  }
-
-  renderer.playerIndex = message.player_index;
-  renderer.vertices = message.game_setup.vertices || message.game_state?.vertices;
-  renderer.state = message.game_state;
-}
 
 // Tournament state
 
