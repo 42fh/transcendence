@@ -330,6 +330,7 @@ def callback(request):
 
     response = requests.post(token_url, data=data)
     if response.status_code != 200:
+        print("fhdebug: ", response)
         return JsonResponse({"error": "Failed to obtain access token"}, status=403)
 
     access_token = response.json().get("access_token")
