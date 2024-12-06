@@ -302,7 +302,7 @@ def login_with_42(request):
     base_url = "https://api.intra.42.fr/oauth/authorize"
     params = {
         "client_id": settings.FORTYTWO_CLIENT_ID,
-        "redirect_uri": settings.FORTYTWO_REDIRECT_URI,
+        "redirect_uri": quote(settings.FORTYTWO_REDIRECT_URI),
         "response_type": "code",
         "scope": "public",
     }
@@ -330,7 +330,7 @@ def callback(request):
 
     response = requests.post(token_url, data=data)
     if response.status_code != 200:
-        print("fhdebug: ", response)
+        print("fhdebug: ", response.text)
         return JsonResponse({"error": "Failed to obtain access token"}, status=403)
 
     access_token = response.json().get("access_token")
