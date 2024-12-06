@@ -13,7 +13,7 @@ export async function getJWT(data) {
 }
 
 export async function refreshJWT(data) {
-  return handleAuthRequest(data, "/api/token/refresh");
+  return handleAuthRequest(data, "/api/token/refresh/");
 }
 
 export async function logoutUser() {
@@ -26,10 +26,6 @@ export async function logoutUser() {
   });
 
   if (!response.ok) {
-    if (response.status === 401) {
-      refreshJWT();
-      logoutUser();
-    }
     const result = await response.json();
     throw new Error(result.error || "Logout failed");
   }

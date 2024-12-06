@@ -76,6 +76,7 @@ async function handleSignup(event) {
 }
 
 async function handleAuth(form, authFunction) {
+  console.log("Submitting form...");
   const formData = new FormData(form);
   const data = Object.fromEntries(formData);
   const messageElement = document.getElementById("modal-message");
