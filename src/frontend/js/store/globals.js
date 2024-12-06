@@ -198,8 +198,8 @@ export function initializeGameStructs(gameId, formData) {
   gameConfig.settings.scoreMode = formData.scoreMode;
 
   // Initialize game state
-  gameState.currentPlayer.id = localStorage.getItem("pongUserId");
-  gameState.currentPlayer.values = { score: 0 };
+  //   gameState.currentPlayer.id = localStorage.getItem("pongUserId");
+  //   gameState.currentPlayer.values = { score: 0 };
 }
 
 /**
@@ -234,33 +234,6 @@ export function updatePlayerValues(values) {
     move_cooldown: values.move_cooldown,
     paddle_length: values.paddle_length,
   };
-}
-
-/**
- * Updates the player values in the game state.
- * @param {Object} values - An object containing player values keyed by player ID.
- */
-export function updatePlayerValues(values) {
-  if (!values) return;
-
-  // Update current player values if they exist
-  if (values[gameState.currentPlayer.id]) {
-    gameState.currentPlayer.values = values[gameState.currentPlayer.id];
-  }
-
-  // Update all player values in the map
-  Object.entries(values).forEach(([playerId, playerValues]) => {
-    if (!gameState.players.has(playerId)) {
-      gameState.players.set(playerId, {
-        id: playerId,
-        values: playerValues,
-        active: true,
-      });
-    } else {
-      const player = gameState.players.get(playerId);
-      player.values = playerValues;
-    }
-  });
 }
 
 // Renderer state

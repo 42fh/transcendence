@@ -1,7 +1,7 @@
 import { updateActiveNavItem } from "../components/bottom-nav.js";
-import { GameWebSocket } from "../2DGame/websocket.js";
+// import { GameWebSocket } from "../2DGame/websocket.js";
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
-import { GAME_2D_CONFIG_TYPES } from "../config/gameConfigs.js";
+import { GAME_2D_CONFIG_TYPES } from "../config/constants.js";
 import { createGameSocket, connectGameSocket } from "../services/gameSocketService.js";
 
 export async function loadGame2DPage(gameId, wsUrl, formData, addToHistory = true) {

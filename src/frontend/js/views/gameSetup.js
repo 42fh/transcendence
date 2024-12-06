@@ -54,6 +54,7 @@ export function loadGameSetupPage(addToHistory = true) {
     };
     updateAllFormElements("two-d-game__", formData);
 
+    // TODO: remove this - This actually should not doing nothing, but removing it breaks the code. Check if we are setting needed eventListeners in the next function call setupEventListnenters ...
     const gameInterface = new GameInterface2D();
 
     setupEventListeners(gameInterface);

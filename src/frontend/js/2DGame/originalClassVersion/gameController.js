@@ -1,5 +1,5 @@
-import { OLD_CONFIG } from "../config/constants.js";
-import { createGame, joinGame } from "../services/gameService.js";
+import { OLD_CONFIG } from "../../config/constants.js";
+import { createGame, joinGame } from "../../services/gameService.js";
 import { GameState } from "./gameState.js";
 import { GameWebSocket } from "./websocket.js";
 import { PolygonRenderer } from "./PolygonRenderer.js";
