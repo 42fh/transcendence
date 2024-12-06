@@ -143,6 +143,51 @@ export const gameContext = {
   },
 };
 
+/**
+ * Updates the game context with values from the initial state message
+ * @param {Object} message - Initial state message from server containing:
+ * - game_state: Current state of the game (balls, paddles, scores, dimensions)
+ * - role: Player role ("player" or "spectator")
+ * - player_index: Index of the current player
+ * - message: Game status message
+ * - player_values: Player specific values (move speed, cooldown, etc)
+ * - game_setup: Game configuration (type, vertices)
+ */
+export function updateGameContext(message) {
+  if (!message) return;
+
+  // Update game state
+  if (message.game_state) {
+    gameContext.game_state = message.game_state;
+  }
+
+  // Update role and player index
+  if (message.role) gameContext.role = message.role;
+  if (message.player_index !== undefined) gameContext.player_index = message.player_index;
+
+  // Update message
+  if (message.message) gameContext.message = message.message;
+
+  // Update player values
+  if (message.player_values) {
+    gameContext.player_values = {
+      move_cooldown: message.player_values.move_cooldown,
+      move_speed: message.player_values.move_speed,
+      move_speed_boost: message.player_values.move_speed_boost,
+      reverse_controls: message.player_values.reverse_controls,
+      paddle_length: message.player_values.paddle_length,
+    };
+  }
+
+  // Update game setup
+  if (message.game_setup) {
+    gameContext.game_setup = {
+      type: message.game_setup.type,
+      vertices: message.game_setup.vertices || [],
+    };
+  }
+}
+
 // Function to initialize game configuration and state - replace the GameController constructor and the GameState constructor
 export function initializeGameStructs(gameId, formData) {
   // Initialize game configuration
@@ -191,6 +236,33 @@ export function updatePlayerValues(values) {
   };
 }
 
+/**
+ * Updates the player values in the game state.
+ * @param {Object} values - An object containing player values keyed by player ID.
+ */
+export function updatePlayerValues(values) {
+  if (!values) return;
+
+  // Update current player values if they exist
+  if (values[gameState.currentPlayer.id]) {
+    gameState.currentPlayer.values = values[gameState.currentPlayer.id];
+  }
+
+  // Update all player values in the map
+  Object.entries(values).forEach(([playerId, playerValues]) => {
+    if (!gameState.players.has(playerId)) {
+      gameState.players.set(playerId, {
+        id: playerId,
+        values: playerValues,
+        active: true,
+      });
+    } else {
+      const player = gameState.players.get(playerId);
+      player.values = playerValues;
+    }
+  });
+}
+
 // Renderer state
 
 /**
@@ -237,31 +309,4 @@ export function updateGlobalTournaments(tournaments) {
 
 export function getGlobalTournaments() {
   return globalTournaments;
-}
-
-/**
- * Updates the player values in the game state.
- * @param {Object} values - An object containing player values keyed by player ID.
- */
-export function updatePlayerValues(values) {
-  if (!values) return;
-
-  // Update current player values if they exist
-  if (values[gameState.currentPlayer.id]) {
-    gameState.currentPlayer.values = values[gameState.currentPlayer.id];
-  }
-
-  // Update all player values in the map
-  Object.entries(values).forEach(([playerId, playerValues]) => {
-    if (!gameState.players.has(playerId)) {
-      gameState.players.set(playerId, {
-        id: playerId,
-        values: playerValues,
-        active: true,
-      });
-    } else {
-      const player = gameState.players.get(playerId);
-      player.values = playerValues;
-    }
-  });
 }

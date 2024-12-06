@@ -2,6 +2,7 @@ import { updateActiveNavItem } from "../components/bottom-nav.js";
 import { GameWebSocket } from "../2DGame/websocket.js";
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { GAME_2D_CONFIG_TYPES } from "../config/gameConfigs.js";
+import { createGameSocket, connectGameSocket } from "../services/gameSocketService.js";
 
 export async function loadGame2DPage(gameId, wsUrl, formData, addToHistory = true) {
   console.log("Entered loadGame2DPage");
@@ -34,12 +35,18 @@ export async function loadGame2DPage(gameId, wsUrl, formData, addToHistory = tru
     const userId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
 
     // Initialize WebSocket connection immediately
-    const ws = new GameWebSocket(gameId, userId, handleGameMessage, {
+    // const ws = new GameWebSocket(gameId, userId, handleGameMessage, {
+    //   type: formData.gameType,
+    //   players: formData.numPlayers,
+    //   balls: formData.numBalls,
+    // });
+    // ws.connect();
+    const ws = createGameSocket(gameId, userId, handleGameMessage, {
       type: formData.gameType,
       players: formData.numPlayers,
       balls: formData.numBalls,
     });
-    ws.connect();
+    connectGameSocket(ws);
 
     // Initialize game info panel
     updateGameInfo(formData);

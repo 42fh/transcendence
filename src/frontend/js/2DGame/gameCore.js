@@ -33,8 +33,7 @@ export function handleGameMessage(message, onEvent = null) {
 }
 
 function handleInitialState(message, onEvent) {
-  gameState.currentState = message.game_state;
-
+  updateGameContext(message);
   initializeRenderer(message.game_setup.type);
 
   if (onEvent) {
@@ -46,26 +45,53 @@ function handleInitialState(message, onEvent) {
   }
 }
 
-function handleGameState(message) {
-  //   gameState.currentState = message.game_state;
+function handleGameState(message, onEvent) {
+  // Update game state
   updateGameState(message.game_state);
-  if (renderer.type) renderer.update(message.game_state);
-}
 
-function handleGameEvent(message, onEvent) {
-  console.log("Game Event:", message.game_state.type);
+  // Update renderer if available
+  if (renderer?.type) {
+    renderer.update(message.game_state);
+  }
 
+  // Could add onEvent here if needed
   if (onEvent) {
     onEvent({
-      type: "game",
-      message: `Game Event: ${message.game_state.type}`,
-      details: "not set",
+      type: "state",
+      message: "Game state updated",
+      details: "", // Could add specific details if needed
     });
   }
 }
 
-function handleGameFinished(message, onEvent) {
-  gameState.currentState = message.game_state;
+export function handleGameEvent(message, onEvent) {
+  // Update game state if provided
+  if (message.game_state) {
+    updateGameState(message.game_state);
+  }
+
+  // Update renderer if available
+  if (renderer?.type) {
+    renderer.update(message.game_state);
+  }
+
+  // Notify through callback
+  if (onEvent) {
+    onEvent({
+      type: "game",
+      message: `Game Event: ${message.event_type}`,
+      details: message.details || "",
+    });
+  }
+}
+
+export function handleGameFinished(message, onEvent) {
+  updateGameState(message.game_state);
+
+  // Show game over in renderer
+  showGameOver(message.winner === "you");
+  updateRenderer(message);
+  disconnectGameSocket();
 
   if (onEvent) {
     onEvent({
