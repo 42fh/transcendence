@@ -298,7 +298,6 @@ class DeleteUserView(View):
 
 
 def login_with_42(request):
-    print("fhdebug login_with_42 view called");
     base_url = "https://api.intra.42.fr/oauth/authorize"
     params = {
         "client_id": settings.FORTYTWO_CLIENT_ID,
@@ -311,9 +310,7 @@ def login_with_42(request):
 
 
 def callback(request):
-    print("fhdebug callback view called");
     code = request.GET.get('code')
-    print("fhdebug code received: ", code);
     if not code:
         return redirect("/")
 
@@ -329,7 +326,6 @@ def callback(request):
 
     response = requests.post(token_url, data=data)
     if response.status_code != 200:
-        print("fhdebug: ", response.text)
         return JsonResponse({"error": "Failed to obtain access token"}, status=403)
     
     access_token = response.json().get("access_token")
@@ -345,14 +341,15 @@ def callback(request):
 
     # Create or log in the user
     username = user_data["login"]
-
-    # user = CustomUser.objects.create(username=username, password=make_password(password))
-
-    # user, created = User.objects.get_or_create(username=username)
     user, created = CustomUser.objects.get_or_create(username=f"42_{username}")
-    login(request, user)
 
-    return redirect('/')  # Redirect to a post-login page
+    if user is not None:
+        login(request, user)  # This creates the session for the new user
+        print("Session Data:", request.session.items())  # Debug session contents
+        return redirect('/')  # Redirect to a post-login page
+    else:
+        return JsonResponse({"error": "Failed to fetch user info"}, status=403)
+
 
 
 @method_decorator(csrf_exempt, name="dispatch")
