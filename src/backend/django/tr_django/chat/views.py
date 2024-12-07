@@ -219,22 +219,17 @@ def notifications(request):
         elif request.method == "PATCH":
             try:
                 body = json.loads(request.body)
-                notification_id = body.get("id")
                 is_read = body.get("is_read")
 
-                if notification_id is None or is_read is None:
-                    return JsonResponse({"status": "error", "message": "Missing id or is_read field"}, status=400)
+                if is_read is None:
+                    return JsonResponse({"status": "error", "message": "Missing is_read field"}, status=400)
 
-                notification = Notification.objects.get(id=notification_id, user=request.user)
-                notification.is_read = is_read
-                notification.save()
+                # Update all notifications for the user
+                Notification.objects.filter(user=request.user).update(is_read=is_read)
 
-                return JsonResponse({"status": "success", "message": "Notification updated successfully"})
-            except Notification.DoesNotExist:
-                logger.warning("Notification not found for update", exc_info=True)
-                return JsonResponse({"status": "error", "message": "Notification not found"}, status=404)
+                return JsonResponse({"status": "success", "message": "All notifications updated successfully"})
             except Exception as e:
-                logger.error("Error updating notification", exc_info=True)
+                logger.error("Error updating notifications", exc_info=True)
                 return JsonResponse({"status": "error", "message": f"Internal server error: {str(e)}"}, status=500)
 
         elif request.method == "POST":

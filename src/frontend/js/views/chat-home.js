@@ -77,6 +77,12 @@ export async function loadChatPage(addToHistory = true) {
 
     // Load users list (Horizontal scroll), filtering out users in conversations with current user
     await loadUsersList(1, 10, "");
+
+    // Add event listener for "Mark all read"
+    const markAllReadButton = document.getElementById("chat-mark-all-read");
+    if (markAllReadButton) {
+      markAllReadButton.addEventListener("click", markAllNotificationsRead);
+    }
   } catch (error) {
     console.error("Error loading chat home:", error);
     displayModalError("Failed to load chat home");
@@ -112,13 +118,17 @@ async function loadChatList(page = 1, perPage = 10, search = "") {
       userItem.style.display = ""; // Make the template visible
 
       // Populate user data
-      const avatarImg = userItem.querySelector(".chat-conversations-list__avatar");
+      const avatarImg = userItem.querySelector(
+        ".chat-conversations-list__avatar"
+      );
       avatarImg.src = user.avatarUrl || ASSETS.IMAGES.DEFAULT_AVATAR;
       avatarImg.onerror = function () {
         this.src = ASSETS.IMAGES.DEFAULT_AVATAR;
       };
 
-      const username = userItem.querySelector(".chat-conversations-list__username");
+      const username = userItem.querySelector(
+        ".chat-conversations-list__username"
+      );
       username.textContent = user.username;
 
       const statusIndicator = userItem.querySelector(
@@ -218,4 +228,29 @@ function renderPagination(pagination, container) {
   nextButton.onclick = () => loadChatList(page + 1);
 
   container.style.display = total_pages <= 1 ? "none" : "flex";
+}
+
+// New function to mark all notifications as read
+async function markAllNotificationsRead() {
+  try {
+    console.log("presed markAllNotificationsRead");
+    const response = await fetch("/api/chat/notifications/", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ is_read: true }), // Assuming your backend expects this format
+    });
+
+    const data = await response.json();
+    if (data.status === "success") {
+      showToast("All notifications marked as read", false);
+      await renderNotifications(); // Refresh notifications
+    } else {
+      throw new Error(data.message);
+    }
+  } catch (error) {
+    console.error("Error marking notifications as read:", error);
+    showToast("Failed to mark notifications as read", true);
+  }
 }

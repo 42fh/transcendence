@@ -63,7 +63,31 @@
   background-color: red;
   color: white;
   border-radius: 50%;
-  padding: 0.2rem 0.5rem;
+  padding: 0.2rem 0.2rem;
   font-size: 0.75rem;
-  display: none; /* Initially hidden */
+  display: none;
 }
+
+
+display: inline-block;
+  background-color: #007bff; /* Bootstrap primary color */
+  color: white;
+  padding: 10px 15px;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 16px;
+  text-align: center;
+  text-decoration: none; /* Remove underline if it's a link */
+}
+
+.mark-all-read-button:hover {
+  background-color: #0056b3; /* Darker shade on hover */
+}
+
+/* Optional: Add focus styles for accessibility */
+.mark-all-read-button:focus {
+  outline: 2px solid #0056b3; /* Focus outline */
+}
+
+
+x
