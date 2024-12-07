@@ -203,3 +203,13 @@
   color: var(--color-text);
   font-size: 0.8rem;
 }
+
+/* Add this new class for the notifications container */
+.notifications-container {
+  height: 200px; /* Set a fixed height */
+  overflow-y: auto; /* Enable vertical scrolling */
+  margin-top: 1rem; /* Add some margin if needed */
+  border: 1px solid #ccc; /* Optional: Add a border for better visibility */
+  border-radius: 8px; /* Optional: Match the existing styles */
+  background: var(--color-background-secondary); /* Match the background */
+}
