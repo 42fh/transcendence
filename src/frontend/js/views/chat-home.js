@@ -154,7 +154,7 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
     );
 
     usersHorizontalContainer.innerHTML = "";
-    const userTemplate = document.getElementById("chat-conversations");
+    const userTemplate = document.getElementById("chat-users");
 
     //TODO: Blocked users should also be filtered out
     data.users.forEach((user) => {
@@ -168,17 +168,17 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
       userItem.style.display = ""; // Make the template visible
 
       // Populate user data
-      const avatarImg = userItem.querySelector(".chat-conversations-list__avatar");
+      const avatarImg = userItem.querySelector(".chat-users-list__avatar");
       avatarImg.src = user.avatarUrl || ASSETS.IMAGES.DEFAULT_AVATAR;
       avatarImg.onerror = function () {
         this.src = ASSETS.IMAGES.DEFAULT_AVATAR;
       };
 
-      const username = userItem.querySelector(".chat-conversations-list__username");
+      const username = userItem.querySelector(".chat-users-list__username");
       username.textContent = user.username;
 
       const statusIndicator = userItem.querySelector(
-        ".chat-conversations-list__status-indicator"
+        ".chat-users-list__status-indicator"
       );
       // You can add online/offline status logic here if needed
 
@@ -188,8 +188,7 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
       });
 
       // Modify classes for horizontal display
-      userItem.classList.add("chat-users-horizontal-item");
-      avatarImg.classList.add("chat-users-horizontal-avatar");
+      // userItem.classList.add("chat-users-horizontal-item");
       username.classList.add("chat-users-horizontal-username");
 
       // Append horizontal user item to the container

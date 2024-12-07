@@ -1,8 +1,6 @@
 .page-container--chat {
   padding: 1rem;
-  /* min-height: calc(100vh - var(--bottom-nav-height)); */
   height: calc(100vh - var(--bottom-nav-height));
-
   position: fixed;
   top: 0;
   left: 2rem;
@@ -17,11 +15,7 @@
   border-radius: var(--profile-border-radius);
   padding: var(--spacing-sm);
   margin-bottom: var(--spacing-sm);
-  /* max-width: 20em; */
-  /* max-width: min(90vw, 50em); */
   width: 100%;
-  /* Take full width of parent */
-
   word-wrap: break-word;
   box-sizing: border-box;
 }
@@ -30,174 +24,24 @@
   margin: 0.4rem;
 }
 
-.chat-clickable-item {
-  cursor: pointer;
-}
-
-.chat-button-small {
-  background: transparent;
-  color: white;
-  font-size: 0.6em;
-  padding: 3px 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-family: "Press Start 2P", cursive;
-  border: 0.5px solid white;
-  border-radius: 4px;
-  margin: 1px;
-}
-
-.chat-button-small:hover {
-  background-color: rgb(255, 0, 0);
-  color: black;
-}
-
-.chat-input-retro {
-  width: 620px;
-  height: 60px;
-  padding: 1em 2em;
-  font-family: "Press Start 2P", cursive;
-  font-size: 1.2em;
-  background: none;
-  color: white;
-  border: 2px solid white;
-  outline: none;
-  transition: all 0.3s ease;
-}
-
-.chat-input-retro:focus {
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.chat-greeting {
-  margin-bottom: var(--spacing-lg);
-}
-
-.chat-user-list {
-  width: 25%;
-}
-
-.chat-section-title {
-  margin-bottom: var(--spacing-sm);
-}
-
-.chat-user-list-ul {
-  margin-bottom: var(--spacing-sm);
-}
-
-.chat-window-messages {
-  width: 70%;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-}
-
-.chat-messages {
-  flex-grow: 1;
-  overflow-y: auto;
-  margin-bottom: var(--spacing-sm);
-}
-
-.chat-input-area {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
-}
-
-.chat-input-area .input-retro {
-  margin-bottom: var(--spacing-sm);
-  width: 100%;
-  height: 60px;
-  width: 620px;
-  padding: 1em 2em;
-  font-family: "Press Start 2P", cursive;
-  font-size: 1.2em;
-  background: none;
-  color: white;
-  border: 2px solid white;
-  outline: none;
-  transition: all 0.3s ease;
-}
-
-.chat-input-area .input-retro:focus {
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.chat-message {
-  margin-bottom: var(--spacing-xs);
-  padding: var(--spacing-xs);
-}
-
-.chat-message-system {
-  color: gray;
-  font-style: italic;
-}
-
-.chat-message-self {
-  text-align: right;
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.chat-message-other {
-  text-align: left;
-}
-
-/* Add cursor pointer for clickable elements */
-.chat-user-item {
-  cursor: pointer;
-}
-
-.chat-user-item-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.chat-user-item {
-  cursor: pointer;
-}
-
-.chat-user-item.has-chat {
-  color: green;
-}
-
-.chat-user-item.blocked-by-user {
-  color: gray;
-  cursor: not-allowed;
-}
-
 .chat-users-horizontal-scroll {
   position: relative;
-  /* Ensure proper stacking context */
   z-index: 10;
-  /* Higher value to stay on top */
   width: 100%;
   overflow-x: auto;
-  /* Allow horizontal scrolling */
   white-space: nowrap;
-  /* Prevent line breaks */
   padding: 10px 0;
 }
 
 .chat-users-horizontal-container {
   display: flex;
-  /* Use flexbox for horizontal layout */
   gap: 15px;
-  /* Space between items */
   overflow-x: scroll;
-  /* Allow horizontal scrolling */
   scroll-snap-type: x mandatory;
-  /* Optional: for smooth scrolling */
   scroll-behavior: smooth;
-  /* Optional: for smooth scrolling */
   padding: 0 10px;
-  /* Padding for better appearance */
   position: relative;
-  /* Ensures proper layout within the scroll */
   z-index: 10;
-  /* Matches the scroll container */
 }
 
 .chat-users-horizontal-item {
@@ -205,9 +49,7 @@
   flex-direction: column;
   align-items: center;
   scroll-snap-align: start;
-  /* Optional: for snapping effect */
   min-width: 70px;
-  /* Minimum width for each item */
   cursor: pointer;
   border: 2px solid rgb(0, 255, 128);
 }
@@ -228,18 +70,12 @@
   white-space: nowrap;
 }
 
-
-
-
-/* conversations list */
-.chat-conversations-list {
+.conversations-list {
   display: flex;
   flex-direction: column;
-  /* gap: 1rem; */
   gap: 0.3em;
   flex: 1;
   margin-top: 1.3rem;
-
 }
 
 .chat-conversations-list__item {
@@ -247,33 +83,22 @@
   align-items: center;
   gap: 1rem;
   padding: 0;
-  background: var(--color-background-secondary);
-  /* Existing background */
+  background-color: rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   margin-bottom: 0.25rem;
-
-  /* New styles for outline and background */
-  background-color: rgba(255, 255, 255, 0.1);
-  /* Light background color */
-  border: 2px solid rgba(255, 255, 255, 0.5);
-  /* Outline color */
   transition: background-color 0.3s ease;
-  /* Smooth transition for hover effect */
 }
 
 .chat-conversations-list__item:hover {
   background-color: rgba(255, 255, 255, 0.2);
-  /* Darker background on hover */
 }
 
 .chat-conversations-list__avatar {
   width: 50px;
   height: 50px;
-
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
-  /* Prevents the avatar from shrinking */
 }
 
 .chat-conversations-list__info {
@@ -287,32 +112,21 @@
   font-size: 0.8rem;
 }
 
-
-.chat-message-system {
-  background-color: #f0f0f0;
-  font-style: italic;
-  color: #666;
-  border-left: 3px solid #999;
-}
-
 .notification-item {
   display: flex;
   justify-content: space-between;
   padding: 10px;
   border-bottom: 1px solid #eee;
   font-size: 0.8rem;
-
 }
 
 .notification-item.is-unread {
-  /* background-color: #f0f0f0; */
   font-weight: bold;
-  color: rgb(255, 255, 255)
+  color: rgb(255, 255, 255);
 }
 
 .notification-item.is-read {
-  /* background-color: #ffffff; */
-  color: rgb(90, 90, 90)
+  color: rgb(90, 90, 90);
 }
 
 .notification-message {
@@ -334,4 +148,58 @@
 
 .notification-error {
   color: #d32f2f;
+}
+
+.chat-users-list {
+  display: flex;
+  flex-direction: column;
+  /* gap: 1rem; */
+  gap: 0.3em;
+  flex: 1;
+  margin-top: 1.3rem;
+
+}
+
+.chat-users-list__item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0;
+  background: var(--color-background-secondary);
+  /* Existing background */
+  border-radius: 8px;
+  margin-bottom: 0.25rem;
+
+  /* New styles for outline and background */
+  background-color: rgba(255, 255, 255, 0.1);
+  /* Light background color */
+  /* Outline color */
+  transition: background-color 0.3s ease;
+  /* Smooth transition for hover effect */
+}
+
+.chat-users-list__item:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  /* Darker background on hover */
+}
+
+.chat-users-list__avatar {
+  width: 50px;
+  height: 50px;
+
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  /* Prevents the avatar from shrinking */
+}
+
+.chat-users-list__info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.chat-users-list__username {
+  color: var(--color-text);
+  font-size: 0.8rem;
 }
