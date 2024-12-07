@@ -439,7 +439,7 @@
       <div class="chat__section">
         <h2 class="chat-page__title">Users</h2>
         <div class="chat-users-horizontal-scroll">
-          <div id="users-horizontal-container" class="chat-users-horizontal-container">
+          <div id="chat-users-horizontal-container" class="chat-users-horizontal-container">
             <!-- Horizontal user items will be populated dynamically here -->
             <div class="chat-users-horizontal-item" id="chat-users" style="display: none;">
               <img class="chat-users-list__avatar" src="" alt="User avatar" />
@@ -454,7 +454,7 @@
 
       <div class="chat__section">
         <h2 class="chat-page__title">Notifications</h2>
-        <h2 id="chat-mark-all-read">Mark all read</h2>
+        <h2 id="notification-mark-all-read">Mark all read</h2>
         <div class="notifications-container">
           <div id="chat-notifications" class="conversations-list">
             <!-- Notifications -->
@@ -477,13 +477,13 @@
       </div>
 
       <div id="notification-container"></div>
-      <div id="users-pagination" class="pagination">
-        <div class="pagination__info">
-          <span class="pagination__current">1</span>
-          <span class="pagination__separator">/</span>
-          <span class="pagination__total">1</span>
-        </div>
+      <!-- <div id="users-pagination" class="pagination"> -->
+      <div class="pagination__info">
+        <span class="pagination__current">1</span>
+        <span class="pagination__separator">/</span>
+        <span class="pagination__total">1</span>
       </div>
+    </div>
     </div>
   </template>
 
@@ -788,6 +788,8 @@
       </div>
     </div>
   </template>
+
+
 
   <!-- User List Item Template -->
   <template id="users-list-item-template">

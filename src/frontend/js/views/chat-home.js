@@ -79,7 +79,7 @@ export async function loadChatPage(addToHistory = true) {
     await loadUsersList(1, 10, "");
 
     // Add event listener for "Mark all read"
-    const markAllReadButton = document.getElementById("chat-mark-all-read");
+    const markAllReadButton = document.getElementById("notification-mark-all-read");
     if (markAllReadButton) {
       markAllReadButton.addEventListener("click", markAllNotificationsRead);
     }
@@ -168,7 +168,7 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
     if (!data || !data.users) throw new Error("Failed to fetch users");
 
     const usersHorizontalContainer = document.getElementById(
-      "users-horizontal-container"
+      "chat-users-horizontal-container"
     );
 
     usersHorizontalContainer.innerHTML = "";
