@@ -1,4 +1,5 @@
 import { initializeChatWebSocket } from "../services/chatSocketService.js";
+import { ASSETS } from "../config/constants.js";
 
 export function loadChatRoom(chatPartner) {
   history.pushState(
@@ -46,6 +47,24 @@ function sendMessage(chatPartner) {
 
 function initializeChatRoom(chatPartner) {
   const currentUser = localStorage.getItem("pongUsername");
+  
+  const partnerAvatar = document.getElementById("chat-room-partner-avatar");
+  const partnerUsername = document.getElementById("chat-room-partner-username");
+  const backButton = document.querySelector(".chat-room-header__back-btn");
+  
+  partnerUsername.textContent = chatPartner;
+  
+  // TODO: FETCH ACTUAL AVATAR
+  partnerAvatar.src = `${ASSETS.IMAGES.DEFAULT_AVATAR}`;
+  partnerAvatar.onerror = function() {
+    this.src = ASSETS.IMAGES.DEFAULT_AVATAR;
+  };
+  
+  // TODO: FIX THIS
+  // backButton.addEventListener("click", () => {
+  //   loadChatPage(); 
+  // });
+
   console.log("pongUsername:", currentUser);
   console.log("Chat Partner:", chatPartner);
 

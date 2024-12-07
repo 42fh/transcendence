@@ -490,6 +490,18 @@
 
   <template id="chat-room-template">
     <div class="chat-room-container">
+      <div class="chat-room-header">
+        <div class="chat-room-header__back-btn">
+          <i class="icon-back">←</i>
+        </div>
+        <div class="chat-room-header__user-info">
+          <img id="chat-room-partner-avatar" class="chat-room-header__avatar" src="" alt="Chat Partner Avatar" />
+          <span id="chat-room-partner-username" class="chat-room-header__username"></span>
+        </div>
+        <div class="chat-room-header__actions">
+          <button id="chat-room-more-actions" class="chat-room-header__more-btn">⋮</button>
+        </div>
+      </div>
       <div id="chat-messages" class="chat-messages"></div>
       <div class="chat-input-container">
         <input id="chat-message-input" class="chat-input" placeholder="Type your message" />
