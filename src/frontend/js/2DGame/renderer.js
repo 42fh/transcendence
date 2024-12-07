@@ -1,20 +1,68 @@
-import { nastyGlobalRendererState as renderer, getGameContext } from "./../store/index.js";
+// import { rendererState as renderer, getGameContext } from "./../store/index.js";
+import { getRendererState, setRendererState } from "./../store/index.js";
+import { getGameContext } from "./../store/game/context.js";
 /**
  * Initializes the renderer with all necessary data from the initial state message
  * @param {Object} message - Initial state message from server
  */
 export function initializeRenderer(message) {
-  renderer.type = message.game_setup.type;
-  // TODO: throw an error if we dont get the vertices
-  // Note: Vertices set only in initial state message
-  renderer.vertices = message.game_setup.vertices || [];
-  renderer.svg = document.getElementById("pongSvg");
-  renderer.playerIndex = message.player_index;
-  //   renderer.scoreList = document.getElementById("scoreDisplay");
+  const renderer = getRendererState();
+  setRendererState({
+    type: message.game_setup.type,
+    vertices: message.game_setup.vertices || [],
+    svg: document.getElementById("pongSvg"),
+    playerIndex: message.player_index,
+  });
+  initializeSVG();
   updateRenderer(message);
+}
+
+function initializeSVG() {
+  const renderer = getRendererState();
   if (!renderer.svg) {
-    throw new Error("SVG element not found");
+    console.error("SVG element not found");
+    return;
   }
+
+  // Set viewBox from config
+  const viewBox = renderer.config.viewBox;
+  renderer.svg.setAttribute("viewBox", `${viewBox.minX} ${viewBox.minY} ${viewBox.width} ${viewBox.height}`);
+
+  // Log verification
+  console.log("ViewBox verification:", {
+    config: renderer.config.viewBox,
+    svgAttribute: renderer.svg.getAttribute("viewBox"),
+    svgViewBox: renderer.svg.viewBox.baseVal,
+  });
+  verifyViewBoxConsistency();
+}
+
+// This function is used to verifty that the values of the SVG viewBox are consistent with the values in the config
+function verifyViewBoxConsistency() {
+  const renderer = getRendererState();
+  const config = renderer.config.viewBox;
+  const svg = renderer.svg;
+  const svgViewBox = svg.viewBox.baseVal;
+
+  const isConsistent =
+    config.minX === svgViewBox.x &&
+    config.minY === svgViewBox.y &&
+    config.width === svgViewBox.width &&
+    config.height === svgViewBox.height;
+
+  if (!isConsistent) {
+    console.error("ViewBox mismatch:", {
+      config,
+      svg: {
+        x: svgViewBox.x,
+        y: svgViewBox.y,
+        width: svgViewBox.width,
+        height: svgViewBox.height,
+      },
+    });
+  }
+
+  return isConsistent;
 }
 
 /**
