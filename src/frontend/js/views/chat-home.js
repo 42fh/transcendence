@@ -109,10 +109,19 @@ async function loadChatList(page = 1, perPage = 10, search = "") {
       conversationUsers
     );
 
-    const userTemplate = document.getElementById("chat-conversations");
+    // Ensure the template is correctly accessed
+    const chatHomeTemplate = document.querySelector("#chat-home-template");
+    const userTemplate = chatHomeTemplate.content.querySelector(
+      ".chat-conversations-list__item"
+    );
 
     // Render chat contacts (Vertical List)
     data.users.forEach((user) => {
+      if (!userTemplate) {
+        console.error("User template not found");
+        return;
+      }
+
       // Clone the hidden user template and populate data
       const userItem = userTemplate.cloneNode(true);
       userItem.style.display = ""; // Make the template visible
@@ -134,7 +143,6 @@ async function loadChatList(page = 1, perPage = 10, search = "") {
       const statusIndicator = userItem.querySelector(
         ".chat-conversations-list__status-indicator"
       );
-      // You can add online/offline status logic here if needed
 
       // Set up click event for the user item
       userItem.addEventListener("click", () => {
@@ -164,11 +172,19 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
     );
 
     usersHorizontalContainer.innerHTML = "";
-    const userTemplate = document.getElementById("chat-users");
 
-    //TODO: Blocked users should also be filtered out
+    const chatHomeTemplate = document.querySelector("#chat-home-template");
+    const userTemplate = chatHomeTemplate.content.querySelector(
+      ".chat-users-horizontal-item"
+    );
+
     data.users.forEach((user) => {
-      // do not show users having a conversation with current user
+      if (!userTemplate) {
+        console.error("User template not found");
+        return;
+      }
+
+      // Do not show users already in conversations with the current user
       if (conversationUsers.includes(user.username)) {
         return;
       }
@@ -185,21 +201,19 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
       };
 
       const username = userItem.querySelector(".chat-users-list__username");
-      username.textContent = user.username;
+      username.textContent =
+        user.username.length > 4
+          ? user.username.substring(0, 3) + "..."
+          : user.username;
 
       const statusIndicator = userItem.querySelector(
         ".chat-users-list__status-indicator"
       );
-      // You can add online/offline status logic here if needed
 
       // Set up click event for the user item
       userItem.addEventListener("click", () => {
         loadChatRoom(user.username);
       });
-
-      // Modify classes for horizontal display
-      // userItem.classList.add("chat-users-horizontal-item");
-      username.classList.add("chat-users-horizontal-username");
 
       // Append horizontal user item to the container
       usersHorizontalContainer.appendChild(userItem);
@@ -209,6 +223,7 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
     displayModalError(`Failed to load users: ${error.message}`);
   }
 }
+
 
 function renderPagination(pagination, container) {
   const { total_pages, page } = pagination;

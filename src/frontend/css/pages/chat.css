@@ -80,13 +80,15 @@
 
 .chat-conversations-list__item {
   display: flex;
+  padding: 5px;
   align-items: center;
   gap: 1rem;
-  padding: 0;
-  background-color: rgba(255, 255, 255, 0.1);
+  background: var(--color-background-secondary);
   border-radius: 8px;
-  margin-bottom: 0.25rem;
-  transition: background-color 0.3s ease;
+  margin-bottom: 0.40rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  box-sizing: border-box;
 }
 
 .chat-conversations-list__item:hover {
@@ -206,10 +208,16 @@
 
 /* Add this new class for the notifications container */
 .notifications-container {
-  height: 200px; /* Set a fixed height */
-  overflow-y: auto; /* Enable vertical scrolling */
-  margin-top: 1rem; /* Add some margin if needed */
-  border: 1px solid #ccc; /* Optional: Add a border for better visibility */
-  border-radius: 8px; /* Optional: Match the existing styles */
-  background: var(--color-background-secondary); /* Match the background */
+  height: 200px;
+  /* Set a fixed height */
+  overflow-y: auto;
+  /* Enable vertical scrolling */
+  margin-top: 1rem;
+  /* Add some margin if needed */
+  border: 1px solid #ccc;
+  /* Optional: Add a border for better visibility */
+  border-radius: 8px;
+  /* Optional: Match the existing styles */
+  background: var(--color-background-secondary);
+  /* Match the background */
 }

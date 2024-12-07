@@ -436,25 +436,28 @@
 
 
 
-
-  <!-- Chat Template -->
   <template id="chat-home-template">
     <div class="page-container page-container--chat">
       <div class="chat__section">
-
         <h2 class="chat-page__title">Users</h2>
-        <!-- Horizontal Scroll -->
         <div class="chat-users-horizontal-scroll">
           <div id="users-horizontal-container" class="chat-users-horizontal-container">
             <!-- Horizontal user items will be populated dynamically here -->
+            <div class="chat-users-horizontal-item" id="chat-users" style="display: none;">
+              <img class="chat-users-list__avatar" src="" alt="User avatar" />
+              <div class="chat-users-list__info">
+                <span class="chat-users-list__username"></span>
+                <span class="chat-users-list__status-indicator"></span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       <div class="chat__section">
         <h2 class="chat-page__title">Notifications</h2>
-        <h2 id="chat-mark-all-read"> Mark all read</h2>
-        <div class="notifications-container"> <!-- New container for notifications -->
+        <h2 id="chat-mark-all-read">Mark all read</h2>
+        <div class="notifications-container">
           <div id="chat-notifications" class="conversations-list">
             <!-- Notifications -->
           </div>
@@ -465,9 +468,15 @@
         <h2 class="chat-page__title">Conversations</h2>
         <div id="chat-conversations-list" class="conversations-list">
           <!-- Vertical list of users will be populated dynamically here -->
+          <div class="chat-conversations-list__item" id="chat-conversations" style="display: none;">
+            <img class="chat-conversations-list__avatar" src="" alt="User avatar" />
+            <div class="chat-conversations-list__info">
+              <span class="chat-conversations-list__username"></span>
+              <span class="chat-conversations-list__status-indicator"></span>
+            </div>
+          </div>
         </div>
       </div>
-
 
       <div id="notification-container"></div>
       <div id="users-pagination" class="pagination">
@@ -479,22 +488,6 @@
       </div>
     </div>
   </template>
-
-  <div class="chat-conversations-list__item" id="chat-conversations" style="display: none;">
-    <img class="chat-conversations-list__avatar" src="" alt="User avatar" />
-    <div class="chat-conversations-list__info">
-      <span class="chat-conversations-list__username"></span>
-      <span class="chat-conversations-list__status-indicator"></span>
-    </div>
-  </div>
-
-  <div class="chat-users-horizontal-item" id="chat-users" style="display: none;">
-    <img class="chat-users-list__avatar" src="" alt="User avatar" />
-    <div class="chat-users-list__info">
-      <span class="chat-users-list__username"></span>
-      <span class="chat-users-list__status-indicator"></span>
-    </div>
-  </div>
 
 
 
