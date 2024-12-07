@@ -1,5 +1,4 @@
-import { nastyGlobalRendererState as renderer, gameContext } from "./../store/globals.js";
-
+import { nastyGlobalRendererState as renderer, gameContext } from "./../store/index.js";
 /**
  * Initializes the renderer with all necessary data from the initial state message
  * @param {Object} message - Initial state message from server
@@ -107,7 +106,7 @@ export function renderBalls(renderer) {
     const ballY = renderer.config.center - ball.y * renderer.config.scale;
 
     renderer.svg.appendChild(
-      createSVGElement(renderer, "circle", {
+      createSVGElement("circle", {
         cx: ballX,
         cy: ballY,
         r: ball.size * renderer.config.scale,
@@ -128,7 +127,7 @@ export function showGameOver(renderer, isWinner) {
   if (!renderer.svg) return;
 
   const message = isWinner ? "YOU WIN!" : "GAME OVER";
-  const textElement = createSVGElement(renderer, "text", {
+  const textElement = createSVGElement("text", {
     x: renderer.config.center,
     y: renderer.config.center,
     "text-anchor": "middle",
@@ -363,7 +362,7 @@ export function renderPolygonOutline(renderer) {
 
   // Draw main polygon outline
   renderer.svg.appendChild(
-    createSVGElement(renderer, "path", {
+    createSVGElement("path", {
       d: `${pathData} Z`,
       fill: "none",
       stroke: "#808080",
@@ -385,7 +384,7 @@ export function renderPolygonOutline(renderer) {
     const offsetY = (dx / len) * 20;
 
     // Add side number label
-    const label = createSVGElement(renderer, "text", {
+    const label = createSVGElement("text", {
       x: midX + offsetX,
       y: midY + offsetY,
       "text-anchor": "middle",

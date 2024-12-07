@@ -1,5 +1,13 @@
 import { renderPolygonGame } from "./renderer.js";
 
+window.gameContext = {
+  players: [
+    { index: 0, username: "Player 1", score: 0, isCurrentPlayer: true },
+    { index: 1, username: "Player 2", score: 0, isCurrentPlayer: false },
+    { index: 2, username: "Player 3", score: 0, isCurrentPlayer: false },
+  ],
+};
+
 // Mock game state for testing
 const mockGameState = {
   type: "polygon",
@@ -21,6 +29,10 @@ const mockGameState = {
 // Create two test renderers for different states
 function createTestRenderer(svgId) {
   const svg = document.getElementById(svgId);
+  if (!svg) {
+    console.error(`SVG element with id ${svgId} not found`);
+    return null;
+  }
   return {
     type: "polygon",
     config: {
@@ -36,21 +48,36 @@ function createTestRenderer(svgId) {
       { x: -1, y: 0 },
       { x: 0, y: -1 },
     ],
-    state: { ...mockGameState }, // Clone the state
+    state: { ...mockGameState },
     playerIndex: 0,
+    showError: (msg) => console.error(msg), // Add error handler
   };
 }
 
 // Run tests
 function runTests() {
-  // Test normal state
-  const normalRenderer = createTestRenderer("normalState");
-  renderPolygonGame(normalRenderer);
+  try {
+    console.log("Before tests - gameContext:", window.gameContext);
 
-  // Test collision state
-  const collisionRenderer = createTestRenderer("collisionState");
-  collisionRenderer.state.collision = { side_index: 0, type: "paddle" };
-  renderPolygonGame(collisionRenderer);
+    // Test normal state
+    const normalRenderer = createTestRenderer("normalState");
+    if (normalRenderer) {
+      console.log("Before rendering normal - gameContext:", window.gameContext);
+      renderPolygonGame(normalRenderer);
+      console.log("After rendering normal - gameContext:", window.gameContext);
+    }
+
+    // Test collision state
+    const collisionRenderer = createTestRenderer("collisionState");
+    if (collisionRenderer) {
+      console.log("Before rendering collision - gameContext:", window.gameContext);
+      collisionRenderer.state.collision = { side_index: 0, type: "paddle" };
+      renderPolygonGame(collisionRenderer);
+      console.log("After rendering collision - gameContext:", window.gameContext);
+    }
+  } catch (error) {
+    console.error("Test failed:", error);
+  }
 }
 
 // Run tests when page loads

@@ -19,12 +19,21 @@
       <div>
         <h3>Normal State</h3>
         <svg id="normalState" width="300" height="300"></svg>
+        <div id="two-d-game__score-list"></div>
       </div>
       <div>
         <h3>Collision State</h3>
         <svg id="collisionState" width="300" height="300"></svg>
+        <div id="two-d-game__score-list-collision"></div>
       </div>
     </div>
+    <!-- Template for score items -->
+    <template id="two-d-game__score-item-template">
+      <div class="two-d-game__score-item">
+        <span class="two-d-game__player-name"></span>:
+        <span class="two-d-game__player-score"></span>
+      </div>
+    </template>
     <script type="module" src="./renderer.js"></script>
     <script type="module" src="./renderer.test.js"></script>
   </body>

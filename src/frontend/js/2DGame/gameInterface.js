@@ -1,4 +1,5 @@
-import { GameController } from "./gameController.js";
+// import { GameController } from "./gameController.js";
+import { GameController } from "./originalClassVersion/gameController.js";
 
 export class GameInterface2D {
   constructor() {

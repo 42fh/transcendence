@@ -4,7 +4,7 @@ import { GAME_2D_CONFIG_TYPES, GAME_2D_CONFIG_TYPE_DEFAULT } from "../config/con
 import { showToast } from "../utils/toast.js";
 import { fetchWaitingGames, createGame } from "../services/gameService.js";
 import { loadGame2DPage } from "./game2D.js";
-import { initializeGameStructs } from "../store/globals.js";
+import { initializeGameConfig } from "../store/index.js";
 
 export function loadGameSetupPage(addToHistory = true) {
   console.log("loadGameSetupPage function called");
@@ -327,7 +327,7 @@ async function findOrCreateGame(formData) {
 async function handleStartGameAndJoinGameResult(result, formData) {
   if (result.success) {
     try {
-      initializeGameStructs(result.game_id, formData);
+      initializeGameConfig(result.game_id, formData);
       await loadGame2DPage(result.game_id, result.ws_url, formData);
     } catch (error) {
       console.error("Error loading 2D game page:", error);
