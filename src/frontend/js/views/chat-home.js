@@ -73,7 +73,6 @@ export async function loadChatPage(addToHistory = true) {
     } else {
       console.error("No current user found for notifications");
     }
-
     await loadChatList(1, 10, "");
 
     // Load users list (Horizontal scroll), filtering out users in conversations with current user
@@ -89,24 +88,22 @@ async function loadChatList(page = 1, perPage = 10, search = "") {
     const data = await fetchConversationList(page, perPage, search);
     if (!data || !data.users) throw new Error("Failed to fetch chat contacts");
 
-    const usersList = document.getElementById("users-list");
+    const usersList = document.getElementById("chat-conversations-list");
     const paginationContainer = document.getElementById("users-pagination");
 
     usersList.innerHTML = "";
 
-    // console.log("Printing conversation list before", conversationUsers);
     conversationUsers = data.users.filter(
       (user) =>
         user.username !== localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID)
-    ); // Exclude the current user from the conversation list
-    conversationUsers = conversationUsers.map((user) => user.username); // Only store usernames
+    );
+    conversationUsers = conversationUsers.map((user) => user.username);
     console.log(
       "Printing conversation list from loadChatList",
       conversationUsers
     );
 
-    // Get the user list item template from HTML
-    const userTemplate = document.getElementById("user-template");
+    const userTemplate = document.getElementById("chat-conversations");
 
     // Render chat contacts (Vertical List)
     data.users.forEach((user) => {
@@ -115,17 +112,17 @@ async function loadChatList(page = 1, perPage = 10, search = "") {
       userItem.style.display = ""; // Make the template visible
 
       // Populate user data
-      const avatarImg = userItem.querySelector(".users-list__avatar");
+      const avatarImg = userItem.querySelector(".chat-conversations-list__avatar");
       avatarImg.src = user.avatarUrl || ASSETS.IMAGES.DEFAULT_AVATAR;
       avatarImg.onerror = function () {
         this.src = ASSETS.IMAGES.DEFAULT_AVATAR;
       };
 
-      const username = userItem.querySelector(".users-list__username");
+      const username = userItem.querySelector(".chat-conversations-list__username");
       username.textContent = user.username;
 
       const statusIndicator = userItem.querySelector(
-        ".users-list__status-indicator"
+        ".chat-conversations-list__status-indicator"
       );
       // You can add online/offline status logic here if needed
 
@@ -157,7 +154,7 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
     );
 
     usersHorizontalContainer.innerHTML = "";
-    const userTemplate = document.getElementById("user-template");
+    const userTemplate = document.getElementById("chat-conversations");
 
     //TODO: Blocked users should also be filtered out
     data.users.forEach((user) => {
@@ -171,17 +168,17 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
       userItem.style.display = ""; // Make the template visible
 
       // Populate user data
-      const avatarImg = userItem.querySelector(".users-list__avatar");
+      const avatarImg = userItem.querySelector(".chat-conversations-list__avatar");
       avatarImg.src = user.avatarUrl || ASSETS.IMAGES.DEFAULT_AVATAR;
       avatarImg.onerror = function () {
         this.src = ASSETS.IMAGES.DEFAULT_AVATAR;
       };
 
-      const username = userItem.querySelector(".users-list__username");
+      const username = userItem.querySelector(".chat-conversations-list__username");
       username.textContent = user.username;
 
       const statusIndicator = userItem.querySelector(
-        ".users-list__status-indicator"
+        ".chat-conversations-list__status-indicator"
       );
       // You can add online/offline status logic here if needed
 

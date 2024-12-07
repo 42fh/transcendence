@@ -3537,3 +3537,17 @@
 2024/12/06 01:02:07 [notice] 1#1: start worker process 30
 2024/12/06 01:02:07 [notice] 1#1: start worker process 31
 2024/12/06 01:02:07 [notice] 1#1: start worker process 32
+2024/12/07 00:53:33 [notice] 1#1: using the "epoll" event method
+2024/12/07 00:53:33 [notice] 1#1: nginx/1.26.1
+2024/12/07 00:53:33 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/12/07 00:53:33 [notice] 1#1: OS: Linux 6.10.11-linuxkit
+2024/12/07 00:53:33 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/12/07 00:53:33 [notice] 1#1: start worker processes
+2024/12/07 00:53:33 [notice] 1#1: start worker process 28
+2024/12/07 00:53:33 [notice] 1#1: start worker process 29
+2024/12/07 00:53:33 [notice] 1#1: start worker process 30
+2024/12/07 00:53:33 [notice] 1#1: start worker process 31
+2024/12/07 00:53:33 [notice] 1#1: start worker process 32
+2024/12/07 00:53:33 [notice] 1#1: start worker process 33
+2024/12/07 00:53:33 [notice] 1#1: start worker process 34
+2024/12/07 00:53:33 [notice] 1#1: start worker process 35
