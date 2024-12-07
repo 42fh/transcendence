@@ -34,6 +34,8 @@ from rest_framework import status
 from rest_framework.views import APIView
 from django.views import View
 from django.http import JsonResponse
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
 
 logger = logging.getLogger(__name__)
 load_dotenv(override=False)
@@ -371,7 +373,6 @@ def callback(request):
     else:
         return JsonResponse({"error": "Failed to fetch user info"}, status=403)
 
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 @method_decorator(csrf_exempt, name="dispatch")
 class UsersListView(APIView):
