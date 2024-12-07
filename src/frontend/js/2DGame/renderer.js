@@ -70,13 +70,15 @@ function verifyViewBoxConsistency() {
  * @param {Object} message - Initial state message from server
  */
 export function updateRenderer(message) {
+  const renderer = getRendererState();
   if (!renderer.type) {
     console.warn("Renderer not initialized");
     return;
   }
-
-  renderer.playerIndex = message.player_index;
-  renderer.state = message.game_state;
+  setRendererState({
+    playerIndex: message.player_index,
+    state: message.game_state,
+  });
 
   // Update scores in game context
   if (message.game_state.scores) {
@@ -85,7 +87,8 @@ export function updateRenderer(message) {
       player.score = message.game_state.scores[player.index] || 0;
     });
   }
-  render(renderer);
+  // TODO: Probably we should call getRendererState() inside render()
+  render();
 }
 
 /**
@@ -139,9 +142,9 @@ export function renderScores() {
 
 /**
  * Renders all balls in the game
- * @param {RendererState} renderer - The renderer state object
  */
-export function renderBalls(renderer) {
+export function renderBalls() {
+  const renderer = getRendererState();
   if (!renderer.svg || !renderer.state.balls) {
     console.warn("No SVG element or balls available for rendering", {
       svg: renderer.svg,
@@ -149,10 +152,12 @@ export function renderBalls(renderer) {
     });
     return;
   }
+  const centerX = renderer.config.centered ? renderer.config.viewBox.width / 2 : 0;
+  const centerY = renderer.config.centered ? renderer.config.viewBox.height / 2 : 0;
 
   renderer.state.balls.forEach((ball) => {
-    const ballX = renderer.config.center + ball.x * renderer.config.scale;
-    const ballY = renderer.config.center - ball.y * renderer.config.scale;
+    const ballX = centerX + ball.x * renderer.config.scale;
+    const ballY = centerY - ball.y * renderer.config.scale;
 
     renderer.svg.appendChild(
       createSVGElement("circle", {
@@ -169,16 +174,19 @@ export function renderBalls(renderer) {
 
 /**
  * Shows game over message
- * @param {RendererState} renderer - The renderer state object
  * @param {boolean} isWinner - Whether the player won
  */
-export function showGameOver(renderer, isWinner) {
+export function showGameOver(isWinner) {
+  const renderer = getRendererState();
   if (!renderer.svg) return;
+
+  const centerX = renderer.config.centered ? renderer.config.viewBox.width / 2 : 0;
+  const centerY = renderer.config.centered ? renderer.config.viewBox.height / 2 : 0;
 
   const message = isWinner ? "YOU WIN!" : "GAME OVER";
   const textElement = createSVGElement("text", {
-    x: renderer.config.center,
-    y: renderer.config.center,
+    x: centerX,
+    y: centerY,
     "text-anchor": "middle",
     "dominant-baseline": "middle",
     "font-size": "24px",
@@ -193,7 +201,8 @@ export function showGameOver(renderer, isWinner) {
  * Main render function that delegates to specific renderers
  * @param {RendererState} renderer - The renderer state object
  */
-export function render(renderer) {
+export function render() {
+  const renderer = getRendererState();
   if (!renderer.type) {
     console.warn("Renderer not initialized");
     return;
@@ -202,7 +211,7 @@ export function render(renderer) {
   try {
     switch (renderer.type) {
       case "polygon":
-        renderPolygonGame(renderer);
+        renderPolygonGame();
         break;
       case "circular":
         // renderCircularGame(renderer);
@@ -225,7 +234,8 @@ export function render(renderer) {
  * Renders the polygon game type
  * @param {RendererState} renderer - The renderer state object
  */
-export function renderPolygonGame(renderer) {
+export function renderPolygonGame() {
+  const renderer = getRendererState();
   console.log("Entering renderPolygonGame");
   // Validate required data is available
   if (!renderer.state || !renderer.svg || !renderer.vertices || renderer.vertices.length === 0) {
@@ -254,7 +264,8 @@ export function renderPolygonGame(renderer) {
     //   renderPaddle(renderer, paddle, paddle.side_index);
     // });
     renderPaddles(renderer);
-    renderBalls(renderer);
+    // renderBalls(renderer);
+    renderBalls();
     renderScores(renderer);
   } catch (error) {
     console.error("Error rendering polygon:", error);
@@ -267,11 +278,52 @@ export function renderPolygonGame(renderer) {
   }
 }
 
-function transformVertices(renderer, vertices) {
-  return vertices.map((vertex) => ({
-    x: renderer.config.center + vertex.x * renderer.config.scale,
-    y: renderer.config.center - vertex.y * renderer.config.scale,
-  }));
+/**
+ * Transforms normalized game coordinates from backend (-1 to 1) to SVG viewBox coordinates.
+ * This transformation is used for all game elements (vertices/polygon, paddles, balls).
+ *
+ * The transformation pipeline:
+ * 1. Input: Normalized coordinates from backend (-1 to 1 range)
+ * 2. Rotation: Apply any game rotation
+ * 3. Scaling: Scale to match SVG size using config.scale
+ * 4. Translation: Move to SVG position (centered or not based on config)
+ *
+ * @param {Object} renderer - The renderer object containing configuration
+ * @param {Array<{x: number, y: number}>} vertices - Array of normalized coordinates from backend
+ * @returns {Array<{x: number, y: number}>} Transformed coordinates in SVG viewBox space
+ *
+ * @example
+ * // Backend sends: [{x: 1, y: 1}, {x: -1, y: -1}]
+ * // With scale: 100, centered: true, viewBox: 800x600
+ * // Returns: [{x: 500, y: 200}, {x: 300, y: 400}]
+ *
+ * @todo Rename function to better reflect its purpose (e.g., mapBackendToSVGCoordinates or mapBakendGameNormalizedCoordinatesAkaVerticesToSVGViewboxCoordinates)
+ */
+function transformVertices() {
+  const renderer = getRendererState();
+  const vertices = renderer.vertices;
+
+  // Convert rotation to radians
+  const angleInRadians = ((renderer.config.rotation || 0) * Math.PI) / 180;
+  // Get center point if centered is true
+  const centerX = renderer.config.centered ? renderer.config.viewBox.width / 2 : 0;
+  const centerY = renderer.config.centered ? renderer.config.viewBox.height / 2 : 0;
+
+  return vertices.map((vertex) => {
+    // 1. First rotate
+    const rotatedX = vertex.x * Math.cos(angleInRadians) - vertex.y * Math.sin(angleInRadians);
+    const rotatedY = vertex.x * Math.sin(angleInRadians) + vertex.y * Math.cos(angleInRadians);
+
+    // 2. Then scale
+    const scaledX = rotatedX * renderer.config.scale;
+    const scaledY = rotatedY * renderer.config.scale;
+
+    // 3. Then translate (including both center offset and translation)
+    return {
+      x: centerX + scaledX + renderer.config.translation.x,
+      y: centerY - scaledY + renderer.config.translation.y, // Note the minus for Y to match SVG coordinates
+    };
+  });
 }
 
 /**
@@ -286,7 +338,7 @@ export function renderPaddle(renderer, paddle, sideIndex, debug = false) {
   if (!paddle.active || !renderer.vertices) return;
 
   // Transform vertices
-  const transformedVertices = transformVertices(renderer, renderer.vertices);
+  const transformedVertices = transformVertices();
   const startVertex = transformedVertices[sideIndex];
   const endVertex = transformedVertices[(sideIndex + 1) % transformedVertices.length];
 
@@ -401,25 +453,7 @@ function calculatePaddlePoints(x, y, normalizedSideX, normalizedSideY, normalX, 
   ].join(" ");
 }
 
-export function renderPolygonOutline(renderer) {
-  if (!renderer.vertices || renderer.vertices.length === 0) {
-    console.warn("No vertices available for polygon outline");
-    return;
-  }
-
-  const transformedVertices = transformVertices(renderer, renderer.vertices);
-  const pathData = transformedVertices.map((vertex, i) => `${i === 0 ? "M" : "L"} ${vertex.x} ${vertex.y}`).join(" ");
-
-  // Draw main polygon outline
-  renderer.svg.appendChild(
-    createSVGElement("path", {
-      d: `${pathData} Z`,
-      fill: "none",
-      stroke: "#808080",
-      "stroke-width": "2",
-    })
-  );
-
+function renderPolygonDebugLabels(renderer) {
   // Add labels for each side
   transformedVertices.forEach((vertex, i) => {
     const nextVertex = transformedVertices[(i + 1) % transformedVertices.length];
@@ -445,4 +479,34 @@ export function renderPolygonOutline(renderer) {
     label.textContent = `side ${i}`;
     renderer.svg.appendChild(label);
   });
+}
+
+/**
+ * Renders the polygon outline
+ */
+export function renderPolygonOutline() {
+  const renderer = getRendererState();
+  if (!renderer.vertices || renderer.vertices.length === 0) {
+    console.warn("No vertices available for polygon outline");
+    return;
+  }
+
+  console.log("renderer:", renderer);
+
+  const transformedVertices = transformVertices();
+  const pathData = transformedVertices.map((vertex, i) => `${i === 0 ? "M" : "L"} ${vertex.x} ${vertex.y}`).join(" ");
+
+  // Draw main polygon outline
+  renderer.svg.appendChild(
+    createSVGElement("path", {
+      d: `${pathData} Z`,
+      fill: "none",
+      stroke: "#808080",
+      "stroke-width": "2",
+    })
+  );
+
+  if (renderer.debug?.enabled && renderer.debug?.showPolygonLabels) {
+    renderPolygonDebugLabels(renderer);
+  }
 }
