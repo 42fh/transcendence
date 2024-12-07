@@ -350,8 +350,10 @@ def callback(request):
 
     if user is not None:
         login(request, user)  # This creates the session for the new user
-        print("Session Data:", request.session.items())  # Debug session contents
+        print("Session Data:", request.session.items())  # Debug session contents    
+        response = redirect('/')  # Redirect to a post-login page
         response.set_cookie("user_uuid", str(user.id), httponly=False, samesite="Lax")        return redirect('/')  # Redirect to a post-login page
+        return response
     else:
         return JsonResponse({"error": "Failed to fetch user info"}, status=403)
 
