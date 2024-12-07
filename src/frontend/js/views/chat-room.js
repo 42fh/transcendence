@@ -65,28 +65,19 @@ function initializeChatRoom(chatPartner) {
         const messageElement = document.importNode(template.content, true);
 
         const messageDiv = messageElement.querySelector(".chat-message");
-
-        // Special styling for system messages
-        if (isSystemMessage) {
-          messageDiv.classList.add("chat-message-system");
-          type = "system";
-        }
-
-        messageDiv.classList.add(`chat-message-${type}`);
-        const usernameElement = messageDiv.querySelector(
-          ".chat-message-username"
-        );
         const textElement = messageDiv.querySelector(".chat-message-text");
 
-        // Hide username for system messages
-        if (isSystemMessage) {
-          usernameElement.style.display = "none";
-        } else {
-          usernameElement.textContent = `${username}:`;
-        }
-
+        // Assign message text
         textElement.textContent = message;
 
+        // Apply classes based on message type
+        if (username === currentUser) {
+          messageDiv.classList.add("chat-message-self");
+        } else {
+          messageDiv.classList.add("chat-message-other");
+        }
+
+        // Append to chat messages container
         chatMessages.appendChild(messageElement);
         chatMessages.scrollTop = chatMessages.scrollHeight;
       },
@@ -141,22 +132,11 @@ function initializeChatRoom(chatPartner) {
 
   // Prevent system user from sending messages
   sendButton.onclick = () => {
-    const messageInput = document.getElementById("chat-message-input");
-    const message = messageInput.value.trim();
-
-    if (message === "" || currentUser === "system") {
+    if (messageInput.value.trim() === "" || currentUser === "system") {
       return;
     }
 
-    const messageData = {
-      type: "chat_message",
-      username: currentUser,
-      message: message,
-      chatPartner: chatPartner,
-    };
-
-    chatSocket.send(JSON.stringify(messageData));
-    messageInput.value = "";
+    sendMessage(chatPartner);
   };
 
   // Similar prevention for Enter key

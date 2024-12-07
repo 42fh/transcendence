@@ -434,8 +434,6 @@
   </template>
 
 
-
-
   <template id="chat-home-template">
     <div class="page-container page-container--chat">
       <div class="chat__section">
@@ -490,22 +488,18 @@
   </template>
 
 
-
-
-
-
   <template id="chat-room-template">
-    <div>
-      <h3>Chat Room</h3>
-      <div id="chat-messages"></div>
-      <input id="chat-message-input" placeholder="Type your message" />
-      <button id="chat-message-submit">Send</button>
+    <div class="chat-room-container">
+      <div id="chat-messages" class="chat-messages"></div>
+      <div class="chat-input-container">
+        <input id="chat-message-input" class="chat-input" placeholder="Type your message" />
+        <button id="chat-message-submit" class="chat-submit-button">Send</button>
+      </div>
     </div>
   </template>
 
   <template id="chat-message-template">
     <div class="chat-message">
-      <strong class="chat-message-username"></strong>
       <span class="chat-message-text"></span>
     </div>
   </template>
