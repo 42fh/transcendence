@@ -519,291 +519,278 @@
 
 
 
-
-
-  <!-- Bottom Navigation Template -->
-  <template id="bottom-nav-template">
-    <nav class="bottom-nav">
-      <button class="bottom-nav__item" data-page="home">
-        <span class="bottom-nav__icon material-symbols-outlined">home</span>
-      </button>
-      <button class="bottom-nav__item" data-page="tournaments">
-        <span class="bottom-nav__icon material-symbols-outlined">trophy</span>
-      </button>
-      <button class="bottom-nav__item" data-page="profile">
-        <span class="bottom-nav__icon material-symbols-outlined">account_circle</span>
-      </button>
-      <button class="bottom-nav__item" data-page="users">
-        <span class="bottom-nav__icon material-symbols-outlined">person_search</span>
-      </button>
-      <button class="bottom-nav__item" data-page="chat">
-        <span class="bottom-nav__icon material-symbols-outlined">chat_bubble</span>
-        <span id="notification-badge" class="notification-badge" style="display: none;"></span>
-      </button>
-    </nav>
-  </template>
-
-  <!-- Profile Template (used for both 'private' profile and 'public' profile) -->
-  <template id="profile-template">
-    <div class="page-container page-container--profile">
-      <div class="profile">
-        <div class="profile__section profile__section--header">
-          <div class="profile__avatar-wrapper">
-            <img class="profile__avatar" src="" alt="Profile avatar" />
-          </div>
-          <div class="profile__info">
-            <div class="profile__username-container">
-              <!-- TODO: think about this h2 if it has really to be -->
-              <span class="profile__online-status material-symbols-outlined profile__public-info">circle</span>
-              <h2 class="profile__username"></h2>
-            </div>
-            <!-- Private info will be hidden/shown based on view type -->
-            <p class="profile__info-item profile__info-item--name profile__private-info"></p>
-            <p class="profile__info-item profile__info-item--email profile__private-info"></p>
-            <p class="profile__info-item profile__info-item--phone profile__private-info"></p>
-          </div>
-        </div>
-        <!-- Public Profile Actions -->
-        <div class="profile__section profile__section--public-actions profile__public-info">
-          <button class="profile__action-button" data-action="friend" title="Add Friend">
-            <span class="material-symbols-outlined">person_add</span>
-          </button>
-          <button class="profile__action-button" data-action="chat" title="Send Message">
-            <span class="material-symbols-outlined">maps_ugc</span>
-          </button>
-          <button class="profile__action-button" data-action="play" title="Challenge to Game">
-            <span class="material-symbols-outlined">play_circle</span>
-          </button>
-          <button class="profile__action-button" data-action="block" title="Block User">
-            <span class="material-symbols-outlined">block</span>
-          </button>
-        </div>
-        <div class="profile__section profile__section--bio">
-          <h3 class="profile__section-title">Bio</h3>
-          <p class="profile__bio-text"></p>
-        </div>
-        <div class="profile__section profile__section--stats">
-          <div class="profile__stats-item">
-            <span class="profile__stats-label">Wins</span>
-            <span class="profile__stats-value profile__stats-wins"></span>
-          </div>
-          <div class="profile__stats-item">
-            <span class="profile__stats-label">Losses</span>
-            <span class="profile__stats-value profile__stats-losses"></span>
-          </div>
-          <div class="profile__stats-item">
-            <span class="profile__stats-label">Win Ratio</span>
-            <span class="profile__stats-value profile__stats-ratio"></span>
-          </div>
-        </div>
-        <div class="profile__section profile__section--matches">
-          <h3 class="profile__section-title">Recent Matches</h3>
-          <div class="profile__matches-list">
-            <!-- Matches will be inserted here dynamically -->
-          </div>
-        </div>
-
-        <!-- Private Profile Actions -->
-        <div class="profile__section profile__section--private-actions profile__private-info">
-          <button class="profile__button profile__button--edit">Edit Profile</button>
-        </div>
-      </div>
-    </div>
-  </template>
-  <!-- Private Profile Actions -->
-  <div class="profile__section profile__section--private-actions profile__private-info">
-    <button class="profile__button profile__button--edit">Edit Profile</button>
-    <button class="profile__button profile__button--2fa">2FA Settings</button>
-    <!-- TODO: Add password change button if we decide to implement it -->
-  </div>
-  </div>
-  </div>
-  </template>
-
-  <!-- Profile Match Template -->
-  <template id="profile-match-template">
-    <div class="profile__match-item">
-      <span class="profile__match-date"></span>
-      <span class="profile__match-result"></span>
-      <span class="profile__match-opponent"></span>
-    </div>
-  </template>
-
-  <!-- Error Message Template -->
-  <template id="form-error-template">
-    <div class="form-error">
-      <span class="form-error__icon material-symbols-outlined">error</span>
-      <span class="form-error__message"></span>
-    </div>
-  </template>
-
-  <!-- Profile Edit Template -->
-  <template id="profile-edit-template">
-    <div class="profile-edit">
-      <h2 class="profile-edit__title">Edit Profile</h2>
-
-      <form class="profile-edit__form">
-        <div class="profile-edit__avatar-section">
-          <div class="profile-edit__avatar-wrapper">
-            <img class="profile-edit__avatar" src="" alt="Profile avatar" />
-          </div>
-          <button type="button" class="profile-edit__avatar-button">
-            <span class="material-symbols-outlined">photo_camera</span>
-            Change Avatar
-          </button>
-        </div>
-
-        <div class="profile-edit__field form-field">
-          <label class="profile-edit__label form-label" for="username">Username</label>
-          <input type="text" id="username" class="profile-edit__input form-input" name="username" value="Mark" />
-        </div>
-        <div class="profile-edit__field form-field">
-          <label class="profile-edit__label form-label" for="first-name">First Name</label>
-          <input type="text" id="first-name" class="profile-edit__input form-input" name="first_name" />
-        </div>
-
-        <div class="profile-edit__field form-field">
-          <label class="profile-edit__label form-label" for="last-name">Last Name</label>
-          <input type="text" id="last-name" class="profile-edit__input form-input" name="last_name" />
-        </div>
-
-        <div class="profile-edit__field form-field">
-          <label class="profile-edit__label form-label" for="email">Email</label>
-          <input type="email" id="email" class="profile-edit__input form-input" name="email" />
-        </div>
-
-        <div class="profile-edit__field form-field">
-          <label class="profile-edit__label form-label" for="phone">Phone</label>
-          <input type="tel" id="phone" class="profile-edit__input form-input" name="telephone_number" />
-        </div>
-
-        <div class="profile-edit__field form-field">
-          <label class="profile-edit__label form-label" for="bio">Bio</label>
-          <textarea id="bio" class="profile-edit__textarea" name="bio" rows="4" maxlength="500"></textarea>
-        </div>
-
-        <div class="profile-edit__buttons">
-          <button type="button" class="profile-edit__button profile-edit__button--cancel">Cancel</button>
-          <button type="submit" class="profile-edit__button profile-edit__button--save">Save</button>
-        </div>
-      </form>
-    </div>
-  </template>
-
-  <!-- 2FA Edit Template -->
-  <template id="2fa-edit-template">
-    <div class="profile-edit">
-      <h2 class="profile-edit__title">Edit 2FA</h2>
-      <p class="email-warning" style="display: none">Email is not set</p>
-      <form class="profile-edit__form">
-        <div class="profile-edit__field form-field">
-          <label class="profile-edit__label form-label" for="email">Email</label>
-          <input type="email" id="email" class="profile-edit__input form-input" name="email" />
-        </div>
-        <div class="profile-edit__field form-field radio-form">
-          <label class="profile-edit__label form-label">2FA Authentication</label>
-          <div class="profile-edit__radio-group">
-            <div class="profile-edit__radio-item">
-              <input type="radio" id="2fa-enabled" name="2fa" value="enabled" class="profile-edit__radio" />
-              <label for="2fa-enabled" class="profile-edit__radio-label">Enabled</label>
-            </div>
-            <div class="profile-edit__radio-item">
-              <input type="radio" id="2fa-disabled" name="2fa" value="disabled" class="profile-edit__radio" />
-              <label for="2fa-disabled" class="profile-edit__radio-label">Disabled</label>
-            </div>
-          </div>
-        </div>
-        <div class="profile-edit__buttons">
-          <button type="button" class="profile-edit__button profile-edit__button--cancel">Cancel</button>
-          <button type="submit" class="profile-edit__button profile-edit__button--save">Save</button>
-        </div>
-      </form>
-    </div>
-  </template>
-
-  <!-- 3D Game -->
-  <template id="3d-game-template">
-    <canvas class="webgl"></canvas>
-    <div class="end-screen">
-      <h1 class="title"></h1>
-      <div class="scores"></div>
-      <button class="exit-button">Exit Game</button>
-    </div>
-    <div class="game-menu-overlay" id="menu">
-      <div class="game-menu-container">
-        <div class="card bg-dark text-light">
-          <div class="card-header">
-            <h2 class="text-center mb-0">Game Setup</h2>
-          </div>
-          <div class="card-body">
-            <form id="gameSetupForm">
-              <div class="mb-4">
-                <label for="gameType">Game Type</label>
-                <input type="text" id="gameType" />
-              </div>
-
-              <div class="mb-4">
-                <label for="gameId">Game ID</label>
-                <input type="text" id="gameId" />
-              </div>
-
-              <div class="mb-4">
-                <label for="playerCount">Player count</label>
-                <input type="text" id="playerCount" />
-              </div>
-
-              <div class="text-center">
-                <div class="joinGame btn btn-primary">Join</div>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-  </template>
-
-  <!-- Users Template -->
-
-  <template id="users-template">
-    <div class="page-container page-container--users">
-      <!-- TODO: Folks around maybe is nicer instead of users -->
-      <h2 class="users-page__title">Users</h2>
-      <div class="users-search">
-        <input type="text" class="users-search__input" placeholder="Search users..." />
-        <!-- <span class="material-symbols-outlined users-search__icon">search</span> -->
-      </div>
-      <div id="chat-conversations-list" class="chat-conversations-list"></div>
-      <div id="users-pagination" class="pagination">
-        <button class="pagination__button pagination__button--prev">
-          <span class="material-symbols-outlined">chevron_left</span>
+    <!-- Bottom Navigation Template -->
+    <template id="bottom-nav-template">
+      <nav class="bottom-nav">
+        <button class="bottom-nav__item" data-page="home">
+          <span class="bottom-nav__icon material-symbols-outlined">home</span>
         </button>
-        <div class="pagination__info">
-          <span class="pagination__current">1</span>
-          <span class="pagination__separator">/</span>
-          <span class="pagination__total">1</span>
-        </div>
-        <button class="pagination__button pagination__button--next">
-          <span class="material-symbols-outlined">chevron_right</span>
+        <button class="bottom-nav__item" data-page="tournaments">
+          <span class="bottom-nav__icon material-symbols-outlined">trophy</span>
         </button>
+        <button class="bottom-nav__item" data-page="profile">
+          <span class="bottom-nav__icon material-symbols-outlined">account_circle</span>
+        </button>
+        <button class="bottom-nav__item" data-page="users">
+          <span class="bottom-nav__icon material-symbols-outlined">person_search</span>
+        </button>
+        <button class="bottom-nav__item" data-page="chat">
+          <span class="bottom-nav__icon material-symbols-outlined">chat_bubble</span>
+        </button>
+      </nav>
+    </template>
+
+    <!-- Profile Template (used for both 'private' profile and 'public' profile) -->
+    <template id="profile-template">
+      <div class="page-container page-container--profile">
+        <div class="profile">
+          <div class="profile__section profile__section--header">
+            <div class="profile__avatar-wrapper">
+              <img class="profile__avatar" src="" alt="Profile avatar" />
+            </div>
+            <div class="profile__info">
+              <div class="profile__username-container">
+                <!-- TODO: think about this h2 if it has really to be -->
+                <span class="profile__online-status material-symbols-outlined profile__public-info">circle</span>
+                <h2 class="profile__username"></h2>
+              </div>
+              <!-- Private info will be hidden/shown based on view type -->
+              <p class="profile__info-item profile__info-item--name profile__private-info"></p>
+              <p class="profile__info-item profile__info-item--email profile__private-info"></p>
+              <p class="profile__info-item profile__info-item--phone profile__private-info"></p>
+            </div>
+          </div>
+          <!-- Public Profile Actions -->
+          <div class="profile__section profile__section--public-actions profile__public-info">
+            <button class="profile__action-button" data-action="friend" title="Add Friend">
+              <span class="material-symbols-outlined">person_add</span>
+            </button>
+            <button class="profile__action-button" data-action="chat" title="Send Message">
+              <span class="material-symbols-outlined">maps_ugc</span>
+            </button>
+            <button class="profile__action-button" data-action="play" title="Challenge to Game">
+              <span class="material-symbols-outlined">play_circle</span>
+            </button>
+            <button class="profile__action-button" data-action="block" title="Block User">
+              <span class="material-symbols-outlined">block</span>
+            </button>
+          </div>
+          <div class="profile__section profile__section--bio">
+            <h3 class="profile__section-title">Bio</h3>
+            <p class="profile__bio-text"></p>
+          </div>
+          <div class="profile__section profile__section--stats">
+            <div class="profile__stats-item">
+              <span class="profile__stats-label">Wins</span>
+              <span class="profile__stats-value profile__stats-wins"></span>
+            </div>
+            <div class="profile__stats-item">
+              <span class="profile__stats-label">Losses</span>
+              <span class="profile__stats-value profile__stats-losses"></span>
+            </div>
+            <div class="profile__stats-item">
+              <span class="profile__stats-label">Win Ratio</span>
+              <span class="profile__stats-value profile__stats-ratio"></span>
+            </div>
+          </div>
+          <div class="profile__section profile__section--matches">
+            <h3 class="profile__section-title">Recent Matches</h3>
+            <div class="profile__matches-list">
+              <!-- Matches will be inserted here dynamically -->
+            </div>
+          </div>
+
+          <!-- Private Profile Actions -->
+          <div class="profile__section profile__section--private-actions profile__private-info">
+            <button class="profile__button profile__button--edit">Edit Profile</button>
+            <button class="profile__button profile__button--2fa">2FA Settings</button>
+            <!-- TODO: Add password change button if we decide to implement it -->
+          </div>
+        </div>
       </div>
-    </div>
-  </template>
+    </template>
 
-
-
-  <!-- User List Item Template -->
-  <template id="users-list-item-template">
-    <div class="users-list__item">
-      <img class="users-list__avatar" src="" alt="User avatar" />
-      <div class="users-list__info">
-        <span class="users-list__username"></span>
-        <!-- <span class="users-list__status"></span> -->
-        <span class="users-list__status-indicator"></span>
+    <!-- Profile Match Template -->
+    <template id="profile-match-template">
+      <div class="profile__match-item">
+        <span class="profile__match-date"></span>
+        <span class="profile__match-result"></span>
+        <span class="profile__match-opponent"></span>
       </div>
-    </div>
-  </template>
+    </template>
 
-  <script type="module" src="js/main.js"></script>
-</body>
+    <!-- Error Message Template -->
+    <template id="form-error-template">
+      <div class="form-error">
+        <span class="form-error__icon material-symbols-outlined">error</span>
+        <span class="form-error__message"></span>
+      </div>
+    </template>
 
+    <!-- Profile Edit Template -->
+    <template id="profile-edit-template">
+      <div class="profile-edit">
+        <h2 class="profile-edit__title">Edit Profile</h2>
+
+        <form class="profile-edit__form">
+          <div class="profile-edit__avatar-section">
+            <div class="profile-edit__avatar-wrapper">
+              <img class="profile-edit__avatar" src="" alt="Profile avatar" />
+            </div>
+            <button type="button" class="profile-edit__avatar-button">
+              <span class="material-symbols-outlined">photo_camera</span>
+              Change Avatar
+            </button>
+          </div>
+
+          <div class="profile-edit__field form-field">
+            <label class="profile-edit__label form-label" for="username">Username</label>
+            <input type="text" id="username" class="profile-edit__input form-input" name="username" value="Mark" />
+          </div>
+          <div class="profile-edit__field form-field">
+            <label class="profile-edit__label form-label" for="first-name">First Name</label>
+            <input type="text" id="first-name" class="profile-edit__input form-input" name="first_name" />
+          </div>
+
+          <div class="profile-edit__field form-field">
+            <label class="profile-edit__label form-label" for="last-name">Last Name</label>
+            <input type="text" id="last-name" class="profile-edit__input form-input" name="last_name" />
+          </div>
+
+          <div class="profile-edit__field form-field">
+            <label class="profile-edit__label form-label" for="email">Email</label>
+            <input type="email" id="email" class="profile-edit__input form-input" name="email" />
+          </div>
+
+          <div class="profile-edit__field form-field">
+            <label class="profile-edit__label form-label" for="phone">Phone</label>
+            <input type="tel" id="phone" class="profile-edit__input form-input" name="telephone_number" />
+          </div>
+
+          <div class="profile-edit__field form-field">
+            <label class="profile-edit__label form-label" for="bio">Bio</label>
+            <textarea id="bio" class="profile-edit__textarea" name="bio" rows="4" maxlength="500"></textarea>
+          </div>
+
+          <div class="profile-edit__buttons">
+            <button type="button" class="profile-edit__button profile-edit__button--cancel">Cancel</button>
+            <button type="submit" class="profile-edit__button profile-edit__button--save">Save</button>
+          </div>
+        </form>
+      </div>
+    </template>
+
+    <!-- 2FA Edit Template -->
+    <template id="2fa-edit-template">
+      <div class="profile-edit">
+        <h2 class="profile-edit__title">Edit 2FA</h2>
+        <p class="email-warning" style="display: none">Email is not set</p>
+        <form class="profile-edit__form">
+          <div class="profile-edit__field form-field">
+            <label class="profile-edit__label form-label" for="email">Email</label>
+            <input type="email" id="email" class="profile-edit__input form-input" name="email" />
+          </div>
+          <div class="profile-edit__field form-field radio-form">
+            <label class="profile-edit__label form-label">2FA Authentication</label>
+            <div class="profile-edit__radio-group">
+              <div class="profile-edit__radio-item">
+                <input type="radio" id="2fa-enabled" name="2fa" value="enabled" class="profile-edit__radio" />
+                <label for="2fa-enabled" class="profile-edit__radio-label">Enabled</label>
+              </div>
+              <div class="profile-edit__radio-item">
+                <input type="radio" id="2fa-disabled" name="2fa" value="disabled" class="profile-edit__radio" />
+                <label for="2fa-disabled" class="profile-edit__radio-label">Disabled</label>
+              </div>
+            </div>
+          </div>
+          <div class="profile-edit__buttons">
+            <button type="button" class="profile-edit__button profile-edit__button--cancel">Cancel</button>
+            <button type="submit" class="profile-edit__button profile-edit__button--save">Save</button>
+          </div>
+        </form>
+      </div>
+    </template>
+
+    <!-- 3D Game -->
+    <template id="3d-game-template">
+      <canvas class="webgl"></canvas>
+      <div class="end-screen">
+        <h1 class="title"></h1>
+        <div class="scores"></div>
+        <button class="exit-button">Exit Game</button>
+      </div>
+      <div class="game-menu-overlay" id="menu">
+        <div class="game-menu-container">
+          <div class="card bg-dark text-light">
+            <div class="card-header">
+              <h2 class="text-center mb-0">Game Setup</h2>
+            </div>
+            <div class="card-body">
+              <form id="gameSetupForm">
+                <div class="mb-4">
+                  <label for="gameType">Game Type</label>
+                  <input type="text" id="gameType" />
+                </div>
+
+                <div class="mb-4">
+                  <label for="gameId">Game ID</label>
+                  <input type="text" id="gameId" />
+                </div>
+
+                <div class="mb-4">
+                  <label for="playerCount">Player count</label>
+                  <input type="text" id="playerCount" />
+                </div>
+
+                <div class="text-center">
+                  <div class="joinGame btn btn-primary">Join</div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- Users Template -->
+
+    <template id="users-template">
+      <div class="page-container page-container--users">
+        <!-- TODO: Folks around maybe is nicer instead of users -->
+        <h2 class="users-page__title">Users</h2>
+        <div class="users-search">
+          <input type="text" class="users-search__input" placeholder="Search users..." />
+          <!-- <span class="material-symbols-outlined users-search__icon">search</span> -->
+        </div>
+        <div id="users-list" class="users-list"></div>
+        <div id="users-pagination" class="pagination">
+          <button class="pagination__button pagination__button--prev">
+            <span class="material-symbols-outlined">chevron_left</span>
+          </button>
+          <div class="pagination__info">
+            <span class="pagination__current">1</span>
+            <span class="pagination__separator">/</span>
+            <span class="pagination__total">1</span>
+          </div>
+          <button class="pagination__button pagination__button--next">
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+      </div>
+    </template>
+
+    <!-- User List Item Template -->
+    <template id="users-list-item-template">
+      <div class="users-list__item">
+        <img class="users-list__avatar" src="" alt="User avatar" />
+        <div class="users-list__info">
+          <span class="users-list__username"></span>
+          <!-- <span class="users-list__status"></span> -->
+          <span class="users-list__status-indicator"></span>
+        </div>
+      </div>
+    </template>
+
+    <script type="module" src="js/main.js"></script>
+  </body>
 </html>
