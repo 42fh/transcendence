@@ -1,4 +1,5 @@
 import { fetchNotifications } from "../services/chatNotificationService.js";
+import { updateNotificationBadge } from "../components/bottom-nav.js";
 
 export async function renderNotifications() {
   const chatHomeTemplate = document.querySelector("#chat-home-template");
@@ -22,6 +23,10 @@ export async function renderNotifications() {
   try {
     const response = await fetchNotifications();
     const notifications = response.notifications;
+
+    // Update the notification badge with unread count
+    const unreadCount = notifications.filter((n) => !n.is_read).length;
+    updateNotificationBadge(unreadCount);
 
     // Handle empty notifications
     if (!notifications || notifications.length === 0) {

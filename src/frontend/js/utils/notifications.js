@@ -1,4 +1,5 @@
 import { showToast } from "./toast.js";
+import { updateNotificationBadge } from "../components/bottom-nav.js";
 
 export function setupNotificationListener(wsUrl) {
   if (!wsUrl) {
@@ -26,6 +27,9 @@ export function setupNotificationListener(wsUrl) {
 
         if (data.type === "send_notification") {
           showToast(data.notification.message, false);
+
+          const unreadCount = data.notification.is_read ? 0 : 1;
+          updateNotificationBadge(unreadCount);
         }
       } catch (parseError) {
         console.error("Error parsing WebSocket message:", parseError);

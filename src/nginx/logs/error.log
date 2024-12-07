@@ -3562,3 +3562,4 @@
 2024/12/07 08:22:20 [notice] 1#1: start worker process 30
 2024/12/07 08:22:20 [notice] 1#1: start worker process 31
 2024/12/07 08:22:20 [notice] 1#1: start worker process 32
+2024/12/07 08:59:48 [warn] 28#28: *56 an upstream response is buffered to a temporary file /var/cache/nginx/proxy_temp/1/00/0000000001 while reading upstream, client: 192.168.65.1, server: localhost, request: "POST /api/users/auth/signup/ HTTP/1.1", upstream: "http://172.19.0.4:8000/api/users/auth/signup/", host: "localhost:8443", referrer: "http://localhost:8443/"
