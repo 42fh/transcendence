@@ -392,14 +392,14 @@ class GameCoordinator:
                 async for key in redis_conn.scan_iter(
                     f"{cls.BOOKED_USER_PREFIX}{user_id}:*"
                 ):
-                    logger.debug("player is booked: ", key)
+                    logger.debug("player is booked: {key}")
                     return True
 
                 # Check for playing status
                 async for key in redis_conn.scan_iter(
                     f"{cls.PLAYING_USER_PREFIX}{user_id}:*"
                 ):
-                    logger.debug("player is playing: ", key)
+                    logger.debug("player is playing: {key}")
                     return True
 
                 return False
