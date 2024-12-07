@@ -64,6 +64,23 @@ export const gameContext = {
   },
 };
 
+// Add this line to attach gameContext to window
+if (typeof window !== "undefined") {
+  window.gameContext = gameContext;
+  console.log("window.gameContext", window.gameContext);
+}
+
+/**
+ * Gets the current game context from window
+ * @returns {GameContext}
+ */
+export function getGameContext() {
+  if (typeof window === "undefined") {
+    throw new Error("Window is not defined");
+  }
+  return window.gameContext;
+}
+
 /**
  * Updates the game context with values from the initial state message
  * @param {Object} message - Initial state message from server containing:

@@ -1,4 +1,4 @@
-import { nastyGlobalRendererState as renderer, gameContext } from "./../store/index.js";
+import { nastyGlobalRendererState as renderer, getGameContext } from "./../store/index.js";
 /**
  * Initializes the renderer with all necessary data from the initial state message
  * @param {Object} message - Initial state message from server
@@ -32,6 +32,7 @@ export function updateRenderer(message) {
 
   // Update scores in game context
   if (message.game_state.scores) {
+    const gameContext = getGameContext();
     gameContext.players.forEach((player) => {
       player.score = message.game_state.scores[player.index] || 0;
     });
@@ -177,6 +178,7 @@ export function render(renderer) {
  * @param {RendererState} renderer - The renderer state object
  */
 export function renderPolygonGame(renderer) {
+  console.log("Entering renderPolygonGame");
   // Validate required data is available
   if (!renderer.state || !renderer.svg || !renderer.vertices || renderer.vertices.length === 0) {
     console.warn("Missing required data for rendering", {
