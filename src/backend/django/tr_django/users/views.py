@@ -350,15 +350,27 @@ def callback(request):
     user, created = CustomUser.objects.get_or_create(username=f"42_{username}")
 
     if user is not None:
-        login(request, user)  # This creates the session for the new user
-        print("Session Data:", request.session.items())  # Debug session contents    
+        login(request, user)  # Creates the session for the new user
+        print("Session Data:", request.session.items())  # Debug session contents
+        
+        # Generate token pair
+        token_serializer = TokenObtainPairSerializer()
+        tokens = token_serializer.get_token(user)
+        access_token = str(tokens.access_token)
+        refresh_token = str(tokens)
+
         response = redirect('/')  # Redirect to a post-login page
+
+        # Set tokens and UUID in cookies
         response.set_cookie("user_uuid", str(user.id), httponly=False, samesite="Lax")
+        response.set_cookie("access_token", access_token, httponly=False, samesite="Lax")
+        response.set_cookie("refresh_token", refresh_token, httponly=False, samesite="Lax")
+
         return response
     else:
         return JsonResponse({"error": "Failed to fetch user info"}, status=403)
 
-
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 @method_decorator(csrf_exempt, name="dispatch")
 class UsersListView(APIView):
