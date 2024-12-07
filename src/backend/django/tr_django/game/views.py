@@ -425,7 +425,7 @@ async def game_settings(request, game_id):
 
     return JsonResponse({"message": "only GET requests are allowed"}, status=400)
 
-
+# no games are stored in all games -> yiu will see always no games 
 @async_only_middleware
 @require_http_methods(["GET"])
 @csrf_exempt
@@ -462,9 +462,11 @@ def all_tournaments(request):
             if result["status"]:
                 tournament = Tournament.objects.get(pk=result["tournament_id"])
                 return JsonResponse({
-                    "message": "Tournament created successfully",
-                    "tournament": build_tournament_data(tournament),
-                    "player": result
+                    "status": "success"
+                    "message": f"Tournament[{tournament.name}] created successfully. {result[message]}",
+                    "tournament_notification_url": result["tournament_notification_url"],
+                    "value_create_tournament_debu": result,
+                    "tournament_debug": build_tournament_data(tournament)
                 })
             return JsonResponse({"error": result["message"]}, status=400)
             
@@ -489,6 +491,9 @@ def tournament_enrollment(request, tournament_id):
     except Player.DoesNotExist:
         return JsonResponse({"error": "Player profile not found"}, status=400)
 
+
+
+# this is only for debugging the schedule creation, notifications will be ignored, do not use out of this scope 
 @csrf_exempt
 @require_http_methods(["POST"])
 def debug_tournament(request):

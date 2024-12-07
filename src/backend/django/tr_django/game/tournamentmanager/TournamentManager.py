@@ -115,16 +115,16 @@ class TournamentManager:
                         cls.start_matchmaking(tournament)
                         return {
                             "status": True,
-                            "message": f"Enrolled in {tournament.name}. Tournament starting soon!", 
+                            "message": f"Enrolled in {tournament.name}. Tournament starting soon! Connect to tournament_notification_url", 
                             "tournament_starting": True,
-                            "ws_url": ws_url
+                            "tournament_notification_url": ws_url
                         }
 
                     return {
                         "status": True,
-                        "message": f"Successfully enrolled in {tournament.name}",
+                        "message": f"Successfully enrolled in {tournament.name}. Waiting for other player.i  Connect to tournament_notification_url",
                         "tournament_starting": False,
-                        "ws_url": ws_url
+                        "tournament_notification_url": ws_url
                     }
 
         except Tournament.DoesNotExist:
@@ -146,7 +146,13 @@ class TournamentManager:
                             "message": "Player not enrolled in tournament",
                             "error_code": "NOT_ENROLLED"
                         }
-
+                    if TournamentGame.objects.filter(tournaments=tournament).exists():
+                        return {
+                            "status": False,
+                            "message": "Cannot remove player - tournament has already started",
+                            "error_code": "NOT_ENROLLED"
+                        }
+                    
                     tournament.participants.remove(player)
                     # Schedule async notification
                     async_to_sync(TournamentNotificationConsumer.close_player_connection)(tournament_id, player.id)
