@@ -30,6 +30,10 @@ function initAuthListeners() {
       submitHandler: handleSignup,
     });
   });
+
+  document.getElementById("...").addEventListener("click", () => {
+    window.location.href='/api/users/auth/login42/';
+  });
 }
 
 export async function loadAuthPage(addToHistory = true) {
