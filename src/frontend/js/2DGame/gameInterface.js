@@ -24,10 +24,10 @@ export class GameInterface2D {
 
   async startGame() {
     const config = this.gameConfigs[this.gameType];
-    // if (!config) {
-    //   this.showStatus("Invalid game type selected", true);
-    //   return;
-    // }
+    if (!config) {
+      this.showStatus("Invalid game type selected", true);
+      return;
+    }
     const { numPlayers, numSides, numBalls, shape, scoreMode, debug } = this.collectFormData();
 
     // Validation
@@ -63,11 +63,11 @@ export class GameInterface2D {
         document.getElementById("2d-game__game").style.display = "block";
 
         this.updateGameInfo(gameConfig);
-        // this.logEvent({
-        //   type: "info",
-        //   message: "Game started",
-        //   details: `Game ID: ${gameId}`,
-        // });
+        this.logEvent({
+          type: "info",
+          message: "Game started",
+          details: `Game ID: ${gameId}`,
+        });
         if (gameConfig.gameId && gameConfig.playerId) {
           console.log(`Connected to game ${gameConfig.gameId} as player ${gameConfig.playerId}`);
         } else {
