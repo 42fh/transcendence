@@ -31,7 +31,7 @@ function initAuthListeners() {
     });
   });
 
-  document.getElementById("...").addEventListener("click", () => {
+  document.getElementById("auth42-button").addEventListener("click", () => {
     window.location.href='/api/users/auth/login42/';
   });
 }
