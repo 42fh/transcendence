@@ -33,6 +33,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from django.views import View
+from django.http import JsonResponse
 
 logger = logging.getLogger(__name__)
 load_dotenv(override=False)
@@ -352,7 +353,7 @@ def callback(request):
         login(request, user)  # This creates the session for the new user
         print("Session Data:", request.session.items())  # Debug session contents    
         response = redirect('/')  # Redirect to a post-login page
-        response.set_cookie("user_uuid", str(user.id), httponly=False, samesite="Lax")        return redirect('/')  # Redirect to a post-login page
+        response.set_cookie("user_uuid", str(user.id), httponly=False, samesite="Lax")
         return response
     else:
         return JsonResponse({"error": "Failed to fetch user info"}, status=403)
