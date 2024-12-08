@@ -1,6 +1,8 @@
 import { loadAuthPage } from "../views/auth.js";
 import { loadHomePage } from "../views/home.js";
 import { loadUsersPage } from "../views/users.js";
+import { loadChatPage } from "../views/chat-home.js";
+import { loadChatRoom } from "../views/chat-room.js";
 import { loadTournamentsPage } from "../views/tournaments.js";
 import { loadTournamentDetailsPage } from "../views/tournament-detail.js";
 import { loadCreateTournamentPage } from "../views/tournament-create.js";
@@ -22,6 +24,8 @@ import { updateActiveNavItem } from "../components/bottom-nav.js";
 // };
 
 export function initializeHistory() {
+
+  console.log("Initializing history_________________________________________________________");
   // Initial state on load
   window.addEventListener("load", () => {
     const username = localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME);
@@ -40,12 +44,14 @@ export function initializeHistory() {
   // Handle browser back/forward
   window.addEventListener("popstate", (event) => {
     event.preventDefault();
+    // console.log("History state changed:", event.state);
 
     if (event.state) {
       // TODO: Check cache before making API calls in each case
       // If cached data exists and is not stale, use it instead of making new API calls
-
+      
       const state = event.state || { view: "home" };
+      console.log("Navigating to:", state.view);
       if (state && state.view) {
         // Update active nav state
         updateActiveNavItem(state.view);
@@ -69,7 +75,18 @@ export function initializeHistory() {
               console.error("No tournament data in state");
               loadTournamentsPage(false);
             }
+            break;  // Add this break statement
+          case "chat-room":
+            if (state.chatPartner) {
+              loadChatRoom(state.chatPartner, false);
+            } else {
+              console.error("No chat partner in state");
+              loadChatPage(false); // Fallback to chat-home
+            }
             break;
+          case "chat-home":
+            loadChatPage(false);
+            break;            
           case "create-tournament":
             loadCreateTournamentPage(false);
             break;
@@ -131,7 +148,9 @@ export function initializeHistory() {
           break;
         case "profile":
           const userId = event.target.dataset.userId || localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
-
+        case "chat-home":
+          loadChatPage();
+          break;
           //   loadProfilePage();
           loadProfilePage(userId, false);
           break;

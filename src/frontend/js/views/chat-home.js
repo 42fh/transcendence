@@ -18,7 +18,7 @@ const LOCAL_STORAGE_KEYS = {
 export async function loadChatPage(addToHistory = true) {
   try {
     if (addToHistory) {
-      history.pushState({ view: "chat-home" }, "");
+      history.pushState({ view: "chat-home" }, "Chat Home");
       updateActiveNavItem("chat");
     }
 

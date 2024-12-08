@@ -1,5 +1,6 @@
 import { initializeChatWebSocket } from "../services/chatSocketService.js";
 import { ASSETS } from "../config/constants.js";
+import { loadChatPage } from "./chat-home.js";
 
 export function loadChatRoom(chatPartner) {
   history.pushState(
@@ -60,10 +61,11 @@ function initializeChatRoom(chatPartner) {
     this.src = ASSETS.IMAGES.DEFAULT_AVATAR;
   };
 
-  // TODO: FIX THIS
-  // backButton.addEventListener("click", () => {
-  //   loadChatPage();
-  // });
+  backButton.addEventListener("click", () => {
+    history.pushState({ view: "chat-home" }, ""); // Add chat-home to history
+    loadChatPage(false); // Navigate to chat-home
+  });
+  
 
   console.log("pongUsername:", currentUser);
   console.log("Chat Partner:", chatPartner);
@@ -101,7 +103,7 @@ function initializeChatRoom(chatPartner) {
         chatMessages.scrollTop = chatMessages.scrollHeight;
       },
       handleWebSocketMessage: (data) => {
-        console.log("Received WebSocket message:", data);
+        // console.log("Received WebSocket message:", data);
         if (data.type === "chat_message") {
           const isSystemMessage = data.username === "system";
 
