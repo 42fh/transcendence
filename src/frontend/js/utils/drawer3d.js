@@ -28,7 +28,7 @@ export default class Drawer {
       this.generatePaddlesCircular(this.config.paddles, this.radius);
       this.createGameFieldCircular(this.radius);
     } else {
-      this.generatePaddles(this.config.paddles.length);
+      this.generatePaddles();
       this.createGameField();
     }
     this.game.scene.add(this.field);
@@ -36,7 +36,7 @@ export default class Drawer {
   }
 
   createGameField() {
-    const wallGeometry = new THREE.BoxGeometry(0.05, 0.5, GAME_HEIGHT * 2);
+    const wallGeometry = new THREE.BoxGeometry(0.05, 0.2, GAME_HEIGHT * 2);
     const wallMaterial = new THREE.MeshStandardMaterial({
       color: 0x000000,
     });
@@ -50,7 +50,7 @@ export default class Drawer {
     this.field.add(wall2);
   }
 
-  generatePaddles(_player_count) {
+  generatePaddles() {
     const playerGeometry = new THREE.BoxGeometry(
       this.config.dimensions.paddle_length,
       this.config.dimensions.paddle_width * 2.5,
@@ -213,11 +213,10 @@ export default class Drawer {
       }
       // update paddles
       for (let i = 0; i < gameState.paddles.length; i++) {
-        const paddle = this.game.paddles.get(i);
-        if (!paddle) continue;
-
-        console.log(gameState.paddles[i].position);
-        paddle.position.x = (gameState.paddles[i].position - GAME_WIDTH) * -1;
+        const paddle1 = this.game.paddles.get(0);
+        paddle1.position.x = (gameState.paddles[0].position - GAME_WIDTH) * -1;
+        const paddle2 = this.game.paddles.get(1);
+        paddle2.position.x = (gameState.paddles[1].position - GAME_WIDTH) * -1;
       }
     }
   }

@@ -148,10 +148,10 @@ export default class World {
 
     // move paddle
     if (this.moveDown && this.game.websocket) {
-      this.game.drawer.movePaddle("left");
+      this.game.drawer.movePaddle("right");
     }
     if (this.moveUp && this.game.websocket) {
-      this.game.drawer.movePaddle("right");
+      this.game.drawer.movePaddle("left");
     }
 
     // UI
@@ -206,29 +206,16 @@ export default class World {
     this.cameraAnimation.pause();
     gsap.killTweensOf(this.cameraAnimation);
 
-    if (this.game.type == "circular") {
-      gsap.to(this.camera.position, {
-        duration: 2,
-        x: 0,
-        y: 1,
-        z: 2.1,
-        ease: "power2.inOut",
-        onUpdate: () => {
-          this.camera.lookAt(1, 1, 1);
-        },
-      });
-    } else {
-      gsap.to(this.camera.position, {
-        duration: 2,
-        x: 6,
-        y: 7,
-        z: 35,
-        ease: "power2.inOut",
-        onUpdate: () => {
-          this.camera.lookAt(1, 1, 1);
-        },
-      });
-    }
+    gsap.to(this.camera.position, {
+      duration: 2,
+      x: 0,
+      y: 1,
+      z: 2.1,
+      ease: "power2.inOut",
+      onUpdate: () => {
+        this.camera.lookAt(1, 1, 1);
+      },
+    });
   }
 
   addEventListeners() {

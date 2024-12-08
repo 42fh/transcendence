@@ -139,6 +139,15 @@ export default class GameConstructor {
         scoreMode: "classic",
         debug: true,
       };
+      // const data = {
+      //   mode: "classic",
+      //   gameType: "classic",
+      //   numPlayers: 2,
+      //   numSides: 4,
+      //   numBalls: 1,
+      //   scoreMode: "classic",
+      //   debug: true,
+      // };
       this.type = "circular";
 
       const games = await fetchWaitingGames();
