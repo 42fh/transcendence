@@ -1,3 +1,5 @@
+import { getGameContext } from "../store/index.js";
+
 /**
  * Displays the game over screen with the result
  * @param {boolean} isWinner - Whether the current player won the game
@@ -31,7 +33,10 @@ export function hideGameOver() {
  * Renders the score display
  */
 export function updateScoreDisplays() {
-  const scoreDisplay = document.getElementById("two-d-game__score-list");
+  console.log("Entering updateScoreDisplays");
+  const gameContext = getGameContext();
+  console.log("gameContext:", gameContext);
+  const scoreDisplay = document.getElementById("two-d-game__score-display");
   if (!scoreDisplay || !gameContext.players.length) {
     console.warn("Score display not found or no players available", {
       scoreDisplay,

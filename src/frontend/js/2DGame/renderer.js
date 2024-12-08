@@ -267,24 +267,12 @@ export function renderPolygonGame() {
     return;
   }
 
-  // Log render debug info
-  //   console.log("Rendering polygon with:", {
-  //     verticesCount: renderer.vertices.length,
-  //     paddlesCount: renderer.state.paddles.length,
-  //     svgElement: renderer.svg.id,
-  //   });
-
-  // Clear previous render
   renderer.svg.innerHTML = "";
 
   try {
-    // Render components
-    renderPolygonOutline(renderer);
-    // renderer.state.paddles.forEach((paddle) => {
-    //   renderPaddle(renderer, paddle, paddle.side_index);
-    // });
-    renderPaddles(renderer);
-    // renderBalls(renderer);
+    // We can pass an option object into it.
+    renderPolygonOutline();
+    renderPaddles();
     renderBalls();
     updateScoreDisplays(renderer);
   } catch (error) {
@@ -355,9 +343,6 @@ function denormalizeCoordinates(x, y, viewBox, boundaries) {
  */
 export function transformVertices(vertices = []) {
   const renderer = getRendererState();
-  console.log("Transform - Input vertices:", vertices);
-  console.log("Transform - Boundaries:", renderer.config.boundaries);
-  console.log("Transform - ViewBox:", renderer.config.viewBox);
   if (vertices.length === 0) {
     vertices = renderer.vertices;
   }
@@ -396,7 +381,6 @@ export function transformVertices(vertices = []) {
       y: denormalized.y + translation.y,
     };
 
-    console.log(`Transform - Vertex (${vertex.x},${vertex.y}) -> (${transformed.x},${transformed.y})`);
     return transformed;
   });
 }
@@ -505,7 +489,8 @@ export function renderPaddle(renderer, paddle, sideIndex, debug = false) {
 }
 
 // Update the renderPaddles function to pass the debug flag
-export function renderPaddles(renderer) {
+export function renderPaddles() {
+  const renderer = getRendererState();
   if (!renderer.state?.paddles) {
     console.warn("No paddles available for rendering");
     return;
