@@ -11,7 +11,7 @@ const deleteCookie = (name) => {
 };
 
 // needed when using sing in with 42
-const getCookie = (name) => {
+const getCookie_none = (name) => {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
   if (parts.length === 2) return parts.pop().split(";").shift();
@@ -25,8 +25,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const userId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
   const username = localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME);
   
-  const cookie_userId = getCookie("pongUserId");
-  const cookie_username = getCookie("pongUsername");
+  const cookie_userId = getCookie_none("pongUserId");
+  const cookie_username = getCookie_none("pongUsername");
 
   // when logging in with 42 user id and name from cookie are move to localstorage
   if ((!userId || !username) && cookie_userId && cookie_username)
