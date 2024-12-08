@@ -38,6 +38,7 @@ export function handleGameMessage(message, onEvent = null) {
 function handleInitialState(message, onEvent) {
   console.log("Initial game state received:", message);
   console.log("onEvent:", onEvent);
+  // Players are still missing
   updateGameContext(message);
   initializeRenderer(message);
 
