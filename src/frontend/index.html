@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pong Game - Welcome</title>
-  <link rel="stylesheet" href="css/fonts.css" />
-  <link rel="stylesheet" href="css/main.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-  <script type="importmap">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pong Game - Welcome</title>
+    <link rel="stylesheet" href="css/fonts.css" />
+    <link rel="stylesheet" href="css/main.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <script type="importmap">
       {
         "imports": {
           "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
@@ -16,27 +16,27 @@
           "gsap": "https://cdn.jsdelivr.net/npm/gsap@3.10.4/index.js"
         }
       }
-    </script>
-</head>
+  </script>
+  </head>
 
-<body>
-  <!-- Main content area where other views will load -->
-  <div id="main-content"></div>
-  <div id="bottom-nav-container"></div>
+  <body>
+    <!-- Main content area where other views will load -->
+    <div id="main-content"></div>
+    <div id="bottom-nav-container"></div>
 
-  <!-- Modal Template -->
-  <template id="modal-template">
-    <div id="modal-overlay" class="modal-overlay">
-      <div id="modal" class="modal">
-        <span id="close-modal" class="modal-close-btn">&times;</span>
-        <div id="modal-content" class="modal-content">
-          <h2 id="modal-title">Modal Title</h2>
-          <p id="modal-text">This is a placeholder text in the modal.</p>
-          <!-- Form will be injected here later or in the modal itself in script.js -->
+    <!-- Modal Template -->
+    <template id="modal-template">
+      <div id="modal-overlay" class="modal-overlay">
+        <div id="modal" class="modal">
+          <span id="close-modal" class="modal-close-btn">&times;</span>
+          <div id="modal-content" class="modal-content">
+            <h2 id="modal-title">Modal Title</h2>
+            <p id="modal-text">This is a placeholder text in the modal.</p>
+            <!-- Form will be injected here later or in the modal itself in script.js -->
+          </div>
         </div>
       </div>
-    </div>
-  </template>
+    </template>
 
     <!-- Auth Template -->
     <template id="auth-template">
@@ -48,470 +48,467 @@
           <button id="auth42-button" class="auth-button">Auth 42</button>
         </div>
       </div>
-    </div>
-  </template>
+     </template>
 
-  <!-- Login Form Template -->
-  <template id="login-template">
-    <p id="modal-message" class="modal-message"></p>
-    <div id="login-container">
-      <form id="login-form" class="modal-form">
+    <!-- Login Form Template -->
+    <template id="login-template">
+      <p id="modal-message" class="modal-message"></p>
+      <div id="login-container">
+        <form id="login-form" class="modal-form">
+          <!-- Message element added here -->
+
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" required />
+
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required />
+
+          <label for="confirm-password">Confirm Password</label>
+          <input type="password" id="confirm-password" name="confirm-password" required />
+          <button type="submit" class="auth-form__button">Log In</button>
+        </form>
+      </div>
+      <div id="2fa-container" style="display: none;">
+        <form id="2fa-form" class="modal-form">
+          <!-- Message element added here -->
+
+          <label for="code">Enter the code sent to your email</label>
+          <input type="text" id="code" name="code" required />
+
+          <div class="resend-section">
+            <span id="countdown">1:00</span>
+            <button type="button" id="resend-button" class="auth-form__button" disabled>
+              Resend Code
+            </button>
+          </div>
+
+          <button type="submit" id="2fa-login" class="auth-form__button">Log In</button>
+        </form>
+      </div>
+    </template>
+
+    <!-- Signup Form Template -->
+    <template id="signup-template">
+      <p id="modal-message" class="modal-message"></p>
+      <form id="signup-form" class="modal-form">
         <!-- Message element added here -->
-
         <label for="username">Username</label>
         <input type="text" id="username" name="username" required />
 
         <label for="password">Password</label>
         <input type="password" id="password" name="password" required />
 
-        <button type="submit" class="auth-form__button">Log In</button>
+        <label for="confirm-password">Confirm Password</label>
+        <input type="password" id="confirm-password" name="confirm-password" required />
+
+        <button type="submit" class="auth-form__button">Sign Up</button>
       </form>
-    </div>
-    <div id="2fa-container" style="display: none;">
-      <form id="2fa-form" class="modal-form">
-        <!-- Message element added here -->
+    </template>
 
-        <label for="code">Enter the code sent to your email</label>
-        <input type="text" id="code" name="code" required />
+    <!-- Home Page Template -->
+    <template id="home-template">
+      <div class="page-container page-container--home">
+        <h1 class="page-container__title page-container__title--home">PONG</h1>
 
-        <div class="resend-section">
-          <span id="countdown">1:00</span>
-          <button type="button" id="resend-button" class="auth-form__button" disabled>
-            Resend Code
-          </button>
+        <div class="home__content">
+          <div class="home__buttonsetleft">
+            <button id="home__button-logout" class="home__button button--red">Logout</button>
+            <button id="home__button-play" class="home__button button--neon">PLAY</button>
+          </div>
+          <div class="home__net">
+            <div class="home__net-segment home__net-segment--black"></div>
+            <div class="home__net-segment home__net-segment--white"></div>
+            <div class="home__net-segment home__net-segment--black"></div>
+            <div class="home__net-segment home__net-segment--white"></div>
+            <div class="home__net-segment home__net-segment--black"></div>
+            <div class="home__net-segment home__net-segment--white"></div>
+            <div class="home__net-segment home__net-segment--black"></div>
+            <div class="home__net-segment home__net-segment--white"></div>
+            <div class="home__net-segment home__net-segment--black"></div>
+            <div class="home__net-segment home__net-segment--white"></div>
+          </div>
+          <button id="home__button-cta" class="home__button button--gradient">CTA</button>
         </div>
-
-        <button type="submit" id="2fa-login" class="auth-form__button">Log In</button>
-      </form>
-    </div>
-
-  </template>
-
-  <!-- Signup Form Template -->
-  <template id="signup-template">
-    <p id="modal-message" class="modal-message"></p>
-    <form id="signup-form" class="modal-form">
-      <!-- Message element added here -->
-      <label for="username">Username</label>
-      <input type="text" id="username" name="username" required />
-
-      <label for="password">Password</label>
-      <input type="password" id="password" name="password" required />
-
-      <label for="confirm-password">Confirm Password</label>
-      <input type="password" id="confirm-password" name="confirm-password" required />
-
-      <button type="submit" class="auth-form__button">Sign Up</button>
-    </form>
-  </template>
-
-  <!-- Home Page Template -->
-  <template id="home-template">
-    <div class="page-container page-container--home">
-      <h1 class="page-container__title page-container__title--home">PONG</h1>
-
-      <div class="home__content">
-        <div class="home__buttonsetleft">
-          <button id="home__button-logout" class="home__button button--red">Logout</button>
-          <button id="home__button-play" class="home__button button--neon">PLAY</button>
-        </div>
-        <div class="home__net">
-          <div class="home__net-segment home__net-segment--black"></div>
-          <div class="home__net-segment home__net-segment--white"></div>
-          <div class="home__net-segment home__net-segment--black"></div>
-          <div class="home__net-segment home__net-segment--white"></div>
-          <div class="home__net-segment home__net-segment--black"></div>
-          <div class="home__net-segment home__net-segment--white"></div>
-          <div class="home__net-segment home__net-segment--black"></div>
-          <div class="home__net-segment home__net-segment--white"></div>
-          <div class="home__net-segment home__net-segment--black"></div>
-          <div class="home__net-segment home__net-segment--white"></div>
-        </div>
-        <button id="home__button-cta" class="home__button button--gradient">CTA</button>
       </div>
-    </div>
-  </template>
+    </template>
 
 
-  <!-- Game list Template 
-     (list of games and button to create new game)-->
-  <template id="game-item-template">
-    <div id="games-container" class="page-container--games">
-      <div class="game-item">
-        <p>Game ID: <span id="game-id"></span></p>
-        <p>Mode: <span></span></p>
-        <p>Date: <span></span></p>
-        <p>Duration: <span></span></p>
-        <p>Winner: <span></span></p>
+    <!-- Game list Template 
+      (list of games and button to create new game)-->
+    <template id="game-item-template">
+      <div id="games-container" class="page-container--games">
+        <div class="game-item">
+          <p>Game ID: <span id="game-id"></span></p>
+          <p>Mode: <span></span></p>
+          <p>Date: <span></span></p>
+          <p>Duration: <span></span></p>
+          <p>Winner: <span></span></p>
+        </div>
       </div>
-    </div>
-    <button id="cta__button-settings" style="display: none;">Settings</button>
-  </template>
+      <button id="cta__button-settings" style="display: none;">Settings</button>
+    </template>
 
 
 
 
-  <!-- Modal Template -->
-  <template id="modal-template">
-    <div class="modal-overlay" id="modal-overlay">
-      <div class="modal">
-        <button class="modal-close-btn" aria-label="Close Modal">&times;</button>
-        <div class="modal-content">
-          <h2>Error</h2>
-          <p class="modal-message" id="modal-message">An error occurred. Please try again.</p>
-          <div class="modal-form">
-            <label for="inputField">Example Input:</label>
-            <input type="text" id="inputField" placeholder="Enter some text" />
-            <button type="button" class="form-button" id="submit-form">Submit</button>
+    <!-- Modal Template -->
+    <template id="modal-template">
+      <div class="modal-overlay" id="modal-overlay">
+        <div class="modal">
+          <button class="modal-close-btn" aria-label="Close Modal">&times;</button>
+          <div class="modal-content">
+            <h2>Error</h2>
+            <p class="modal-message" id="modal-message">An error occurred. Please try again.</p>
+            <div class="modal-form">
+              <label for="inputField">Example Input:</label>
+              <input type="text" id="inputField" placeholder="Enter some text" />
+              <button type="button" class="form-button" id="submit-form">Submit</button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </template>
+    </template>
 
 
-  <!-- Game Settings Template-->
-  <template id="game-settings-template">
-    <p id="status" class="status"></p>
-    <!-- Status message container -->
-    <div id="status" style="display: none;"></div>
-    <div class="tournament-container page-container--settings">
-      <h2>GAME SETTINGS</h2>
+    <!-- Game Settings Template-->
+    <template id="game-settings-template">
+      <p id="status" class="status"></p>
+      <!-- Status message container -->
+      <div id="status" style="display: none;"></div>
+      <div class="tournament-container page-container--settings">
+        <h2>GAME SETTINGS</h2>
+        <div class="tournament-detail-container">
+          <form id="gameForm" class="tournament-detail-section">
+            <div class="game-setting-group">
+              <label for="playerId">Player ID:</label>
+              <input type="text" id="playerId" name="playerId" class="create-tournament-select">
+            </div>
+            <div class="game-setting-group">
+              <label for="numPlayers">Number of Players:</label>
+              <input type="number" id="numPlayers" name="numPlayers" min="2" max="8" class="create-tournament-select">
+            </div>
+            <div class="game-setting-group">
+              <label for="numSides">Number of Sides:</label>
+              <input type="number" id="numSides" name="numSides" min="3" max="100" class="create-tournament-select">
+            </div>
+            <div class="game-setting-group">
+              <label for="numBalls">Number of Balls:</label>
+              <input type="number" id="numBalls" name="numBalls" min="1" max="4" class="create-tournament-select">
+            </div>
+            <div class="game-setting-group">
+              <label for="mode">Select Mode:</label>
+              <select id="mode" name="mode" class="create-tournament-select">
+                <option value="regular">Regular</option>
+                <option value="classic">Classic</option>
+                <option value="circular">Circular</option>
+                <option value="irregular">Irregular</option>
+              </select>
+            </div>
+            <div class="game-setting-group">
+              <label for="shape">Shape:</label>
+              <select id="shape" name="shape" class="create-tournament-select">
+                <option value="regular">Regular</option>
+                <option value="irregular">Irregular</option>
+                <option value="star">Star</option>
+                <option value="crazy">Crazy</option>
+              </select>
+            </div>
+            <div class="game-setting-group">
+              <label for="scoreMode">Score Mode:</label>
+              <select id="scoreMode" name="scoreMode" class="create-tournament-select">
+                <option value="classic">Classic</option>
+                <option value="modern">Modern</option>
+              </select>
+            </div>
+            <div class="game-setting-group">
+              <button type="submit" class="form-button">Create Game</button>
+            </div>
+          </form>
+        </div>
+        <div id="descriptions-container" class="tournament-detail-descriptions">
+          <h3>Game Information</h3>
+          <p><strong>Classic:</strong> Classic 2-player pong with 2 paddles and 2 walls. Maximum players: 2.</p>
+          <p><strong>Regular:</strong> Regular polygon with all sides playable. Maximum players: 4.</p>
+          <p><strong>Circular:</strong> Circular arena with curved paddles and sides. Maximum players: 8.</p>
+          <p><strong>Irregular:</strong> Irregular polygon shape with customizable sides. Maximum players: 6.</p>
+          <ul>
+            <li><strong>Regular Shape:</strong> Standard polygon.</li>
+            <li><strong>Irregular Shape:</strong> Slightly deformed polygon with balanced sides.</li>
+            <li><strong>Star Shape:</strong> Star-like shape with alternating long and short sides.</li>
+            <li><strong>Crazy Shape:</strong> Extreme deformation with sharp transitions.</li>
+          </ul>
+        </div>
+      </div>
+    </template>
+
+
+
+    <!-- Tournament List Page Template -->
+    <template id="tournament-template">
+      <div id="container" class="tournament-container">
+        <h2>OPEN TOURNAMENTS</h2>
+        <div id="open-tournaments" class="tournament-list">
+          <!-- Tournament cards will be inserted here dynamically -->
+        </div>
+
+        <h2>ENROLLED</h2>
+        <div id="enrolled-tournaments" class="tournament-list">
+          <!-- Enrolled tournament cards will be inserted here -->
+        </div>
+
+        <div class="button-wrapper">
+          <button id="create-tournament" class="tournament-button">CREATE NEW TOURNAMENT</button>
+        </div>
+      </div>
+    </template>
+
+    <!-- Tournament Card Template -->
+    <template id="tournament-card-template">
+      <div class="tournament-card">
+        <div class="tournament-card-date"></div>
+        <div class="tournament-card-name"></div>
+        <div class="tournament-card-status"></div>
+      </div>
+    </template>
+
+    <!-- Tournament Detail Page Template -->
+    <template id="tournament-detail-template">
       <div class="tournament-detail-container">
-        <form id="gameForm" class="tournament-detail-section">
-          <div class="game-setting-group">
-            <label for="playerId">Player ID:</label>
-            <input type="text" id="playerId" name="playerId" class="create-tournament-select">
+        <h1 class="tournament-detail-name"></h1>
+
+        <div class="tournament-detail-description"></div>
+
+        <div class="tournament-detail-section">
+          <h2>PARTICIPANTS</h2>
+          <div class="tournament-detail-participants"></div>
+        </div>
+
+        <div class="tournament-detail-info">
+          <div class="tournament-detail-dates">
+            <div>Registration End: <span class="tournament-detail-closing-date"></span></div>
+            <div>Start: <span class="tournament-detail-starting-date"></span></div>
           </div>
-          <div class="game-setting-group">
-            <label for="numPlayers">Number of Players:</label>
-            <input type="number" id="numPlayers" name="numPlayers" min="2" max="8" class="create-tournament-select">
+          <div class="tournament-detail-type"></div>
+
+          <div class="tournament-detail-timetable-status">
+            <!-- Will be filled dynamically based on timetable status -->
           </div>
-          <div class="game-setting-group">
-            <label for="numSides">Number of Sides:</label>
-            <input type="number" id="numSides" name="numSides" min="3" max="100" class="create-tournament-select">
+
+          <!-- Only shown when timetable is available and user is enrolled -->
+          <div class="tournament-detail-next-match" style="display: none">
+            <h2>YOUR NEXT MATCH</h2>
+            <div class="tournament-detail-next-match-info"></div>
           </div>
-          <div class="game-setting-group">
-            <label for="numBalls">Number of Balls:</label>
-            <input type="number" id="numBalls" name="numBalls" min="1" max="4" class="create-tournament-select">
+        </div>
+
+        <button class="tournament-detail-action-btn"></button>
+      </div>
+    </template>
+
+    <!-- Toast Template -->
+    <!-- https://ux.stackexchange.com/questions/103783/success-toast-vs-modal -->
+    <template id="toast-template">
+      <div class="toast-container">
+        <div class="toast-message"></div>
+      </div>
+    </template>
+
+    <!-- Create Tournament Page Template -->
+    <template id="create-tournament-template">
+      <div class="create-tournament-container">
+        <h1 class="create-tournament-title">CREATE TOURNAMENT</h1>
+
+        <form class="create-tournament-form">
+          <!-- Basic Info -->
+          <div class="create-tournament-form-group">
+            <label class="create-tournament-label" for="tournament-name">NAME</label>
+            <input class="create-tournament-input" type="text" id="tournament-name" name="name" required />
           </div>
-          <div class="game-setting-group">
-            <label for="mode">Select Mode:</label>
-            <select id="mode" name="mode" class="create-tournament-select">
-              <option value="regular">Regular</option>
-              <option value="classic">Classic</option>
-              <option value="circular">Circular</option>
-              <option value="irregular">Irregular</option>
+
+          <div class="create-tournament-form-group">
+            <label class="create-tournament-label" for="tournament-description">DESCRIPTION</label>
+            <textarea class="create-tournament-textarea" id="tournament-description" name="description"
+              required></textarea>
+          </div>
+
+          <!-- Tournament Type -->
+          <div class="create-tournament-form-group">
+            <label class="create-tournament-label" for="tournament-type">TYPE</label>
+            <select class="create-tournament-select" id="tournament-type" name="type" required>
+              <option value="single_elimination">Single Elimination</option>
+              <option value="double_elimination">Double Elimination</option>
+              <option value="round_robin">Round Robin</option>
             </select>
           </div>
-          <div class="game-setting-group">
-            <label for="shape">Shape:</label>
-            <select id="shape" name="shape" class="create-tournament-select">
-              <option value="regular">Regular</option>
-              <option value="irregular">Irregular</option>
-              <option value="star">Star</option>
-              <option value="crazy">Crazy</option>
+
+          <!-- Dates -->
+          <div class="create-tournament-form-group">
+            <label class="create-tournament-label" for="tournament-start">START DATE</label>
+            <input class="create-tournament-input" type="datetime-local" id="tournament-start" name="startingDate"
+              required />
+          </div>
+
+          <div class="create-tournament-form-group">
+            <label class="create-tournament-label" for="registration-start">REGISTRATION START</label>
+            <input class="create-tournament-input" type="datetime-local" id="registration-start" name="registrationStart"
+              required />
+          </div>
+
+          <div class="create-tournament-form-group">
+            <label class="create-tournament-label" for="registration-close">REGISTRATION CLOSE</label>
+            <input class="create-tournament-input" type="datetime-local" id="registration-close" name="registrationClose"
+              required />
+          </div>
+
+          <!-- Visibility -->
+          <div class="create-tournament-form-group">
+            <label class="create-tournament-label" for="tournament-visibility">VISIBILITY</label>
+            <select class="create-tournament-select" id="tournament-visibility" name="visibility" required>
+              <option value="public">Public</option>
+              <option value="private">Private</option>
             </select>
           </div>
-          <div class="game-setting-group">
-            <label for="scoreMode">Score Mode:</label>
-            <select id="scoreMode" name="scoreMode" class="create-tournament-select">
-              <option value="classic">Classic</option>
-              <option value="modern">Modern</option>
+
+          <!-- Allowed Users (only shown when private is selected) -->
+          <div class="create-tournament-form-group" id="allowed-users-group" style="display: none">
+            <label class="create-tournament-label" for="allowed-users-input">ALLOWED USERS</label>
+            <div class="create-tournament-users-input-container">
+              <input type="text" class="create-tournament-input" id="allowed-users-input" placeholder="Type username" />
+              <button type="button" class="create-tournament-button-secondary" id="add-user-btn">ADD</button>
+            </div>
+            <div id="allowed-users-list" class="create-tournament-users-list"></div>
+          </div>
+
+          <!-- Game Mode -->
+          <div class="create-tournament-form-group">
+            <label class="create-tournament-label" for="game-mode">GAME MODE</label>
+            <select class="create-tournament-select" id="game-mode" name="gameMode" required>
+              <option value="1v1">1 vs 1</option>
+              <option value="multiplayer">Multiplayer</option>
             </select>
           </div>
-          <div class="game-setting-group">
-            <button type="submit" class="form-button">Create Game</button>
+
+          <!-- Action Buttons -->
+          <div class="create-tournament-actions">
+            <button type="button" class="create-tournament-button-secondary" id="cancel-tournament">CANCEL</button>
+            <button type="submit" class="create-tournament-button-primary">CREATE TOURNAMENT</button>
           </div>
         </form>
       </div>
-      <div id="descriptions-container" class="tournament-detail-descriptions">
-        <h3>Game Information</h3>
-        <p><strong>Classic:</strong> Classic 2-player pong with 2 paddles and 2 walls. Maximum players: 2.</p>
-        <p><strong>Regular:</strong> Regular polygon with all sides playable. Maximum players: 4.</p>
-        <p><strong>Circular:</strong> Circular arena with curved paddles and sides. Maximum players: 8.</p>
-        <p><strong>Irregular:</strong> Irregular polygon shape with customizable sides. Maximum players: 6.</p>
-        <ul>
-          <li><strong>Regular Shape:</strong> Standard polygon.</li>
-          <li><strong>Irregular Shape:</strong> Slightly deformed polygon with balanced sides.</li>
-          <li><strong>Star Shape:</strong> Star-like shape with alternating long and short sides.</li>
-          <li><strong>Crazy Shape:</strong> Extreme deformation with sharp transitions.</li>
-        </ul>
-      </div>
-    </div>
-  </template>
+    </template>
 
-
-
-  <!-- Tournament List Page Template -->
-  <template id="tournament-template">
-    <div id="container" class="tournament-container">
-      <h2>OPEN TOURNAMENTS</h2>
-      <div id="open-tournaments" class="tournament-list">
-        <!-- Tournament cards will be inserted here dynamically -->
-      </div>
-
-      <h2>ENROLLED</h2>
-      <div id="enrolled-tournaments" class="tournament-list">
-        <!-- Enrolled tournament cards will be inserted here -->
-      </div>
-
-      <div class="button-wrapper">
-        <button id="create-tournament" class="tournament-button">CREATE NEW TOURNAMENT</button>
-      </div>
-    </div>
-  </template>
-
-  <!-- Tournament Card Template -->
-  <template id="tournament-card-template">
-    <div class="tournament-card">
-      <div class="tournament-card-date"></div>
-      <div class="tournament-card-name"></div>
-      <div class="tournament-card-status"></div>
-    </div>
-  </template>
-
-  <!-- Tournament Detail Page Template -->
-  <template id="tournament-detail-template">
-    <div class="tournament-detail-container">
-      <h1 class="tournament-detail-name"></h1>
-
-      <div class="tournament-detail-description"></div>
-
-      <div class="tournament-detail-section">
-        <h2>PARTICIPANTS</h2>
-        <div class="tournament-detail-participants"></div>
-      </div>
-
-      <div class="tournament-detail-info">
-        <div class="tournament-detail-dates">
-          <div>Registration End: <span class="tournament-detail-closing-date"></span></div>
-          <div>Start: <span class="tournament-detail-starting-date"></span></div>
-        </div>
-        <div class="tournament-detail-type"></div>
-
-        <div class="tournament-detail-timetable-status">
-          <!-- Will be filled dynamically based on timetable status -->
-        </div>
-
-        <!-- Only shown when timetable is available and user is enrolled -->
-        <div class="tournament-detail-next-match" style="display: none">
-          <h2>YOUR NEXT MATCH</h2>
-          <div class="tournament-detail-next-match-info"></div>
+    <!-- Tournament Timetable Template -->
+    <template id="tournament-timetable-template">
+      <div class="tournament-timetable-container">
+        <h1 class="tournament-timetable-tournament-name"></h1>
+        <h2 class="tournament-timetable-title">TOURNAMENT TIMETABLE</h2>
+        <div id="tournament-timetable-rounds">
+          <!-- Rounds will be added dynamically -->
         </div>
       </div>
+    </template>
 
-      <button class="tournament-detail-action-btn"></button>
-    </div>
-  </template>
-
-  <!-- Toast Template -->
-  <!-- https://ux.stackexchange.com/questions/103783/success-toast-vs-modal -->
-  <template id="toast-template">
-    <div class="toast-container">
-      <div class="toast-message"></div>
-    </div>
-  </template>
-
-  <!-- Create Tournament Page Template -->
-  <template id="create-tournament-template">
-    <div class="create-tournament-container">
-      <h1 class="create-tournament-title">CREATE TOURNAMENT</h1>
-
-      <form class="create-tournament-form">
-        <!-- Basic Info -->
-        <div class="create-tournament-form-group">
-          <label class="create-tournament-label" for="tournament-name">NAME</label>
-          <input class="create-tournament-input" type="text" id="tournament-name" name="name" required />
+    <!-- Tournament Timetable Round Template -->
+    <template id="tournament-timetable-round-template">
+      <div class="tournament-timetable-round">
+        <h3 class="tournament-timetable-round-title">ROUND</h3>
+        <div class="tournament-timetable-games">
+          <!-- Games will be added dynamically -->
         </div>
+      </div>
+    </template>
 
-        <div class="create-tournament-form-group">
-          <label class="create-tournament-label" for="tournament-description">DESCRIPTION</label>
-          <textarea class="create-tournament-textarea" id="tournament-description" name="description"
-            required></textarea>
+    <!-- Tournament Timetable Game Template -->
+    <template id="tournament-timetable-game-template">
+      <div class="tournament-timetable-game">
+        <div class="tournament-timetable-game-datetime">
+          <div class="tournament-timetable-game-date"></div>
+          <div class="tournament-timetable-game-time"></div>
         </div>
-
-        <!-- Tournament Type -->
-        <div class="create-tournament-form-group">
-          <label class="create-tournament-label" for="tournament-type">TYPE</label>
-          <select class="create-tournament-select" id="tournament-type" name="type" required>
-            <option value="single_elimination">Single Elimination</option>
-            <option value="double_elimination">Double Elimination</option>
-            <option value="round_robin">Round Robin</option>
-          </select>
+        <div class="tournament-timetable-game-players">
+          <div class="tournament-timetable-game-player"></div>
+          <div class="tournament-timetable-game-vs">VS</div>
+          <div class="tournament-timetable-game-player"></div>
         </div>
+        <div class="tournament-timetable-game-result"></div>
+        <div class="tournament-timetable-game-status"></div>
+      </div>
+    </template>
 
-        <!-- Dates -->
-        <div class="create-tournament-form-group">
-          <label class="create-tournament-label" for="tournament-start">START DATE</label>
-          <input class="create-tournament-input" type="datetime-local" id="tournament-start" name="startingDate"
-            required />
-        </div>
 
-        <div class="create-tournament-form-group">
-          <label class="create-tournament-label" for="registration-start">REGISTRATION START</label>
-          <input class="create-tournament-input" type="datetime-local" id="registration-start" name="registrationStart"
-            required />
-        </div>
-
-        <div class="create-tournament-form-group">
-          <label class="create-tournament-label" for="registration-close">REGISTRATION CLOSE</label>
-          <input class="create-tournament-input" type="datetime-local" id="registration-close" name="registrationClose"
-            required />
-        </div>
-
-        <!-- Visibility -->
-        <div class="create-tournament-form-group">
-          <label class="create-tournament-label" for="tournament-visibility">VISIBILITY</label>
-          <select class="create-tournament-select" id="tournament-visibility" name="visibility" required>
-            <option value="public">Public</option>
-            <option value="private">Private</option>
-          </select>
-        </div>
-
-        <!-- Allowed Users (only shown when private is selected) -->
-        <div class="create-tournament-form-group" id="allowed-users-group" style="display: none">
-          <label class="create-tournament-label" for="allowed-users-input">ALLOWED USERS</label>
-          <div class="create-tournament-users-input-container">
-            <input type="text" class="create-tournament-input" id="allowed-users-input" placeholder="Type username" />
-            <button type="button" class="create-tournament-button-secondary" id="add-user-btn">ADD</button>
+    <template id="chat-home-template">
+      <div class="page-container page-container--chat">
+        <div class="chat__section">
+          <h2 class="chat-page__title">Users</h2>
+          <div class="chat-users-horizontal-scroll">
+            <div id="chat-users-horizontal-container" class="chat-users-horizontal-container">
+              <!-- Horizontal user items will be populated dynamically here -->
+              <div class="chat-users-horizontal-item" id="chat-users" style="display: none;">
+                <img class="chat-users-list__avatar" src="" alt="User avatar" />
+                <div class="chat-users-list__info">
+                  <span class="chat-users-list__username"></span>
+                  <span class="chat-users-list__status-indicator"></span>
+                </div>
+              </div>
+            </div>
           </div>
-          <div id="allowed-users-list" class="create-tournament-users-list"></div>
         </div>
 
-        <!-- Game Mode -->
-        <div class="create-tournament-form-group">
-          <label class="create-tournament-label" for="game-mode">GAME MODE</label>
-          <select class="create-tournament-select" id="game-mode" name="gameMode" required>
-            <option value="1v1">1 vs 1</option>
-            <option value="multiplayer">Multiplayer</option>
-          </select>
+        <div class="chat__section">
+          <h2 class="chat-page__title">Notifications</h2>
+          <h2 id="notification-mark-all-read">Mark all read</h2>
+          <div class="notifications-container">
+            <div id="chat-notifications" class="conversations-list">
+              <!-- Notifications -->
+            </div>
+          </div>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="create-tournament-actions">
-          <button type="button" class="create-tournament-button-secondary" id="cancel-tournament">CANCEL</button>
-          <button type="submit" class="create-tournament-button-primary">CREATE TOURNAMENT</button>
-        </div>
-      </form>
-    </div>
-  </template>
-
-  <!-- Tournament Timetable Template -->
-  <template id="tournament-timetable-template">
-    <div class="tournament-timetable-container">
-      <h1 class="tournament-timetable-tournament-name"></h1>
-      <h2 class="tournament-timetable-title">TOURNAMENT TIMETABLE</h2>
-      <div id="tournament-timetable-rounds">
-        <!-- Rounds will be added dynamically -->
-      </div>
-    </div>
-  </template>
-
-  <!-- Tournament Timetable Round Template -->
-  <template id="tournament-timetable-round-template">
-    <div class="tournament-timetable-round">
-      <h3 class="tournament-timetable-round-title">ROUND</h3>
-      <div class="tournament-timetable-games">
-        <!-- Games will be added dynamically -->
-      </div>
-    </div>
-  </template>
-
-  <!-- Tournament Timetable Game Template -->
-  <template id="tournament-timetable-game-template">
-    <div class="tournament-timetable-game">
-      <div class="tournament-timetable-game-datetime">
-        <div class="tournament-timetable-game-date"></div>
-        <div class="tournament-timetable-game-time"></div>
-      </div>
-      <div class="tournament-timetable-game-players">
-        <div class="tournament-timetable-game-player"></div>
-        <div class="tournament-timetable-game-vs">VS</div>
-        <div class="tournament-timetable-game-player"></div>
-      </div>
-      <div class="tournament-timetable-game-result"></div>
-      <div class="tournament-timetable-game-status"></div>
-    </div>
-  </template>
-
-
-  <template id="chat-home-template">
-    <div class="page-container page-container--chat">
-      <div class="chat__section">
-        <h2 class="chat-page__title">Users</h2>
-        <div class="chat-users-horizontal-scroll">
-          <div id="chat-users-horizontal-container" class="chat-users-horizontal-container">
-            <!-- Horizontal user items will be populated dynamically here -->
-            <div class="chat-users-horizontal-item" id="chat-users" style="display: none;">
-              <img class="chat-users-list__avatar" src="" alt="User avatar" />
-              <div class="chat-users-list__info">
-                <span class="chat-users-list__username"></span>
-                <span class="chat-users-list__status-indicator"></span>
+        <div class="chat__section">
+          <h2 class="chat-page__title">Conversations</h2>
+          <div id="chat-conversations-list" class="conversations-list">
+            <!-- Vertical list of users will be populated dynamically here -->
+            <div class="chat-conversations-list__item" id="chat-conversations" style="display: none;">
+              <img class="chat-conversations-list__avatar" src="" alt="User avatar" />
+              <div class="chat-conversations-list__info">
+                <span class="chat-conversations-list__username"></span>
+                <span class="chat-conversations-list__status-indicator"></span>
               </div>
             </div>
           </div>
         </div>
       </div>
+      </div>
+    </template>
 
-      <div class="chat__section">
-        <h2 class="chat-page__title">Notifications</h2>
-        <h2 id="notification-mark-all-read">Mark all read</h2>
-        <div class="notifications-container">
-          <div id="chat-notifications" class="conversations-list">
-            <!-- Notifications -->
+
+    <template id="chat-room-template">
+      <div class="chat-room-container">
+        <div class="chat-room-header">
+          <div class="chat-room-header__back-btn">
+            <i class="icon-back">←</i>
+          </div>
+          <div class="chat-room-header__user-info">
+            <img id="chat-room-partner-avatar" class="chat-room-header__avatar" src="" alt="Chat Partner Avatar" />
+            <span id="chat-room-partner-username" class="chat-room-header__username"></span>
+          </div>
+          <div class="chat-room-header__actions">
+            <button id="chat-room-more-actions" class="chat-room-header__more-btn">⋮</button>
           </div>
         </div>
-      </div>
-
-      <div class="chat__section">
-        <h2 class="chat-page__title">Conversations</h2>
-        <div id="chat-conversations-list" class="conversations-list">
-          <!-- Vertical list of users will be populated dynamically here -->
-          <div class="chat-conversations-list__item" id="chat-conversations" style="display: none;">
-            <img class="chat-conversations-list__avatar" src="" alt="User avatar" />
-            <div class="chat-conversations-list__info">
-              <span class="chat-conversations-list__username"></span>
-              <span class="chat-conversations-list__status-indicator"></span>
-            </div>
-          </div>
+        <div id="chat-messages" class="chat-messages"></div>
+        <div class="chat-input-container">
+          <input id="chat-message-input" class="chat-input" placeholder="Type your message" />
+          <button id="chat-message-submit" class="chat-submit-button">Send</button>
         </div>
       </div>
-    </div>
-    </div>
-  </template>
+    </template>
 
-
-  <template id="chat-room-template">
-    <div class="chat-room-container">
-      <div class="chat-room-header">
-        <div class="chat-room-header__back-btn">
-          <i class="icon-back">←</i>
-        </div>
-        <div class="chat-room-header__user-info">
-          <img id="chat-room-partner-avatar" class="chat-room-header__avatar" src="" alt="Chat Partner Avatar" />
-          <span id="chat-room-partner-username" class="chat-room-header__username"></span>
-        </div>
-        <div class="chat-room-header__actions">
-          <button id="chat-room-more-actions" class="chat-room-header__more-btn">⋮</button>
-        </div>
+    <template id="chat-message-template">
+      <div class="chat-message">
+        <span class="chat-message-text"></span>
       </div>
-      <div id="chat-messages" class="chat-messages"></div>
-      <div class="chat-input-container">
-        <input id="chat-message-input" class="chat-input" placeholder="Type your message" />
-        <button id="chat-message-submit" class="chat-submit-button">Send</button>
-      </div>
-    </div>
-  </template>
-
-  <template id="chat-message-template">
-    <div class="chat-message">
-      <span class="chat-message-text"></span>
-    </div>
-  </template>
-
-
-
+    </template>
 
     <!-- Bottom Navigation Template -->
     <template id="bottom-nav-template">

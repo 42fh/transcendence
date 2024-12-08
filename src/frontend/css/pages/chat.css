@@ -70,7 +70,7 @@
   white-space: nowrap;
 }
 
-.conversations-list {
+.chat-conversations-list {
   display: flex;
   flex-direction: column;
   gap: 0.3em;
