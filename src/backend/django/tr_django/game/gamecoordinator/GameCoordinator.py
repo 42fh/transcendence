@@ -13,8 +13,6 @@ from asgiref.sync import sync_to_async
 logger = logging.getLogger(__name__)
 
 
-
-
 class RedisLock:
     def __init__(self, redis_conn: redis.Redis, lock_key: str, timeout: int = 10):
         self.redis_conn = redis_conn
@@ -190,24 +188,27 @@ class GameCoordinator:
 
             await pipeline.execute()
 
-
-
-
     @classmethod
-    async def create_tournament_game(cls, real_game_id: str, tournament_id: str, players: list[str], game_settings: dict) -> dict:
+    async def create_tournament_game(
+        cls,
+        real_game_id: str,
+        tournament_id: str,
+        players: list[str],
+        game_settings: dict,
+    ) -> dict:
         """Create tournament game with pre-assigned players"""
         try:
             game_id = None
             async with await cls.get_redis(cls.REDIS_URL) as redis_conn:
                 async with RedisLock(redis_conn, cls.LOCK_KEYS["game_id"]):
                     game_id = await cls.generate_game_id(redis_conn)
-                    
+
             if not game_id:
                 return {"status": "error", "message": "Failed to generate game ID"}
 
             # Setup base game
             await cls.game_setup(redis_conn, game_settings, game_id)
-            
+
             # Set tournament flags
             async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
                 pipe = redis_conn.pipeline()
@@ -224,17 +225,11 @@ class GameCoordinator:
                     # Add URL to list
                     player_urls.append((user_id, f"ws/game/{game_id}/"))
             print("F")
-            return {
-                "status": "running",
-                "game_id": game_id,
-                "player_urls": player_urls
-            }
+            return {"status": "running", "game_id": game_id, "player_urls": player_urls}
 
         except Exception as e:
             logger.error(f"Error creating tournament game: {e}")
             return {"status": "error", "message": str(e)}
-
-
 
     # view
 

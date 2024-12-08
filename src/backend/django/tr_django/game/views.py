@@ -19,9 +19,6 @@ import random
 from .tournamentmanager.utils import get_test_tournament_data
 
 
-
-
-
 def transcendance(request):
     return HttpResponse("Initial view for transcendance")
 
@@ -425,7 +422,8 @@ async def game_settings(request, game_id):
 
     return JsonResponse({"message": "only GET requests are allowed"}, status=400)
 
-# no games are stored in all games -> yiu will see always no games 
+
+# no games are stored in all games -> yiu will see always no games
 @async_only_middleware
 @require_http_methods(["GET"])
 @csrf_exempt
@@ -442,6 +440,7 @@ async def all_games(request):
 
     return JsonResponse({"message": "only GET requests are allowed"}, status=405)
 
+
 # ------ new Tournament
 from .tournamentmanager.TournamentManager import TournamentManager
 
@@ -453,41 +452,48 @@ def all_tournaments(request):
         tournament_list = Tournament.objects.all()
         data = [build_tournament_data(t) for t in tournament_list]
         return JsonResponse({"tournaments": data})
-        
+
     elif request.method == "POST":
         try:
             data = json.loads(request.body)
             creator = Player.objects.get(user=request.user)
-            result = TournamentManager.create_tournament(data, data.get("game_settings", {}), creator)
+            result = TournamentManager.create_tournament(
+                data, data.get("game_settings", {}), creator
+            )
             if result["status"]:
                 tournament = Tournament.objects.get(pk=result["tournament_id"])
-                return JsonResponse({
-                    "status": "success",
-                    "message": f"Tournament[{tournament.name}] created successfully. {result['message']}",
-                    "tournament_notification_url": result["tournament_notification_url"],
-                    "value_create_tournament_debug": result,
-                    "tournament_debug": build_tournament_data(tournament)
-                })
+                return JsonResponse(
+                    {
+                        "status": "success",
+                        "message": f"Tournament[{tournament.name}] created successfully. {result['message']}",
+                        "tournament_notification_url": result[
+                            "tournament_notification_url"
+                        ],
+                        "value_create_tournament_debug": result,
+                        "tournament_debug": build_tournament_data(tournament),
+                    }
+                )
             return JsonResponse({"error": result["message"]}, status=400)
-            
+
         except (json.JSONDecodeError, Player.DoesNotExist) as e:
             return JsonResponse({"error": str(e)}, status=400)
+
 
 @require_http_methods(["POST", "DELETE"])
 @csrf_exempt
 def tournament_enrollment(request, tournament_id):
     try:
         player = Player.objects.get(user=request.user)
-        
+
         if request.method == "POST":
             result = TournamentManager.add_player(tournament_id, player)
         elif request.method == "DELETE":
             result = TournamentManager.remove_player(tournament_id, player)
         else:
             return JsonResponse({"error": "Method not allowed"}, status=405)
-            
+
         return JsonResponse(result, status=400 if not result["status"] else 200)
-        
+
     except Player.DoesNotExist:
         return JsonResponse({"error": "Player profile not found"}, status=400)
 
@@ -499,7 +505,8 @@ def get_game_schedule(request, tournament_id):
         result = TournamentManager.get_game_schedule(tournament_id)
         return JsonResponse(result, status=400 if not result["status"] else 200)
 
-# this is only for debugging the schedule creation, notifications will be ignored, do not use out of this scope 
+
+# this is only for debugging the schedule creation, notifications will be ignored, do not use out of this scope
 @csrf_exempt
 @require_http_methods(["POST"])
 def debug_tournament(request):
@@ -510,31 +517,25 @@ def debug_tournament(request):
         result = TournamentManager.create_tournament(tournament_data, {}, creator)
         if not result["status"]:
             return JsonResponse(result, status=400)
-        print("debug: " ,result)   
+        print("debug: ", result)
         tournament_id = result["tournament_id"]
-        
+
         # Add 4 sample players
         sample_players = Player.objects.all()[:4]
-        print ("players: ", sample_players)
+        print("players: ", sample_players)
         for player in sample_players:
             result = TournamentManager.add_player(tournament_id, player)
             print("debug2: ", result)
         # Get schedule
         schedule = TournamentManager.get_game_schedule(tournament_id)
-        
-        return JsonResponse({
-            "tournament_id": tournament_id,
-            "schedule": schedule
-        })
-        
+
+        return JsonResponse({"tournament_id": tournament_id, "schedule": schedule})
+
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
 
-
-
 # ----------------  Tournament and Game  -> database?
-
 
 
 @csrf_exempt
@@ -587,5 +588,3 @@ def single_tournament(request, tournament_id):
         )
 
     return JsonResponse({"error": "Method not allowed"}, status=405)
-
-
