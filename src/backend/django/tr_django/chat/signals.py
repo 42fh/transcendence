@@ -11,37 +11,46 @@ logger = logging.getLogger("notifications")
 @receiver(post_save, sender=Message)
 def create_message_notification(sender, instance, created, **kwargs):
     """
-    Signal handler to create a notification and send it via WebSocket
+    Signal handler to create a notification in the database
     whenever a new message is created in the database.
     """
-    print(f"DEBUG: Signal triggered for Message ID: {instance.id}")
     if created:
         try:
-            logger.debug(f"New message detected: {instance.id}, sender: {instance.sender}, room: {instance.room}")
-
             # Determine the recipient of the message
             recipient = instance.room.user2 if instance.sender == instance.room.user1 else instance.room.user1
-            logger.debug(f"Recipient determined: {recipient.username}")
 
             # Create the notification
             notification = Notification.objects.create(
                 user=recipient, message=f"New message from {instance.sender.username}: {instance.content[:50]}"
             )
             logger.info(f"Notification created: {notification.id} for user: {recipient.username}")
+        except Exception as e:
+            logger.error(f"Error creating notification: {str(e)}", exc_info=True)
+
+
+@receiver(post_save, sender=Notification)
+def send_notification_websocket(sender, instance, created, **kwargs):
+    """
+    Signal handler to send a notification via WebSocket
+    whenever a new notification is created in the database.
+    """
+    if created:
+        try:
+            recipient = instance.user
+            channel_layer = get_channel_layer()
 
             # Send the notification via WebSocket
-            channel_layer = get_channel_layer()
             async_to_sync(channel_layer.group_send)(
                 f"notifications_{recipient.username}",
                 {
                     "type": "send_notification",
                     "notification": {
-                        "id": notification.id,
-                        "message": notification.message,
-                        "created_at": notification.created_at.isoformat(),
+                        "id": instance.id,
+                        "message": instance.message,
+                        "created_at": instance.created_at.isoformat(),
                     },
                 },
             )
             logger.info(f"Notification sent to WebSocket group: notifications_{recipient.username}")
         except Exception as e:
-            logger.error(f"Error creating notification or sending WebSocket message: {str(e)}", exc_info=True)
+            logger.error(f"Error sending WebSocket notification: {str(e)}", exc_info=True)
