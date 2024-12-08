@@ -256,6 +256,7 @@ export function render() {
 export function renderPolygonGame() {
   const renderer = getRendererState();
   console.log("Entering renderPolygonGame");
+  console.log(renderer);
   // Validate required data is available
   if (!renderer.state || !renderer.svg || !renderer.vertices || renderer.vertices.length === 0) {
     console.warn("Missing required data for rendering", {

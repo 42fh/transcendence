@@ -260,5 +260,5 @@ export const DEFAULT_SVG_VIEWBOX = {
 };
 
 export const DOM_IDS = {
-  GAME_SVG: "gameSvg",
+  GAME_SVG: "two-d-game__pong-svg",
 };
