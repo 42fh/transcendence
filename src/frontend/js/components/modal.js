@@ -73,27 +73,3 @@ export function closeModal() {
     modalOverlay.remove();
   }
 }
-
-export function displayNotification(message) {
-  const notificationContainer = document.getElementById(
-    "notification-container"
-  );
-
-  if (!notificationContainer) {
-    console.error("Notification container not found");
-    return;
-  }
-
-  // Create notification element
-  const notificationElement = document.createElement("div");
-  notificationElement.classList.add("notification");
-  notificationElement.textContent = message;
-
-  // Add to container
-  notificationContainer.appendChild(notificationElement);
-
-  // Automatically remove after 5 seconds
-  setTimeout(() => {
-    notificationContainer.removeChild(notificationElement);
-  }, 5000);
-}
