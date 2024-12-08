@@ -64,6 +64,9 @@ postgres_data/
 **/logs/
 *.log
 
+# Ignore specific nginx access log
+src/nginx/logs/access.log
+
 # Ignore all files in media/avatars
 media/avatars/*
 src/backend/django/tests/media/*
