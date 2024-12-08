@@ -1,8 +1,15 @@
 import { updateActiveNavItem } from "../components/bottom-nav.js";
 import { GameInterface2D } from "../2DGame/gameInterface.js";
-import { GAME_2D_CONFIG_TYPES, GAME_2D_CONFIG_TYPE_DEFAULT } from "../config/constants.js";
+import {
+  GAME_2D_CONFIG_TYPES,
+  GAME_2D_CONFIG_TYPE_DEFAULT,
+} from "../config/constants.js";
 import { showToast } from "../utils/toast.js";
-import { fetchWaitingGames, createGame } from "../services/gameService.js";
+import {
+  fetchWaitingGames,
+  createGame,
+  findMatchingGame,
+} from "../services/gameService.js";
 import { loadGame2DPage } from "./game2D.js";
 import { initializeGameConfig } from "../store/index.js";
 
@@ -61,17 +68,21 @@ export function loadGameSetupPage(addToHistory = true) {
   } catch (error) {
     console.error("Error loading 2D game page:", error);
   }
-  document.getElementById("two-d-game__game-type").addEventListener("change", (e) => {
-    const selectedGameType = e.target.value;
-    updateGameFormInputConstraints(selectedGameType);
-    // toggleGameFormFields();
-  });
+  document
+    .getElementById("two-d-game__game-type")
+    .addEventListener("change", (e) => {
+      const selectedGameType = e.target.value;
+      updateGameFormInputConstraints(selectedGameType);
+      // toggleGameFormFields();
+    });
 }
 
 /* with updateGameTypeFields we were updating the configuration based on the HTML */
 /* now we are updating the HTML based on the configuration */
 //   updateGameTypeFields() {
-function updateGameFormInputConstraints(gameType = GAME_2D_CONFIG_TYPE_DEFAULT) {
+function updateGameFormInputConstraints(
+  gameType = GAME_2D_CONFIG_TYPE_DEFAULT
+) {
   //   const config = this.gameConfigs[this.gameType];d
   const gameConfig = GAME_2D_CONFIG_TYPES[gameType];
   if (!gameConfig) {
@@ -79,12 +90,16 @@ function updateGameFormInputConstraints(gameType = GAME_2D_CONFIG_TYPE_DEFAULT) 
     return;
   }
 
-  const defaultConstraints = GAME_2D_CONFIG_TYPES[GAME_2D_CONFIG_TYPE_DEFAULT].input_constraints;
+  const defaultConstraints =
+    GAME_2D_CONFIG_TYPES[GAME_2D_CONFIG_TYPE_DEFAULT].input_constraints;
 
   // Update number of players max value
-  const numPlayersInputElement = document.getElementById("two-d-game__num-players");
+  const numPlayersInputElement = document.getElementById(
+    "two-d-game__num-players"
+  );
   if (numPlayersInputElement) {
-    const playerConstraint = gameConfig.inputConstraints?.players || defaultConstraints.players;
+    const playerConstraint =
+      gameConfig.inputConstraints?.players || defaultConstraints.players;
     numPlayersInputElement.min = playerConstraint.min;
     numPlayersInputElement.max = playerConstraint.max;
     numPlayersInputElement.value = playerConstraint.value;
@@ -98,7 +113,8 @@ function updateGameFormInputConstraints(gameType = GAME_2D_CONFIG_TYPE_DEFAULT) 
   // Update number of sides
   const numSidesInputElement = document.getElementById("two-d-game__num-sides");
   if (numSidesInputElement) {
-    const sidesConstraints = gameConfig.inputConstraints?.sides || defaultConstraints.sides;
+    const sidesConstraints =
+      gameConfig.inputConstraints?.sides || defaultConstraints.sides;
     numSidesInputElement.min = sidesConstraints.min;
     numSidesInputElement.max = sidesConstraints.max;
     numSidesInputElement.value = sidesConstraints.value;
@@ -192,7 +208,10 @@ function setupEventListeners(gameInterface) {
     const element = document.getElementById(fieldId);
     if (element) {
       element.addEventListener("change", (e) => {
-        gameInterface.formData[fieldId] = e.target.type === "number" ? parseInt(e.target.value) : e.target.value;
+        gameInterface.formData[fieldId] =
+          e.target.type === "number"
+            ? parseInt(e.target.value)
+            : e.target.value;
       });
     }
   });
@@ -218,9 +237,15 @@ function setupEventListeners(gameInterface) {
 
 function collectFormData() {
   const gameType = document.getElementById("two-d-game__game-type").value;
-  const numPlayers = parseInt(document.getElementById("two-d-game__num-players").value);
-  const numSides = parseInt(document.getElementById("two-d-game__num-sides").value);
-  const numBalls = parseInt(document.getElementById("two-d-game__num-balls").value);
+  const numPlayers = parseInt(
+    document.getElementById("two-d-game__num-players").value
+  );
+  const numSides = parseInt(
+    document.getElementById("two-d-game__num-sides").value
+  );
+  const numBalls = parseInt(
+    document.getElementById("two-d-game__num-balls").value
+  );
   //   const shape = document.getElementById("two-d-game__shape").value;
   const scoreMode = document.getElementById("two-d-game__score-mode").value;
   const debug = document.getElementById("two-d-game__debug-mode").checked;
@@ -237,7 +262,10 @@ function validateFormData(formData) {
     }
   } else if (gameType !== "classic") {
     if (numSides < 3 || numSides > 8) {
-      showToast("Number of sides must be between 3 and 8 for polygon modes", true);
+      showToast(
+        "Number of sides must be between 3 and 8 for polygon modes",
+        true
+      );
       return false;
     }
   }
@@ -249,35 +277,6 @@ function validateFormData(formData) {
   return true;
 }
 
-/**
- * Finds a matching game from available games based on form data
- * @param {Array<GameInfo>} games - Array of available games
- * @param {Object} formData - Form data with game preferences
- * @returns {string|null} gameId of matching game or null if no match found
- */
-function findMatchingGame(games, formData) {
-  console.log("findMatchingGame", games, formData);
-  const matchingGame =
-    games.find(
-      (game) =>
-        // Match game mode
-        game.mode === formData.gameType &&
-        // Match number of players
-        game.num_players === formData.numPlayers &&
-        // Match number of sides (for non-classic modes)
-        (formData.gameType === "classic" || game.sides === formData.numSides) &&
-        // TODO: Future matching criteria could include:
-        // && game.score.max === formData.scoreLimit
-        // && game.initial_ball_speed === formData.ballSpeed
-        // && game.paddle_length === formData.paddleLength
-        // && game.ball_size === formData.ballSize
-        // && game.score_mode === formData.scoreMode
-        // Ensure there's room for more players
-        game.players.current + game.players.reserved < game.players.total_needed
-    )?.game_id || null;
-  console.log("matchingGame", matchingGame);
-  return matchingGame;
-}
 // Note this fucntion is meant to be used if you want to join or create a certain type of game not to join a specific waiting gamej
 async function handleStartGame(gameInterface) {
   const formData = collectFormData();
@@ -353,17 +352,19 @@ function createGameList(games) {
             <button class="join-button">Join</button>
         `;
 
-    gameElement.querySelector(".join-button").addEventListener("click", async () => {
-      // Get form data based on game settings
-      const formData = {
-        gameType: game.mode,
-        numPlayers: game.num_players,
-        numBalls: game.num_balls,
-        scoreMode: game.score_mode,
-      };
+    gameElement
+      .querySelector(".join-button")
+      .addEventListener("click", async () => {
+        // Get form data based on game settings
+        const formData = {
+          gameType: game.mode,
+          numPlayers: game.num_players,
+          numBalls: game.num_balls,
+          scoreMode: game.score_mode,
+        };
 
-      await handleJoinGame(game.id, formData);
-    });
+        await handleJoinGame(game.id, formData);
+      });
 
     gamesList.appendChild(gameElement);
   });

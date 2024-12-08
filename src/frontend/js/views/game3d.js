@@ -100,20 +100,6 @@ export async function loadGame3D() {
     ],
     function setupResources() {
       this.loader.items["42berlin"].colorSpace = THREE.SRGBColorSpace;
-      this.loader.items["floorColorTexture"].repeat.set(4, 4);
-      this.loader.items["floorNormalTexture"].repeat.set(4, 4);
-      this.loader.items["floorDisplacementTexture"].repeat.set(4, 4);
-      this.loader.items["floorARMTexture"].repeat.set(4, 4);
-      this.loader.items["floorColorTexture"].wrapS = THREE.RepeatWrapping;
-      this.loader.items["floorColorTexture"].wrapT = THREE.RepeatWrapping;
-      this.loader.items["floorNormalTexture"].wrapS = THREE.RepeatWrapping;
-      this.loader.items["floorNormalTexture"].wrapT = THREE.RepeatWrapping;
-      this.loader.items["floorDisplacementTexture"].wrapS =
-        THREE.RepeatWrapping;
-      this.loader.items["floorDisplacementTexture"].wrapT =
-        THREE.RepeatWrapping;
-      this.loader.items["floorARMTexture"].wrapS = THREE.RepeatWrapping;
-      this.loader.items["floorARMTexture"].wrapT = THREE.RepeatWrapping;
 
       const GAME_HEIGHT = 1;
       const GAME_WIDTH = 0.5;
@@ -246,7 +232,7 @@ export async function loadGame3D() {
       // this.fin3 = this.scene.children[0].getObjectByName("sharkFin3");
     }
   );
-  game.connectToWebsockets();
+  await game.connectToWebsockets();
   game.world.addPerspectiveCamera();
   game.world.addGame(game, false);
 }

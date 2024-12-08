@@ -7,6 +7,14 @@ import Debug from "./debug3d.js";
 import GameWebSocket from "./websocket3d.js";
 import Drawer from "./drawer3d.js";
 import GameUI from "./gameui3d.js";
+import { createGame } from "../services/gameService.js";
+import {
+  fetchWaitingGames,
+  joinGame,
+  findMatchingGame,
+} from "../services/gameService.js";
+import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
+import { showToast } from "./toast.js";
 
 export default class GameConstructor {
   constructor() {
@@ -40,6 +48,9 @@ export default class GameConstructor {
 
     // UI
     this.ui = new GameUI(this);
+
+    // User ID
+    this.userId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
   }
 
   addAmbientLight(intensity, color) {
@@ -50,6 +61,7 @@ export default class GameConstructor {
   addDirectionalLight(intensity, color, Vector3) {
     const directionalLight = new THREE.DirectionalLight(color, intensity);
     directionalLight.position.set(Vector3.x, Vector3.y, Vector3.z);
+    directionalLight.castShadow = true;
     this.scene.add(directionalLight);
   }
 
@@ -116,57 +128,35 @@ export default class GameConstructor {
     this.setupResources = setupResources;
   }
 
-  connectToWebsockets() {
-    document.querySelector(".joinGame").addEventListener("click", async () => {
-      const gameId = document.getElementById("gameId").value;
-      const playerId = this.generateRandomId();
-      const gameType = document.getElementById("gameType").value;
-      const numPlayers = document.getElementById("playerCount").value;
-      const numBalls = 1;
-      const debug = true;
-
-      this.type = gameType;
-
-      const gameConfig = {
-        gameId,
-        playerId,
-        type: gameType == "circular" ? "circular" : "polygon",
-        pongType: gameType,
-        players: numPlayers,
-        balls: numBalls,
-        debug,
-        sides: gameType == "circular" ? numPlayers : numPlayers * 2,
-        shape: undefined,
-        scoreMode: "classic",
-      };
-      console.log("Connecting to game", gameConfig);
-
-      const success = await this.directConnect(gameId, {
-        ...gameConfig,
-      });
-
-      console.log("Connected to game", success);
-    });
-  }
-
-  async directConnect(gameId, config = {}) {
+  async connectToWebsockets() {
     try {
-      this.gameId = gameId;
-      this.playerId =
-        config.playerId || "player-" + Math.random().toString(36).substr(2, 9);
+      const data = {
+        mode: "circular",
+        gameType: "circular",
+        numPlayers: 2,
+        numSides: 3,
+        numBalls: 1,
+        scoreMode: "classic",
+        debug: true,
+      };
+      this.type = "circular";
 
-      this.websocket = new GameWebSocket(
-        gameId,
-        this.playerId,
-        this.handleMessage.bind(this),
-        config
-      );
-      this.websocket.connect();
+      const games = await fetchWaitingGames();
+      const matchingGameId = findMatchingGame(games, data);
 
-      return true;
+      let result = null;
+      if (matchingGameId) {
+        result = await joinGame(matchingGameId);
+        console.log("Join game result:", result);
+      } else {
+        result = await createGame(data);
+        console.log("Game creation result:", result);
+      }
+
+      this.websocket = new GameWebSocket(this.handleMessage.bind(this));
+      this.websocket.connect(result.ws_url);
     } catch (error) {
-      console.error("Failed to connect directly:", error);
-      return false;
+      console.error("Error creating game:", error);
     }
   }
 
@@ -191,6 +181,7 @@ export default class GameConstructor {
         case "initial_state":
           console.log("initial_state: ", message);
           this.playerIndex = message.player_index;
+          this.lastWaitingMessage = Date.now();
           this.createGame(message.game_state);
 
           const div = document.getElementById("menu");
@@ -214,14 +205,41 @@ export default class GameConstructor {
         case "game_event":
           console.log("game_event", message);
           if (message.game_state.type == "paddle_hit") {
-            this.world.audio.playSound("static/sounds/paddle.mp3");
+            this.world.audio.playSound("static/sounds/paddle.mp3", 0.3);
+          } else if (message.game_state.type == "wall_hit") {
+            this.world.audio.playSound("static/sounds/wall-hit.mp3", 0.5);
+          }
+          break;
+        case "player_joined":
+          console.log("player_joined: ", message);
+          while (message.player_index >= 0) {
+            this.paddles.get(message.player_index).material.map = this.skins[0];
+            message.player_index--;
+          }
+          showToast("Player joined");
+          break;
+        case "waiting":
+          if (Date.now() - this.lastWaitingMessage > 10000) {
+            showToast(
+              `Waiting for ${
+                message.required_players - message.current_players
+              } player${
+                message.required_players - message.current_players > 1
+                  ? "s"
+                  : ""
+              }`
+            );
+            this.lastWaitingMessage = Date.now();
           }
           break;
         case "game_finished":
           console.log("game_finished: ", message);
-          this.ui.createEndScreen(message);
+          showToast("Game finished: " + message.message);
           break;
-
+        case "error":
+          console.error("Error message:", message);
+          showToast(message.message, true);
+          break;
         default:
           console.log("Unknown message type:", message);
       }

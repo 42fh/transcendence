@@ -131,8 +131,8 @@ export default class World {
     this.game.water.material.uniforms["time"].value += 1.0 / 240.0;
 
     // shark animation
-    const sharkAngle = 0.0003 * deltaTime;
     if (this.game.fin1) {
+      const sharkAngle = 0.0003 * deltaTime;
       this.game.fin1.position.x = Math.cos(sharkAngle) * 25 + 6;
       this.game.fin1.position.z = Math.sin(sharkAngle) * 25 + 6;
       this.game.fin1.rotation.y = Math.PI - sharkAngle;
@@ -211,7 +211,7 @@ export default class World {
         duration: 2,
         x: 0,
         y: 1,
-        z: 1.8,
+        z: 2.1,
         ease: "power2.inOut",
         onUpdate: () => {
           this.camera.lookAt(1, 1, 1);

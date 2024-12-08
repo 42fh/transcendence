@@ -96,12 +96,15 @@ export async function createGame(gameConfig) {
  */
 export async function joinGame(gameId) {
   try {
-    const response = await fetch(`${CONFIG.API_BASE_URL}/api/game//${gameId}/join`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await fetch(
+      `${CONFIG.API_BASE_URL}/api/game/${gameId}/join`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     const data = await response.json();
     return {
@@ -112,6 +115,36 @@ export async function joinGame(gameId) {
     console.error("Error joining game:", error);
     throw error;
   }
+}
+
+/**
+ * Finds a matching game from available games based on form data
+ * @param {Array<GameInfo>} games - Array of available games
+ * @param {Object} formData - Form data with game preferences
+ * @returns {string|null} gameId of matching game or null if no match found
+ */
+export function findMatchingGame(games, formData) {
+  console.log("findMatchingGame", games, formData);
+  const matchingGame =
+    games.find(
+      (game) =>
+        // Match game mode
+        game.mode === formData.gameType &&
+        // Match number of players
+        game.num_players === formData.numPlayers &&
+        // Match number of sides (for non-classic modes)
+        (formData.gameType === "classic" || game.sides === formData.numSides) &&
+        // TODO: Future matching criteria could include:
+        // && game.score.max === formData.scoreLimit
+        // && game.initial_ball_speed === formData.ballSpeed
+        // && game.paddle_length === formData.paddleLength
+        // && game.ball_size === formData.ballSize
+        // && game.score_mode === formData.scoreMode
+        // Ensure there's room for more players
+        game.players.current + game.players.reserved < game.players.total_needed
+    )?.game_id || null;
+  console.log("matchingGame", matchingGame);
+  return matchingGame;
 }
 
 export async function showAvailableGames() {
