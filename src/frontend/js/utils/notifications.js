@@ -1,5 +1,5 @@
 import { showToast } from "./toast.js";
-import { updateNotificationBadge } from "../components/bottom-nav.js";
+import { updateNotificationBadge } from "../components/bottomNav.js";
 
 export function setupNotificationListener(wsUrl) {
   if (!wsUrl) {

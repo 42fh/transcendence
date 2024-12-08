@@ -1,5 +1,5 @@
 import { fetchNotifications } from "../services/chatNotificationService.js";
-import { updateNotificationBadge } from "../components/bottom-nav.js";
+import { updateNotificationBadge } from "../components/bottomNav.js";
 
 export async function renderNotifications() {
   const chatHomeTemplate = document.querySelector("#chat-home-template");

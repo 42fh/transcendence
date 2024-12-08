@@ -1,8 +1,8 @@
 import { handleLogout } from "./auth.js";
 import { displayLogoutError } from "../utils/errors.js";
 import { loadTournamentsPage } from "./tournaments.js";
-import { updateActiveNavItem } from "../components/bottom-nav.js";
-import { loadChatPage } from "./chat-home.js";
+import { updateActiveNavItem } from "../components/bottomNav.js";
+import { loadChatPage } from "./chatHome.js";
 import { loadGameHome } from "./game.js";
 import { loadGame3D } from "./game3d.js";
 

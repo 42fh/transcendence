@@ -1,7 +1,7 @@
 import { loadHomePage } from "../views/home.js";
 import { loadTournamentsPage } from "../views/tournaments.js";
 import { loadProfilePage } from "../views/profile.js";
-import { loadChatPage } from "../views/chat-home.js";
+import { loadChatPage } from "../views/chatHome.js";
 import { loadUsersPage } from "../views/users.js";
 import { NAVIGATION, LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { renderNotifications } from "../views/chatNotification.js";

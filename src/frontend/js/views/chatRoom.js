@@ -1,6 +1,6 @@
 import { initializeChatWebSocket } from "../services/chatSocketService.js";
 import { ASSETS } from "../config/constants.js";
-import { loadChatPage } from "./chat-home.js";
+import { loadChatPage } from "./chatHome.js";
 
 export function loadChatRoom(chatPartner) {
   history.pushState(

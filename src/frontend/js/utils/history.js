@@ -1,15 +1,15 @@
 import { loadAuthPage } from "../views/auth.js";
 import { loadHomePage } from "../views/home.js";
 import { loadUsersPage } from "../views/users.js";
-import { loadChatPage } from "../views/chat-home.js";
-import { loadChatRoom } from "../views/chat-room.js";
+import { loadChatPage } from "../views/chatHome.js";
+import { loadChatRoom } from "../views/chatRoom.js";
 import { loadTournamentsPage } from "../views/tournaments.js";
-import { loadTournamentDetailsPage } from "../views/tournament-detail.js";
-import { loadCreateTournamentPage } from "../views/tournament-create.js";
+import { loadTournamentDetailsPage } from "../views/tournamentDetail.js";
+import { loadCreateTournamentPage } from "../views/tournamentCreate.js";
 import { loadTimetablePage } from "../views/timetable.js";
 import { loadProfilePage } from "../views/profile.js";
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
-import { updateActiveNavItem } from "../components/bottom-nav.js";
+import { updateActiveNavItem } from "../components/bottomNav.js";
 
 // TODO: Implement state management system to cache API responses
 // Consider using:
