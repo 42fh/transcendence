@@ -1,8 +1,8 @@
 export async function fetchConversationList() {
-  const response = await fetch("/api/chat/users/");
+  const response = await fetch("/api/chat/");
   // console.log("Printing response from fetchConversationList: ");
   // console.log(response);
-  if (!response.ok) throw new Error("Failed to get user list");
+  if (!response.ok) throw new Error("Failed to get conversation list");
 
   const data = await response.json();
   console.log("Fetched conversation list:", data);
