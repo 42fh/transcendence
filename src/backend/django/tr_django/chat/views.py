@@ -5,22 +5,11 @@ from django.db import models
 from .models import ChatRoom, Message, BlockedUser, Notification
 from django.views.decorators.csrf import csrf_exempt
 from users.models import CustomUser
-import json
 from django.utils import timezone
 from channels.db import database_sync_to_async
-from django.http import JsonResponse
-from django.conf import settings
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
 import json
+from django.conf import settings
 import logging
-
-from django.conf import settings
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
-import json
-import traceback
-import sys
 
 logger = logging.getLogger(__name__)
 
