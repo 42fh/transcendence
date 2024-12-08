@@ -2,7 +2,7 @@ import { updateActiveNavItem } from "../components/bottom-nav.js";
 import { GameInterface2D } from "../2DGame/gameInterface.js";
 import { GAME_2D_CONFIG_TYPES, GAME_2D_CONFIG_TYPE_DEFAULT } from "../config/constants.js";
 import { showToast } from "../utils/toast.js";
-import { fetchWaitingGames, createGame } from "../services/gameService.js";
+import { fetchWaitingGames, createGame, joinGame } from "../services/gameService.js";
 import { loadGame2DPage } from "./game2D.js";
 import { initializeGameConfig } from "../store/index.js";
 
