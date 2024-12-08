@@ -96,7 +96,7 @@ export async function createGame(gameConfig) {
  */
 export async function joinGame(gameId) {
   try {
-    const response = await fetch(`${CONFIG.API_BASE_URL}/api/game//${gameId}/join`, {
+    const response = await fetch(`${CONFIG.API_BASE_URL}/api/game/${gameId}/join`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
