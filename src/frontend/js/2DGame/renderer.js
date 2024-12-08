@@ -317,27 +317,18 @@ export function renderPolygonGame() {
  * @returns {{x: number, y: number}} Coordinates in SVG viewport space
  */
 function denormalizeCoordinates(x, y, viewBox, boundaries) {
-  const renderer = getRendererState();
   // Convert X and Y from cartesian normalized space (-1,1) to SVG graphic space (0,1)
-  const cartesianToGraphicX = (x - boundaries.xMin) / viewBox.width;
-  // Note: We subtract from yMax to flip the Y axis for SVG coordinates
-
-  const cartesianToGraphicY = (y - boundaries.yMin) / viewBox.height;
+  const cartesianToGraphicX = (x - boundaries.xMin) / (boundaries.xMax - boundaries.xMin);
+  const cartesianToGraphicY = 1 - (y - boundaries.yMin) / (boundaries.yMax - boundaries.yMin); // Flip Y axis
 
   // Scale to viewport dimensions
-  const viewportWidth = renderer.config.viewBox.width - renderer.config.viewBox.minX;
-  const viewportHeight = renderer.config.viewBox.height - renderer.config.viewBox.minY;
+  const viewportWidth = viewBox.width - viewBox.minX;
+  const viewportHeight = viewBox.height - viewBox.minY;
+
   return {
     x: cartesianToGraphicX * viewportWidth,
     y: cartesianToGraphicY * viewportHeight,
   };
-}
-
-function denormalizeVertices(vertices) {
-  const renderer = getRendererState();
-  return vertices.map((vertex) =>
-    denormalizeCoordinates(vertex.x, vertex.y, renderer.config.viewBox, renderer.boundaries)
-  );
 }
 
 /**
@@ -363,6 +354,9 @@ function denormalizeVertices(vertices) {
  */
 export function transformVertices(vertices = []) {
   const renderer = getRendererState();
+  console.log("Transform - Input vertices:", vertices);
+  console.log("Transform - Boundaries:", renderer.config.boundaries);
+  console.log("Transform - ViewBox:", renderer.config.viewBox);
   if (vertices.length === 0) {
     vertices = renderer.vertices;
   }
@@ -396,10 +390,13 @@ export function transformVertices(vertices = []) {
     );
 
     // 4. Apply any additional translation
-    return {
+    const transformed = {
       x: denormalized.x + translation.x,
       y: denormalized.y + translation.y,
     };
+
+    console.log(`Transform - Vertex (${vertex.x},${vertex.y}) -> (${transformed.x},${transformed.y})`);
+    return transformed;
   });
 }
 
@@ -561,7 +558,16 @@ function renderPolygonDebugLabels(renderer) {
 /**
  * Renders the polygon outline
  */
-export function renderPolygonOutline() {
+export function renderPolygonOutline(options = {}) {
+  const defaultOptions = {
+    fill: "none",
+    fillOpacity: 1,
+    stroke: "#808080",
+    strokeWidth: 2,
+    strokeOpacity: 1,
+  };
+  // Merge default options with provided options
+  const renderOptions = { ...defaultOptions, ...options };
   const renderer = getRendererState();
   if (!renderer.vertices || renderer.vertices.length === 0) {
     console.warn("No vertices available for polygon outline");
@@ -570,16 +576,27 @@ export function renderPolygonOutline() {
 
   console.log("renderer:", renderer);
 
+  console.log("FUNCTION - Initial renderer state:", {
+    vertices: renderer.vertices,
+    viewBox: renderer.config.viewBox,
+    boundaries: renderer.config.boundaries,
+  });
   const transformedVertices = transformVertices();
+  console.log("FUNCTION - After transformation:", transformedVertices);
+
   const pathData = transformedVertices.map((vertex, i) => `${i === 0 ? "M" : "L"} ${vertex.x} ${vertex.y}`).join(" ");
+
+  console.log("FUNCTION - Generated path data:", pathData + " Z");
 
   // Draw main polygon outline
   renderer.svg.appendChild(
     createSVGElement("path", {
       d: `${pathData} Z`,
-      fill: "none",
-      stroke: "#808080",
-      "stroke-width": "2",
+      fill: renderOptions.fill,
+      "fill-opacity": renderOptions.fillOpacity,
+      stroke: renderOptions.stroke,
+      "stroke-width": renderOptions.strokeWidth,
+      "stroke-opacity": renderOptions.strokeOpacity,
     })
   );
 
