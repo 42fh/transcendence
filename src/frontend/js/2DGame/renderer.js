@@ -557,9 +557,23 @@ function renderPolygonDebugLabels(renderer) {
 }
 
 /**
- * Renders the polygon outline
+ * Renders a polygon outline using SVG path elements with customizable styling
+ *
+ * @param {Object} options - Styling options for the polygon
+ * @param {string} [options.fill="#000000"] - Fill color of the polygon
+ * @param {number} [options.fillOpacity=1] - Opacity of the fill (0-1)
+ * @param {string} [options.stroke="#808080"] - Stroke/outline color
+ * @param {number} [options.strokeWidth=2] - Width of the stroke in pixels
+ * @param {number} [options.strokeOpacity=1] - Opacity of the stroke (0-1)
+ *
+ *
+ * @requires getRendererState - Function to get current renderer state
+ * @requires transformVertices - Function to transform vertex coordinates
+ * @requires createSVGElement - Function to create SVG elements
+ * @requires renderPolygonDebugLabels - Function for debug label rendering
  */
 export function renderPolygonOutline(options = {}) {
+  console.log("Entering renderPolygonOutline");
   const defaultOptions = {
     fill: "#000000", // Default black fill
     fillOpacity: 1, // Fully opaque
@@ -575,19 +589,9 @@ export function renderPolygonOutline(options = {}) {
     return;
   }
 
-  console.log("renderer:", renderer);
-
-  console.log("FUNCTION - Initial renderer state:", {
-    vertices: renderer.vertices,
-    viewBox: renderer.config.viewBox,
-    boundaries: renderer.config.boundaries,
-  });
   const transformedVertices = transformVertices();
-  console.log("FUNCTION - After transformation:", transformedVertices);
 
   const pathData = transformedVertices.map((vertex, i) => `${i === 0 ? "M" : "L"} ${vertex.x} ${vertex.y}`).join(" ");
-
-  console.log("FUNCTION - Generated path data:", pathData + " Z");
 
   // Draw main polygon outline
   renderer.svg.appendChild(
