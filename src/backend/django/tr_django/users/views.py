@@ -364,10 +364,10 @@ def callback(request):
         response = redirect('/')  # Redirect to a post-login page
 
         # Set tokens and UUID in cookies
-        response.set_cookie("pongUserId", str(user.id), httponly=False, samesite="Lax")
-        response.set_cookie("pongUsername", str(user.username), httponly=False, samesite="Lax")
-        response.set_cookie("access_token", access_token, httponly=False, samesite="Lax")
-        response.set_cookie("refresh_token", refresh_token, httponly=False, samesite="Lax")
+        response.set_cookie("pongUserId", str(user.id), httponly=False, samesite="Strict")
+        response.set_cookie("pongUsername", str(user.username), httponly=False, samesite="Strict")
+        response.set_cookie("access_token", access_token, httponly=False, samesite="Strict")
+        response.set_cookie("refresh_token", refresh_token, httponly=False, samesite="Strict")
 
         return response
     else:
