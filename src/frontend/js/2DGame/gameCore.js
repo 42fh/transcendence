@@ -2,9 +2,10 @@
 // TODO: Rename maybe to gameCore.js
 // Import necessary dependencies
 import { gameState, gameConfig, updateGameState } from "../store/index.js";
-import { updateGameContext, initializeRenderer, updateRenderer } from "./renderer.js";
+import { initializeRenderer, updateRenderer } from "./renderer.js";
 import { disconnectGameSocket } from "../services/gameSocketService.js";
-import { updateScoreDisplays, showGameOver, hideGameOver } from "./utils.js";
+import { showGameOver } from "./utils.js";
+import { updateGameContext } from "../store/index.js";
 
 export function handleGameMessage(message, onEvent = null) {
   try {
@@ -35,8 +36,14 @@ export function handleGameMessage(message, onEvent = null) {
 }
 
 function handleInitialState(message, onEvent) {
+  console.log("Initial game state received:", message);
+  console.log("onEvent:", onEvent);
   updateGameContext(message);
   initializeRenderer(message);
+
+  console.warn("Disconnecting game socket after receiving initial state - Just for testing");
+  // Disconnect after receiving initial state
+  disconnectGameSocket();
 
   if (onEvent) {
     onEvent({
