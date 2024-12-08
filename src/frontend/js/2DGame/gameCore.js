@@ -4,6 +4,8 @@
 import { gameState, gameConfig, updateGameState } from "../store/index.js";
 import { updateGameContext, initializeRenderer, updateRenderer } from "./renderer.js";
 import { disconnectGameSocket } from "../services/gameSocketService.js";
+import { updateScoreDisplays, showGameOver, hideGameOver } from "./utils.js";
+
 export function handleGameMessage(message, onEvent = null) {
   try {
     switch (message.type) {
@@ -34,7 +36,7 @@ export function handleGameMessage(message, onEvent = null) {
 
 function handleInitialState(message, onEvent) {
   updateGameContext(message);
-  initializeRenderer(message.game_setup.type);
+  initializeRenderer(message);
 
   if (onEvent) {
     onEvent({

@@ -9,7 +9,7 @@ import { DEFAULT_SVG_VIEWBOX } from "../../config/constants.js";
 /**
  * @typedef {Object} RenderConfig
  * @property {ViewBoxConfig} viewBox - Viewbox configuration
- * @property {number} scale - Scale factor for rendering
+ * @property {number} scale - Scale factor for rendering from 0 to 1
  * @property {boolean} centered - Whether if we want to center the polygon on the svg
  * @property {number} [rotation=0] - Rotation in degrees (clockwise)
  */
@@ -36,6 +36,7 @@ import { DEFAULT_SVG_VIEWBOX } from "../../config/constants.js";
 /** @type {RendererState} */
 // TODO: Change the name to config or renderConfig.
 // TODO: Think about the state object, this is a copy of the state object in the game. Instead of having a copy, we could just have a reference to the game state, or maybe a function that returns the state object.
+// TODO: rethink 'centered'. The property should eventualy center the Viewbox in the SVG Element. If we have a viewbox 1:1 and a SVG Element 2:1, the cntered would bring the Viewbox in the middle of the element. Otherwise it would start top-left
 const initialState = {
   // Base attributes
   playerIndex: null,
@@ -46,21 +47,24 @@ const initialState = {
 
   // Configuration
   config: {
-    // viewboxSize: 300,
-    // viewBox: {
-    //   minX: 0,
-    //   minY: 0,
-    //   width: 800,
-    //   height: 600,
-    // },
     viewBox: DEFAULT_SVG_VIEWBOX,
-    scale: 75,
-    // center: 150,
-    centered: true,
+    boundaries: {
+      xMin: -1,
+      xMax: 1,
+      yMin: -1,
+      yMax: 1,
+    },
+    // from 0 to 1
+    scale: 1,
+    // centered: true,
     rotation: 0,
     translation: {
       x: 0,
       y: 0,
+    },
+    ball: {
+      // circle or square
+      shape: "circle",
     },
   },
   // Debug settings
@@ -92,10 +96,18 @@ export function setRendererState(newState) {
     ...newState,
     config: {
       ...rendererState.config,
-      ...(newState.config || {}),
+      ...(newState.config || {}), // Spread empty object to keep existing config if not provided
       viewBox: {
         ...rendererState.config.viewBox,
-        ...(newState.config?.viewBox || {}),
+        ...(newState.config?.viewBox || {}), // Spread empty object to keep existing viewBox if not provided
+      },
+      boundaries: {
+        ...rendererState.config.boundaries,
+        ...(newState.config?.boundaries || {}),
+      },
+      ball: {
+        ...rendererState.config.ball,
+        ...(newState.config?.ball || {}), // Spread empty object to keep existing ball shape if not provided
       },
     },
   };

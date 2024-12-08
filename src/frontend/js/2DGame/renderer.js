@@ -1,20 +1,72 @@
-// import { rendererState as renderer, getGameContext } from "./../store/index.js";
 import { getRendererState, setRendererState } from "./../store/index.js";
 import { getGameContext } from "./../store/game/context.js";
+import { DOM_IDS } from "./../config/constants.js";
+import { updateScoreDisplays, showGameOver, hideGameOver } from "./utils.js";
 /**
  * Initializes the renderer with all necessary data from the initial state message
  * @param {Object} message - Initial state message from server
  */
 export function initializeRenderer(message) {
-  const renderer = getRendererState();
+  if (!message.game_setup.vertices || message.game_setup.vertices.length === 0) {
+    console.warn("No vertices available for renderer");
+    return;
+  }
+  const vertices = message.game_setup.vertices;
+  const boundaries = getGameBoundaries(vertices);
   setRendererState({
     type: message.game_setup.type,
-    vertices: message.game_setup.vertices || [],
-    svg: document.getElementById("pongSvg"),
+    vertices: vertices,
+    boundaries: boundaries,
+    svg: document.getElementById(DOM_IDS.GAME_SVG),
     playerIndex: message.player_index,
   });
   initializeSVG();
   updateRenderer(message);
+}
+
+/**
+ * Analyzes vertices to determine the game area boundaries in normalized coordinate space.
+ *
+ * This function is crucial for coordinate transformation as it:
+ * 1. Determines the actual game area dimensions from the vertices
+ * 2. Helps map between normalized game coordinates (-1 to 1) and SVG viewport coordinates
+ * 3. Handles different aspect ratios (e.g., 4:3, 16:9) by finding actual min/max values
+ *
+ * For example, in a 4:3 game:
+ * - X might range from -1 to 1
+ * - Y might range from -0.5625 to 0.5625
+ *
+ * @param {Array<{x: number, y: number}>} vertices - Array of vertex coordinates defining the game area
+ * @returns {GameBoundaries} Object containing min/max values for x and y coordinates
+ * @typedef {Object} GameBoundaries
+ * @property {number} xMin - Minimum X coordinate in game space
+ * @property {number} xMax - Maximum X coordinate in game space
+ * @property {number} yMin - Minimum Y coordinate in game space
+ * @property {number} yMax - Maximum Y coordinate in game space
+ */
+
+function getGameBoundaries(vertices) {
+  // Start with extreme initial values
+  let boundaries = {
+    xMin: Infinity,
+    xMax: -Infinity,
+    yMin: Infinity,
+    yMax: -Infinity,
+  };
+
+  // Check each vertex
+  vertices.forEach((vertex) => {
+    // Update xMin if we find a smaller x
+    boundaries.xMin = Math.min(boundaries.xMin, vertex.x);
+    // Update xMax if we find a larger x
+    boundaries.xMax = Math.max(boundaries.xMax, vertex.x);
+    // Update yMin if we find a smaller y
+    boundaries.yMin = Math.min(boundaries.yMin, vertex.y);
+    // Update yMax if we find a larger y
+    boundaries.yMax = Math.max(boundaries.yMax, vertex.y);
+  });
+
+  return boundaries;
 }
 
 function initializeSVG() {
@@ -87,7 +139,6 @@ export function updateRenderer(message) {
       player.score = message.game_state.scores[player.index] || 0;
     });
   }
-  // TODO: Probably we should call getRendererState() inside render()
   render();
 }
 
@@ -106,95 +157,63 @@ export function createSVGElement(type, attributes) {
 }
 
 /**
- * Renders the score display
+ * Renders a single ball
+ * @param {Object} ball - Ball properties
+ * @param {number} ball.x - X coordinate (-1 to 1)
+ * @param {number} ball.y - Y coordinate (-1 to 1)
+ * @param {number} ball.size - Ball radius
+ * @param {Object} options - Rendering options
+ * @param {string} [options.shape='circle'] - 'circle' or 'square'
+ * @param {string} [options.fill='yellow'] - Ball color
+ * @param {string} [options.stroke='black'] - Border color
  */
-export function renderScores() {
-  const scoreDisplay = document.getElementById("two-d-game__score-list");
-  if (!scoreDisplay || !gameContext.players.length) {
-    console.warn("Score display not found or no players available", {
-      scoreDisplay,
-      players: gameContext.players,
-    });
-    return;
-  }
 
-  scoreDisplay.innerHTML = "";
-  const template = document.getElementById("two-d-game__score-item-template");
-
-  gameContext.players
-    .sort((a, b) => a.index - b.index) // Ensure consistent display order
-    .forEach((player) => {
-      const scoreItem = template.content.cloneNode(true);
-      const container = scoreItem.querySelector(".two-d-game__score-item");
-
-      if (player.isCurrentPlayer) {
-        container.classList.add("two-d-game__score-item--current");
-      }
-
-      container.querySelector(".two-d-game__player-name").textContent = player.isCurrentPlayer
-        ? "You"
-        : player.username;
-      container.querySelector(".two-d-game__player-score").textContent = player.score.toString();
-
-      scoreDisplay.appendChild(scoreItem);
-    });
-}
-
-/**
- * Renders all balls in the game
- */
-export function renderBalls() {
+export function renderSingleBall(ball, options = {}) {
   const renderer = getRendererState();
-  if (!renderer.svg || !renderer.state.balls) {
-    console.warn("No SVG element or balls available for rendering", {
-      svg: renderer.svg,
-      balls: renderer.state.balls,
-    });
-    return;
-  }
-  const centerX = renderer.config.centered ? renderer.config.viewBox.width / 2 : 0;
-  const centerY = renderer.config.centered ? renderer.config.viewBox.height / 2 : 0;
+  if (!renderer.svg) return;
 
-  renderer.state.balls.forEach((ball) => {
-    const ballX = centerX + ball.x * renderer.config.scale;
-    const ballY = centerY - ball.y * renderer.config.scale;
+  const { shape = "circle", fill = "yellow", stroke = "black" } = options;
 
+  const transformedPoint = transformVertices([{ x: ball.x, y: ball.y }])[0];
+  const ballX = transformedPoint.x;
+  const ballY = transformedPoint.y;
+
+  if (shape === "square") {
+    const squareSize = ball.size * renderer.config.scale * Math.SQRT2;
+    renderer.svg.appendChild(
+      createSVGElement("rect", {
+        x: ballX - squareSize / 2,
+        y: ballY - squareSize / 2,
+        width: squareSize,
+        height: squareSize,
+        fill,
+        stroke,
+        "stroke-width": "1",
+      })
+    );
+  } else {
     renderer.svg.appendChild(
       createSVGElement("circle", {
         cx: ballX,
         cy: ballY,
         r: ball.size * renderer.config.scale,
-        fill: "yellow",
-        stroke: "black",
+        fill,
+        stroke,
         "stroke-width": "1",
       })
     );
-  });
+  }
 }
 
-/**
- * Shows game over message
- * @param {boolean} isWinner - Whether the player won
- */
-export function showGameOver(isWinner) {
+export function renderBalls() {
   const renderer = getRendererState();
-  if (!renderer.svg) return;
+  if (!renderer.svg || !renderer.state.balls) return;
 
-  const centerX = renderer.config.centered ? renderer.config.viewBox.width / 2 : 0;
-  const centerY = renderer.config.centered ? renderer.config.viewBox.height / 2 : 0;
-
-  const message = isWinner ? "YOU WIN!" : "GAME OVER";
-  const textElement = createSVGElement("text", {
-    x: centerX,
-    y: centerY,
-    "text-anchor": "middle",
-    "dominant-baseline": "middle",
-    "font-size": "24px",
-    "font-weight": "bold",
-    fill: isWinner ? "green" : "red",
+  renderer.state.balls.forEach((ball) => {
+    renderSingleBall(ball, {
+      shape: renderer.config.ball?.shape,
+    });
   });
-  textElement.textContent = message;
-  renderer.svg.appendChild(textElement);
 }
 
 /**
@@ -266,7 +285,7 @@ export function renderPolygonGame() {
     renderPaddles(renderer);
     // renderBalls(renderer);
     renderBalls();
-    renderScores(renderer);
+    updateScoreDisplays(renderer);
   } catch (error) {
     console.error("Error rendering polygon:", error);
     showError(renderer, {
@@ -276,6 +295,49 @@ export function renderPolygonGame() {
       stack: error.stack,
     });
   }
+}
+
+/**
+ * Transforms game coordinates to SVG viewport coordinates.
+ *
+ * This function converts from:
+ * - Cartesian normalized space (-1 to 1)
+ * - To SVG graphic space (0 to viewport dimensions) through the Viewport normalization
+ *
+ * Example:
+ * In a 4:3 game with boundaries {xMin: -1, xMax: 1, yMin: -0.5625, yMax: 0.5625}:
+ * - Cartesian (-1, 0.5625) → SVG (0, 0)
+ * - Cartesian (1, -0.5625) → SVG (400, 250)
+ *
+ * @param {number} x - X coordinate in cartesian space (-1 to 1)
+ * @param {number} y - Y coordinate in cartesian space (-1 to 1)
+ * @param {ViewBoxConfig} viewBox - SVG viewport configuration
+ * @param {GameBoundaries} boundaries - Game coordinate boundaries
+ * @param {{xRange: number, yRange: number}} ranges - Precalculated coordinate ranges
+ * @returns {{x: number, y: number}} Coordinates in SVG viewport space
+ */
+function denormalizeCoordinates(x, y, viewBox, boundaries) {
+  const renderer = getRendererState();
+  // Convert X and Y from cartesian normalized space (-1,1) to SVG graphic space (0,1)
+  const cartesianToGraphicX = (x - boundaries.xMin) / viewBox.width;
+  // Note: We subtract from yMax to flip the Y axis for SVG coordinates
+
+  const cartesianToGraphicY = (y - boundaries.yMin) / viewBox.height;
+
+  // Scale to viewport dimensions
+  const viewportWidth = renderer.config.viewBox.width - renderer.config.viewBox.minX;
+  const viewportHeight = renderer.config.viewBox.height - renderer.config.viewBox.minY;
+  return {
+    x: cartesianToGraphicX * viewportWidth,
+    y: cartesianToGraphicY * viewportHeight,
+  };
+}
+
+function denormalizeVertices(vertices) {
+  const renderer = getRendererState();
+  return vertices.map((vertex) =>
+    denormalizeCoordinates(vertex.x, vertex.y, renderer.config.viewBox, renderer.boundaries)
+  );
 }
 
 /**
@@ -299,29 +361,44 @@ export function renderPolygonGame() {
  *
  * @todo Rename function to better reflect its purpose (e.g., mapBackendToSVGCoordinates or mapBakendGameNormalizedCoordinatesAkaVerticesToSVGViewboxCoordinates)
  */
-function transformVertices() {
+export function transformVertices(vertices = []) {
   const renderer = getRendererState();
-  const vertices = renderer.vertices;
+  if (vertices.length === 0) {
+    vertices = renderer.vertices;
+  }
 
   // Convert rotation to radians
   const angleInRadians = ((renderer.config.rotation || 0) * Math.PI) / 180;
-  // Get center point if centered is true
-  const centerX = renderer.config.centered ? renderer.config.viewBox.width / 2 : 0;
-  const centerY = renderer.config.centered ? renderer.config.viewBox.height / 2 : 0;
+
+  // Get translation if it exists, otherwise use {x: 0, y: 0}
+  const translation = renderer.config.translation || { x: 0, y: 0 };
+  const ranges = {
+    xRange: renderer.config.boundaries.xMax - renderer.config.boundaries.xMin,
+    yRange: renderer.config.boundaries.yMax - renderer.config.boundaries.yMin,
+  };
 
   return vertices.map((vertex) => {
-    // 1. First rotate
+    // 1. First rotate in cartesian space
     const rotatedX = vertex.x * Math.cos(angleInRadians) - vertex.y * Math.sin(angleInRadians);
     const rotatedY = vertex.x * Math.sin(angleInRadians) + vertex.y * Math.cos(angleInRadians);
 
-    // 2. Then scale
+    // 2. Apply scale if needed
     const scaledX = rotatedX * renderer.config.scale;
     const scaledY = rotatedY * renderer.config.scale;
 
-    // 3. Then translate (including both center offset and translation)
+    // 3. Denormalize to SVG space (this handles Y-flip)
+    const denormalized = denormalizeCoordinates(
+      scaledX,
+      scaledY,
+      renderer.config.viewBox,
+      renderer.config.boundaries,
+      ranges
+    );
+
+    // 4. Apply any additional translation
     return {
-      x: centerX + scaledX + renderer.config.translation.x,
-      y: centerY - scaledY + renderer.config.translation.y, // Note the minus for Y to match SVG coordinates
+      x: denormalized.x + translation.x,
+      y: denormalized.y + translation.y,
     };
   });
 }

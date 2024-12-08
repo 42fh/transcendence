@@ -258,3 +258,7 @@ export const DEFAULT_SVG_VIEWBOX = {
   width: 400, // Classic Pong aspect ratio is roughly 16:10
   height: 250, // This gives us nice round numbers to work with
 };
+
+export const DOM_IDS = {
+  GAME_SVG: "gameSvg",
+};
