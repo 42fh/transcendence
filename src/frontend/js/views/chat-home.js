@@ -62,7 +62,6 @@ export async function loadChatPage(addToHistory = true) {
         }
       }
 
-      // Set up new notification socket
       notificationSocket = setupNotificationListener(wsUrl);
     } else {
       console.error("No current user found for notifications");
@@ -72,7 +71,6 @@ export async function loadChatPage(addToHistory = true) {
     // Load users list (Horizontal scroll), filtering out users in conversations with current user
     await loadUsersList(1, 10, "");
 
-    // Add event listener for "Mark all read"
     const markAllReadButton = document.getElementById(
       "notification-mark-all-read"
     );
@@ -91,7 +89,6 @@ async function loadChatList(page = 1, perPage = 10, search = "") {
     if (!data || !data.users) throw new Error("Failed to fetch chat contacts");
 
     const usersList = document.getElementById("chat-conversations-list");
-    const paginationContainer = document.getElementById("users-pagination");
 
     usersList.innerHTML = "";
 
@@ -105,24 +102,20 @@ async function loadChatList(page = 1, perPage = 10, search = "") {
     //   conversationUsers
     // );
 
-    // Ensure the template is correctly accessed
     const chatHomeTemplate = document.querySelector("#chat-home-template");
     const userTemplate = chatHomeTemplate.content.querySelector(
       ".chat-conversations-list__item"
     );
 
-    // Render chat contacts (Vertical List)
     data.users.forEach((user) => {
       if (!userTemplate) {
         console.error("User template not found");
         return;
       }
 
-      // Clone the hidden user template and populate data
       const userItem = userTemplate.cloneNode(true);
-      userItem.style.display = ""; // Make the template visible
+      userItem.style.display = "";
 
-      // Populate user data
       const avatarImg = userItem.querySelector(
         ".chat-conversations-list__avatar"
       );
@@ -140,18 +133,13 @@ async function loadChatList(page = 1, perPage = 10, search = "") {
         ".chat-conversations-list__status-indicator"
       );
 
-      // Set up click event for the user item
       userItem.addEventListener("click", () => {
         loadChatRoom(user.username);
       });
 
-      // Append user item to the vertical list
       usersList.appendChild(userItem);
     });
 
-    // Update pagination
-    const { total_pages = 1, page: currentPage = 1 } = data.pagination || {};
-    renderPagination({ total_pages, page: currentPage }, paginationContainer);
   } catch (error) {
     console.error("Error loading chat list:", error);
     displayModalError(`Failed to load chat contacts: ${error.message}`);
@@ -185,9 +173,8 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
         return;
       }
 
-      // Clone the hidden user template and populate data
       const userItem = userTemplate.cloneNode(true);
-      userItem.style.display = ""; // Make the template visible
+      userItem.style.display = "";
 
       // Populate user data
       const avatarImg = userItem.querySelector(".chat-users-list__avatar");
@@ -206,12 +193,10 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
         ".chat-users-list__status-indicator"
       );
 
-      // Set up click event for the user item
       userItem.addEventListener("click", () => {
         loadChatRoom(user.username);
       });
 
-      // Append horizontal user item to the container
       usersHorizontalContainer.appendChild(userItem);
     });
   } catch (error) {
@@ -220,28 +205,7 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
   }
 }
 
-function renderPagination(pagination, container) {
-  console.log("pagination container:", container);
-  const { total_pages, page } = pagination;
 
-  const prevButton = container.querySelector(".pagination__button--prev");
-  const nextButton = container.querySelector(".pagination__button--next");
-  const currentPage = container.querySelector(".pagination__current");
-  const totalPages = container.querySelector(".pagination__total");
-
-  currentPage.textContent = page;
-  totalPages.textContent = total_pages;
-
-  prevButton.disabled = page <= 1;
-  nextButton.disabled = page >= total_pages;
-
-  prevButton.onclick = () => loadChatList(page - 1);
-  nextButton.onclick = () => loadChatList(page + 1);
-
-  container.style.display = total_pages <= 1 ? "none" : "flex";
-}
-
-// New function to mark all notifications as read
 async function markAllNotificationsRead() {
   try {
     console.log("presed markAllNotificationsRead");
@@ -250,13 +214,13 @@ async function markAllNotificationsRead() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ is_read: true }), // Assuming your backend expects this format
+      body: JSON.stringify({ is_read: true }),
     });
 
     const data = await response.json();
     if (data.status === "success") {
       showToast("All notifications marked as read", false);
-      await renderNotifications(); // Refresh notifications
+      await renderNotifications();
     } else {
       throw new Error(data.message);
     }
