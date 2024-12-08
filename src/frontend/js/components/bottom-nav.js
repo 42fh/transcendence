@@ -86,7 +86,7 @@ export function updateActiveNavItem(view) {
 }
 
 export function updateNotificationBadge(count) {
-  const notificationBadge = document.getElementById("notification-badge");
+  const notificationBadge = document.getElementById("bottom-nav-notification-badge");
   if (notificationBadge) {
     notificationBadge.textContent = count > 0 ? count : "";
     notificationBadge.style.display = count > 0 ? "block" : "none";
