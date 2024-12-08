@@ -2,6 +2,7 @@ import os
 import sys
 from pathlib import Path
 from dotenv import load_dotenv
+from datetime import timedelta
 
 load_dotenv(override=False)
 
@@ -34,6 +35,12 @@ else:
     # ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1']
 
 
+# oauth2 settings for remote authentication
+FORTYTWO_CLIENT_ID = os.getenv("FORTYTWO_CLIENT_ID")
+FORTYTWO_CLIENT_SECRET = os.getenv("FORTYTWO_CLIENT_SECRET")
+FORTYTWO_REDIRECT_URI = os.getenv("FORTYTWO_REDIRECT_URI")
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -64,6 +71,19 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+}
 
 # Add these to your Django settings.py
 SESSION_ENGINE = "django.contrib.sessions.backends.db"

@@ -14,6 +14,7 @@ import {
   logoutUser,
   sendEmailVerification,
   validateEmailVerification,
+  manageJWT,
 } from "../services/authService.js";
 import { showToast } from "../utils/toast.js";
 
@@ -28,6 +29,10 @@ function initAuthListeners() {
     renderModal("signup-template", {
       submitHandler: handleSignup,
     });
+  });
+
+  document.getElementById("auth42-button").addEventListener("click", () => {
+    window.location.href='/api/users/auth/login42/';
   });
 }
 
@@ -75,12 +80,15 @@ async function handleSignup(event) {
 }
 
 async function handleAuth(form, authFunction) {
+  console.log("Submitting form...");
   const formData = new FormData(form);
   const data = Object.fromEntries(formData);
   const messageElement = document.getElementById("modal-message");
 
   try {
     const result = await authFunction(data);
+
+    const _accessToken = await manageJWT(data, true);
 
     let userData = await fetchUserProfile(result.id);
     if (!userData.success) {
