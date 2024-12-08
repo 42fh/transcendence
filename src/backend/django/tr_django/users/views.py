@@ -4,6 +4,7 @@ import json
 import logging
 import random
 import os
+import requests
 from dotenv import load_dotenv
 from django.utils import timezone
 from datetime import timedelta
@@ -23,11 +24,18 @@ import logging
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
+from django.shortcuts import redirect
+from urllib.parse import quote
+
+from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from django.views import View
+from django.http import JsonResponse
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
 
 logger = logging.getLogger(__name__)
 load_dotenv(override=False)
@@ -295,6 +303,75 @@ class DeleteUserView(APIView):
         except Exception as e:
             logger.error(f"Error anonymizing user account: {str(e)}")
             return Response({"error": "Failed to delete account"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+def login_with_42(request):
+    base_url = "https://api.intra.42.fr/oauth/authorize"
+    params = {
+        "client_id": settings.FORTYTWO_CLIENT_ID,
+        "redirect_uri": settings.FORTYTWO_REDIRECT_URI,
+        "response_type": "code",
+        "scope": "public",
+    }
+    query_string = "&".join([f"{key}={value}" for key, value in params.items()])
+    return redirect(f"{base_url}?{query_string}")
+
+
+def callback(request):
+    code = request.GET.get('code')
+    if not code:
+        return redirect("/")
+
+    # Exchange the code for an access token
+    token_url = "https://api.intra.42.fr/oauth/token"
+    data = {
+        "grant_type": "authorization_code",
+        "client_id": settings.FORTYTWO_CLIENT_ID,
+        "client_secret": settings.FORTYTWO_CLIENT_SECRET,
+        "code": code,
+        "redirect_uri": settings.FORTYTWO_REDIRECT_URI,
+    }
+
+    response = requests.post(token_url, data=data)
+    if response.status_code != 200:
+        return JsonResponse({"error": "Failed to obtain access token"}, status=403)
+    
+    access_token = response.json().get("access_token")
+
+    # Fetch user information
+    user_info_url = "https://api.intra.42.fr/v2/me"
+    headers = {"Authorization": f"Bearer {access_token}"}
+    user_info_response = requests.get(user_info_url, headers=headers)
+    if user_info_response.status_code != 200:
+        return JsonResponse({"error": "Failed to fetch user info"}, status=403)
+
+    user_data = user_info_response.json()
+
+    # Create or log in the user
+    username = user_data["login"]
+    user, created = CustomUser.objects.get_or_create(username=f"42_{username}")
+
+    if user is not None:
+        login(request, user)  # Creates the session for the new user
+        print("Session Data:", request.session.items())  # Debug session contents
+        
+        # Generate token pair
+        token_serializer = TokenObtainPairSerializer()
+        tokens = token_serializer.get_token(user)
+        access_token = str(tokens.access_token)
+        refresh_token = str(tokens)
+
+        response = redirect('/')  # Redirect to a post-login page
+
+        # Set tokens and UUID in cookies
+        response.set_cookie("pongUserId", str(user.id), httponly=False, samesite="Strict")
+        response.set_cookie("pongUsername", str(user.username), httponly=False, samesite="Strict")
+        response.set_cookie("access_token", access_token, httponly=False, samesite="Strict")
+        response.set_cookie("refresh_token", refresh_token, httponly=False, samesite="Strict")
+
+        return response
+    else:
+        return JsonResponse({"error": "Failed to fetch user info"}, status=403)
 
 
 @method_decorator(csrf_exempt, name="dispatch")

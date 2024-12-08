@@ -35,6 +35,12 @@ else:
     # ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1']
 
 
+# oauth2 settings for remote authentication
+FORTYTWO_CLIENT_ID = os.getenv("FORTYTWO_CLIENT_ID")
+FORTYTWO_CLIENT_SECRET = os.getenv("FORTYTWO_CLIENT_SECRET")
+FORTYTWO_REDIRECT_URI = os.getenv("FORTYTWO_REDIRECT_URI")
+
+
 # Application definition
 
 INSTALLED_APPS = [

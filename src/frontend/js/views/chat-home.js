@@ -42,8 +42,6 @@ export async function loadChatPage(addToHistory = true) {
     const content = document.importNode(template.content, true);
     mainContent.appendChild(content);
 
-    console.log("Whole Local Storage:", localStorage);
-
     const currentUser = localStorage.getItem("pongUsername");
     if (currentUser) {
       const wsUrlprev = `/ws/notifications/${currentUser}/`;
@@ -52,8 +50,6 @@ export async function loadChatPage(addToHistory = true) {
           ? `wss://${window.location.host}/ws/notifications/${currentUser}/`
           : `ws://${window.location.host}/ws/notifications/${currentUser}/`;
 
-      console.log("wsurl:", wsUrl);
-      console.log("wsUrlprev:", wsUrlprev);
 
       if (notificationSocket) {
         try {
