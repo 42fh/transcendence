@@ -1,6 +1,0 @@
-{
-  "scripts": {
-    "test": "node --test ./*.unitTest.js"
-  },
-  "type": "module"
-}
