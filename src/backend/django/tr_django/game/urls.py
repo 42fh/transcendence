@@ -22,6 +22,7 @@ urlpatterns = [
         views.tournament_enrollment,
         name="tournament_enrollment",
     ),
+    path('tournaments/<int:tournament_id>/schedule/', views.get_game_schedule, name='tournament_schedule'),
     path('tournament/debug/', views.debug_tournament, name="debug_tournament"),
     path(
         "tournaments/<int:tournament_id>/",

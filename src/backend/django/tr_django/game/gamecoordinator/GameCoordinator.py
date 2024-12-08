@@ -8,9 +8,11 @@ import asyncio
 from .GameSettingsManager import GameSettingsManager
 import math
 import logging
-
+from asgiref.sync import sync_to_async
 
 logger = logging.getLogger(__name__)
+
+
 
 
 class RedisLock:
@@ -188,8 +190,11 @@ class GameCoordinator:
 
             await pipeline.execute()
 
+
+
+
     @classmethod
-    async def create_tournament_game(cls, real_game_id: int, tournament_id: int, players: list, game_settings: dict) -> dict:
+    async def create_tournament_game(cls, real_game_id: str, tournament_id: str, players: list[str], game_settings: dict) -> dict:
         """Create tournament game with pre-assigned players"""
         try:
             game_id = None
@@ -207,18 +212,18 @@ class GameCoordinator:
             async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
                 pipe = redis_conn.pipeline()
                 pipe.set(f"game_is_tournament:{game_id}", "1")
-                pipe.set(f"tournament_game:{game_id}", str(real_game_id))
-                pipe.set(f"tournament_id:{game_id}", str(tournament_id))
+                pipe.set(f"tournament_game:{game_id}", real_game_id)
+                pipe.set(f"tournament_id:{game_id}", tournament_id)
                 await pipe.execute()
-
-                # Pre-book players with no expiry
-                for player in players:
-                    booking_key = f"{cls.TOURNAMENT_USER_PREFIX}{player.user.id}:{game_id}"
+                player_urls = []
+                for user_id in players:
+                    print(f"user_id: {user_id}/{type(user_id)}")
+                    # Book player
+                    booking_key = f"{cls.TOURNAMENT_USER_PREFIX}{user_id}:{game_id}"
                     await redis_conn.set(booking_key, "1")
-
-            # Generate player URLs
-            player_urls = [(p.id, f"ws/game/{game_id}/") for p in players]
-            
+                    # Add URL to list
+                    player_urls.append((user_id, f"ws/game/{game_id}/"))
+            print("F")
             return {
                 "status": "running",
                 "game_id": game_id,

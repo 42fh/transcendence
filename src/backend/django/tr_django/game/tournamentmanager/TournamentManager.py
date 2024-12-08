@@ -11,7 +11,9 @@ from datetime import timedelta
 import random
 import math
 import logging
-
+from channels.layers import get_channel_layer
+from ..models import Tournament, TournamentGame, TournamentGameSchedule, Player
+from ..gamecoordinator.GameCoordinator import GameCoordinator
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +48,6 @@ class TournamentManager:
     @classmethod
     def create_tournament(cls, tournament_data: Dict, game_settings: Dict, creator: Player) -> Dict:
         """Creates tournament with game settings and returns status dict"""
-        from ..models import Tournament, TournamentGame, TournamentGameSchedule, Player
         try:
             start_date = timezone.make_aware(datetime.fromisoformat(tournament_data["startingDate"].replace("Z", "+00:00"))) 
             reg_start = timezone.make_aware( 
@@ -112,7 +113,7 @@ class TournamentManager:
                     logger.debug(f"Tournament: booked in: {tournament.participants.count()} full with: {tournament.max_participants}") 
                     # Check if tournament is ready to start matchmaking
                     if tournament.participants.count() == tournament.max_participants:
-                        cls.start_matchmaking(tournament)
+                        redis_conn.set(f"tournament_pending_start:{tournament_id}", "1")
                         return {
                             "status": True,
                             "message": f"Enrolled in {tournament.name}. Tournament starting soon! Connect to tournament_notification_url", 
@@ -150,12 +151,24 @@ class TournamentManager:
                         return {
                             "status": False,
                             "message": "Cannot remove player - tournament has already started",
-                            "error_code": "NOT_ENROLLED"
+                            "error_code": "NOT_REMOVED"
                         }
                     
                     tournament.participants.remove(player)
                     # Schedule async notification
-                    async_to_sync(TournamentNotificationConsumer.close_player_connection)(tournament_id, player.id)
+                    channel_layer = get_channel_layer()
+                    async_to_sync(channel_layer.group_send)(
+                        f"tournament_{tournament_id}",
+                        {
+                            "type": "player_left",
+                            "message": 
+                            {
+                                    "type": "force_disconnect", 
+                                    "player_id": player.id
+                                    }
+                        }           
+                    )
+
                     notifier = TournamentNotifier(tournament_id)
                     async_to_sync(notifier.player_left)(player.display_name)                   
                     return {
@@ -185,8 +198,9 @@ class TournamentManager:
             cls._create_round_robin_schedule(tournament)
         
         tournament.save()
-        cls.create_rounds(tournament.id)        
-
+        debug = cls.create_rounds(tournament.id)        
+        print("debug: ", debug)
+        
     @classmethod
     def get_game_schedule(cls, tournament_id: int) -> Dict:
         """
@@ -212,7 +226,7 @@ class TournamentManager:
                     'status': game.status,
                     'game_id': game.id,
                     'players': [
-                        {'id': p.id, 'name': p.display_name} 
+                        {'id': p.user.id, 'name': p.username} 
                         for p in players
                     ] if players else [],
                     'source_games': [
@@ -256,14 +270,13 @@ class TournamentManager:
             games = TournamentGameSchedule.objects.filter(
                 tournament=tournament
             ).select_related('game').order_by('round_number')
-            
             tournament_completed = True
             games_started = 0
             
             # First handle completed games
             for schedule in games:
                 game = schedule.game
-                if game.status == 'FINISHED':
+                if game.status == "finished":
                     game.get_game_logic().handle_game_completion()
 
             # Then check for games that can be started
@@ -271,44 +284,47 @@ class TournamentManager:
                 game = schedule.game
                 players = list(game.players.all())
                 
-                if not players or game.status == 'FINISHED':
+                if not players or game.status == "finished":
                     continue
                     
                 tournament_completed = False
-
-                if len(players) == tournament.max_participants:
+                if len(players) == 2:
+                    print("A: ", players)
                     # Check if any players are in a READY game
                     players_in_ready = any(
                         TournamentGame.objects.filter(
                             players=player,
-                            status='READY'
+                            status="ready"
                         ).exists() for player in players
                     )
-                    
-                    if not players_in_ready and game.status == 'DRAFT':
-                        game.status = 'READY'
+                    print(game.status) 
+                    if not players_in_ready and game.status == "draft":
+                        game.status = "ready"
                         game.save()
                     
-                    if game.status == 'READY':
-                        response = GameCoordinator.create_tournament_game(
-                            real_game_id=game.id,
-                            tournament_id=tournament_id,
-                            players=players,
-                            game_settings={"mode": "classic"}
-                        )
-                        
+                    if game.status == "ready":
+                        print("AA")
+                        player_data = [str(player.user.id) for player in players]
+                        response = async_to_sync(GameCoordinator.create_tournament_game)(
+                                    real_game_id=str(game.id),
+                                    tournament_id=tournament_id, 
+                                    players=player_data,
+                                    game_settings={"mode": "classic"})
+                        print("AA: ", response)
                         if response["status"] == "running":
-                            game.status = 'ACTIVE'
+                            game.status = "activ"
                             game.save()
                             games_started += 1
-                            
+                                                        
                             # Notify players
                             notifier = TournamentNotifier(tournament_id)
                             for player_id, ws_url in response["player_urls"]:
-                                async_to_sync(notifier.game_ready)(game.id, ws_url, player_id)
+                                print(f"player_id: {player_id}/{type(player_id)} , ws_url: {ws_url}/{type(ws_url)}")        
+                                async_to_sync(notifier.game_ready)(str(game.id), ws_url, player_id)
                 else:
                     # Players waiting for opponents
                     tournament_completed = False
+                    print("B", players)
                     notifier = TournamentNotifier(tournament_id)
                     for player in players:
                         async_to_sync(notifier.waiting_for_opponent)(
@@ -365,8 +381,7 @@ class TournamentManager:
             game = TournamentGame.objects.create(
                 game_type=TournamentGame.GAME_TYPE_DIRECT_ELIMINATION,
                 status=TournamentGame.READY,
-                start_date=game_time
-            )
+                start_date=game_time)
             game.players.add(players[i], players[i+1])
             
             TournamentGameSchedule.objects.create(

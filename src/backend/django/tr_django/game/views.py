@@ -462,10 +462,10 @@ def all_tournaments(request):
             if result["status"]:
                 tournament = Tournament.objects.get(pk=result["tournament_id"])
                 return JsonResponse({
-                    "status": "success"
-                    "message": f"Tournament[{tournament.name}] created successfully. {result[message]}",
+                    "status": "success",
+                    "message": f"Tournament[{tournament.name}] created successfully. {result['message']}",
                     "tournament_notification_url": result["tournament_notification_url"],
-                    "value_create_tournament_debu": result,
+                    "value_create_tournament_debug": result,
                     "tournament_debug": build_tournament_data(tournament)
                 })
             return JsonResponse({"error": result["message"]}, status=400)
@@ -492,6 +492,12 @@ def tournament_enrollment(request, tournament_id):
         return JsonResponse({"error": "Player profile not found"}, status=400)
 
 
+@require_http_methods(["GET"])
+@csrf_exempt
+def get_game_schedule(request, tournament_id):
+    if request.method == "GET":
+        result = TournamentManager.get_game_schedule(tournament_id)
+        return JsonResponse(result, status=400 if not result["status"] else 200)
 
 # this is only for debugging the schedule creation, notifications will be ignored, do not use out of this scope 
 @csrf_exempt
@@ -555,7 +561,7 @@ def create_game(request):
     return JsonResponse({"message": "only POST requests are allowed"}, status=400)
 
 
-
+#
 @csrf_exempt
 def single_tournament(request, tournament_id):
     """
