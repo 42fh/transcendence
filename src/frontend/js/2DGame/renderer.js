@@ -560,9 +560,9 @@ function renderPolygonDebugLabels(renderer) {
  */
 export function renderPolygonOutline(options = {}) {
   const defaultOptions = {
-    fill: "none",
-    fillOpacity: 1,
-    stroke: "#808080",
+    fill: "#000000", // Default black fill
+    fillOpacity: 1, // Fully opaque
+    stroke: "#808080", // Gray outline
     strokeWidth: 2,
     strokeOpacity: 1,
   };
