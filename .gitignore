@@ -62,9 +62,9 @@ postgres_data/
 
 # Logs
 **/logs/
+**/logs/*.log
 *.log
-
-# Ignore specific nginx access log
+src/nginx/logs/*.log
 src/nginx/logs/access.log
 
 # Ignore all files in media/avatars
