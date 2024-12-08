@@ -42,8 +42,6 @@ export async function loadChatPage(addToHistory = true) {
     const content = document.importNode(template.content, true);
     mainContent.appendChild(content);
 
-    showToast("Testing 2", false);
-
     console.log("Whole Local Storage:", localStorage);
 
     const currentUser = localStorage.getItem("pongUsername");
@@ -79,7 +77,9 @@ export async function loadChatPage(addToHistory = true) {
     await loadUsersList(1, 10, "");
 
     // Add event listener for "Mark all read"
-    const markAllReadButton = document.getElementById("notification-mark-all-read");
+    const markAllReadButton = document.getElementById(
+      "notification-mark-all-read"
+    );
     if (markAllReadButton) {
       markAllReadButton.addEventListener("click", markAllNotificationsRead);
     }
@@ -223,7 +223,6 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
     displayModalError(`Failed to load users: ${error.message}`);
   }
 }
-
 
 function renderPagination(pagination, container) {
   const { total_pages, page } = pagination;

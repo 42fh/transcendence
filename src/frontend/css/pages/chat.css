@@ -51,7 +51,7 @@
   scroll-snap-align: start;
   min-width: 70px;
   cursor: pointer;
-  border: 2px solid rgb(0, 255, 128);
+  /* border: 2px solid rgb(0, 255, 128); */
 }
 
 .chat-users-horizontal-avatar {
