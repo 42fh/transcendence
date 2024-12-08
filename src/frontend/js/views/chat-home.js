@@ -104,10 +104,10 @@ async function loadChatList(page = 1, perPage = 10, search = "") {
         user.username !== localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID)
     );
     conversationUsers = conversationUsers.map((user) => user.username);
-    console.log(
-      "Printing conversation list from loadChatList",
-      conversationUsers
-    );
+    // console.log(
+    //   "Printing conversation list from loadChatList",
+    //   conversationUsers
+    // );
 
     // Ensure the template is correctly accessed
     const chatHomeTemplate = document.querySelector("#chat-home-template");
@@ -225,6 +225,7 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
 }
 
 function renderPagination(pagination, container) {
+  console.log("pagination container:", container);
   const { total_pages, page } = pagination;
 
   const prevButton = container.querySelector(".pagination__button--prev");

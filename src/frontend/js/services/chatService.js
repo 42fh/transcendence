@@ -5,7 +5,7 @@ export async function fetchConversationList() {
   if (!response.ok) throw new Error("Failed to get conversation list");
 
   const data = await response.json();
-  console.log("Fetched conversation list:", data);
+  // console.log("Fetched conversation list:", data);
   return data;
 }
 

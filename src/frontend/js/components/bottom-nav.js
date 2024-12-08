@@ -90,7 +90,7 @@ export function updateNotificationBadge(count) {
   if (notificationBadge) {
     notificationBadge.textContent = count > 0 ? count : "";
     notificationBadge.style.display = count > 0 ? "block" : "none";
-    console.log(`Notification badge updated: ${count} unread notifications.`);
+    // console.log(`Notification badge updated: ${count} unread notifications.`);
   } else {
     console.error("Notification badge element not found.");
   }
