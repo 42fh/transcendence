@@ -58,10 +58,10 @@ export async function loadChatPage(addToHistory = true) {
     } else {
       console.error("No current user found for notifications");
     }
-    await loadChatList(1, 10, "");
+    await loadChatList(1, "", "");
 
     // Load users list (Horizontal scroll), filtering out users in conversations with current user
-    await loadUsersList(1, 10, "");
+    await loadUsersList(1, 100, "");
 
     const markAllReadButton = document.getElementById(
       "notification-mark-all-read"
@@ -75,8 +75,9 @@ export async function loadChatPage(addToHistory = true) {
   }
 }
 
-async function loadChatList(page = 1, perPage = 10, search = "") {
+async function loadChatList(page = 1, perPage = 100, search = "") {
   try {
+    console.log("perPaage    ", perPage);
     const data = await fetchConversationList(page, perPage, search);
     if (!data || !data.users) throw new Error("Failed to fetch chat contacts");
 
@@ -134,7 +135,7 @@ async function loadChatList(page = 1, perPage = 10, search = "") {
   }
 }
 
-async function loadUsersList(page = 1, perPage = 10, search = "") {
+async function loadUsersList(page = 1, perPage = 100, search = "") {
   try {
     const data = await fetchUsers(page, perPage, search);
     if (!data || !data.users) throw new Error("Failed to fetch users");

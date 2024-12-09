@@ -12,10 +12,10 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write("Checking existing users...")
 
-        # # Check if dev user exists
-        # if CustomUser.objects.filter(username="dev").exists():
-        #     self.stdout.write(self.style.SUCCESS("Users already seeded, skipping..."))
-        #     return
+        # Check if dev user exists
+        if CustomUser.objects.filter(username="dev").exists():
+            self.stdout.write(self.style.SUCCESS("Users already seeded, skipping..."))
+            return
 
         # Create game mode if it doesn't exist
         game_mode, _ = GameMode.objects.get_or_create(
