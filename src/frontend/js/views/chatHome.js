@@ -7,13 +7,10 @@ import { ASSETS } from "../config/constants.js";
 import { setupNotificationListener } from "../utils/notifications.js";
 import { showToast } from "../utils/toast.js";
 import { renderNotifications } from "./chatNotification.js";
+import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 
 let conversationUsers = [];
 let notificationSocket = null;
-
-const LOCAL_STORAGE_KEYS = {
-  USER_ID: "user_id",
-};
 
 export async function loadChatPage(addToHistory = true) {
   try {
@@ -42,14 +39,9 @@ export async function loadChatPage(addToHistory = true) {
     const content = document.importNode(template.content, true);
     mainContent.appendChild(content);
 
-    const currentUser = localStorage.getItem("pongUsername");
+    const currentUser = LOCAL_STORAGE_KEYS.USERNAME;
     if (currentUser) {
-      const wsUrlprev = `/ws/notifications/${currentUser}/`;
-      const wsUrl =
-        window.location.protocol === "https:"
-          ? `wss://${window.location.host}/ws/notifications/${currentUser}/`
-          : `ws://${window.location.host}/ws/notifications/${currentUser}/`;
-
+      const wsUrl = `/ws/notifications/${currentUser}/`;
 
       if (notificationSocket) {
         try {
@@ -102,9 +94,9 @@ async function loadChatList(page = 1, perPage = 10, search = "") {
     //   conversationUsers
     // );
 
-    const chatHomeTemplate = document.querySelector("#chat-home-template");
-    const userTemplate = chatHomeTemplate.content.querySelector(
-      ".chat-conversations-list__item"
+    const chatHomeTemplate = document.getElementById("chat-home-template");
+    const userTemplate = chatHomeTemplate.content.getElementById(
+      "chat-conversations-list-item"
     );
 
     data.users.forEach((user) => {
@@ -119,6 +111,7 @@ async function loadChatList(page = 1, perPage = 10, search = "") {
       const avatarImg = userItem.querySelector(
         ".chat-conversations-list__avatar"
       );
+      // const avatarImg = document.getElementById("chat-avatar");
       avatarImg.src = user.avatarUrl || ASSETS.IMAGES.DEFAULT_AVATAR;
       avatarImg.onerror = function () {
         this.src = ASSETS.IMAGES.DEFAULT_AVATAR;
@@ -129,17 +122,12 @@ async function loadChatList(page = 1, perPage = 10, search = "") {
       );
       username.textContent = user.username;
 
-      const statusIndicator = userItem.querySelector(
-        ".chat-conversations-list__status-indicator"
-      );
-
       userItem.addEventListener("click", () => {
         loadChatRoom(user.username);
       });
 
       usersList.appendChild(userItem);
     });
-
   } catch (error) {
     console.error("Error loading chat list:", error);
     displayModalError(`Failed to load chat contacts: ${error.message}`);
@@ -189,10 +177,6 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
           ? user.username.substring(0, 3) + "..."
           : user.username;
 
-      const statusIndicator = userItem.querySelector(
-        ".chat-users-list__status-indicator"
-      );
-
       userItem.addEventListener("click", () => {
         loadChatRoom(user.username);
       });
@@ -204,7 +188,6 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
     displayModalError(`Failed to load users: ${error.message}`);
   }
 }
-
 
 async function markAllNotificationsRead() {
   try {
