@@ -30,6 +30,10 @@ function initAuthListeners() {
       submitHandler: handleSignup,
     });
   });
+
+  document.getElementById("auth42-button").addEventListener("click", () => {
+    window.location.href='/api/users/auth/login42/';
+  });
 }
 
 export async function loadAuthPage(addToHistory = true) {
