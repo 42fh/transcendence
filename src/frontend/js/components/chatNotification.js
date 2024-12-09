@@ -1,5 +1,5 @@
 import { fetchNotifications } from "../services/chatNotificationService.js";
-import { updateNotificationBadge } from "../components/bottomNav.js";
+import { updateNotificationBadge } from "./bottomNav.js";
 
 export async function renderNotifications() {
   const chatHomeTemplate = document.querySelector("#chat-home-template");
@@ -30,9 +30,7 @@ export async function renderNotifications() {
 
     // Handle empty notifications
     if (!notifications || notifications.length === 0) {
-      notificationContainer.innerHTML = `
-        <p class="notification-empty">No notifications available.</p>
-      `;
+      notificationContainer.innerHTML = "";
       return;
     }
 

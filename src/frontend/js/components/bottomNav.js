@@ -4,7 +4,7 @@ import { loadProfilePage } from "../views/profile.js";
 import { loadChatPage } from "../views/chatHome.js";
 import { loadUsersPage } from "../views/users.js";
 import { NAVIGATION, LOCAL_STORAGE_KEYS } from "../config/constants.js";
-import { renderNotifications } from "../views/chatNotification.js";
+import { renderNotifications } from "./chatNotification.js";
 
 export function initBottomNav() {
   const bottomNavTemplate = document.getElementById("bottom-nav-template");
@@ -86,7 +86,9 @@ export function updateActiveNavItem(view) {
 }
 
 export function updateNotificationBadge(count) {
-  const notificationBadge = document.getElementById("bottom-nav-notification-badge");
+  const notificationBadge = document.getElementById(
+    "bottom-nav-notification-badge"
+  );
   if (notificationBadge) {
     notificationBadge.textContent = count > 0 ? count : "";
     notificationBadge.style.display = count > 0 ? "block" : "none";

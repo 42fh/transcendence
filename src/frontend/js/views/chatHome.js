@@ -6,7 +6,7 @@ import { loadChatRoom } from "./chatRoom.js";
 import { ASSETS } from "../config/constants.js";
 import { setupNotificationListener } from "../utils/notifications.js";
 import { showToast } from "../utils/toast.js";
-import { renderNotifications } from "./chatNotification.js";
+import { renderNotifications } from "../components/chatNotification.js";
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 
 let conversationUsers = [];
