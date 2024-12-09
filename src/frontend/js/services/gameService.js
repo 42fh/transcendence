@@ -131,9 +131,9 @@ export function findMatchingGame(games, formData) {
         // Match game mode
         game.mode === formData.gameType &&
         // Match number of players
-        game.num_players === formData.numPlayers &&
+        game.num_players === formData.num_players &&
         // Match number of sides (for non-classic modes)
-        (formData.gameType === "classic" || game.sides === formData.numSides) &&
+        (formData.gameType === "classic" || game.sides === formData.sides) &&
         // TODO: Future matching criteria could include:
         // && game.score.max === formData.scoreLimit
         // && game.initial_ball_speed === formData.ballSpeed

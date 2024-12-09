@@ -204,25 +204,19 @@ export default class Drawer {
         paddle.lookAt(0, -0.28, 0);
       }
     } else {
-      for (let i = 0; i < gameState.balls.length; i++) {
-        this.game.balls[i].position.set(
-          gameState.balls[i].y,
-          0.08,
-          gameState.balls[i].x
-        );
-      }
-      // update paddles
-      for (let i = 0; i < gameState.paddles.length; i++) {
-        const paddle1 = this.game.paddles.get(0);
-        paddle1.position.x = (gameState.paddles[0].position - GAME_WIDTH) * -1;
-        const paddle2 = this.game.paddles.get(1);
-        paddle2.position.x = (gameState.paddles[1].position - GAME_WIDTH) * -1;
-      }
+      this.game.balls[0].position.set(
+        gameState.balls[0].y,
+        0.08,
+        gameState.balls[0].x
+      );
+      const paddle1 = this.game.paddles.get(0);
+      paddle1.position.x = (gameState.paddles[1].position - GAME_WIDTH) * -1;
+      const paddle2 = this.game.paddles.get(1);
+      paddle2.position.x = (gameState.paddles[3].position - GAME_WIDTH) * -1;
     }
   }
 
   movePaddle(direction) {
-    console.log("index ", this.game.userId);
     this.game.websocket.sendMessage({
       action: "move_paddle",
       direction,

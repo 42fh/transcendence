@@ -130,13 +130,14 @@ export default class GameConstructor {
 
   async connectToWebsockets() {
     try {
+      console.log("ccccb");
       const data = {
         mode: "circular",
         gameType: "circular",
-        numPlayers: 2,
-        numSides: 3,
-        numBalls: 1,
-        scoreMode: "classic",
+        num_players: 4,
+        sides: 4,
+        num_balls: 1,
+        score_mode: "classic",
         debug: true,
       };
       // const data = {

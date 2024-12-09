@@ -110,7 +110,7 @@ export default class World {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // ratio more than 2 is too computationally expensive
   }
 
-  addGame(newGame, isASCII = false) {
+  addGame(newGame) {
     this.game = newGame;
 
     this.controls = new OrbitControls(this.camera, this.canvas);
