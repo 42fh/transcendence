@@ -99,11 +99,11 @@ async def create_new_game(request, use_redis_lock: bool = True):
         )
 
     async def create_game_logic():
-        if await GameCoordinator.is_player_playing(user_id):
-            return JsonResponse(
-                {"error": "Double booking", "message": "Player already in active game"},
-                status=409,
-            )
+        # if await GameCoordinator.is_player_playing(user_id):
+        #     return JsonResponse(
+        #         {"error": "Double booking", "message": "Player already in active game"},
+        #         status=409,
+        #     )
         game_id = await GameCoordinator.create_new_game(data)
         if not game_id:
             return JsonResponse(
@@ -168,11 +168,11 @@ async def join_game(request, game_id, use_redis_lock: bool = True):
     user_id = await sync_to_async(lambda: request.user.id)()
 
     async def join_logic():
-        if await GameCoordinator.is_player_playing(user_id):
-            return JsonResponse(
-                {"error": "Double booking", "message": "Player already in active game"},
-                status=409,
-            )
+        # if await GameCoordinator.is_player_playing(user_id):
+        #     return JsonResponse(
+        #         {"error": "Double booking", "message": "Player already in active game"},
+        #         status=409,
+        #     )
         message = "Joined Game! "
 
         response = await GameCoordinator.join_game(user_id, game_id)

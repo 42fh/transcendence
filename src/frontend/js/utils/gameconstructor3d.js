@@ -130,12 +130,11 @@ export default class GameConstructor {
 
   async connectToWebsockets() {
     try {
-      console.log("ccccb");
       const data = {
         mode: "circular",
         gameType: "circular",
-        num_players: 4,
-        sides: 4,
+        num_players: 3,
+        sides: 3,
         num_balls: 1,
         score_mode: "classic",
         debug: true,
@@ -191,6 +190,7 @@ export default class GameConstructor {
         case "initial_state":
           console.log("initial_state: ", message);
           this.playerIndex = message.player_index;
+          this.playerNames = message.player_names;
           this.lastWaitingMessage = Date.now();
           this.createGame(message.game_state);
 
@@ -226,7 +226,7 @@ export default class GameConstructor {
             this.paddles.get(message.player_index).material.map = this.skins[0];
             message.player_index--;
           }
-          showToast("Player joined");
+          showToast(`${message.player_name} joined the game`);
           break;
         case "waiting":
           if (Date.now() - this.lastWaitingMessage > 10000) {
@@ -248,7 +248,6 @@ export default class GameConstructor {
           break;
         case "error":
           console.error("Error message:", message);
-          showToast(message.message, true);
           break;
         default:
           console.log("Unknown message type:", message);

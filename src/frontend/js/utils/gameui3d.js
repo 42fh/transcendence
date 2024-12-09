@@ -176,7 +176,9 @@ export default class GameUI {
         -columnWidth / 2 + colorSquareSize * 1.2,
         yOffset,
         0,
-        "Player " + (index + 1)
+        this.game.playerNames[index]
+          ? this.game.playerNames[index].username
+          : `Player ${index + 1}`
       );
       nameButton.material.color.setHex(0x555555);
       this.tableGroup.add(nameButton);
@@ -198,7 +200,6 @@ export default class GameUI {
     this.tableGroup.rotation.y = 0;
     this.tableGroup.position.set(0.12, 0.5, -1.5);
     this.game.scene.add(this.tableGroup);
-    return tableGroup;
   }
 
   updateScoreTable(scores) {
