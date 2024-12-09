@@ -35,7 +35,9 @@ from rest_framework.views import APIView
 from django.views import View
 from django.http import JsonResponse
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.contrib.auth.hashers import make_password
 
 logger = logging.getLogger(__name__)
 load_dotenv(override=False)
@@ -67,6 +69,20 @@ class SignupView(APIView):
                 },
                 status=400,
             )
+        
+        # rejects weak passwords
+        try:
+            validate_password(password)
+        except ValidationError as e:
+            return Response(
+                {
+                    "success": False,
+                    "error": e.messages,
+                    "action": "signup",
+                },
+                status=400,
+            )
+
         # Create and save new user
         user = CustomUser.objects.create(username=username, password=make_password(password))
 
