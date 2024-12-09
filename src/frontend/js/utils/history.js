@@ -25,8 +25,6 @@ import { updateActiveNavItem } from "../components/bottomNav.js";
 
 export function initializeHistory() {
 
-  console.log("Initializing history_________________________________________________________");
-  // Initial state on load
   window.addEventListener("load", () => {
     const username = localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME);
 
