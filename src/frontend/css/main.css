@@ -29,7 +29,7 @@ body {
   background-color: var(--color-background);
   color: var(--color-text-primary);
   font-family: "Press Start 2P", cursive;
-  display: flex;
+  /* display: flex; */
   justify-content: center;
   align-items: center;
 }
