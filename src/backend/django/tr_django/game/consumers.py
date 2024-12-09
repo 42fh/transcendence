@@ -3,6 +3,7 @@ import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .agame.AGameManager import AGameManager
 from .gamecoordinator.GameCoordinator import GameCoordinator as GC
+from .gamecoordinator.GameCoordinator import RedisLock 
 import time
 import msgpack
 import redis.asyncio as redis
@@ -39,19 +40,21 @@ class PongConsumer(AsyncWebsocketConsumer):
         try:
             # init game instance
             self.game_manager = await AGameManager.get_instance(self.game_id, game_type)
+            
+            async with RedisLock(self.redis_conn, f"{self.game_id}_player_situation"):
+                # Check Redis for existing players
+                player_count = await self.game_manager.redis_conn.scard(
+                    self.game_manager.players_key
+                )
 
-            # Check Redis for existing players
-            player_count = await self.game_manager.redis_conn.scard(
-                self.game_manager.players_key
-            )
-
-            player_index = await self.game_manager.add_player(self.player_id)
-            if not player_index:
-                await self.close(code=1011)
-                logger.error("get instance: Error in add player")
-                return
-            if player_count == 0:
-                asyncio.create_task(self.game_manager.start_game())
+                player_index = await self.game_manager.add_player(self.player_id)
+                if not player_index:
+                    await self.close(code=1011)
+                    logger.error("get instance: Error in add player")
+                    return
+                if player_count == 0:
+                    asyncio.create_task(self.game_manager.start_game())
+            #
             self.role = player_index["role"]
             # load player settings
             if self.role == "player":
@@ -123,7 +126,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             self.ping_task.cancel()
         if self.check_connection_task:
             self.check_connection_task.cancel()
-        if self.role == "player":
+        if self.role == "player"
             await self.game_manager.remove_player(self.player_id)
             logger.info(
                 f"Player[{self.player_id}] disconnected from game[{self.game_id}]"

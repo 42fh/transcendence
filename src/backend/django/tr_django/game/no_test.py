@@ -346,6 +346,12 @@ class TournamentWebsocketTest(TransactionTestCase):
             data = json.loads(response.content)  
             logger.info(f"created Tournament: {data}")
      
+            # Disconnect Player 4
+            response = await sync_to_async(self.client.delete)(
+                reverse("tournament_enrollment", args=[tournament_id])
+            )
+            enrollment_data = json.loads(response.content)
+            logger.debug(f"disconnect player 3: {enrollment_data}")
         
         finally:
             if communicator1:
@@ -354,6 +360,8 @@ class TournamentWebsocketTest(TransactionTestCase):
                 await communicator2.disconnect()
             if communicator3:
                 await communicator3.disconnect()
+            if communicator4:
+                await communicator4.disconnect()
           
 
     

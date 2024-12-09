@@ -534,10 +534,18 @@ class GameCoordinator:
     # from AGameManager
 
     @classmethod
-    async def set_to_waiting_game(cls, game_id):
-        """"""
+    async def set_to_waiting_game(cls, game_id, time=None):
+        """ set a game to waiting, set expire redis1 time """
         async with await cls.get_redis(cls.REDIS_URL) as redis_conn:
             await redis_conn.sadd(cls.WAITING_GAMES, str(game_id))
+        # open game url redis
+        if not time: 
+            # r.persist(key)
+            logger.info(f"game[{str(game_id)}] will set waiting infiniti ")
+        else:
+            logger.info(f"game[{str(game_id)}] will set to ex:{time}")
+            
+
 
     @classmethod
     async def set_to_running_game(cls, game_id):
@@ -648,3 +656,27 @@ class GameCoordinator:
                 await redis_conn.delete(f"{cls.USER_ONLINE_PREFIX}{user_id}")
         except Exception as e:
             logger.error(f"Error setting offline status: {e}")
+
+    #
+    @classmethod
+    async def cleanup_game(cls, game_id: str):
+        """Clean up all Redis entries related to a specific game using UNLINK for async deletion"""
+        try:
+            async with await cls.get_redis(cls.REDIS_URL) as redis_conn:
+                await redis_conn.srem(cls.ALL_GAMES, game_id)
+                await redis_conn.srem(cls.WAITING_GAMES, game_id)
+                await redis_conn.srem(cls.RUNNING_GAMES, game_id)
+                await redis_conn.srem(cls.FINISHED_GAMES, game_id)
+
+            async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_game:
+                keys_to_delete = []
+                async for key in redis_game.scan_iter(f"*:{game_id}"):
+                    keys_to_delete.append(key)
+                
+                if keys_to_delete:
+                    await redis_game.unlink(*keys_to_delete)
+                    logger.info(f"Cleaned up {len(keys_to_delete)} keys for game {game_id}")
+            return True
+        except Exception as e:
+            logger.error(f"Error cleaning up game {game_id}: {e}")
+            return False

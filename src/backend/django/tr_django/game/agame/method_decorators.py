@@ -31,12 +31,13 @@ def add_game_flow(cls):
     Decorator that adds game flow management methods to a class.
     Includes methods for starting, updating, and ending games with process-safe checks.
     """
-    from .game_flow import start_game, update_game, end_game
+    from .game_flow import start_game, update_game, end_game, error_exit
 
     methods = {
         "start_game": start_game,
         "update_game": update_game,
         "end_game": end_game,
+        "error_exit": error_exit
     }
 
     for name, method in methods.items():
