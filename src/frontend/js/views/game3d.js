@@ -232,7 +232,9 @@ export async function loadGame3D() {
       // this.fin3 = this.scene.children[0].getObjectByName("sharkFin3");
     }
   );
-  await game.connectToWebsockets();
+  document.querySelector(".joinGame").addEventListener("click", () => {
+    game.connectToWebsockets();
+  });
   game.world.addPerspectiveCamera();
   game.world.addGame(game, false);
 }

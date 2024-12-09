@@ -130,11 +130,14 @@ export default class GameConstructor {
 
   async connectToWebsockets() {
     try {
+      console.log("Connecting to websocket...");
+      const numPlayers = document.getElementById("playerCount").value;
+      console.log("Num players:", numPlayers);
       const data = {
         mode: "circular",
         gameType: "circular",
-        num_players: 3,
-        sides: 3,
+        num_players: Number(numPlayers),
+        sides: Number(numPlayers),
         num_balls: 1,
         score_mode: "classic",
         debug: true,
@@ -244,7 +247,7 @@ export default class GameConstructor {
           break;
         case "game_finished":
           console.log("game_finished: ", message);
-          showToast("Game finished: " + message.message);
+          showToast("Game finished, Winner: " + message.winner);
           break;
         case "error":
           console.error("Error message:", message);
