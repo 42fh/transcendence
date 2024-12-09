@@ -45,3 +45,12 @@ export const PROFILE_ICONS = {
   PLAY: "play_circle", // Alternative: 'sports_esports'
   CHAT: "maps_ugc", // Alternative: 'chat_bubble'
 };
+
+export const CHAT_WS_MSG_TYPE = {
+  MESSAGE: "chat_message",
+  SYSTEM: "system",
+  SELF: "self",
+  OTHER: "other",
+  MESSAGE_HISTORY: "message_history",
+  SEND_NOTIFICATION: "send_notification",
+};
