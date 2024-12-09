@@ -12,8 +12,6 @@ WORKDIR /app
 RUN mkdir -p /app/media/avatars/users /app/media/avatars/default
 
 
-# Copy the requirements.txt from the backend directory
-COPY requirements.txt /app/
 
 # Install build dependencies and postgresql client
 RUN apt-get update && apt-get install -y \
@@ -25,6 +23,8 @@ RUN apt-get update && apt-get install -y \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
+# Copy the requirements.txt from the backend directory
+COPY requirements.txt /app/
 # Install dependencies before copying the rest of the project
 RUN pip install --upgrade pip && pip install -r requirements.txt
 

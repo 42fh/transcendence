@@ -1,5 +1,5 @@
 export function displayLogoutError(message) {
-  const logoutButton = document.getElementById("logout-button");
+  const logoutButton = document.getElementById("home__button-logout");
 
   // Remove any existing error message
   const existingError = document.getElementById("logout-error");
