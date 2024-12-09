@@ -105,7 +105,18 @@
   font-size: 0.8rem;
 }
 
+.notifications-container {
+  height: 200px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: block;
+}
+
+
+
 .notification-item {
+  width: 100%;
+  box-sizing: border-box;
   display: flex;
   justify-content: space-between;
   padding: 10px;
@@ -184,15 +195,6 @@
 .chat-users-list__username {
   color: var(--color-text);
   font-size: 0.8rem;
-}
-
-.notifications-container {
-  height: 200px;
-  overflow-y: auto;
-  margin-top: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background: var(--color-background-secondary);
 }
 
 /* Chat Room Styles */

@@ -48,6 +48,8 @@ function sendMessage(chatPartner) {
 
 function initializeChatRoom(chatPartner) {
   const currentUser = localStorage.getItem("pongUsername");
+  // import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
+  // const currentUser = LOCAL_STORAGE_KEYS.USERNAME;
 
   const partnerAvatar = document.getElementById("chat-room-partner-avatar");
   const partnerUsername = document.getElementById("chat-room-partner-username");
