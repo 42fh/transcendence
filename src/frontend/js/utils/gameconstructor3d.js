@@ -145,9 +145,9 @@ export default class GameConstructor {
       // const data = {
       //   mode: "classic",
       //   gameType: "classic",
-      //   numPlayers: 2,
-      //   numSides: 4,
-      //   numBalls: 1,
+      //   num_players: 2,
+      //   num_sides: 4,
+      //   num_balls: 1,
       //   scoreMode: "classic",
       //   debug: true,
       // };
@@ -225,6 +225,7 @@ export default class GameConstructor {
           break;
         case "player_joined":
           console.log("player_joined: ", message);
+          this.playerNames[message.player_index] = message.player_name;
           while (message.player_index >= 0) {
             this.paddles.get(message.player_index).material.map = this.skins[0];
             message.player_index--;

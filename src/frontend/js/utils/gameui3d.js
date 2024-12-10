@@ -178,6 +178,8 @@ export default class GameUI {
         0,
         this.game.playerNames[index]
           ? this.game.playerNames[index].username
+            ? this.game.playerNames[index].username
+            : this.game.playerNames[index]
           : `Player ${index + 1}`
       );
       nameButton.material.color.setHex(0x555555);

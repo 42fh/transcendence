@@ -192,3 +192,37 @@ body {
   text-align: center;
   white-space: nowrap;
 }
+
+.mobile-controls {
+  position: fixed;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px;
+  pointer-events: none;
+}
+
+.control-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+  color: white;
+  font-size: 24px;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+.control-btn:active {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Hide on desktop */
+@media (min-width: 768px) {
+  .mobile-controls {
+    display: none;
+  }
+}
