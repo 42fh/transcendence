@@ -33,7 +33,7 @@ function sendMessage(chatPartner) {
     return;
   }
 
-  const currentUser = localStorage.getItem("username");
+  const currentUser = localStorage.getItem("LOCAL_STORAGE_KEYS.USERNAME");
   const messageData = {
     type: CHAT_WS_MSG_TYPE.MESSAGE,
     username: currentUser,
@@ -47,7 +47,7 @@ function sendMessage(chatPartner) {
 }
 
 function initializeChatRoom(chatPartner) {
-  const currentUser = LOCAL_STORAGE_KEYS.USERNAME;
+  const currentUser = localStorage.getItem("pongUsername");
 
   const partnerAvatar = document.getElementById("chat-room-partner-avatar");
   const partnerUsername = document.getElementById("chat-room-partner-username");
