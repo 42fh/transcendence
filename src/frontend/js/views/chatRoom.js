@@ -1,6 +1,7 @@
 import { initializeChatWebSocket } from "../services/chatSocketService.js";
 import { ASSETS } from "../config/constants.js";
 import { loadChatPage } from "./chatHome.js";
+import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 
 export function loadChatRoom(chatPartner) {
   history.pushState(
@@ -47,9 +48,7 @@ function sendMessage(chatPartner) {
 }
 
 function initializeChatRoom(chatPartner) {
-  const currentUser = localStorage.getItem("pongUsername");
-  // import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
-  // const currentUser = LOCAL_STORAGE_KEYS.USERNAME;
+  const currentUser = LOCAL_STORAGE_KEYS.USERNAME;
 
   const partnerAvatar = document.getElementById("chat-room-partner-avatar");
   const partnerUsername = document.getElementById("chat-room-partner-username");

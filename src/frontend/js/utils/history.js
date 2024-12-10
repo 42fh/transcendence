@@ -30,8 +30,6 @@ export function initializeHistory() {
 
     const initialView = username ? "home" : "auth";
     history.replaceState({ view: initialView }, "");
-
-    // Load initial view
     if (username) {
       loadHomePage();
     } else {
@@ -39,10 +37,8 @@ export function initializeHistory() {
     }
   });
 
-  // Handle browser back/forward
   window.addEventListener("popstate", (event) => {
     event.preventDefault();
-    // console.log("History state changed:", event.state);
 
     if (event.state) {
       // TODO: Check cache before making API calls in each case
@@ -73,13 +69,13 @@ export function initializeHistory() {
               console.error("No tournament data in state");
               loadTournamentsPage(false);
             }
-            break;  // Add this break statement
+            break;
           case "chat-room":
             if (state.chatPartner) {
               loadChatRoom(state.chatPartner, false);
             } else {
               console.error("No chat partner in state");
-              loadChatPage(false); // Fallback to chat-home
+              loadChatPage(false);
             }
             break;
           case "chat-home":
@@ -102,11 +98,8 @@ export function initializeHistory() {
             break;
           case "profile":
             // TODO: Implement profile data caching
-            // Cache user profiles with timestamp for invalidation
-            // Consider different cache durations for own profile vs other users
             const userId = state.userId || localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
 
-            // loadProfilePage(false);
             loadProfilePage(userId, false);
             break;
           default:
@@ -124,9 +117,7 @@ export function initializeHistory() {
     }
   });
 
-  // Prevent default link behavior for navigation
   document.addEventListener("click", (event) => {
-    // Check if the clicked element is a navigation link
     if (event.target.matches("[data-nav]")) {
       event.preventDefault();
       const view = event.target.getAttribute("data-nav");
@@ -149,7 +140,6 @@ export function initializeHistory() {
         case "chat-home":
           loadChatPage();
           break;
-          //   loadProfilePage();
           loadProfilePage(userId, false);
           break;
         default:

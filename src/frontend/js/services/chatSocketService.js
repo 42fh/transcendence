@@ -14,14 +14,12 @@ export function initializeChatWebSocket(wsUrl, otherUser, handlers) {
       chatMessages.innerHTML = "";
     }
 
-    // Use the passed handlers.addMessageToChat function
-    if (typeof handlers.addMessageToChat === 'function') {
       handlers.addMessageToChat(
         "System",
         `Connected to chat with ${otherUser}`,
         "system"
       );
-    }
+
 
     if (handlers.state) {
       handlers.state.messageHistoryLoaded = false;
@@ -32,9 +30,7 @@ export function initializeChatWebSocket(wsUrl, otherUser, handlers) {
   window.chatSocket.onmessage = (e) => {
     try {
       const data = JSON.parse(e.data);
-      if (typeof handlers.handleWebSocketMessage === 'function') {
         handlers.handleWebSocketMessage(data);
-      }
     } catch (error) {
       console.error('Error processing message:', error);
     }
@@ -42,13 +38,11 @@ export function initializeChatWebSocket(wsUrl, otherUser, handlers) {
 
   window.chatSocket.onclose = () => {
     if (handlers.state.currentChatPartner === otherUser && !handlers.state.isSwitchingRoom) {
-      if (typeof handlers.addMessageToChat === 'function') {
         handlers.addMessageToChat(
           "System",
           "Connection closed. Attempting to reconnect...",
           "system"
         );
-      }
       setTimeout(() => {
         if (typeof handlers.startChatWith === 'function') {
           handlers.startChatWith(otherUser);
@@ -59,7 +53,6 @@ export function initializeChatWebSocket(wsUrl, otherUser, handlers) {
 
   window.chatSocket.onerror = (error) => {
     console.error("WebSocket error:", error);
-    // Optionally, display a user-friendly error message
     if (typeof displayModalError === 'function') {
       displayModalError("Failed to connect to chat");
     }
