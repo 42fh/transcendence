@@ -1,8 +1,16 @@
 /* Main container */
-.two-d-game__container-game {
+/* .two-d-game__container-game {
   width: 100%;
   height: 100vh;
   padding: 20px;
+} */
+.two-d-game__page-container--game {
+  /* width: var(--page-width); */
+  width: 100%;
+  /* padding: var(--spacing-lg); */
+  padding: 1 rem;
+  margin: 0 auto;
+  background: pink;
 }
 
 /* Game layout with flexbox */
