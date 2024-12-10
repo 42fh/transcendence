@@ -382,8 +382,11 @@
 
 /* Keep edit button at bottom */
 .profile__section--private-actions {
-  margin-top: auto; /* This pushes it to the bottom if we use flex column on parent */
-  padding-top: var(--spacing-lg);
+  flex-direction: column;
+  margin: auto; /* This pushes it to the bottom if we use flex column on parent */
+  margin-bottom: calc(2* var(--spacing-lg)); /* ensures easy scrollability to bottom */
+  padding: var(--spacing-lg);
+  gap: var(--spacing-sm);
 }
 
 /* .profile__section--friends {

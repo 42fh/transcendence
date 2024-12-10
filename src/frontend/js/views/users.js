@@ -25,7 +25,7 @@ export async function loadUsersPage(addToHistory = true) {
     const content = document.importNode(usersTemplate.content, true);
     mainContent.appendChild(content);
 
-    // Get the search input after template is cloned and added
+    // TODO: Get the search input after template is cloned and added
     // const searchInput = document.querySelector(".users-search__input");
     // if (searchInput) {
     //   searchInput.addEventListener(

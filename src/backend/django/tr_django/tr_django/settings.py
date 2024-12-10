@@ -2,13 +2,14 @@ import os
 import sys
 from pathlib import Path
 from dotenv import load_dotenv
+from datetime import timedelta
 
 load_dotenv(override=False)
 
 print(f"POSTGRES_HOST: {os.getenv('POSTGRES_HOST')}")
 print(f"POSTGRES_PORT: {os.getenv('POSTGRES_PORT')}")
 
-ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
+ENVIRONMENT = os.getenv("ENVIRONMENT", "production")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 # ALLOWED_HOSTS = []
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -32,6 +33,12 @@ else:
     DEBUG = True
     ALLOWED_HOSTS = ["*"]
     # ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1']
+
+
+# oauth2 settings for remote authentication
+FORTYTWO_CLIENT_ID = os.getenv("FORTYTWO_CLIENT_ID")
+FORTYTWO_CLIENT_SECRET = os.getenv("FORTYTWO_CLIENT_SECRET")
+FORTYTWO_REDIRECT_URI = os.getenv("FORTYTWO_REDIRECT_URI")
 
 
 # Application definition
@@ -65,12 +72,32 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+}
+
 # Add these to your Django settings.py
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
 SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
 SESSION_COOKIE_SECURE = True  # for HTTPS
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
 if ENVIRONMENT == "production":
     SESSION_COOKIE_SECURE = True
@@ -165,10 +192,24 @@ USE_TZ = True
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {message}",
+            "style": "{",
+        },
+    },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
+            "formatter": "verbose",
         },
+        # docker file has to change to store t in a file
+        #"game_file": {
+        #    "class": "logging.FileHandler",
+        #    "filename": "logs/game.log",
+        #    "formatter": "verbose",
+        #}
+
     },
     "loggers": {
         "users": {  # This matches 'users' app logs
@@ -176,6 +217,11 @@ LOGGING = {
             "level": "DEBUG",  # or 'INFO'
             "propagate": True,
         },
+        "game": {
+            "handlers": ["console"],
+            "level": "INFO", # or "DEBUG"
+            "propagate": False,
+        }
     },
     "root": {
         "handlers": ["console"],

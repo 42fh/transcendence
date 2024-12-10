@@ -14,6 +14,7 @@ import {
   rejectFriendRequest,
 } from "../services/friendshipService.js";
 import { renderModal, closeModal } from "../components/modal.js";
+import { load2FAPage } from "./2fa.js";
 
 export async function loadProfilePage(userId = null, addToHistory = true) {
   const loggedInUserId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
@@ -103,7 +104,14 @@ export async function loadProfilePage(userId = null, addToHistory = true) {
           loadProfileEditPage(userData);
         });
       }
+      // Add 2FA button handler
+      const TwoFAButton = mainContent.querySelector(".profile__button--2fa");
+      TwoFAButton.addEventListener("click", () => {
+        console.log("2FA button clicked");
+        load2FAPage(userData);
+      });
     }
+
     // TODO: probably we don't need this
     const bottomNavContainer = document.getElementById("bottom-nav-container");
     if (bottomNavContainer) {

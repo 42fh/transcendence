@@ -9,6 +9,9 @@ lib/
 Include/
 pyvenv.cfg
 
+# SSL key
+*.pem
+
 # Media directory
 src/backend/django/tr_django/media/*
 !src/backend/django/tr_django/media/.gitkeep

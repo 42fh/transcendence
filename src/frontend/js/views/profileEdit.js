@@ -67,15 +67,12 @@ export async function loadProfileEditPage() {
 }
 
 function populateFormFields(content, userData) {
-  // content is now mainContent so to say
-  console.log("Populating form fields with user data:", userData);
-
   // Add defensive check for avatar
   const avatarImg = content.querySelector(".profile-edit__avatar");
   if (avatarImg) {
     avatarImg.src = userData.avatar || ASSETS.IMAGES.DEFAULT_AVATAR; // Use the same constant as profile.js
   } else {
-    console.log("Avatar image not found");
+    console.warn("Avatar image not found");
   }
 
   content.querySelector('input[name="username"]').value = userData.username || "";
@@ -147,10 +144,9 @@ function setupAvatarUpload(content, userId) {
   avatarInput.addEventListener("change", async (e) => {
     const file = e.target.files[0];
     if (!file) {
-      console.log("No file selected");
+      console.warn("No file selected");
       return;
     }
-    console.log("Selected file:", file);
 
     handleAvatarUpload(file, avatarButton, avatarImg, userId);
   });
@@ -182,7 +178,7 @@ async function handleFormSubmission(form, userId) {
   form.querySelectorAll("input, textarea").forEach((input) => {
     const error = validateFormField(input);
     if (error) {
-      console.log("Form field error:", error);
+      console.warn("Form field error:", error);
       hasErrors = true;
       updateFieldError(input, error);
     }

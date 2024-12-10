@@ -19,10 +19,15 @@ services:
       - "5432:5432"
     networks:
       - transcendence_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} -p 5432"]
+      interval: 1s
+      timeout: 10s
+      retries: 3
   django:
     build: ./src/backend/django
-    # mind that manage.py is in the tr_django folder
-    command: sh -c "python tr_django/manage.py migrate && python tr_django/manage.py collectstatic --noinput && daphne -b 0.0.0.0 -p 8000 tr_django.asgi:application"
+    # mind that manage.py is in the tr_django folder 
+    command: sh -c "echo Error the command of django must be overwritten"
     env_file:
       - ./.env
     volumes:
@@ -32,8 +37,10 @@ services:
     ports:
       - "8000"
     depends_on:
-      - redis
-      - postgres
+      redis:
+        condition: service_started
+      postgres:
+        condition: service_healthy
     environment:
       - REDIS_URL=${REDIS_URL}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS}
@@ -59,7 +66,7 @@ services:
       - ./src/frontend/:/usr/share/nginx/html
       - ./src/nginx/logs:/var/log/nginx
       - ./media:/var/www/media
-      - ./t.000031.xyz:/etc/letsencrypt/live/t.000031.xyz:ro
+      - ./ssl-keys:/etc/letsencrypt/live/.000031.xyz:ro
     # ports:
       # due to the way multiple docker compose files are 
       # merged (e.g. using docker-compose.override.yml) the

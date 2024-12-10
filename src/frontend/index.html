@@ -38,11 +38,12 @@
 
     <!-- Auth Template -->
     <template id="auth-template">
-      <div class="auth-container">
+      <div class="auth-container" id="auth-container">
         <h1>PONG</h1>
         <div class="auth-buttons">
           <button id="login-button" class="auth-button">Login</button>
           <button id="signup-button" class="auth-button">Sign Up</button>
+          <button id="auth42-button" class="auth-button">Auth 42</button>
         </div>
       </div>
     </template>
@@ -50,17 +51,42 @@
     <!-- Login Form Template -->
     <template id="login-template">
       <p id="modal-message" class="modal-message"></p>
-      <form id="login-form" class="modal-form">
-        <!-- Message element added here -->
+      <div id="login-container">
+        <form id="login-form" class="modal-form">
+          <!-- Message element added here -->
 
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username" required />
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" required />
 
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" required />
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required />
 
-        <button type="submit" class="auth-form__button">Log In</button>
-      </form>
+          <button type="submit" class="auth-form__button">Log In</button>
+        </form>
+      </div>
+      <div id="2fa-container" style="display: none;">
+        <form id="2fa-form" class="modal-form">
+          <!-- Message element added here -->
+  
+          <label for="code">Enter the code sent to your email</label>
+          <input type="text" id="code" name="code" required />
+
+          <div class="resend-section">
+            <span id="countdown">1:00</span>
+            <button 
+              type="button" 
+              id="resend-button" 
+              class="auth-form__button" 
+              disabled
+            >
+              Resend Code
+            </button>
+          </div>      
+  
+          <button type="submit" id="2fa-login" class="auth-form__button">Log In</button>
+        </form>
+      </div>
+
     </template>
 
     <!-- Signup Form Template -->
@@ -68,7 +94,6 @@
       <p id="modal-message" class="modal-message"></p>
       <form id="signup-form" class="modal-form">
         <!-- Message element added here -->
-
         <label for="username">Username</label>
         <input type="text" id="username" name="username" required />
 
@@ -88,7 +113,10 @@
         <h1 class="page-container__title page-container__title--home">PONG</h1>
 
         <div class="home__content">
-          <button id="home__button-play" class="home__button button--neon">PLAY</button>
+          <div class="home__buttonsetleft">
+            <button id="home__button-logout" class="home__button button--red">Logout</button>
+            <button id="home__button-play" class="home__button button--neon">PLAY</button>
+          </div>
           <div class="home__net">
             <div class="home__net-segment home__net-segment--black"></div>
             <div class="home__net-segment home__net-segment--white"></div>
@@ -105,6 +133,117 @@
         </div>
       </div>
     </template>
+      
+
+    <!-- Game list Template 
+     (list of games and button to create new game)-->
+    <template id="game-item-template">
+      <div id="games-container" class="page-container--games">
+        <div class="game-item">
+          <p>Game ID: <span id="game-id"></span></p>
+          <p>Mode: <span></span></p>
+          <p>Date: <span></span></p>
+          <p>Duration: <span></span></p>
+          <p>Winner: <span></span></p>
+        </div>
+      </div>
+      <button id="cta__button-settings" style="display: none;">Settings</button>
+    </template>
+
+
+
+
+    <!-- Modal Template -->
+<template id="modal-template">
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <button class="modal-close-btn" aria-label="Close Modal">&times;</button>
+      <div class="modal-content">
+        <h2>Error</h2>
+        <p class="modal-message" id="modal-message">An error occurred. Please try again.</p>
+        <div class="modal-form">
+          <label for="inputField">Example Input:</label>
+          <input type="text" id="inputField" placeholder="Enter some text" />
+          <button type="button" class="form-button" id="submit-form">Submit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+
+<!-- Game Settings Template-->
+<template id="game-settings-template">
+  <p id="status" class="status"></p>
+      <!-- Status message container -->
+      <div id="status" style="display: none;"></div>
+  <div class="tournament-container page-container--settings">
+    <h2>GAME SETTINGS</h2>
+    <div class="tournament-detail-container">
+      <form id="gameForm" class="tournament-detail-section">
+        <div class="game-setting-group">
+          <label for="playerId">Player ID:</label>
+          <input type="text" id="playerId" name="playerId" class="create-tournament-select">
+        </div>
+        <div class="game-setting-group">
+          <label for="numPlayers">Number of Players:</label>
+          <input type="number" id="numPlayers" name="numPlayers" min="2" max="8" class="create-tournament-select">
+        </div>
+        <div class="game-setting-group">
+          <label for="numSides">Number of Sides:</label>
+          <input type="number" id="numSides" name="numSides" min="3" max="100" class="create-tournament-select">
+        </div>
+        <div class="game-setting-group">
+          <label for="numBalls">Number of Balls:</label>
+          <input type="number" id="numBalls" name="numBalls" min="1" max="4" class="create-tournament-select">
+        </div>
+        <div class="game-setting-group">
+          <label for="mode">Select Mode:</label>
+          <select id="mode" name="mode" class="create-tournament-select">
+            <option value="regular">Regular</option>
+            <option value="classic">Classic</option>
+            <option value="circular">Circular</option>
+            <option value="irregular">Irregular</option>
+          </select>
+        </div>
+        <div class="game-setting-group">
+          <label for="shape">Shape:</label>
+          <select id="shape" name="shape" class="create-tournament-select">
+            <option value="regular">Regular</option>
+            <option value="irregular">Irregular</option>
+            <option value="star">Star</option>
+            <option value="crazy">Crazy</option>
+          </select>
+        </div>
+        <div class="game-setting-group">
+          <label for="scoreMode">Score Mode:</label>
+          <select id="scoreMode" name="scoreMode" class="create-tournament-select">
+            <option value="classic">Classic</option>
+            <option value="modern">Modern</option>
+          </select>
+        </div>
+        <div class="game-setting-group">
+          <button type="submit" class="form-button">Create Game</button>
+        </div>
+      </form>
+    </div>
+    <div id="descriptions-container" class="tournament-detail-descriptions">
+      <h3>Game Information</h3>
+      <p><strong>Classic:</strong> Classic 2-player pong with 2 paddles and 2 walls. Maximum players: 2.</p>
+      <p><strong>Regular:</strong> Regular polygon with all sides playable. Maximum players: 4.</p>
+      <p><strong>Circular:</strong> Circular arena with curved paddles and sides. Maximum players: 8.</p>
+      <p><strong>Irregular:</strong> Irregular polygon shape with customizable sides. Maximum players: 6.</p>
+      <ul>
+        <li><strong>Regular Shape:</strong> Standard polygon.</li>
+        <li><strong>Irregular Shape:</strong> Slightly deformed polygon with balanced sides.</li>
+        <li><strong>Star Shape:</strong> Star-like shape with alternating long and short sides.</li>
+        <li><strong>Crazy Shape:</strong> Extreme deformation with sharp transitions.</li>
+      </ul>
+    </div>
+  </div>
+</template>
+
+
 
     <!-- Tournament List Page Template -->
     <template id="tournament-template">
@@ -449,6 +588,8 @@
           <!-- Private Profile Actions -->
           <div class="profile__section profile__section--private-actions profile__private-info">
             <button class="profile__button profile__button--edit">Edit Profile</button>
+            <button class="profile__button profile__button--2fa">2FA Settings</button>
+            <!-- TODO: Add password change button if we decide to implement it -->
           </div>
         </div>
       </div>
@@ -516,6 +657,37 @@
             <textarea id="bio" class="profile-edit__textarea" name="bio" rows="4" maxlength="500"></textarea>
           </div>
 
+          <div class="profile-edit__buttons">
+            <button type="button" class="profile-edit__button profile-edit__button--cancel">Cancel</button>
+            <button type="submit" class="profile-edit__button profile-edit__button--save">Save</button>
+          </div>
+        </form>
+      </div>
+    </template>
+
+    <!-- 2FA Edit Template -->
+    <template id="2fa-edit-template">
+      <div class="profile-edit">
+        <h2 class="profile-edit__title">Edit 2FA</h2>
+        <p class="email-warning" style="display: none">Email is not set</p>
+        <form class="profile-edit__form">
+          <div class="profile-edit__field form-field">
+            <label class="profile-edit__label form-label" for="email">Email</label>
+            <input type="email" id="email" class="profile-edit__input form-input" name="email" />
+          </div>
+          <div class="profile-edit__field form-field radio-form">
+            <label class="profile-edit__label form-label">2FA Authentication</label>
+            <div class="profile-edit__radio-group">
+              <div class="profile-edit__radio-item">
+                <input type="radio" id="2fa-enabled" name="2fa" value="enabled" class="profile-edit__radio" />
+                <label for="2fa-enabled" class="profile-edit__radio-label">Enabled</label>
+              </div>
+              <div class="profile-edit__radio-item">
+                <input type="radio" id="2fa-disabled" name="2fa" value="disabled" class="profile-edit__radio" />
+                <label for="2fa-disabled" class="profile-edit__radio-label">Disabled</label>
+              </div>
+            </div>
+          </div>
           <div class="profile-edit__buttons">
             <button type="button" class="profile-edit__button profile-edit__button--cancel">Cancel</button>
             <button type="submit" class="profile-edit__button profile-edit__button--save">Save</button>

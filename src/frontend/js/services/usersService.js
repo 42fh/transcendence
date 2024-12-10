@@ -1,4 +1,5 @@
 import { CONFIG, LOCAL_STORAGE_KEYS } from "../config/constants.js";
+import { manageJWT } from "./authService.js";
 
 /**
  * Fetches a user's profile data
@@ -32,7 +33,14 @@ import { CONFIG, LOCAL_STORAGE_KEYS } from "../config/constants.js";
  */
 export async function fetchUserProfile(userId) {
   try {
-    const response = await fetch(`${CONFIG.API_BASE_URL}/api/users/${userId}/`);
+    const accessToken = await manageJWT();
+
+    const response = await fetch(`${CONFIG.API_BASE_URL}/api/users/${userId}/`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
     if (!response.ok) {
       return {
         success: false,
@@ -89,9 +97,12 @@ export function renderMatchHistory(matches, container) {
 
 export async function updateUserProfile(userId, userData) {
   try {
+    const accessToken = await manageJWT();
+
     const response = await fetch(`${CONFIG.API_BASE_URL}/api/users/${userId}/`, {
       method: "PATCH",
       headers: {
+        Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(userData),
@@ -125,9 +136,15 @@ export async function uploadUserAvatar(userId, avatarFile) {
     const formData = new FormData();
     formData.append("avatar", avatarFile);
 
-    const url = `${CONFIG.API_BASE_URL}/api/users/users/${userId}/avatar/`;
+    const accessToken = await manageJWT();
+
+    const url = `${CONFIG.API_BASE_URL}/api/users/${userId}/avatar/`;
     const response = await fetch(url, {
       method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
       body: formData,
     });
 
@@ -160,13 +177,17 @@ export async function fetchUsers(page = 1, perPage = 10, search = "") {
     queryParams.set("page", page);
     queryParams.set("per_page", perPage);
     if (search) queryParams.set("search", search);
+    const accessToken = await manageJWT();
+
     const url = `${CONFIG.API_BASE_URL}/api/users/?${queryParams}`;
-    console.log("Fetching users from:", url);
-    const response = await fetch(url);
-    console.log("Response status:", response.status);
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
     if (!response.ok) throw new Error("Failed to fetch users");
     const data = await response.json();
-    console.log("Fetched users:", data);
     return data;
   } catch (error) {
     console.error("Error fetching users:", error);

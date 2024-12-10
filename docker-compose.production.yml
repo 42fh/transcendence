@@ -1,34 +1,20 @@
 services:
   django:
-    # commented out as they seem not needed
-    # depends_on:
-    #   - postgres
-    #   - redis
-    # command: >
-    #   sh -c "
-    #     while ! nc -z postgres 5432; do
-    #       echo 'Waiting for postgres...';
-    #       sleep 1;
-    #     done;
-    #     while ! nc -z redis 6379; do
-    #       echo 'Waiting for redis...';
-    #       sleep 1;
-    #     done;
-    #     # Commented out database reset - uncomment if you need a fresh start
-    #     # echo 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;' | python tr_django/manage.py dbshell &&
-    #     python tr_django/manage.py migrate &&
-    #     python tr_django/manage.py seed_users &&
-    #     python tr_django/manage.py seed_tournaments &&
-    #     python tr_django/manage.py runserver 0.0.0.0:8000"
-    # volumes:
-    #   - ./src/backend/django:/app
-    #   - ./media:/app/media
-    ports:
-      - "443:443"
+    command: >
+      sh -c "
+        # Commented out database reset - uncomment if you need a fresh start
+        # echo 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;' | python tr_django/manage.py dbshell &&
+        python tr_django/manage.py migrate &&
+        python tr_django/manage.py seed_users &&
+        python tr_django/manage.py seed_tournaments &&
+        cd tr_django &&
+        daphne -b 0.0.0.0 -p 8000 tr_django.asgi:application" 
     environment:
       - Debug=False
       - ENVIRONMENT=production
   nginx:
+    ports:
+      - "${PORT:-8443}:443"
     build:
       context: ./src
       dockerfile: ./nginx/Dockerfile

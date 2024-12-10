@@ -2,9 +2,16 @@ import json
 import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .agame.AGameManager import AGameManager
+from .gamecoordinator.GameCoordinator import GameCoordinator as GC
 import time
 import msgpack
 import redis.asyncio as redis
+import logging
+from django.core.serializers.json import DjangoJSONEncoder
+from django.contrib.auth import get_user_model
+from asgiref.sync import sync_to_async
+
+logger = logging.getLogger(__name__)
 
 
 class PongConsumer(AsyncWebsocketConsumer):
@@ -12,100 +19,99 @@ class PongConsumer(AsyncWebsocketConsumer):
         super().__init__(*args, **kwargs)
 
         self.last_move_time = 0
-        self.current_pos = 0.5  # should be updated if game is loaded
 
-        self.player_values = {
-            "move_cooldown": 0.02,
-            "move_speed": 0.05,
-            "move_speed_boost": 1.0,  # example for player own values
-            "reverse_controls": False,  # example for player own values
-            "paddle_size": 0.3,  # example for player own values
-        }  # should come from the GameManager
+        # Healthcheck RFC 6455
+        self.ping_interval = 5  # seconds
+        self.ping_timeout = 5  # seconds
+        self.last_pong = time.time()
+        self.ping_task = None
+        self.check_connection_task = None
 
     async def connect(self):
+        print("hallo world")
+
         self.game_id = self.scope["url_route"]["kwargs"]["game_id"]
-        query_string = self.scope["query_string"].decode("utf-8")
-        query_params = dict(param.split("=") for param in query_string.split("&"))
-        self.player_id = query_params.get("player") 
-        game_type = query_params.get("type", "polygon")  # Default to polygon_pong
-        print(query_params)
+        self.user = self.scope["user"]
+        self.player_id = str(self.user.id)
+        # init channels
         self.game_group = f"game_{self.game_id}"
         channel_key = f"asgi:group:{self.game_group}"
         await self.channel_layer.group_add(self.game_group, self.channel_name)
-        # redis_conn = await redis.Redis.from_url('redis://redis:6379', decode_responses=True)
-        # await redis_conn.expire(channel_key, 30)
+        # get gametype
+        async with await GC.get_redis(GC.REDIS_GAME_URL) as redis_game:
+            game_type = await redis_game.get(f"game_type:{self.game_id}")
         try:
-            # Try to get existing game or create new one with specified type
-            self.game_manager = await AGameManager.get_instance(
-                self.game_id,
-                game_type=query_params.get("type", "polygon"),
-                settings={
-                    "num_players": int(query_params.get("players", "2")),
-                    "num_balls": int(query_params.get("balls", "1")),
-                    "min_players": int(query_params.get("players", "2")),
-                    "sides": int(query_params.get("sides", "4")),
-                    "pongType": str(query_params.get("pongType", "regular")),   # Type of pong (e.g., regular, irregular)
-                    "shape": query_params.get("shape", "regular"),         # Shape of the pong field (e.g., regular, polygon)
-                    "scoreMode": query_params.get("scoreMode", "classic"), # Scoring mode (e.g., classic, modern)
-                    "debug": query_params.get("debug", "false").lower() == "true",  # Debug mode (true or false)
-                    "playerId": query_params.get("playerId", "1"),    # ID of the player
-                    "gameId": query_params.get("gameId", "1"),        # ID of the game session
-                    "type": query_params.get("type", "polygon"),           # Type of game (e.g., polygon, other modes)
-                },
-            )
+            # init game instance
+            self.game_manager = await AGameManager.get_instance(self.game_id, game_type)
 
             # Check Redis for existing players
             player_count = await self.game_manager.redis_conn.scard(
                 self.game_manager.players_key
             )
 
-            # Initialize game if no players exist with provided settings -> notworking
-            if player_count == 0:
-                asyncio.create_task(self.game_manager.start_game())
-
             player_index = await self.game_manager.add_player(self.player_id)
             if not player_index:
                 await self.close(code=1011)
+                logger.error("get instance: Error in add player")
                 return
-            self.role = player_index['role']
-            if self.role == 'player':
-                self.current_pos = player_index.get("position", 0.5)
-                self.player_index = player_index.get("index", 0)
-                print(f"Player {self.player_id} connected to game {self.game_id} as player {self.player_index}")
-
+            if player_count == 0:
+                asyncio.create_task(self.game_manager.start_game())
+            self.role = player_index["role"]
+            # load player settings
+            if self.role == "player":
+                self.current_pos = player_index.get("position")
+                self.player_index = player_index.get("index")
+                self.player_values = player_index.get("settings")
+                logger.info(
+                    f"Player[{self.player_id}] connected to game[{self.game_id}] as player: {self.player_index +1 } index {self.player_index +1 }"
+                )
+            else:
+                logger.info(
+                    f"Player[{self.player_id}] connected to game[{self.game_id}] as spectator"
+                )
             await self.accept()
+            # Healthcheck RFC 6455 -Start ping/pong mechanism after accepting connection
+            # self.ping_task = asyncio.create_task(self.send_ping())
+            # self.check_connection_task = asyncio.create_task(self.check_connection())
+            if self.role == "player":
+                await self.channel_layer.group_send(
+                    self.game_group,
+                    {
+                        "type": "player_joined",
+                        "player_id": self.player_id,
+                        "player_name": self.user.username,    
+                        "player_index": self.player_index,
+                        "current_players": player_count + 1,
+                    },
+                )
 
             # Send initial game state
             try:
-                state_data = await self.game_manager.redis_conn.get(
-                    self.game_manager.state_key
+
+                player_names = await self.get_connected_players()
+                await self.send(
+                    text_data=json.dumps(
+                        {
+                            "type": "initial_state",
+                            "game_state": self.game_manager.settings["state"],
+                            "role": self.role,
+                            "player_index": (
+                                self.game_manager.active_sides[self.player_index]
+                                if self.role == "player"
+                                else None
+                            ),
+                            "player_names" : player_names, 
+                            "message": player_index.get("message", "no message given"),
+                            "player_values": self.player_values,
+                            "game_setup": {
+                                "type": game_type,
+                                "vertices": self.game_manager.vertices,
+                            },
+                        }
+                    )
                 )
-                if state_data:
-                    current_state = msgpack.unpackb(state_data)
-                    sanitized_state = self.sanitize_for_json(current_state)
-                    vertices_data = await self.game_manager.redis_conn.get(
-                        self.game_manager.vertices_key
-                    )
-                    vertices = msgpack.unpackb(vertices_data) if vertices_data else None
-                    sanitized_vertices = self.sanitize_for_json(vertices)
-                    await self.send(
-                        text_data=json.dumps(
-                            {
-                                "type": "initial_state",
-                                "game_state": sanitized_state,
-                                "role": self.role,        
-                                "player_index":self.game_manager.active_sides[self.player_index] if self.role == "player" else None,
-                                "message": player_index.get("message", "no message given"),        
-                                "player_values": self.player_values,
-                                "game_setup": {
-                                    "type": game_type,
-                                    "vertices": sanitized_vertices,
-                                    #'settings': await self.game_manager.redis_conn.get(self.game_manager.settings_key)
-                                },
-                            }
-                        )
-                    )
             except Exception as e:
+                logger.error(f"Failed to load initial game state: {str(e)}")
                 await self.send(
                     text_data=json.dumps(
                         {
@@ -116,22 +122,60 @@ class PongConsumer(AsyncWebsocketConsumer):
                 )
 
         except Exception as e:
-            print(f"Error in connect: {e}")
+            logger.error(f"Error in connect: {e}")
             await self.close(code=1011)
 
-    # TODO: disconnect could not be called (browser crash etc. so we need a extra test if the client is there
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(self.game_group, self.channel_name)
-        if self.role == "player": 
+        if self.ping_task:
+            self.ping_task.cancel()
+        if self.check_connection_task:
+            self.check_connection_task.cancel()
+        if self.role == "player":
             await self.game_manager.remove_player(self.player_id)
-            print(f"Player {self.player_id} disconnected from game {self.game_id}")
+            logger.info(
+                f"Player[{self.player_id}] disconnected from game[{self.game_id}]"
+            )
 
-    # TODO: What else do/ could we recieve from the client: 1.answer for PING, 2.want to use powerup etc ....
+    # Healthcheck RFC 6455
+    async def send_ping(self):
+        """Periodically send ping messages"""
+        while True:
+            try:
+                await self.send(text_data="ping")
+                await asyncio.sleep(self.ping_interval)
+            except Exception as e:
+                logger.error(f"Error sending ping: {str(e)}")
+                break
+
+    async def check_connection(self):
+        """Check if we're receiving pongs within timeout period"""
+        while True:
+            try:
+                await asyncio.sleep(self.ping_timeout)
+                if (
+                    time.time() - self.last_pong
+                    > self.ping_interval + self.ping_timeout
+                ):
+                    logger.warning(f"Client {self.player_id} connection timed out")
+                    await self.disconnect(code=1006)  # Properly disconnect
+                    await self.close(code=1006)  # Connection closed abnormally
+                    break
+            except Exception as e:
+                logger.error(f"Error checking connection: {str(e)}")
+                await self.disconnect(code=1006)  # Properly disconnect
+                await self.close(code=1006)  # Connection closed abnormally
+                break
+
     async def receive(self, text_data):
         try:
+            if text_data == "pong":
+                self.last_pong = time.time()
+                # logger.info("POOOOOOONG")
+                return
             data = json.loads(text_data)
             action = data.get("action")
-                        
+
             if self.role == "spectator":
                 await self.send(
                     text_data=json.dumps(
@@ -139,7 +183,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                     )
                 )
                 return
-             
+
             # here we could decide what the client can set up during waiting
             if not await self.game_manager.running:
                 await self.send(
@@ -155,15 +199,18 @@ class PongConsumer(AsyncWebsocketConsumer):
                 await self.handle_paddle_move(direction, user_id)
 
         except json.JSONDecodeError:
-            print(f"Invalid JSON received: {text_data}")
+            logger.error(f"Invalid JSON received: {text_data}")
         except Exception as e:
-            print(f"Error processing message: {str(e)}")
+            logger.error(f"Error processing message: {str(e)}")
 
     async def handle_paddle_move(self, direction, user_id):
         if user_id != self.player_id:  # this could go into a cheatlog
             await self.send(
                 text_data=json.dumps(
-                    {"type": "error", "message": "Your are not allowed to move this player"}
+                    {
+                        "type": "error",
+                        "message": "Your are not allowed to move this player",
+                    }
                 )
             )
             return
@@ -193,14 +240,20 @@ class PongConsumer(AsyncWebsocketConsumer):
             return False
 
         # check if paddle already at max or min
-        if direction == "left" and self.current_pos < self.player_values["paddle_size"] / 2 :
+        if (
+            direction == "left"
+            and self.current_pos < self.player_values["paddle_length"] / 2
+        ):
             await self.send(
                 text_data=json.dumps(
                     {"type": "error", "message": "Your are reached beginning of paddle"}
                 )
             )
             return False
-        if direction == "right" and self.current_pos > 1 - self.player_values["paddle_size"] / 2:
+        if (
+            direction == "right"
+            and self.current_pos > 1 - self.player_values["paddle_length"] / 2
+        ):
             await self.send(
                 text_data=json.dumps(
                     {"type": "error", "message": "Your are reached end of paddle"}
@@ -216,9 +269,14 @@ class PongConsumer(AsyncWebsocketConsumer):
         )
 
         if direction == "left":
-            self.current_pos = max(self.player_values["paddle_size"] / 2, self.current_pos - move_amount)
+            self.current_pos = max(
+                self.player_values["paddle_length"] / 2, self.current_pos - move_amount
+            )
         elif direction == "right":
-            self.current_pos = min(1 - self.player_values["paddle_size"] / 2, self.current_pos + move_amount)
+            self.current_pos = min(
+                1 - self.player_values["paddle_length"] / 2,
+                self.current_pos + move_amount,
+            )
 
         # Use player_index instead of index
         await self.game_manager.update_paddle(self.player_index, self.current_pos)
@@ -240,7 +298,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                     "active", False
                 )
             elif power_up_type == "resize_paddle":
-                self.player_values["paddle_size"] = effect_data.get(
+                self.player_values["paddle_length"] = effect_data.get(
                     "size_multiplier", 1.0
                 )
 
@@ -260,41 +318,61 @@ class PongConsumer(AsyncWebsocketConsumer):
         """Handle game state update events"""
         sanitized_state = self.sanitize_for_json(event["game_state"])
         await self.send(
-            text_data=json.dumps(
-                {"type": "game_state", "game_state": sanitized_state}
-            )
+            text_data=json.dumps({"type": "game_state", "game_state": sanitized_state})
         )
 
     async def game_collision(self, event):
         collisions = event.get("data")
-        print("collisons: ", collisions)
+        logger.debug(f"collisons: {collisions}")
         for event in collisions:
             sanitized_event = self.sanitize_for_json(event)
             await self.send(
                 text_data=json.dumps(
-                    {
-                        "type": "game_event",
-                        "game_state": sanitized_event
-                    }
+                    {"type": "game_event", "game_state": sanitized_event}
                 )
             )
-            
-        
+
+    async def player_joined(self, event):
+        """Handle player join notifications"""
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "type": "player_joined",
+                    "player_id": event["player_id"],
+                    "player_index": event["player_index"],
+                    "current_players": event["current_players"],
+                    "player_name": event["player_name"] 
+                }
+            )
+        )
 
     async def game_finished(self, event):
         """Handle game finished events"""
         winner_index = event.get("winner")
-        print(winner_index)
+        logger.debug(winner_index)
         is_winner = (
             self.player_index in winner_index if winner_index is not None else False
         )
-        sanitized_state = self.sanitize_for_json(event["game_state"])
+        # sanitized_state = self.sanitize_for_json(event["game_state"])
         await self.send(
             text_data=json.dumps(
                 {
                     "type": "game_finished",
-                    "game_state": sanitized_state,
+                    "game_state": event["game_state"],
                     "winner": "you" if is_winner else "other",
+                },
+                cls=DjangoJSONEncoder,
+            )
+        )
+
+    async def waiting(self, event):
+        """Handle waiting state events"""
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "type": "waiting",
+                    "current_players": event.get("current_players", 0),
+                    "required_players": event.get("required_players", 0),
                 }
             )
         )
@@ -322,3 +400,43 @@ class PongConsumer(AsyncWebsocketConsumer):
             return data
         else:
             return str(data)  # Convert any other types to strings
+
+
+    @sync_to_async
+    def get_user_info(self, user_id):
+        User = get_user_model()
+        try:
+            user = User.objects.get(id=user_id)
+            return {
+                'username': user.username,
+            }
+        except User.DoesNotExist:
+            return None
+
+    async def get_connected_players(self):
+        player_data = []
+        
+        # Get all player IDs
+        player_ids = await self.game_manager.redis_conn.smembers(self.game_manager.players_key)
+        print("hallo ", player_ids) 
+        # Get index for each player
+        for player_id in player_ids:
+            index = await self.game_manager.redis_conn.get(f"{self.game_id}:player_side:{player_id.decode('utf-8')}")
+            logger.info(f"{self.game_id}:player_side:{str(player_id)} //  {index}")
+            if index:
+                player_data.append({
+                    'player_id': player_id.decode('utf-8'),
+                    'index': int(index)  # Renamed from 'position' to 'index'
+                })
+        
+        # Sort by index
+        player_data.sort(key=lambda x: x['index'])
+        
+        # Fetch user info for each player
+        for player in player_data:
+            user_info = await self.get_user_info(player['player_id'])
+            if user_info:
+                player.update(user_info)
+        
+        return player_data
+
