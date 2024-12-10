@@ -18,7 +18,7 @@
 
 /* Profile Sections */
 .profile__section {
-  background: var(--profile-section-bg);
+  background: var(--color-section-bg);
   border-radius: var(--profile-border-radius);
   padding: var(--spacing-sm);
   margin-bottom: var(--spacing-sm);
@@ -61,7 +61,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: var(--profile-section-bg);
+  background: var(--color-section-bg);
   border: var(--border-width) solid var(--color-border);
 }
 

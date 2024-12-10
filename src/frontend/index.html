@@ -162,7 +162,7 @@
           <p>Winner: <span></span></p>
         </div>
       </div>
-      <button id="cta__button-settings" style="display: none">Settings</button>
+      <button id="cta__button-settings">Settings</button>
     </template>
 
     <!-- Modal Template -->
@@ -615,7 +615,10 @@
               >
                 <img class="chat-users-list__avatar" src="" alt="User avatar" />
                 <div class="chat-users-list__info">
-                  <span id="chat-users-list-username" class="chat-users-list__username"></span>
+                  <span
+                    id="chat-users-list-username"
+                    class="chat-users-list__username"
+                  ></span>
                   <span class="chat-users-list__status-indicator"></span>
                 </div>
               </div>
@@ -637,18 +640,27 @@
           <h2 class="chat-page__title">Conversations</h2>
           <div id="chat-conversations-list" class="conversations-list">
             <!-- Vertical list of users will be populated dynamically here -->
-            <div id="chat-conversations-list-item" class="chat-conversations-list__item"
+            <div
+              id="chat-conversations-list-item"
+              class="chat-conversations-list__item"
               id="chat-conversations"
               style="display: none"
             >
-              <img id="chat-avatar"
+              <img
+                id="chat-avatar"
                 class="chat-conversations-list__avatar"
                 src=""
                 alt="User avatar"
               />
               <div class="chat-conversations-list__info">
-                <span id="chat-conversations-list-username" class="chat-conversations-list__username"></span>
-                <span id="chat-conversations-list-status" class="chat-conversations-list__status-indicator"></span>
+                <span
+                  id="chat-conversations-list-username"
+                  class="chat-conversations-list__username"
+                ></span>
+                <span
+                  id="chat-conversations-list-status"
+                  class="chat-conversations-list__status-indicator"
+                ></span>
               </div>
             </div>
           </div>

@@ -174,8 +174,8 @@ async function loadUsersList(page = 1, perPage = 100, search = "") {
 
       const username = userItem.querySelector(".chat-users-list__username");
       username.textContent =
-        user.username.length > 4
-          ? user.username.substring(0, 3) + "..."
+        user.username.length > 5
+          ? user.username.substring(0, 4) + "..."
           : user.username;
 
       userItem.addEventListener("click", () => {
