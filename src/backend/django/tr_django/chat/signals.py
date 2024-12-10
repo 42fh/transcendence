@@ -16,10 +16,8 @@ def create_message_notification(sender, instance, created, **kwargs):
     """
     if created:
         try:
-            # Determine the recipient of the message
             recipient = instance.room.user2 if instance.sender == instance.room.user1 else instance.room.user1
 
-            # Create the notification
             notification = Notification.objects.create(
                 user=recipient,
                 type="message",
@@ -41,15 +39,15 @@ def send_notification_websocket(sender, instance, created, **kwargs):
             recipient = instance.user
             channel_layer = get_channel_layer()
 
-            # Send the notification via WebSocket
             async_to_sync(channel_layer.group_send)(
                 f"notifications_{recipient.username}",
                 {
                     "type": "send_notification",
                     "notification": {
                         "id": instance.id,
-                        "message": instance.message,
+                        "content": instance.content,
                         "created_at": instance.created_at.isoformat(),
+                        "type": instance.type,
                     },
                 },
             )
