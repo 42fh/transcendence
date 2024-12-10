@@ -257,6 +257,7 @@ export function renderPolygonGame() {
   const renderer = getRendererState();
   console.log("Entering renderPolygonGame");
   console.log(renderer);
+
   // Validate required data is available
   if (!renderer.state || !renderer.svg || !renderer.vertices || renderer.vertices.length === 0) {
     console.warn("Missing required data for rendering", {
@@ -266,6 +267,24 @@ export function renderPolygonGame() {
     });
     return;
   }
+  console.group("Game Area Debug");
+  console.log("Game Area Debug:", {
+    // SVG Container
+    viewBox: renderer.config.viewBox,
+    svgElement: {
+      width: renderer.svg.clientWidth,
+      height: renderer.svg.clientHeight,
+    },
+    // Game Boundaries
+    boundaries: renderer.config.boundaries,
+    // Scale and other configs
+    scale: renderer.config.scale,
+    centered: renderer.config.centered,
+    // Vertices
+    originalVertices: renderer.vertices,
+    transformedVertices: transformVertices(),
+  });
+  console.groupEnd();
 
   renderer.svg.innerHTML = "";
 
@@ -394,12 +413,26 @@ export function transformVertices(vertices = []) {
  */
 export function renderPaddle(renderer, paddle, sideIndex, debug = false) {
   // Skip inactive paddles
+  debug = true;
   if (!paddle.active || !renderer.vertices) return;
-
+  if (debug)
+    console.log("renderPaddle - debug inog:", {
+      debug,
+      paddle,
+      sideIndex,
+      active: paddle.active,
+      hasVertices: !!renderer.vertices,
+    });
   // Transform vertices
   const transformedVertices = transformVertices();
   const startVertex = transformedVertices[sideIndex];
   const endVertex = transformedVertices[(sideIndex + 1) % transformedVertices.length];
+
+  console.log("Geometry:", {
+    startVertex,
+    endVertex,
+    sideLength: Math.sqrt(Math.pow(endVertex.x - startVertex.x, 2) + Math.pow(endVertex.y - startVertex.y, 2)),
+  });
 
   // Calculate paddle geometry
   const sideX = endVertex.x - startVertex.x;
@@ -416,9 +449,17 @@ export function renderPaddle(renderer, paddle, sideIndex, debug = false) {
   const paddleX = startVertex.x + sideX * paddle.position;
   const paddleY = startVertex.y + sideY * paddle.position;
   const paddleLength = renderer.state.dimensions.paddle_length * sideLength;
-  const paddleWidth = renderer.state.dimensions.paddle_width * renderer.config.scale;
+  const paddleWidth = renderer.state.dimensions.paddle_width * sideLength;
   const hitZoneWidth =
     (renderer.state.dimensions.paddle_width + (renderer.state.dimensions.ball_size || 0.1) * 2) * renderer.config.scale;
+
+  console.log("Paddle Dimensions:", {
+    sideLength, // Should be ~140 pixels
+    paddleLength, // Should be ~28 pixels (20% of side)
+    paddleWidth, // Should be ~4.2 pixels (3% of side)
+    hitZoneWidth, // Should be ~7 pixels (paddle + 2*ball)
+    position: paddle.position, // Should be between 0-1
+  });
 
   // Determine paddle state
   const isCurrentPlayer = renderer.state.paddles.indexOf(paddle) === renderer.playerIndex;
@@ -434,6 +475,15 @@ export function renderPaddle(renderer, paddle, sideIndex, debug = false) {
     paddleLength,
     paddleWidth
   );
+
+  // After calculating paddle points
+  console.log("Paddle Points:", {
+    paddleX,
+    paddleY,
+    paddleLength,
+    paddleWidth,
+    points: paddlePoints,
+  });
 
   renderer.svg.appendChild(
     createSVGElement("polygon", {
@@ -490,6 +540,13 @@ export function renderPaddle(renderer, paddle, sideIndex, debug = false) {
 
 // Update the renderPaddles function to pass the debug flag
 export function renderPaddles() {
+  // 1. Find out the expected values of the paddles.
+  // Width and length are in the renderer.state.dimensions object.
+  // Position is in the renderer.state.paddles object.
+  // Side index is in the renderer.state.paddles object.
+  // Active is in the renderer.state.paddles object.
+  // 2. Be aware of teh dimension of the game area
+
   const renderer = getRendererState();
   if (!renderer.state?.paddles) {
     console.warn("No paddles available for rendering");
@@ -501,15 +558,21 @@ export function renderPaddles() {
   });
 }
 
-/**
- * Helper function to calculate paddle points
- */
 function calculatePaddlePoints(x, y, normalizedSideX, normalizedSideY, normalX, normalY, length, width) {
+  // OLD version (going outward)
+  //   return [
+  //     `${x - (normalizedSideX * length) / 2},${y - (normalizedSideY * length) / 2}`,
+  //     `${x + (normalizedSideX * length) / 2},${y + (normalizedSideY * length) / 2}`,
+  //     `${x + (normalizedSideX * length) / 2 + normalX * width},${y + (normalizedSideY * length) / 2 + normalY * width}`,
+  //     `${x - (normalizedSideX * length) / 2 + normalX * width},${y - (normalizedSideY * length) / 2 + normalY * width}`,
+  //   ].join(" ");
+
+  // NEW version (going inward)
   return [
     `${x - (normalizedSideX * length) / 2},${y - (normalizedSideY * length) / 2}`,
     `${x + (normalizedSideX * length) / 2},${y + (normalizedSideY * length) / 2}`,
-    `${x + (normalizedSideX * length) / 2 + normalX * width},${y + (normalizedSideY * length) / 2 + normalY * width}`,
-    `${x - (normalizedSideX * length) / 2 + normalX * width},${y - (normalizedSideY * length) / 2 + normalY * width}`,
+    `${x + (normalizedSideX * length) / 2 - normalX * width},${y + (normalizedSideY * length) / 2 - normalY * width}`,
+    `${x - (normalizedSideX * length) / 2 - normalX * width},${y - (normalizedSideY * length) / 2 - normalY * width}`,
   ].join(" ");
 }
 
@@ -560,7 +623,8 @@ function renderPolygonDebugLabels(renderer) {
 export function renderPolygonOutline(options = {}) {
   console.log("Entering renderPolygonOutline");
   const defaultOptions = {
-    fill: "#000000", // Default black fill
+    // fill: "#000000", // Default black fill
+    fill: "#000033", // Dark blue fill
     fillOpacity: 1, // Fully opaque
     stroke: "#808080", // Gray outline
     strokeWidth: 2,
