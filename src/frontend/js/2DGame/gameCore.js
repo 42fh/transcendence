@@ -3,7 +3,7 @@
 // Import necessary dependencies
 import { gameState, gameConfig, updateGameState } from "../store/index.js";
 import { initializeRenderer, updateRenderer } from "./renderer.js";
-import { disconnectGameSocket } from "../services/gameSocketService.js";
+import { disconnectGameSocket, sendGameMessage } from "../services/gameSocketService.js";
 import { showGameOver } from "./utils.js";
 import { updateGameContext, getGameContext } from "../store/index.js";
 import { updateGameInfo } from "./utils.js";
@@ -29,6 +29,10 @@ export function handleGameMessage(message, onEvent = null) {
 
       case "error":
         handleError(message, onEvent);
+        // Add specific handling for paddle movement errors
+        if (message.message.includes("move")) {
+          console.warn("Paddle movement error:", message.message);
+        }
         break;
     }
   } catch (error) {
@@ -43,7 +47,12 @@ function handleInitialState(message, onEvent) {
   updateGameContext(message);
 
   const gameContext = getGameContext();
-  // For backend data:
+
+  console.log("Initializing controls for player:", gameContext.player_index);
+
+  if (gameContext.role === "player") {
+    initializeControls();
+  }
 
   const INVALID_VALUE = "❌"; // or "???" or "—" or "N/A"
   if (!gameContext) {
@@ -99,9 +108,10 @@ function handleGameState(message, onEvent) {
   updateGameState(message.game_state);
 
   // Update renderer if available
-  if (renderer?.type) {
-    renderer.update(message.game_state);
-  }
+  //   if (renderer?.type) {
+  //     renderer.update(message.game_state);
+  //   }
+  updateRenderer(message);
 
   // Could add onEvent here if needed
   if (onEvent) {
@@ -162,3 +172,51 @@ function handleError(message, onEvent) {
     });
   }
 }
+
+export function initializeControls(debug = false) {
+  debug = true;
+  if (debug) {
+    console.log("Initializing controls");
+  }
+
+  document.addEventListener("keydown", (event) => {
+    let direction = null;
+    if (event.key === "ArrowLeft" || event.key === "a") {
+      direction = "left";
+    } else if (event.key === "ArrowRight" || event.key === "d") {
+      direction = "right";
+    }
+
+    if (direction) {
+      console.log("Sending paddle move:", direction);
+      sendPaddleMove(direction);
+    }
+  });
+}
+
+let lastMoveTime = 0;
+const MOVE_COOLDOWN = 0.1; // seconds, should come from player_values
+
+function sendPaddleMove(direction, debug = false) {
+  debug = true;
+  if (debug) {
+    console.log("Sending paddle move:", direction);
+  }
+  const gameContext = getGameContext();
+  const currentTime = Date.now() / 1000; // Convert to seconds
+
+  // Check cooldown
+  if (currentTime - lastMoveTime < MOVE_COOLDOWN) {
+    return;
+  }
+
+  sendGameMessage({
+    action: "move_paddle",
+    direction,
+    user_id: gameContext.player_id,
+  });
+
+  lastMoveTime = currentTime;
+}
+
+// Add error handling in handleGameMessage

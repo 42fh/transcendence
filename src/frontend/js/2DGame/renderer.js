@@ -122,6 +122,7 @@ function verifyViewBoxConsistency() {
  * @param {Object} message - Initial state message from server
  */
 export function updateRenderer(message) {
+  console.log("updateRenderer", message);
   const renderer = getRendererState();
   if (!renderer.type) {
     console.warn("Renderer not initialized");
@@ -170,7 +171,7 @@ export function createSVGElement(type, attributes) {
 
 export function renderSingleBall(ball, options = {}, debug = false) {
   const renderer = getRendererState();
-  debug = true;
+  //   debug = true;
   console.log("renderSingleBall - input:", {
     ball,
     options,
@@ -229,7 +230,7 @@ export function renderBalls(debug = false) {
   const renderer = getRendererState();
   if (!renderer.svg || !renderer.state.balls) return;
 
-  debug = true;
+  //   debug = true;
 
   if (debug) {
     console.log("renderBalls - state:", {
@@ -443,7 +444,7 @@ export function transformVertices(vertices = []) {
  */
 export function renderPaddle(renderer, paddle, sideIndex, debug = false) {
   // Skip inactive paddles
-  debug = true;
+  //   debug = true;
   if (!paddle.active || !renderer.vertices) return;
   if (debug)
     console.log("renderPaddle - debug inog:", {

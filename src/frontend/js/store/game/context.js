@@ -1,4 +1,5 @@
 import { gameState } from "./state.js";
+import { LOCAL_STORAGE_KEYS } from "../../config/constants.js";
 
 /**
  * @typedef {Object} Player
@@ -48,11 +49,12 @@ export const defaultPlayer = {
 
 /** @type {GameContext} */
 export const gameContext = {
+  player_index: null,
+  player_id: localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID),
   game_state: gameState,
   role: "spectator",
   players: [],
   spectators: [],
-  player_index: null,
   message: "Welcome to the game!",
   player_values: {
     move_speed: 0.05,
@@ -105,7 +107,8 @@ export function getGameContext() {
  * - game_setup: Game configuration (type, vertices)
  */
 export function updateGameContext(message, debug = false) {
-  debug = true;
+  // debug = true;
+
   // 1. game_setup
   // 2. game_state
   // 3. message

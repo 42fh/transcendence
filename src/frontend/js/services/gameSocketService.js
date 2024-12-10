@@ -117,6 +117,7 @@ function handleGameSocketReconnect(wsConfig) {
 export function sendGameMessage(message) {
   if (ws?.readyState === WebSocket.OPEN) {
     try {
+      console.log("Sending WebSocket message:", message);
       ws.send(JSON.stringify(message));
     } catch (error) {
       console.error("Error sending WebSocket message:", error);
