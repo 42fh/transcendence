@@ -9,6 +9,8 @@ import { showToast } from "../utils/toast.js";
 import { renderNotifications } from "../components/chatNotification.js";
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 
+import { testButtonForNotificationsWithUrl } from "../dirtyTesting/testButtonForNotificationsWithUrl.js";
+
 let conversationUsers = [];
 let notificationSocket = null;
 
@@ -58,6 +60,7 @@ export async function loadChatPage(addToHistory = true) {
     } else {
       console.error("No current user found for notifications");
     }
+    testButtonForNotificationsWithUrl();
     await loadChatList(1, "", "");
 
     // Load users list (Horizontal scroll), filtering out users in conversations with current user
