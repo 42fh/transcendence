@@ -60,6 +60,7 @@ export async function loadChatPage(addToHistory = true) {
     } else {
       console.error("No current user found for notifications");
     }
+    console.log("Before button");
     testButtonForNotificationsWithUrl();
     await loadChatList(1, "", "");
 
@@ -80,7 +81,6 @@ export async function loadChatPage(addToHistory = true) {
 
 async function loadChatList(page = 1, perPage = 100, search = "") {
   try {
-    console.log("perPaage    ", perPage);
     const data = await fetchConversationList(page, perPage, search);
     if (!data || !data.users) throw new Error("Failed to fetch chat contacts");
 
