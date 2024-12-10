@@ -2,7 +2,8 @@ import { formatDate } from "../utils/date.js";
 import { showToast } from "../utils/toast.js";
 import { loadTimetablePage } from "./timetable.js";
 import { handleTournamentAction } from "../services/tournamentService.js";
-import { updateActiveNavItem } from "../components/bottom-nav.js";
+import { updateActiveNavItem } from "../components/bottomNav.js";
+
 export function loadTournamentDetailsPage(tournament, addToHistory = true) {
   try {
     if (addToHistory) {
