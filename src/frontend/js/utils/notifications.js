@@ -7,10 +7,8 @@ export function setupNotificationListener(wsUrl) {
     showToast("Notification setup failed: Invalid URL", true);
     return null;
   }
-  // console.log("wsurl:", wsUrl);
 
   try {
-    // console.log(wsUrl);
     if (window.chatSocket) {
       window.chatSocket.close();
     }
