@@ -97,7 +97,8 @@ class BlockedUser(models.Model):
 
 class Notification(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications")
-    message = models.TextField()
+    type = models.CharField(max_length=50, default="default_type")
+    content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
     url = models.URLField(blank=True, null=True)
@@ -110,4 +111,4 @@ class Notification(models.Model):
         ]
 
     def __str__(self):
-        return f"Notification for {self.user.username}: {self.message[:50]}"
+        return f"Notification for {self.user.username}: {self.content[:50]}"

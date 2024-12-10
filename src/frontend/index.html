@@ -628,10 +628,13 @@
 
         <div class="chat__section">
           <h2 class="chat-page__title">Notifications</h2>
-          <h2 id="notification-mark-all-read">Mark all read</h2>
+          <h2 id="notification-mark-all-read" class="mark-all-read">Mark all read</h2>
           <div class="notifications-container">
             <div id="chat-notifications" class="conversations-list">
-              <!-- Notifications -->
+              <!-- Notifications will be dynamically inserted here -->
+            </div>
+            <div id="no-notifications" class="no-notifications" style="display: none;">
+              <p>No notifications available.</p>
             </div>
           </div>
         </div>

@@ -8,7 +8,6 @@ from users.models import CustomUser
 from django.utils import timezone
 from channels.db import database_sync_to_async
 import json
-from django.conf import settings
 import logging
 
 logger = logging.getLogger(__name__)
@@ -178,8 +177,8 @@ def get_or_create_chat_room(self):
         raise
 
 
-@login_required
 @csrf_exempt
+@login_required
 def notifications(request):
     try:
         logger.debug("Notifications view accessed")
@@ -189,7 +188,7 @@ def notifications(request):
         if request.method == "GET":
             try:
                 notifications = Notification.objects.filter(user=request.user).values(
-                    "id", "message", "created_at", "is_read", "url"
+                    "id", "type", "content", "created_at", "is_read", "url"
                 )
                 logger.debug(f"Notifications found: {list(notifications)}")
 
@@ -224,12 +223,18 @@ def notifications(request):
         elif request.method == "POST":
             try:
                 body = json.loads(request.body)
-                message = body.get("message")
+                content = body.get("content")
+                notification_type = body.get("type")
+                url = body.get("url")
 
-                if not message:
-                    return JsonResponse({"status": "error", "message": "Missing message field"}, status=400)
+                if not content:
+                    return JsonResponse({"status": "error", "message": "Missing content field"}, status=400)
+                if not notification_type:
+                    return JsonResponse({"status": "error", "message": "Missing type field"}, status=400)
 
-                notification = Notification.objects.create(user=request.user, message=message, url=url)
+                notification = Notification.objects.create(
+                    user=request.user, type=notification_type, content=content, url=url
+                )
 
                 return JsonResponse(
                     {"status": "success", "message": "Notification created successfully", "id": notification.id}

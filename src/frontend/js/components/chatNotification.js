@@ -13,7 +13,8 @@ export async function renderNotifications() {
   const notificationContainer = chatHomeTemplate.content.querySelector(
     "#chat-notifications"
   );
-  const markAllReadElement = document.getElementById("notification-mark-all-read");
+  const noNotificationsContainer =
+    chatHomeTemplate.content.querySelector("#no-notifications");
 
   if (!notificationContainer) {
     console.error("Notification container not found in chat home template.");
@@ -21,42 +22,44 @@ export async function renderNotifications() {
   }
 
   // Clear existing notifications while preserving HTML structure
-  Array.from(notificationContainer.children).forEach(child => child.remove());
+  Array.from(notificationContainer.children).forEach((child) => child.remove());
 
   try {
     const response = await fetchNotifications();
     const notifications = response.notifications;
 
-    // Update the notification badge with unread count
+    // Update the notification badge
     const unreadCount = notifications.filter((n) => !n.is_read).length;
     updateNotificationBadge(unreadCount);
 
     // Handle empty notifications
     if (!notifications || notifications.length === 0) {
-      // Optionally, you could add a 'hidden' class or use display:none 
-      // to hide elements without removing HTML
+      noNotificationsContainer.style.display = "block";
       return;
+    } else {
+      noNotificationsContainer.style.display = "none";
     }
 
-    notifications.forEach(notification => {
-      const notificationElement = document.createElement('div');
-      notificationElement.classList.add('notification-item');
-      notificationElement.classList.add(notification.is_read ? 'is-read' : 'is-unread');
-      
-      const messageSpan = document.createElement('span');
-      messageSpan.classList.add('notification-message');
-      messageSpan.textContent = notification.message;
+    notifications.forEach((notification) => {
+      const notificationElement = document.createElement("div");
+      notificationElement.classList.add("notification-item");
+      notificationElement.classList.add(
+        notification.is_read ? "is-read" : "is-unread"
+      );
 
-      const dateSpan = document.createElement('span');
-      dateSpan.classList.add('notification-date');
+      const typeSpan = document.createElement("span");
+      typeSpan.classList.add("notification-type");
+      typeSpan.textContent = notification.type;
+
+      const dateSpan = document.createElement("span");
+      dateSpan.classList.add("notification-date");
       dateSpan.textContent = new Date(notification.created_at).toLocaleString();
 
-      notificationElement.appendChild(messageSpan);
+      notificationElement.appendChild(typeSpan);
       notificationElement.appendChild(dateSpan);
 
       notificationContainer.appendChild(notificationElement);
     });
-
   } catch (error) {
     console.error("Error fetching notifications:", error);
   }
