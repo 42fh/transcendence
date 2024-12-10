@@ -189,7 +189,7 @@ def notifications(request):
         if request.method == "GET":
             try:
                 notifications = Notification.objects.filter(user=request.user).values(
-                    "id", "message", "created_at", "is_read"
+                    "id", "message", "created_at", "is_read", "url"
                 )
                 logger.debug(f"Notifications found: {list(notifications)}")
 
@@ -209,14 +209,22 @@ def notifications(request):
             try:
                 body = json.loads(request.body)
                 is_read = body.get("is_read")
+                url = body.get("url")
 
-                if is_read is None:
-                    return JsonResponse({"status": "error", "message": "Missing is_read field"}, status=400)
+                if is_read is None and url is None:
+                    return JsonResponse(
+                        {"status": "error", "message": "At least one field (is_read or url) is required"}, status=400
+                    )
 
-                # Update all notifications for the user
-                Notification.objects.filter(user=request.user).update(is_read=is_read)
+                update_fields = {}
+                if is_read is not None:
+                    update_fields["is_read"] = is_read
+                if url is not None:
+                    Notification.objects.filter(user=request.user).update(url=url)
 
-                return JsonResponse({"status": "success", "message": "All notifications updated successfully"})
+                Notification.objects.filter(user=request.user).update(**update_fields)
+
+                return JsonResponse({"status": "success", "message": "Notifications updated successfully"})
             except Exception as e:
                 logger.error("Error updating notifications", exc_info=True)
                 return JsonResponse({"status": "error", "message": f"Internal server error: {str(e)}"}, status=500)
@@ -225,11 +233,12 @@ def notifications(request):
             try:
                 body = json.loads(request.body)
                 message = body.get("message")
+                url = body.get("url")
 
                 if not message:
                     return JsonResponse({"status": "error", "message": "Missing message field"}, status=400)
 
-                notification = Notification.objects.create(user=request.user, message=message)
+                notification = Notification.objects.create(user=request.user, message=message, url=url)
 
                 return JsonResponse(
                     {"status": "success", "message": "Notification created successfully", "id": notification.id}
