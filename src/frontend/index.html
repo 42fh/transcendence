@@ -625,17 +625,26 @@
             </div>
           </div>
         </div>
-
+        
         <div class="chat__section">
           <h2 class="chat-page__title">Notifications</h2>
-          <h2 id="notification-mark-all-read">Mark all read</h2>
+          <h2 id="notification-mark-all-read" class="mark-all-read">Mark all read</h2>
           <div class="notifications-container">
             <div id="chat-notifications" class="conversations-list">
-              <!-- Notifications -->
+              <!-- Notifications go here -->
+              <div class="no-notifications" style="display: none;">No notifications</div>
+              
+              <!-- Notification Item Template -->
+              <div class="notification-item-template" style="display: none;">
+                <div class="notification-item">
+                  <div class="notification-type"></div>
+                  <div class="notification-date"></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-
+        
         <div class="chat__section">
           <h2 class="chat-page__title">Conversations</h2>
           <div id="chat-conversations-list" class="conversations-list">
