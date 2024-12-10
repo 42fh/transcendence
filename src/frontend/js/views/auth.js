@@ -1,9 +1,22 @@
 import { displayLogoutError } from "../utils/errors.js";
-import { renderModal, closeModal, displayModalError } from "../components/modal.js";
+import {
+  renderModal,
+  closeModal,
+  displayModalError,
+} from "../components/modal.js";
+import { fetchUserProfile } from "../services/usersService.js";
 import { loadHomePage } from "./home.js";
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
-import { updateActiveNavItem } from "../components/bottom-nav.js";
-import { loginUser, signupUser, logoutUser } from "../services/authService.js";
+import { updateActiveNavItem } from "../components/bottomNav.js";
+import {
+  loginUser,
+  signupUser,
+  logoutUser,
+  sendEmailVerification,
+  validateEmailVerification,
+  manageJWT,
+} from "../services/authService.js";
+import { showToast } from "../utils/toast.js";
 
 function initAuthListeners() {
   document.getElementById("login-button").addEventListener("click", () => {
@@ -16,6 +29,10 @@ function initAuthListeners() {
     renderModal("signup-template", {
       submitHandler: handleSignup,
     });
+  });
+
+  document.getElementById("auth42-button").addEventListener("click", () => {
+    window.location.href='/api/users/auth/login42/';
   });
 }
 
@@ -63,22 +80,46 @@ async function handleSignup(event) {
 }
 
 async function handleAuth(form, authFunction) {
+  console.log("Submitting form...");
   const formData = new FormData(form);
   const data = Object.fromEntries(formData);
   const messageElement = document.getElementById("modal-message");
 
   try {
     const result = await authFunction(data);
-    messageElement.style.color = "white";
-    messageElement.innerText = `${result.message || "Signup or Login successful! 🎉 Redirecting..."}`;
-    localStorage.setItem(LOCAL_STORAGE_KEYS.USERNAME, result.username);
-    localStorage.setItem(LOCAL_STORAGE_KEYS.USER_ID, result.id);
-    form.style.display = "none";
-    setTimeout(() => {
-      closeModal();
-      history.pushState({ view: "home" }, "");
-      loadHomePage();
-    }, 2000);
+
+    const _accessToken = await manageJWT(data, true);
+
+    let userData = await fetchUserProfile(result.id);
+    if (!userData.success) {
+      if (userData.status === 404 && isOwnProfile) {
+        localStorage.clear();
+        loadAuthPage();
+        return;
+      }
+
+      if (userData.error === "NETWORK_ERROR") {
+        showToast("Network error. Please check your connection.", "error");
+        return;
+      }
+
+      throw new Error(userData.message || "Failed to load profile");
+    }
+    userData = userData.data;
+    if (userData.two_factor_enabled && userData.email != "") {
+      document.getElementById("login-container").style.display = "none";
+      document.getElementById("2fa-container").style.display = "block";
+
+      await startResendTimer();
+      resendButtonListener(userData);
+
+      await sendEmailVerification(userData);
+      console.log("Email verification sent:");
+
+      twoFaFormListener(result, form);
+    } else {
+      await handleAuthSuccess(result, form);
+    }
   } catch (error) {
     messageElement.style.color = "var(--color-text-error)";
     messageElement.innerText = error.message;
@@ -97,6 +138,84 @@ export async function handleLogout() {
     loadAuthPage();
   } catch (error) {
     console.error("Logout error:", error);
-    displayLogoutError("An error occurred while logging out. Please try again.");
+    displayLogoutError(
+      "An error occurred while logging out. Please try again."
+    );
   }
+}
+
+async function handleAuthSuccess(result, form) {
+  const messageElement = document.getElementById("modal-message");
+
+  messageElement.style.color = "white";
+  messageElement.innerText = `${
+    result.message || "Signup or Login successful! 🎉 Redirecting..."
+  }`;
+
+  localStorage.setItem(LOCAL_STORAGE_KEYS.USERNAME, result.username);
+  localStorage.setItem(LOCAL_STORAGE_KEYS.USER_ID, result.id);
+  form.style.display = "none";
+
+  setTimeout(() => {
+    closeModal();
+    history.pushState({ view: "home" }, "");
+    loadHomePage();
+  }, 2000);
+}
+
+async function startResendTimer() {
+  const countdown = document.getElementById("countdown");
+  const resendButton = document.getElementById("resend-button");
+
+  resendButton.disabled = true;
+  let timeLeft = 60;
+
+  const timer = setInterval(() => {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    countdown.textContent = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      resendButton.disabled = false;
+      countdown.textContent = "Code expired";
+    }
+    timeLeft--;
+  }, 1000);
+}
+
+function resendButtonListener(userData) {
+  document
+    .getElementById("resend-button")
+    .addEventListener("click", async () => {
+      try {
+        console.log("Resending email verification...");
+        await sendEmailVerification(userData);
+        console.log("Email verification sent");
+        await startResendTimer(userData);
+        showToast("Verification code resent");
+      } catch (error) {
+        console.error("Error resending email verification:", error);
+        showToast("Failed to resend verification code", true);
+      }
+    });
+}
+
+function twoFaFormListener(result, form) {
+  document
+    .getElementById("2fa-form")
+    .addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const code = document.getElementById("code").value.trim();
+
+      try {
+        await validateEmailVerification(code);
+        console.log("Email verification successful");
+        handleAuthSuccess(result, form);
+      } catch (error) {
+        console.error("Error validating email verification:", error);
+        showToast("Verification code is invalid", true);
+      }
+    });
 }

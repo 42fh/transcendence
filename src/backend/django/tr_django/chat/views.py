@@ -1,62 +1,89 @@
-from django.shortcuts import render
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from .models import ChatRoom, Message, BlockedUser
+from .models import ChatRoom, Message, BlockedUser, Notification
 from django.views.decorators.csrf import csrf_exempt
 from users.models import CustomUser
-import json
-from django.middleware.csrf import get_token
 from django.utils import timezone
 from channels.db import database_sync_to_async
+import json
+from django.conf import settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @login_required
-def users(request):
+def rooms(request):
     try:
         if not request.user.is_authenticated:
             return JsonResponse({"status": "error", "message": "User not authenticated"}, status=401)
 
         users = CustomUser.objects.exclude(username=request.user.username).values("username")
-        print(f"DEBUG: Retrieved {len(users)} users")
+        # print(f"DEBUG: Retrieved {len(users)} users")
 
-        # Get blocked users
         blocked_users = set(
             BlockedUser.objects.filter(user=request.user).values_list("blocked_user__username", flat=True)
         )
         print(f"DEBUG: Blocked users: {blocked_users}")
-
-        # Get users who blocked current user
         blocked_by_users = set(
             BlockedUser.objects.filter(blocked_user=request.user).values_list("user__username", flat=True)
         )
         print(f"DEBUG: Blocked by users: {blocked_by_users}")
+        all_blocked_users = blocked_users.union(blocked_by_users)
+
+        # Exclude blocked users from the users queryset
+        users = (
+            CustomUser.objects.exclude(username=request.user.username)
+            .exclude(username__in=all_blocked_users)
+            .values("username")
+        )
+        print(f"DEBUG: Retrieved {len(users)} users after filtering blocked users")
+
+        # Log the current user
+        print(f"DEBUG: Current user: {request.user.username}")
 
         recent_chats = (
-            ChatRoom.objects.filter(models.Q(user1=request.user) | models.Q(user2=request.user))
+            ChatRoom.objects.filter(
+                (models.Q(user1=request.user) | models.Q(user2=request.user))
+                & ~models.Q(user1__username__in=all_blocked_users)
+                & ~models.Q(user2__username__in=all_blocked_users)
+            )
             .select_related("user1", "user2")
             .order_by("-last_message_at")
         )
-        print(f"DEBUG: Retrieved {recent_chats.count()} recent chats")
 
+        # Log the retrieved recent chats
+        print(f"DEBUG: Retrieved {recent_chats.count()} recent chats for user: {request.user.username}")
+
+        # Create a set of users with whom the current user has conversations
         users_with_chats = set()
         for chat in recent_chats:
             other_user = chat.user2 if chat.user1 == request.user else chat.user1
             users_with_chats.add(other_user.username)
 
+        users = users.filter(username__in=users_with_chats)
+
         user_list = []
         for user in users:
             username = user["username"]
+            unread_count = (
+                Message.objects.filter(room__user1=request.user, room__user2__username=username, is_read=False).count()
+                + Message.objects.filter(
+                    room__user2=request.user, room__user1__username=username, is_read=False
+                ).count()
+            )
+
             user_data = {
                 "username": username,
-                "has_chat": username in users_with_chats,
-                "is_blocked": username in blocked_users,
-                "has_blocked_you": username in blocked_by_users,
+                "unread_messages": unread_count,
             }
             user_list.append(user_data)
-
-        return JsonResponse({"status": "success", "users": user_list})
+        if user_list:
+            return JsonResponse({"status": "success", "users": user_list})
+        else:
+            return JsonResponse({"status": "success", "users": []})  # Return empty list if no conversations
 
     except Exception as e:
         print(f"DEBUG: Error in users: {str(e)}")
@@ -86,6 +113,18 @@ def mark_messages_read(request, room_id):
 @login_required
 def blocked_user(request):
     try:
+        if request.method == "GET":
+            # Get blocked users
+            blocked_users = set(
+                BlockedUser.objects.filter(user=request.user).values_list("blocked_user__username", flat=True)
+            )
+            blocked_by_users = set(
+                BlockedUser.objects.filter(blocked_user=request.user).values_list("user__username", flat=True)
+            )
+            all_blocked_users = blocked_users.union(blocked_by_users)
+
+            return JsonResponse({"status": "success", "blocked_users": list(all_blocked_users)})
+
         data = json.loads(request.body)
         username = data.get("username")
 
@@ -137,3 +176,70 @@ def get_or_create_chat_room(self):
     except Exception as e:
         print(f"DEBUG: Error in get_or_create_chat_room: {str(e)}")
         raise
+
+
+@login_required
+@csrf_exempt
+def notifications(request):
+    try:
+        logger.debug("Notifications view accessed")
+        logger.debug(f"User authenticated: {request.user}")
+        logger.debug(f"User ID: {request.user.id}")
+
+        if request.method == "GET":
+            try:
+                notifications = Notification.objects.filter(user=request.user).values(
+                    "id", "message", "created_at", "is_read"
+                )
+                logger.debug(f"Notifications found: {list(notifications)}")
+
+                notification_list = list(notifications)
+
+                for notification in notification_list:
+                    notification["created_at"] = notification["created_at"].isoformat()
+
+                return JsonResponse({"status": "success", "notifications": notification_list})
+            except Exception as query_error:
+                logger.error("Error querying notifications", exc_info=True)
+                return JsonResponse(
+                    {"status": "error", "message": f"Database query error: {str(query_error)}"}, status=500
+                )
+
+        elif request.method == "PATCH":
+            try:
+                body = json.loads(request.body)
+                is_read = body.get("is_read")
+
+                if is_read is None:
+                    return JsonResponse({"status": "error", "message": "Missing is_read field"}, status=400)
+
+                # Update all notifications for the user
+                Notification.objects.filter(user=request.user).update(is_read=is_read)
+
+                return JsonResponse({"status": "success", "message": "All notifications updated successfully"})
+            except Exception as e:
+                logger.error("Error updating notifications", exc_info=True)
+                return JsonResponse({"status": "error", "message": f"Internal server error: {str(e)}"}, status=500)
+
+        elif request.method == "POST":
+            try:
+                body = json.loads(request.body)
+                message = body.get("message")
+
+                if not message:
+                    return JsonResponse({"status": "error", "message": "Missing message field"}, status=400)
+
+                notification = Notification.objects.create(user=request.user, message=message)
+
+                return JsonResponse(
+                    {"status": "success", "message": "Notification created successfully", "id": notification.id}
+                )
+            except Exception as e:
+                logger.error("Error creating notification", exc_info=True)
+                return JsonResponse({"status": "error", "message": f"Internal server error: {str(e)}"}, status=500)
+
+        return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
+
+    except Exception as e:
+        logger.error("Unexpected error in notifications view", exc_info=True)
+        return JsonResponse({"status": "error", "message": f"Internal server error: {str(e)}"}, status=500)

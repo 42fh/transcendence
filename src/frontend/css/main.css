@@ -2,6 +2,7 @@
 @import "base/variables.css";
 @import "base/reset.css";
 @import "base/typography.css";
+@import "base/layout.css";
 
 /* Components */
 @import "components/buttons.css";
@@ -12,11 +13,11 @@
 @import "components/toast.css";
 
 /* Pages */
-@import "pages/layout.css";
 @import "pages/home.css";
 @import "pages/tournaments.css";
 @import "pages/profile.css";
 @import "pages/profileEdit.css";
+@import "pages/2faEdit.css";
 @import "pages/auth.css";
 @import "pages/game.css";
 @import "pages/chat.css";
@@ -28,9 +29,10 @@ body {
   background-color: var(--color-background);
   color: var(--color-text-primary);
   font-family: "Press Start 2P", cursive;
-  display: flex;
+  /* display: flex; */
   justify-content: center;
   align-items: center;
+  height: 100vh;
 }
 
 /* Material Icons Configuration */
