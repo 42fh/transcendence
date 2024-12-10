@@ -1,7 +1,6 @@
 import { initializeChatWebSocket } from "../services/chatSocketService.js";
-import { ASSETS } from "../config/constants.js";
 import { loadChatPage } from "./chatHome.js";
-import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
+import { LOCAL_STORAGE_KEYS, ASSETS, CHAT_WS_MSG_TYPE } from "../config/constants.js";
 
 export function loadChatRoom(chatPartner) {
   history.pushState(
@@ -34,9 +33,9 @@ function sendMessage(chatPartner) {
     return;
   }
 
-  const currentUser = localStorage.getItem("username");
+  const currentUser = localStorage.getItem("LOCAL_STORAGE_KEYS.USERNAME");
   const messageData = {
-    type: "chat_message",
+    type: CHAT_WS_MSG_TYPE.MESSAGE,
     username: currentUser,
     message: message,
     chatPartner: chatPartner,
@@ -48,7 +47,7 @@ function sendMessage(chatPartner) {
 }
 
 function initializeChatRoom(chatPartner) {
-  const currentUser = LOCAL_STORAGE_KEYS.USERNAME;
+  const currentUser = localStorage.getItem("pongUsername");
 
   const partnerAvatar = document.getElementById("chat-room-partner-avatar");
   const partnerUsername = document.getElementById("chat-room-partner-username");
@@ -105,24 +104,24 @@ function initializeChatRoom(chatPartner) {
       },
       handleWebSocketMessage: (data) => {
         // console.log("Received WebSocket message:", data);
-        if (data.type === "chat_message") {
-          const isSystemMessage = data.username === "system";
+        if (data.type === CHAT_WS_MSG_TYPE.MESSAGE) {
+          const isSystemMessage = data.username === CHAT_WS_MSG_TYPE.SYSTEM;
 
           handlers.addMessageToChat(
             data.username,
             data.message,
-            data.username === currentUser ? "self" : "other",
+            data.username === currentUser ? "self" : CHAT_WS_MSG_TYPE.SYSTEM,
             isSystemMessage
           );
         } else if (data.type === "message_history") {
           console.log("Processing history messages:", data.messages);
           data.messages.forEach((msg) => {
-            const isSystemMessage = msg.username === "system";
+            const isSystemMessage = msg.username === CHAT_WS_MSG_TYPE.SYSTEM;
 
             handlers.addMessageToChat(
               msg.username,
               msg.message,
-              msg.username === currentUser ? "self" : "other",
+              msg.username === currentUser ? "self" : CHAT_WS_MSG_TYPE.SYSTEM,
               isSystemMessage
             );
           });
@@ -133,9 +132,9 @@ function initializeChatRoom(chatPartner) {
 
           // This ensures notifications come through as system messages
           handlers.addMessageToChat(
-            "system",
+            CHAT_WS_MSG_TYPE.SYSTEM,
             data.notification.message,
-            "system",
+            CHAT_WS_MSG_TYPE.SYSTEM,
             true
           );
         }
@@ -154,7 +153,7 @@ function initializeChatRoom(chatPartner) {
 
   // Prevent system user from sending messages
   sendButton.onclick = () => {
-    if (messageInput.value.trim() === "" || currentUser === "system") {
+    if (messageInput.value.trim() === "" || currentUser === CHAT_WS_MSG_TYPE.SYSTEM) {
       return;
     }
 
@@ -163,7 +162,7 @@ function initializeChatRoom(chatPartner) {
 
   // Similar prevention for Enter key
   messageInput.onkeyup = (e) => {
-    if (e.key === "Enter" && currentUser !== "system") {
+    if (e.key === "Enter" && currentUser !== CHAT_WS_MSG_TYPE.SYSTEM) {
       sendMessage(chatPartner);
     }
   };

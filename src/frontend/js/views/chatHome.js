@@ -23,7 +23,7 @@ export async function loadChatPage(addToHistory = true) {
     try {
       const chatHomeTemplate = document.querySelector("#chat-home-template");
       const chatHomeContent = chatHomeTemplate.content.cloneNode(true);
-      document.getElementById("main-content").appendChild(chatHomeContent);
+      // document.getElementById("main-content").appendChild(chatHomeContent);
       await renderNotifications();
     } catch (error) {
       console.error("Error with renderNotifications");
