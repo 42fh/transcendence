@@ -168,46 +168,76 @@ export function createSVGElement(type, attributes) {
  * @param {string} [options.stroke='black'] - Border color
  */
 
-export function renderSingleBall(ball, options = {}) {
+export function renderSingleBall(ball, options = {}, debug = false) {
   const renderer = getRendererState();
+  debug = true;
+  console.log("renderSingleBall - input:", {
+    ball,
+    options,
+    scale: renderer.config.scale,
+  });
   if (!renderer.svg) return;
 
   const { shape = "circle", fill = "yellow", stroke = "black" } = options;
 
-  const transformedPoint = transformVertices([{ x: ball.x, y: ball.y }])[0];
-  const ballX = transformedPoint.x;
-  const ballY = transformedPoint.y;
-
-  if (shape === "square") {
-    const squareSize = ball.size * renderer.config.scale * Math.SQRT2;
-    renderer.svg.appendChild(
-      createSVGElement("rect", {
-        x: ballX - squareSize / 2,
-        y: ballY - squareSize / 2,
-        width: squareSize,
-        height: squareSize,
-        fill,
-        stroke,
-        "stroke-width": "1",
-      })
-    );
-  } else {
-    renderer.svg.appendChild(
-      createSVGElement("circle", {
-        cx: ballX,
-        cy: ballY,
-        r: ball.size * renderer.config.scale,
-        fill,
-        stroke,
-        "stroke-width": "1",
-      })
-    );
+  let ballX = ball.x;
+  let ballY = ball.y;
+  if (debug && ballX === 0 && ballY === 0) {
+    ballX = 0.5; // Center horizontally
+    ballY = 0.5; // Center vertically
   }
+
+  const transformedPoint = transformVertices([{ x: ball.x, y: ball.y }])[0];
+  const scaledBallX = transformedPoint.x;
+  const scaledBallY = transformedPoint.y;
+  //   const scaledBallSize = ball.size * renderer.config.scale;
+  // Use the smaller dimension of the viewBox for consistent scaling
+  const scaleFactor = Math.min(renderer.config.viewBox.width, renderer.config.viewBox.height);
+  const scaledSize = ball.size * scaleFactor;
+
+  // Log final SVG element properties
+  const elementProps =
+    shape === "square"
+      ? {
+          type: "rect",
+          x: scaledBallX - (scaledSize * Math.SQRT2) / 2,
+          y: scaledBallY - (scaledSize * Math.SQRT2) / 2,
+          width: scaledSize * Math.SQRT2,
+          height: scaledSize * Math.SQRT2,
+        }
+      : {
+          type: "circle",
+          cx: scaledBallX,
+          cy: scaledBallY,
+          r: scaledSize,
+        };
+
+  console.log("SVG element:", elementProps);
+
+  // Create and append the SVG element
+  renderer.svg.appendChild(
+    createSVGElement(elementProps.type, {
+      ...elementProps,
+      fill,
+      stroke,
+      "stroke-width": "1",
+    })
+  );
 }
 
-export function renderBalls() {
+export function renderBalls(debug = false) {
   const renderer = getRendererState();
   if (!renderer.svg || !renderer.state.balls) return;
+
+  debug = true;
+
+  if (debug) {
+    console.log("renderBalls - state:", {
+      hasSVG: !!renderer.svg,
+      balls: renderer.state.balls,
+      config: renderer.config.ball,
+    });
+  }
 
   renderer.state.balls.forEach((ball) => {
     renderSingleBall(ball, {
