@@ -20,15 +20,6 @@ export async function loadChatPage(addToHistory = true) {
       updateActiveNavItem("chat");
     }
 
-    try {
-      const chatHomeTemplate = document.querySelector("#chat-home-template");
-      const chatHomeContent = chatHomeTemplate.content.cloneNode(true);
-      // document.getElementById("main-content").appendChild(chatHomeContent);
-      await renderNotifications();
-    } catch (error) {
-      console.error("Error with renderNotifications");
-    }
-
     const mainContent = document.getElementById("main-content");
     mainContent.innerHTML = "";
 
@@ -39,6 +30,12 @@ export async function loadChatPage(addToHistory = true) {
 
     const content = document.importNode(template.content, true);
     mainContent.appendChild(content);
+
+    try {
+      await renderNotifications();
+    } catch (error) {
+      console.error("Error with renderNotifications:", error);
+    }
 
     const currentUser = LOCAL_STORAGE_KEYS.USERNAME;
     if (currentUser) {
@@ -59,9 +56,9 @@ export async function loadChatPage(addToHistory = true) {
     } else {
       console.error("No current user found for notifications");
     }
+
     await loadChatList(1, "", "");
 
-    // Load users list (Horizontal scroll), filtering out users in conversations with current user
     await loadUsersList(1, 100, "");
 
     const markAllReadButton = document.getElementById(
@@ -70,6 +67,13 @@ export async function loadChatPage(addToHistory = true) {
     if (markAllReadButton) {
       markAllReadButton.addEventListener("click", markAllNotificationsRead);
     }
+
+    const modalTemplate = document.getElementById("modal-template");
+    if (!modalTemplate) {
+      console.error("Modal template not found");
+    }
+
+    await renderNotifications();
   } catch (error) {
     console.error("Error loading chat home:", error);
     displayModalError("Failed to load chat home");
