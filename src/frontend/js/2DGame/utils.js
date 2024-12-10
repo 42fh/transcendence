@@ -36,33 +36,81 @@ export function updateScoreDisplays() {
   console.log("Entering updateScoreDisplays");
   const gameContext = getGameContext();
   console.log("gameContext:", gameContext);
-  const scoreDisplay = document.getElementById("two-d-game__score-display");
-  if (!scoreDisplay || !gameContext.players.length) {
+  // Get the score display element
+  // Mind the the 'external' template is already loaded in the index.html
+  const scoreDisplayElement = document.getElementById("two-d-game__score-display");
+  if (!scoreDisplayElement) {
+    console.warn("Score display not found");
+    return;
+  }
+
+  // Get the score item template, the nested template
+  const gameTemplate = document.getElementById("two-d-game__game-template");
+  const scoreItemTemplate = gameTemplate.content.getElementById("two-d-game__score-item-template");
+  if (!scoreItemTemplate) {
+    console.warn("Score item template not found");
+    return;
+  }
+
+  if (!scoreDisplayElement || !gameContext.players.length) {
     console.warn("Score display not found or no players available", {
-      scoreDisplay,
+      scoreDisplay: scoreDisplayElement,
       players: gameContext.players,
     });
     return;
   }
 
-  scoreDisplay.innerHTML = "";
-  const template = document.getElementById("two-d-game__score-item-template");
+  scoreDisplayElement.innerHTML = "";
 
   gameContext.players
     .sort((a, b) => a.index - b.index) // Ensure consistent display order
     .forEach((player) => {
-      const scoreItem = template.content.cloneNode(true);
-      const container = scoreItem.querySelector(".two-d-game__score-item");
+      const scoreItem = scoreItemTemplate.content.cloneNode(true);
+      const scoreItemContainer = scoreItem.querySelector(".two-d-game__score-item");
 
       if (player.isCurrentPlayer) {
-        container.classList.add("two-d-game__score-item--current");
+        scoreItemContainer.classList.add("two-d-game__score-item--current");
       }
 
-      container.querySelector(".two-d-game__player-name").textContent = player.isCurrentPlayer
+      scoreItemContainer.querySelector(".two-d-game__player-name").textContent = player.isCurrentPlayer
         ? "You"
         : player.username;
-      container.querySelector(".two-d-game__player-score").textContent = player.score.toString();
+      scoreItemContainer.querySelector(".two-d-game__player-score").textContent = player.score.toString();
 
-      scoreDisplay.appendChild(scoreItem);
+      scoreDisplayElement.appendChild(scoreItem);
     });
+}
+
+/**
+ * Updates the game info form data
+ * @param {Object} data - The data to update the form with
+ */
+export function updateGameInfo(data) {
+  const gameInfo = document.getElementById("two-d-game__game-info");
+  if (!gameInfo) {
+    console.warn("Game info container not found");
+    return;
+  }
+
+  // Get the template
+  const gameTemplate = document.getElementById("two-d-game__game-template");
+  const infoTemplate = gameTemplate.content.getElementById("two-d-game__game-info-template");
+  if (!infoTemplate) {
+    console.warn("Game info template not found");
+    return;
+  }
+
+  // Clear existing content
+  gameInfo.innerHTML = "";
+
+  // Create and append each info item
+  data.forEach((item) => {
+    const infoItem = infoTemplate.content.cloneNode(true);
+    const container = infoItem.querySelector(".two-d-game__game-info-item");
+
+    container.querySelector(".two-d-game__game-info-label").textContent = item.label;
+    container.querySelector(".two-d-game__game-info-value").textContent = item.value;
+
+    gameInfo.appendChild(infoItem);
+  });
 }

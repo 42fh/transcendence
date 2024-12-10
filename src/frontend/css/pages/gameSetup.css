@@ -107,23 +107,6 @@
   border-radius: 4px;
 }
 
-/* Logs and Monitoring */
-.two-d-game__event-log {
-  height: 200px;
-  overflow-y: auto;
-  font-family: monospace;
-  font-size: 14px;
-}
-
-.two-d-game__log-entry {
-  padding: 8px;
-  border-bottom: 1px solid #eee;
-}
-
-.two-d-game__log-entry:last-child {
-  border-bottom: none;
-}
-
 .two-d-game__input {
   width: 100%;
   padding: 8px;
@@ -193,35 +176,6 @@
 .two-d-game__score-item.current-player {
   background: #e3f2fd;
   font-weight: bold;
-}
-
-/* Game Info Display */
-.two-d-game__game-info {
-  font-size: 14px;
-}
-
-.two-d-game__game-info-item {
-  display: flex;
-  justify-content: space-between;
-  padding: 4px 0;
-}
-
-.two-d-game__game-info-label {
-  font-weight: 600;
-  color: #666;
-}
-
-/* Controls Info */
-.two-d-game__controls-info {
-  background: #e3f2fd;
-  padding: 15px;
-  border-radius: 4px;
-  margin-top: 20px;
-}
-
-.two-d-game__controls-info ul {
-  margin: 10px 0;
-  padding-left: 20px;
 }
 
 .two-d-game__select {

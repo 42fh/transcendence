@@ -89,13 +89,15 @@ export function connectGameSocket(wsConfig) {
 
   ws.onclose = () => {
     console.log("WebSocket closed");
-    handleGameSocketReconnect(wsConfig);
+    // handleGameSocketReconnect(wsConfig);
   };
 
   ws.onerror = (error) => {
     console.error("WebSocket error:", error);
   };
 }
+
+// NOTE: this is never used, cause we don't allow to the websocket to reconnect
 
 function handleGameSocketReconnect(wsConfig) {
   if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {

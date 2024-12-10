@@ -42,6 +42,8 @@ export const defaultPlayer = {
  * @property {string} message - System message for the player
  * @property {PlayerValues} player_values - Player-specific settings
  * @property {GameSetup} game_setup - Initial game configuration
+ * @property {string} type - Game type ("classic", "custom")
+ *
  */
 
 /** @type {GameContext} */
@@ -62,6 +64,17 @@ export const gameContext = {
     type: "classic",
     vertices: [],
   },
+  players: [
+    {
+      player_id: "06efddfd-6d32-454b-bb11-0c21244914a7",
+      index: 0,
+      username: "player1",
+      score: 0,
+      role: "player",
+      isCurrentPlayer: false,
+      isActive: true,
+    },
+  ],
 };
 
 // Add this line to attach gameContext to window
@@ -91,22 +104,41 @@ export function getGameContext() {
  * - player_values: Player specific values (move speed, cooldown, etc)
  * - game_setup: Game configuration (type, vertices)
  */
-export function updateGameContext(message) {
-  if (!message) return;
+export function updateGameContext(message, debug = false) {
+  debug = true;
+  // 1. game_setup
+  // 2. game_state
+  // 3. message
+  // 4. player_index
+  // 5. player_values
+  // 6. role
+  // 7. type
 
-  // Update game state
+  if (debug) console.log("Entering updateGameContext");
+  if (!message) return;
+  if (debug) console.log("message:", message);
+  // 1. Update game setup
+  if (message.game_setup) {
+    gameContext.game_setup = {
+      type: message.game_setup.type,
+      vertices: message.game_setup.vertices || [],
+    };
+    if (debug) console.log("gameContext.game_setup:", gameContext.game_setup);
+  }
+  // 2. Update game state
   if (message.game_state) {
     gameContext.game_state = message.game_state;
+    if (debug) console.log("gameContext.game_state:", gameContext.game_state);
   }
 
-  // Update role and player index
-  if (message.role) gameContext.role = message.role;
-  if (message.player_index !== undefined) gameContext.player_index = message.player_index;
-
-  // Update message
+  // 3. Update message
   if (message.message) gameContext.message = message.message;
+  if (debug) console.log("gameContext.message:", gameContext.message);
 
-  // Update player values
+  // 4. Update index
+  if (message.player_index !== undefined) gameContext.player_index = message.player_index;
+  if (debug) console.log("gameContext.player_index:", gameContext.player_index);
+  // 5. Update player values
   if (message.player_values) {
     gameContext.player_values = {
       move_cooldown: message.player_values.move_cooldown,
@@ -115,14 +147,38 @@ export function updateGameContext(message) {
       reverse_controls: message.player_values.reverse_controls,
       paddle_length: message.player_values.paddle_length,
     };
+    if (debug) console.log("gameContext.player_values:", gameContext.player_values);
   }
 
-  // Update game setup
-  if (message.game_setup) {
-    gameContext.game_setup = {
-      type: message.game_setup.type,
-      vertices: message.game_setup.vertices || [],
-    };
+  // 6. Update role
+  if (debug) console.log("gameContext.role:", gameContext.role);
+  if (message.role) gameContext.role = message.role;
+
+  // 7. Update type
+  if (message.type) gameContext.type = message.type;
+  // 8. Update players array
+  if (message.player_names) {
+    // Use player information from server
+    gameContext.players = message.player_names.map((player) => ({
+      id: player.player_id,
+      username: player.username,
+      index: player.index,
+      score: message.game_state?.scores?.[player.index] || 0,
+      role: message.role || "player",
+      isCurrentPlayer: player.index === message.player_index,
+      isActive: true,
+    }));
+  } else if (message.game_state?.scores) {
+    // Generate default player information from scores
+    gameContext.players = message.game_state.scores.map((score, index) => ({
+      id: `player-${index}`,
+      username: `Unknown Player ${index + 1}`,
+      index: index,
+      score: score,
+      role: index === message.player_index ? message.role || "player" : "player",
+      isCurrentPlayer: index === message.player_index,
+      isActive: true,
+    }));
   }
 }
 

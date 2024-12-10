@@ -5,7 +5,8 @@ import { gameState, gameConfig, updateGameState } from "../store/index.js";
 import { initializeRenderer, updateRenderer } from "./renderer.js";
 import { disconnectGameSocket } from "../services/gameSocketService.js";
 import { showGameOver } from "./utils.js";
-import { updateGameContext } from "../store/index.js";
+import { updateGameContext, getGameContext } from "../store/index.js";
+import { updateGameInfo } from "./utils.js";
 
 export function handleGameMessage(message, onEvent = null) {
   try {
@@ -40,11 +41,49 @@ function handleInitialState(message, onEvent) {
   console.log("onEvent:", onEvent);
   // Players are still missing
   updateGameContext(message);
+
+  const gameContext = getGameContext();
+  // For backend data:
+
+  const INVALID_VALUE = "❌"; // or "???" or "—" or "N/A"
+  if (!gameContext) {
+    console.warn("Game context is not available");
+    return;
+  }
+  if (
+    !gameContext.player_index ||
+    !gameContext.game_setup.type ||
+    !gameContext.players.length ||
+    !gameContext.game_state.balls.length
+  ) {
+    console.warn({
+      "gameContext.player_index": gameContext.player_index,
+      "gameContext.game_setup.type": gameContext.game_setup.type,
+      "gameContext.players.length": gameContext.players.length,
+      "gameContext.game_state.balls.length": gameContext.game_state.balls.length,
+    });
+    return;
+  }
+  const gameContextInfoItems = [
+    { label: "Player ID", value: gameContext.player_index },
+    { label: "Game Type", value: gameContext.game_setup.type },
+    { label: "Players", value: gameContext.players.length || INVALID_VALUE },
+    { label: "Balls", value: gameContext.game_state.balls.length || INVALID_VALUE },
+  ];
+
+  if (gameContext.game_setup.sides) {
+    gameContextInfoItems.push({ label: "Sides", value: gameContext.game_setup.sides || INVALID_VALUE });
+  }
+  if (gameContext.game_setup.shape) {
+    gameContextInfoItems.push({ label: "Shape", value: gameContext.game_setup.shape || INVALID_VALUE });
+  }
+
+  updateGameInfo(gameContextInfoItems);
   initializeRenderer(message);
 
-  console.warn("Disconnecting game socket after receiving initial state - Just for testing");
+  //   console.warn("Disconnecting game socket after receiving initial state - Just for testing");
   // Disconnect after receiving initial state
-  disconnectGameSocket();
+  //   disconnectGameSocket();
 
   if (onEvent) {
     onEvent({

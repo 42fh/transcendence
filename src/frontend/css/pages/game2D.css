@@ -1,38 +1,25 @@
-/* Main container */
-/* .two-d-game__container-game {
-  width: 100%;
-  height: 100vh;
-  padding: 20px;
-} */
 .two-d-game__page-container--game {
-  /* width: var(--page-width); */
   width: 100%;
-  /* padding: var(--spacing-lg); */
-  padding: 1 rem;
+  padding: var(--spacing-sm);
   margin: 0 auto;
-  background: pink;
+  background: var(--color-background);
+  min-height: 100vh;
 }
 
 /* Game layout with flexbox */
 .two-d-game__game-layout {
   display: flex;
-  gap: 20px;
-  height: 100%;
-}
-
-/* Main game area */
-.two-d-game__game-main {
-  flex: 1;
-  display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--spacing-md);
 }
 
-/* Canvas container */
+/* Game canvas container */
 .two-d-game__game-canvas-container {
-  aspect-ratio: 1;
-  background: #000;
-  border: 2px solid #333;
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: var(--color-background-dark);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--border-radius);
 }
 
 #two-d-game__pong-svg {
@@ -42,66 +29,159 @@
 
 /* Sidebar */
 .two-d-game__game-sidebar {
-  width: 300px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--spacing-md);
 }
 
-/* Panels (used in both main area and sidebar) */
+/* Panel styling */
 .two-d-game__panel {
-  background: rgba(0, 0, 0, 0.8);
-  border: 1px solid #333;
-  border-radius: 4px;
-  padding: 15px;
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-sm);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-small);
 }
 
-.two-d-game__panel-header {
-  margin-bottom: 10px;
+.two-d-game__panel h3 {
+  margin: 0 0 var(--spacing-sm) 0;
+  font-size: var(--font-size-large);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
 }
 
-.two-d-game__panel-title {
-  color: #fff;
-  font-size: 1.2em;
-  margin: 0;
+/* These are repeated with slight variations */
+.two-d-game__panel-item,
+.two-d-game__game-info-item,
+.two-d-game__score-item,
+.two-d-game__panel li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xs);
+  font-size: var(--font-size-panel);
 }
 
-/* Event log */
+.two-d-game__panel-item {
+  color: var(--color-text-label);
+}
+
+.two-d-game__panel-label {
+  color: var(--color-text-label);
+  font-weight: var(--font-weight-label);
+}
+
+.two-d-game__panel-value {
+  color: var(--color-text-primary);
+}
+
+/* Game Info - inherits from panel-item */
+
+.two-d-game__game-info-label {
+  color: var(--color-text-label);
+  font-weight: var(--font-weight-label);
+}
+
+.two-d-game__player-name {
+  color: var(--color-text-label);
+  font-weight: var(--font-weight-label);
+}
+
+.two-d-game__player-score {
+  color: var(--color-text-primary);
+}
+
+.two-d-game__control-key {
+  color: var(--color-text-primary);
+}
+
+.two-d-game__control-key {
+  color: var(--color-text-primary);
+}
+
+.two-d-game__score-display {
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-sm);
+}
+
+/* Score items */
+.two-d-game__score-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xs);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.two-d-game__score-item--current {
+  color: var(--color-text-primary);
+  border-left: var(--border-width) solid var(--color-accent);
+}
+
+.two-d-game__player-name {
+  color: var(--color-text-secondary);
+}
+
+.two-d-game__player-score {
+  color: var(--color-text-primary);
+}
+
+/* Logs and Monitoring */
 .two-d-game__event-log {
-  height: 150px;
+  height: 200px;
   overflow-y: auto;
+  font-size: var(--font-size-small);
+  background: var(--color-surface);
+  /* border: var(--border-width) solid var(--color-border); */
+  border-radius: var(--border-radius);
 }
 
 .two-d-game__log-entry {
-  color: #fff;
-  padding: 5px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: var(--spacing-xs);
+  border-bottom: var(--border-width) solid var(--color-border);
+  color: var(--color-text-primary);
 }
 
-/* Game info and score display */
-.two-d-game__game-info,
-.two-d-game__score-display {
-  color: #fff;
+.two-d-game__log-entry:last-child {
+  border-bottom: none;
 }
 
-/* Controls info */
-.two-d-game__controls-info {
-  color: #fff;
-  padding: 15px;
-  background: rgba(0, 0, 0, 0.8);
-  border-radius: 4px;
+/* Game Info Display */
+.two-d-game__game-info {
+  font-size: 14px;
 }
 
-.two-d-game__controls-info h3 {
-  margin: 0 0 10px 0;
+.two-d-game__game-info-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
 }
 
-.two-d-game__controls-info ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.two-d-game__game-info-label {
+  font-weight: 600;
+  color: #666;
 }
 
-.two-d-game__controls-info li {
-  padding: 5px 0;
+/* Desktop layout */
+@media (min-width: 1024px) {
+  .two-d-game__game-layout {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--spacing-lg);
+  }
+
+  .two-d-game__game-canvas-container {
+    flex: 1;
+    max-width: calc(100vh * (16 / 9));
+  }
+
+  .two-d-game__game-sidebar {
+    width: 300px;
+    position: sticky;
+    top: var(--spacing-md);
+  }
 }

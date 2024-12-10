@@ -274,7 +274,7 @@ export function renderPolygonGame() {
     renderPolygonOutline();
     renderPaddles();
     renderBalls();
-    updateScoreDisplays(renderer);
+    updateScoreDisplays();
   } catch (error) {
     console.error("Error rendering polygon:", error);
     showError(renderer, {
