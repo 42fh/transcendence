@@ -62,8 +62,8 @@ function initializeChatRoom(chatPartner) {
   };
 
   backButton.addEventListener("click", () => {
-    history.pushState({ view: "chat-home" }, ""); // Add chat-home to history
-    loadChatPage(false); // Navigate to chat-home
+    history.pushState({ view: "chat-home" }, "");
+    loadChatPage(false);
   });
   
 
@@ -88,7 +88,6 @@ function initializeChatRoom(chatPartner) {
         const messageDiv = messageElement.querySelector(".chat-message");
         const textElement = messageDiv.querySelector(".chat-message-text");
 
-        // Assign message text
         textElement.textContent = message;
 
         // Apply classes based on message type
@@ -103,7 +102,6 @@ function initializeChatRoom(chatPartner) {
         chatMessages.scrollTop = chatMessages.scrollHeight;
       },
       handleWebSocketMessage: (data) => {
-        // console.log("Received WebSocket message:", data);
         if (data.type === CHAT_WS_MSG_TYPE.MESSAGE) {
           const isSystemMessage = data.username === CHAT_WS_MSG_TYPE.SYSTEM;
 
@@ -127,10 +125,7 @@ function initializeChatRoom(chatPartner) {
           });
           handlers.state.messageHistoryLoaded = true;
         } else if (data.type === "send_notification") {
-          // Debug: Log the received notification
-          console.log("DEBUG: Notification received:", data.notification);
 
-          // This ensures notifications come through as system messages
           handlers.addMessageToChat(
             CHAT_WS_MSG_TYPE.SYSTEM,
             data.notification.message,
@@ -151,7 +146,6 @@ function initializeChatRoom(chatPartner) {
     displayModalError(`Failed to connect to chat: ${error.message}`);
   }
 
-  // Prevent system user from sending messages
   sendButton.onclick = () => {
     if (messageInput.value.trim() === "" || currentUser === CHAT_WS_MSG_TYPE.SYSTEM) {
       return;
@@ -160,7 +154,6 @@ function initializeChatRoom(chatPartner) {
     sendMessage(chatPartner);
   };
 
-  // Similar prevention for Enter key
   messageInput.onkeyup = (e) => {
     if (e.key === "Enter" && currentUser !== CHAT_WS_MSG_TYPE.SYSTEM) {
       sendMessage(chatPartner);
