@@ -38,11 +38,11 @@ class RedisSyncLock:
 
 
 class TournamentManager:
-    REDIS_TOURNAMENT_URL = "redis://redis:6379/3"
+    REDIS_URL = "redis://redis:6379/3"
 
     @classmethod
     def get_redis(cls) -> redis:
-        return redis.from_url(cls.REDIS_TOURNAMENT_URL, decode_responses=True)
+        return redis.from_url(cls.REDIS_URL, decode_responses=True)
 
     @classmethod
     def create_tournament(

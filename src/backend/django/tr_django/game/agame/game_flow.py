@@ -5,6 +5,9 @@ from .AGameManager import GameStateError
 import math
 from ..gamecoordinator.GameCoordinator import GameCoordinator, RedisLock
 import logging
+import time
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -45,11 +48,21 @@ async def start_game(self):
     try:
         players = self.settings.get("num_players")
         await GameCoordinator.set_to_waiting_game(self.game_id)
+
+        
+        redis_str = await GameCoordinator.get_redis(GameCoordinator.REDIS_GAME_URL)
+        redis_bin = await GameCoordinator.get_redis_binary(GameCoordinator.REDIS_GAME_URL)        
+
+        # Use async context managers for both Redis connections
+        # async with await GameCoordinator.get_redis(GameCoordinator.REDIS_GAME_URL) as redis_str, \
+        #          await GameCoordinator.get_redis_binary(GameCoordinator.REDIS_GAME_URL) as redis_bin:
+
+
         while True:
             async with RedisLock(self.redis_conn, f"{self.game_id}_player_situation"):
                 player_count = await self.redis_conn.scard(self.players_key)
                 if player_count == 0:
-                    logger.info( f"{self.game_id}: exit task but stat stays in redis for {waiting_after_leaving})"
+                    logger.info( f"{self.game_id}: exit task but stat stays in redis for {waiting_after_leaving}")
                     await GameCoordinator.set_to_waiting_game(self.game_id, waiting_after_leaving)
                     return
                 if player_count >= players:
@@ -66,10 +79,15 @@ async def start_game(self):
             )
 
             await asyncio.sleep(1)
+        pipeline = self.redis_conn.pipeline()
+        current_time = time.time()
+        pipeline.set(self.running_key, b"1")
+        pipeline.set(f"game_start_time:{self.game_id}", str(current_time).encode())        
+        await pipeline.execute()
 
-        await self.redis_conn.set(self.running_key, b"1")
+
         logger.debug(
-            f"""DEBUG    
+        f"""DEBUG    
         sides: {self.num_sides} 
         paddles: {self.num_paddles} 
         mode: {self.game_mode} 
@@ -91,7 +109,7 @@ async def start_game(self):
             await asyncio.sleep(0.016)  # ~60 FPS
     except Exception as e:
         logger.error(f"Error in start_game: {e}")
-        self.error_exit("Error in start_game" , f"{e}")
+        await self.error_exit("Error in start_game" , f"{e}")
         return
 
 
@@ -99,12 +117,14 @@ async def end_game(self):
     """End game with process-safe cleanup"""
     try:
         await GameCoordinator.set_to_finished_game(self.game_id)
+        print("end now the datavbase")
+        await GameCoordinator.store_game_in_database(self.game_id)
         # Keep game state briefly for end-game display
         # would be handle by GameCoordinator 
-
+        print ("the END")
     except Exception as e:
         logger.error(f"Error ending game: {e}")
-        self.error_exit("Error in ending game" , f"{e}")
+        await self.error_exit("Error in ending game" , f"{e}")
 
 async def update_game(self):
     """Process-safe game update with enhanced error handling"""
@@ -212,7 +232,7 @@ async def update_game(self):
 
     except Exception as e:
         logger.error(f"Error in update_game: {e}")
-        self.error_exit("Error in update_game" , f"{e}")
+        await self.error_exit("Error in update_game" , f"{e}")
         return False
 
 

@@ -351,7 +351,7 @@ class TournamentWebsocketTest(TransactionTestCase):
                 reverse("tournament_enrollment", args=[tournament_id])
             )
             enrollment_data = json.loads(response.content)
-            logger.debug(f"disconnect player 3: {enrollment_data}")
+            logger.info(f"disconnect player 3: {enrollment_data}")
         
         finally:
             if communicator1:

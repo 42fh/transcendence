@@ -39,11 +39,10 @@ class PolygonPongGame(AGameManager):
         #        )  # Will be initialized after num_sides is set from settings
         #        self.game_mode = "regular"  # Default mode
         #        # Initialize combo system
-        #        self.hit_combo = 0
+        self.hit_combo = 0
         self.last_hit_time = 0
         self.combo_timeout = 1.5  # seconds
-
-    #        self.highest_recorded_speed = 0
+        self.highest_recorded_speed = 0
     #
     # not sure if needed
     #    async def apply_game_settings(self):

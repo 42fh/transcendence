@@ -10,6 +10,9 @@ import math
 import logging
 from asgiref.sync import sync_to_async
 
+
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -35,8 +38,9 @@ class RedisLock:
 class GameCoordinator:
     """creates new games and manages all waiting and running games"""
 
-    REDIS_URL = "redis://redis:6379/2"
-    REDIS_GAME_URL = "redis://redis:6379/1"
+    REDIS_URL = "redis://redis:6379/2" # GameCoordinator data 
+    REDIS_GAME_URL = "redis://redis:6379/1" # GameManager data -> real game data
+    
     # KEYS for Redis
     ALL_GAMES = "all_games"
     WAITING_GAMES = "waiting_games"
@@ -137,7 +141,10 @@ class GameCoordinator:
             pipeline.set(f"game_recorded:{game_id}", "0")  # Not recorded
             pipeline.set(f"game_running:{game_id}", "0")  # Not running
             pipeline.set(f"game_finished:{game_id}", "0")  # Not finished
-            pipeline.set(f"game_is_tournament:{game_id}", "0")  # Not tournament
+            # pipeline.set(f"game_is_tournament:{game_id}", "0")  # Not tournament
+            current_time = time.time()
+            pipeline.set(f"game_created_time:{game_id}", str(current_time))            
+
 
             # String values
             pipeline.set(f"game_type:{game_id}", settings.get("type"))
@@ -189,13 +196,7 @@ class GameCoordinator:
             await pipeline.execute()
 
     @classmethod
-    async def create_tournament_game(
-        cls,
-        real_game_id: str,
-        tournament_id: str,
-        players: list[str],
-        game_settings: dict,
-    ) -> dict:
+    async def create_tournament_game(cls, real_game_id: str, tournament_id: str, players: list[str], game_settings: dict) -> dict:
         """Create tournament game with pre-assigned players"""
         try:
             game_id = None
@@ -578,6 +579,260 @@ class GameCoordinator:
                     pipe.set(f"game_finished:{game_id}", "1")
                     await pipe.execute()
 
+    # 
+    @classmethod
+    async def cleanup_game(cls, game_id: str):
+        """Clean up all Redis entries related to a specific game using UNLINK for async deletion"""
+        try:
+            async with await cls.get_redis(cls.REDIS_URL) as redis_conn:
+                await redis_conn.srem(cls.ALL_GAMES, game_id)
+                await redis_conn.srem(cls.WAITING_GAMES, game_id)
+                await redis_conn.srem(cls.RUNNING_GAMES, game_id)
+                await redis_conn.srem(cls.FINISHED_GAMES, game_id)
+
+            async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_game:
+                keys_to_delete = []
+                async for key in redis_game.scan_iter(f"*:{game_id}"):
+                    keys_to_delete.append(key)
+                
+                if keys_to_delete:
+                    await redis_game.unlink(*keys_to_delete)
+                    logger.info(f"Cleaned up {len(keys_to_delete)} keys for game {game_id}")
+            return True
+        except Exception as e:
+            logger.error(f"Error cleaning up game {game_id}: {e}")
+            return False
+    
+    @classmethod
+    @sync_to_async
+    def _get_player_instances(cls, player_ids):
+        """Get Player model instances for given user IDs"""
+        from ..models import Player
+        return {
+            str(p.user.id): p 
+            for p in Player.objects.filter(user_id__in=player_ids)
+        }
+
+
+    @classmethod
+    @sync_to_async
+    def _update_tournament_game(cls, game_id, winner, finished_at):
+        """Update existing tournament game record, ensuring it has a mode"""
+        from ..models import TournamentGame, GameMode
+        
+        # Get or create default mode
+        default_mode, _ = GameMode.objects.get_or_create(
+            name="Default Tournament",
+            defaults={
+                'description': 'Default tournament mode',
+                'player_count': GameMode.TWO_PLAYER,
+                'ball_speed': 1.0,
+                'paddle_size': 1.0,
+                'number_of_balls': 1,
+                'ball_size': 1.0,
+                'win_condition': 'points',
+                'winning_score': 11
+            }
+        )
+        
+        game = TournamentGame.objects.get(id=game_id)
+        game.finished_at = finished_at
+        game.winner = winner
+        game.status = 'finished'
+        
+        # Set default mode if none exists
+        if not game.mode:
+            game.mode = default_mode
+            
+        game.save()
+        return game
+
+    @classmethod
+    @sync_to_async
+    def _create_single_game(cls, game_id, winner, created_at, start_date, finished_at):
+        """Create new single game record with a default mode"""
+        from ..models import SingleGame, GameMode
+        
+        # Get or create a default game mode
+        default_mode, _ = GameMode.objects.get_or_create(
+            name="Default",
+            defaults={
+                'description': 'Default game mode',
+                'player_count': GameMode.TWO_PLAYER,
+                'ball_speed': 1.0,
+                'paddle_size': 1.0,
+                'number_of_balls': 1,
+                'ball_size': 1.0,
+                'win_condition': 'points',
+                'winning_score': 11
+            }
+        )
+        
+        game = SingleGame.objects.create(
+            id=game_id,
+            status='finished',
+            created_at=created_at,
+            start_date=start_date,
+            finished_at=finished_at,
+            mode=default_mode  # Set the default mode
+        )
+        
+        if winner:
+            game.winner = winner
+            game.save()
+        return game
+
+
+
+    @classmethod
+    @sync_to_async
+    def _create_player_stats(cls, player, score, joined_at, game, is_tournament, rank):
+        """Create player game statistics record with rank"""
+        from ..models import PlayerGameStats
+        stats = PlayerGameStats(
+            player=player,
+            score=score,
+            joined_at=joined_at,
+            rank=rank
+        )
+        
+        # Assign game to the appropriate field based on game type
+        if is_tournament:
+            stats.tournament_game = game
+            stats.single_game = None
+        else:
+            stats.single_game = game
+            stats.tournament_game = None
+        
+        stats.save()
+        
+        # Update player's overall stats
+        player.update_stats(won=(player.id == game.winner_id if game.winner_id else False))
+
+    @classmethod
+    async def store_game_in_database(cls, game_id: str):
+        """
+        Stores completed game data in the database.
+        Should be called during game finish process.
+        """
+        from django.utils import timezone
+        from datetime import datetime, timezone as dt_timezone      
+        try:
+            # Get final game state and settings from Redis
+            async with await cls.get_redis_binary(cls.REDIS_GAME_URL) as redis_game:
+                pipe = redis_game.pipeline()
+                pipe.get(f"game_state:{game_id}")
+                pipe.get(f"game_settings:{game_id}")
+                state_data, settings_data = await pipe.execute()
+
+            if not state_data or not settings_data:
+                raise ValueError("Game state or settings not found")
+                
+            final_state = msgpack.unpackb(state_data)
+            settings = msgpack.unpackb(settings_data)
+            # Game mode info is in settings
+            game_mode = settings.get("type")  # Get the game mode from settings
+        
+            
+            # Check if this is a tournament game
+            async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
+                is_tournament = await redis_conn.get(f"game_is_tournament:{game_id}")
+                real_game_id = None
+                if is_tournament:
+                    real_game_id = await redis_conn.get(f"tournament_game:{game_id}")
+
+                pipe = redis_conn.pipeline()
+                pipe.get(f"game_is_tournament:{game_id}")
+                pipe.get(f"tournament_game:{game_id}")
+                pipe.get(f"game_created_time:{game_id}")
+                pipe.get(f"game_start_time:{game_id}")
+                results = await pipe.execute()
+                
+                #is_tournament = results[0]
+                #real_game_id = results[1]
+                created_timestamp = float(results[2]) if results[2] else None
+                start_timestamp = float(results[3]) if results[3] else None                
+
+
+
+                # Get all players and their scores
+                players_data = []
+                async for player_id in redis_conn.sscan_iter(f"game_players:{game_id}"):
+                    pipe = redis_conn.pipeline()
+                    pipe.get(f"{game_id}:player_side:{player_id}")
+                    pipe.get(f"player_join_time:{game_id}:{player_id}")
+                    pipe.get(f"{game_id}:paddle_index:{player_id}")
+                    side_data, join_time, paddle_index = await pipe.execute()
+                    
+                    if paddle_index is not None:
+                        side_index = int(paddle_index)
+                        score = final_state["scores"][side_index]
+                        players_data.append({
+                            "player_id": player_id,
+                            "score": score,
+                            "side_index": side_index,
+                            "joined_at": float(join_time) if join_time else None
+                        })           
+            print(players_data) 
+            # Sort by score to determine winner and rankings
+            players_data.sort(key=lambda x: x["score"], reverse=True)
+            for rank, player_data in enumerate(players_data, 1):
+                player_data["rank"] = rank
+
+            winner_id = players_data[0]["player_id"] if players_data else None
+        
+
+ 
+            # # Sort by score to determine winner
+            # players_data.sort(key=lambda x: x["score"], reverse=True)
+            # winner_id = players_data[0]["player_id"] if players_data else None
+            
+            # Get player instances from database
+            player_instances = await cls._get_player_instances([pd["player_id"] for pd in players_data])
+            winner = player_instances.get(winner_id) if winner_id else None
+            finished_at = timezone.now()
+            # Convert timestamps to datetime objects
+            created_at = timezone.datetime.fromtimestamp(created_timestamp, tz=dt_timezone.utc) if created_timestamp else None
+            start_date = timezone.datetime.fromtimestamp(start_timestamp, tz=dt_timezone.utc) if start_timestamp else None   
+
+            # Create or update game record
+            if is_tournament and real_game_id:
+                game = await cls._update_tournament_game(real_game_id, winner, finished_at)
+            else:
+                game = await cls._create_single_game(
+                    game_id,
+                    winner,
+                    created_at,
+                    start_date,
+                    finished_at
+                )
+                # We might want to set the game mode here for SingleGame
+                # if game_mode:
+                #    game.mode = game_mode
+                #    await sync_to_async(game.save)()
+            
+            # Create player stats records with ranks
+            tasks = [
+                cls._create_player_stats(
+                    player_instances.get(str(player_data["player_id"])),
+                    player_data["score"],
+                    datetime.fromtimestamp(player_data["joined_at"], tz=dt_timezone.utc) if player_data["joined_at"] else start_date,
+                    game,
+                    bool(is_tournament),
+                    player_data["rank"]
+                )
+                for player_data in players_data
+                if player_instances.get(str(player_data["player_id"]))
+            ]
+            
+            await asyncio.gather(*tasks)
+            return game.id
+            
+        except Exception as e:
+            logger.error(f"Error storing game in database: {e}", exc_info=True)
+            return None
+
+
     # some more calls
     @classmethod
     async def cancel_booking(cls, user_id: str) -> dict:
@@ -657,26 +912,3 @@ class GameCoordinator:
         except Exception as e:
             logger.error(f"Error setting offline status: {e}")
 
-    #
-    @classmethod
-    async def cleanup_game(cls, game_id: str):
-        """Clean up all Redis entries related to a specific game using UNLINK for async deletion"""
-        try:
-            async with await cls.get_redis(cls.REDIS_URL) as redis_conn:
-                await redis_conn.srem(cls.ALL_GAMES, game_id)
-                await redis_conn.srem(cls.WAITING_GAMES, game_id)
-                await redis_conn.srem(cls.RUNNING_GAMES, game_id)
-                await redis_conn.srem(cls.FINISHED_GAMES, game_id)
-
-            async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_game:
-                keys_to_delete = []
-                async for key in redis_game.scan_iter(f"*:{game_id}"):
-                    keys_to_delete.append(key)
-                
-                if keys_to_delete:
-                    await redis_game.unlink(*keys_to_delete)
-                    logger.info(f"Cleaned up {len(keys_to_delete)} keys for game {game_id}")
-            return True
-        except Exception as e:
-            logger.error(f"Error cleaning up game {game_id}: {e}")
-            return False
