@@ -1,5 +1,23 @@
 import { showToast } from "./toast.js";
 import { updateNotificationBadge } from "../components/bottomNav.js";
+import { WS_RECONNECTION, CHAT_WS_MSG_TYPE } from "../config/constants.js";
+
+let reconnectAttempts = 0;
+
+function reconnectWebSocket(wsUrl) {
+  if (reconnectAttempts >= WS_RECONNECTION.MAX_RECONNECT_ATTEMPTS) {
+    showToast("Maximum reconnect attempts reached", true);
+    return;
+  }
+  
+  reconnectAttempts++;
+  showToast(`Attempting to reconnect... (${reconnectAttempts}/${WS_RECONNECTION.MAX_RECONNECT_ATTEMPTS})`, "warning");
+
+  setTimeout(() => {
+    setupNotificationListener(wsUrl);
+  }, RECONNECT_DELAY);
+}
+
 
 export function setupNotificationListener(wsUrl) {
   if (!wsUrl) {
@@ -7,10 +25,8 @@ export function setupNotificationListener(wsUrl) {
     showToast("Notification setup failed: Invalid URL", true);
     return null;
   }
-  // console.log("wsurl:", wsUrl);
 
   try {
-    // console.log(wsUrl);
     if (window.chatSocket) {
       window.chatSocket.close();
     }
@@ -25,11 +41,11 @@ export function setupNotificationListener(wsUrl) {
         const data = JSON.parse(event.data);
         console.log("Received WebSocket message:", data);
 
-        if (data.type === "send_notification") {
+        if (data.type === "CHAT_WS_MSG_TYPE.SEND_NOTIFICATION") {
           showToast(data.notification.message, false);
 
-          const unreadCount = data.notification.is_read ? 0 : 1;
-          updateNotificationBadge(unreadCount);
+          const unread = data.notification.is_read ? 0 : 1;
+          updateNotificationBadge(unread);
         }
       } catch (parseError) {
         console.error("Error parsing WebSocket message:", parseError);
@@ -49,6 +65,7 @@ export function setupNotificationListener(wsUrl) {
       if (event.code !== 1000) {
         // 1000 is a normal closure
         showToast("Notification connection lost. Reconnecting...", "warning");
+        reconnectWebSocket(wsUrl);
       }
     };
 
