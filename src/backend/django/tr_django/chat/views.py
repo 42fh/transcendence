@@ -189,7 +189,7 @@ def notifications(request):
         if request.method == "GET":
             try:
                 notifications = Notification.objects.filter(user=request.user).values(
-                    "id", "message", "created_at", "is_read"
+                    "id", "message", "created_at", "is_read", "url"
                 )
                 logger.debug(f"Notifications found: {list(notifications)}")
 
@@ -229,7 +229,7 @@ def notifications(request):
                 if not message:
                     return JsonResponse({"status": "error", "message": "Missing message field"}, status=400)
 
-                notification = Notification.objects.create(user=request.user, message=message)
+                notification = Notification.objects.create(user=request.user, message=message, url=url)
 
                 return JsonResponse(
                     {"status": "success", "message": "Notification created successfully", "id": notification.id}
