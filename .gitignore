@@ -86,3 +86,5 @@ src/backend/django/tests/media/*
 
 #So the intern doesn't push thousands of lines incognito:
 tore.
+
+ssl-keys/
