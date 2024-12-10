@@ -195,7 +195,7 @@ body {
 
 .mobile-controls {
   position: fixed;
-  bottom: 20px;
+  bottom: 60px;
   left: 0;
   right: 0;
   display: flex;
