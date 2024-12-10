@@ -9,7 +9,7 @@ import { showToast } from "../utils/toast.js";
 import { renderNotifications } from "../components/chatNotification.js";
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 
-import { testButtonForNotificationsWithUrl } from "../dirtyTesting/testButtonForNotificationsWithUrl.js";
+// import { testButtonForNotificationsWithUrl } from "../dirtyTesting/testButtonForNotificationsWithUrl.js";
 
 let conversationUsers = [];
 let notificationSocket = null;
