@@ -55,23 +55,27 @@ export async function loadGameOffline(addToHistory = true) {
         // Bounce off top and bottom walls
         if (ballY - ballSize <= 0 || ballY + ballSize >= gameCanvas.height) {
             ballSpeedY = -ballSpeedY;
+
+            ballX += 0.1 * ballSpeedX;
             ballY += 0.1 * ballSpeedY;
         }
 
         // Paddle collision
         if (ballX - ballSize <= 30 && ballY > paddle1Y && ballY < paddle1Y + paddleHeight) {
             ballSpeedX = -ballSpeedX;
-            ballX += 0.1 *ballSpeedX;
-        } else if (ballX >= gameCanvas.width - 30 - ballSize && ballY > paddle2Y && ballY < paddle2Y + paddleHeight) {
+            ballX += 0.1 * ballSpeedX;
+            ballY += 0.1 * ballSpeedY;
+        } else if (ballX + ballSize >= gameCanvas.width - 30 && ballY > paddle2Y && ballY < paddle2Y + paddleHeight) {
             ballSpeedX = -ballSpeedX;
-            ballX += 0.1 *ballSpeedX;
+            ballX += 0.1 * ballSpeedX;
+            ballY += 0.1 * ballSpeedY;
         }
 
         // Scoring
-        if (ballX <= 0) {
+        if (ballX < 30) {
             player2Score++;
             resetBall();
-        } else if (ballX >= gameCanvas.width) {
+        } else if (ballX > gameCanvas.width - 30) {
             player1Score++;
             resetBall();
         }
