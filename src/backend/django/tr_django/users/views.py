@@ -309,7 +309,6 @@ class DeleteUserView(APIView):
         except Exception as e:
             logger.error(f"Error anonymizing user account: {str(e)}")
             return JsonResponse({"error": "Failed to delete account"}, status=500)
-<<<<<<< Updated upstream
 
 
 def login_with_42(request):
@@ -325,7 +324,7 @@ def login_with_42(request):
 
 
 def callback(request):
-    code = request.GET.get('code')
+    code = request.GET.get("code")
     if not code:
         return redirect("/")
 
@@ -342,7 +341,7 @@ def callback(request):
     response = requests.post(token_url, data=data)
     if response.status_code != 200:
         return JsonResponse({"error": "Failed to obtain access token"}, status=403)
-    
+
     access_token = response.json().get("access_token")
 
     # Fetch user information
@@ -361,14 +360,14 @@ def callback(request):
     if user is not None:
         login(request, user)  # Creates the session for the new user
         print("Session Data:", request.session.items())  # Debug session contents
-        
+
         # Generate token pair
         token_serializer = TokenObtainPairSerializer()
         tokens = token_serializer.get_token(user)
         access_token = str(tokens.access_token)
         refresh_token = str(tokens)
 
-        response = redirect('/')  # Redirect to a post-login page
+        response = redirect("/")  # Redirect to a post-login page
 
         # Set tokens and UUID in cookies
         response.set_cookie("pongUserId", str(user.id), httponly=False, samesite="Strict")
@@ -379,8 +378,6 @@ def callback(request):
         return response
     else:
         return JsonResponse({"error": "Failed to fetch user info"}, status=403)
-=======
->>>>>>> Stashed changes
 
 
 @method_decorator(csrf_exempt, name="dispatch")
