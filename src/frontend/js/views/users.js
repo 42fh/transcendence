@@ -1,6 +1,6 @@
 import { displayModalError } from "../components/modal.js";
 import { ASSETS } from "../config/constants.js";
-import { updateActiveNavItem } from "../components/bottom-nav.js";
+import { updateActiveNavItem } from "../components/bottomNav.js";
 import { fetchUsers } from "../services/usersService.js";
 import { loadProfilePage } from "./profile.js";
 
