@@ -7,7 +7,7 @@ import {
 import { fetchUserProfile } from "../services/usersService.js";
 import { loadHomePage } from "./home.js";
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
-import { updateActiveNavItem } from "../components/bottom-nav.js";
+import { updateActiveNavItem } from "../components/bottomNav.js";
 import {
   loginUser,
   signupUser,

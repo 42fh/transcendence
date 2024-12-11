@@ -6,6 +6,7 @@ urlpatterns = [
     path("running/", views.running_games, name="running_games"),
     path("all/", views.all_games, name="all_games"),
     path("games/", views.create_new_game, name="games"),  # POST: create new game
+    path("tournaments/", views.all_tournaments, name="all_tournaments"),
     path("booking/cancel/", views.cancel_booking, name="cancel_booking"),
     path("", views.transcendance, name="transcendance_home"),
     # online status user
@@ -16,19 +17,20 @@ urlpatterns = [
     path("<str:game_id>/players/count/", views.player_count, name="player_count"),
     path("<str:game_id>/", views.game_settings, name="game_settings"),
     path("", views.transcendance, name="transcendance_home"),
-    path("create_game/", views.create_game, name="create_game"),
-    path("create_game_mode/", views.create_game_mode, name="create_game_mode"),
-    path("get_games/", views.get_games, name="get_games"),
-    path("get_game_modes/", views.get_game_modes, name="get_game_modes"),
     path(
         "tournaments/<int:tournament_id>/enrollment/",
         views.tournament_enrollment,
         name="tournament_enrollment",
     ),
     path(
+        "tournaments/<int:tournament_id>/schedule/",
+        views.get_game_schedule,
+        name="tournament_schedule",
+    ),
+    path("tournament/debug/", views.debug_tournament, name="debug_tournament"),
+    path(
         "tournaments/<int:tournament_id>/",
         views.single_tournament,
         name="single_tournament",
     ),
-    path("tournaments/", views.all_tournaments, name="all_tournaments"),
 ]

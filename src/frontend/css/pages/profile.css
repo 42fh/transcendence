@@ -11,19 +11,21 @@
   width: 100%;
   padding: var(--spacing-sm);
   max-width: 800px;
-  max-width: min(90vw, 50em); /* Fluid but with a maximum */
+  max-width: min(90vw, 50em);
+  /* Fluid but with a maximum */
   margin: 0 auto;
 }
 
 /* Profile Sections */
 .profile__section {
-  background: var(--profile-section-bg);
+  background: var(--color-section-bg);
   border-radius: var(--profile-border-radius);
   padding: var(--spacing-sm);
   margin-bottom: var(--spacing-sm);
   /* max-width: 20em; */
   /* max-width: min(90vw, 50em); */
-  width: 100%; /* Take full width of parent */
+  width: 100%;
+  /* Take full width of parent */
 
   word-wrap: break-word;
   box-sizing: border-box;
@@ -59,7 +61,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: var(--profile-section-bg);
+  background: var(--color-section-bg);
   border: var(--border-width) solid var(--color-border);
 }
 
@@ -76,7 +78,8 @@
 }
 
 .profile__online-status {
-  font-size: 0.8em; /* Remove the crossed-out font-size */
+  font-size: 0.8em;
+  /* Remove the crossed-out font-size */
   /* color: var(--color-success); */
   color: var(--color-status-online);
 }
@@ -84,9 +87,11 @@
 .profile__username-container .profile__online-status.material-symbols-outlined {
   font-size: 0.8em;
   color: var(--color-status-online);
-  font-variation-settings: "FILL" 1, "wght" 700; /* Filled and bold */
+  font-variation-settings: "FILL" 1, "wght" 700;
+  /* Filled and bold */
   /* font-variation-settings: "FILL" 0, "wght" 100; */
 }
+
 .profile__username {
   font-size: var(--font-size-large);
   color: var(--color-text-primary);
@@ -383,8 +388,10 @@
 /* Keep edit button at bottom */
 .profile__section--private-actions {
   flex-direction: column;
-  margin: auto; /* This pushes it to the bottom if we use flex column on parent */
-  margin-bottom: calc(2* var(--spacing-lg)); /* ensures easy scrollability to bottom */
+  margin: auto;
+  /* This pushes it to the bottom if we use flex column on parent */
+  margin-bottom: calc(2 * var(--spacing-lg));
+  /* ensures easy scrollability to bottom */
   padding: var(--spacing-lg);
   gap: var(--spacing-sm);
 }

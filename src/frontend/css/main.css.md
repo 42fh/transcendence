@@ -12,7 +12,7 @@ Base container - common layout properties:
 
 ```css
 .page-container {
-  width: var(--page-width);
+  /* width: var(--page-width); */
   height: var(--page-height);
   min-height: var(--page-min-height);
   padding-bottom: var(--page-padding-bottom);

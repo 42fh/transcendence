@@ -70,6 +70,7 @@ async def end_game(self):
         # await self.redis_conn.set(self.running_key, b"0")
         await GameCoordinator.set_to_finished_game(self.game_id)
         # Keep game state briefly for end-game display
+        # would be handle by GameCoordinator 
         for key in [
             self.state_key,
             self.players_key,
@@ -87,7 +88,7 @@ async def end_game(self):
 
     except Exception as e:
         logger.error(f"Error ending game: {e}")
-
+        # TODO: cleanup requierd
 
 async def update_game(self):
     """Process-safe game update with enhanced error handling"""

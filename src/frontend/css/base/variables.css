@@ -6,6 +6,7 @@
   --color-secondary: #cccccc; /* Light gray - Secondary elements */
   --color-border: rgba(255, 255, 255, 0.3); /* Semi-transparent white for borders */
   --color-accent: #4caf50; /* Green - Highlights, success states */
+  --color-section-bg: rgba(26, 26, 26, 0.9);
 
   /* Text Colors */
   --color-text-primary: var(--color-primary); /* White - Main text */
@@ -56,8 +57,8 @@
   --container-height: 80vh;
 
   /* Layout Pages */
-  --page-width: 80vw;
-  --page-height: 80vh;
+  --page-width: 100vw;
+  --page-height: 100vh;
   --page-min-height: calc(100vh - var(--bottom-nav-height));
   --page-padding-bottom: var(--bottom-nav-height);
 

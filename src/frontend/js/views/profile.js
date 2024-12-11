@@ -1,7 +1,7 @@
 import { fetchUserProfile, formatWinRatio, renderMatchHistory } from "../services/usersService.js";
 import { showToast } from "../utils/toast.js";
 import { ASSETS, LOCAL_STORAGE_KEYS } from "../config/constants.js";
-import { updateActiveNavItem } from "../components/bottom-nav.js";
+import { updateActiveNavItem } from "../components/bottomNav.js";
 import { loadHomePage } from "./home.js";
 import { loadProfileEditPage } from "./profileEdit.js";
 import { applyUsernameTruncation } from "../utils/strings.js";

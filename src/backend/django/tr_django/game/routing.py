@@ -1,5 +1,6 @@
 from django.urls import path, re_path
 from .consumers import PongConsumer
+from .tournamentmanager.TournamentNotification import TournamentNotificationConsumer
 
 websocket_urlpatterns = [
     path("ws/game/<int:game_id>/", PongConsumer.as_asgi()),
@@ -14,4 +15,7 @@ websocket_urlpatterns = [
     path("wss/pong/<int:game_id>/", PongConsumer.as_asgi()),
     path("wss/pong/<uuid:game_id>/", PongConsumer.as_asgi()),
     path("wss/pong/<str:game_id>/", PongConsumer.as_asgi()),
+    # TournamentNotification
+    path('ws/tournament/<str:tournament_id>/notifications/', TournamentNotificationConsumer.as_asgi()),
+    path('wss/tournament/<str:tournament_id>/notifications/', TournamentNotificationConsumer.as_asgi()),
 ]

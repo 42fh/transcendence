@@ -1,5 +1,5 @@
 import { gameSettings } from "./gameSettings.js";
-import { updateActiveNavItem } from "../components/bottom-nav.js";
+import { updateActiveNavItem } from "../components/bottomNav.js";
 import { fetchGames } from "../services/fetchGamesService.js";
 
 let currentView = "home";
