@@ -1,4 +1,4 @@
-import { updateActiveNavItem } from "../components/bottom-nav.js";
+import { updateActiveNavItem } from "../components/bottomNav.js";
 // import { GameWebSocket } from "../2DGame/websocket.js";
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { GAME_2D_CONFIG_TYPES } from "../config/constants.js";

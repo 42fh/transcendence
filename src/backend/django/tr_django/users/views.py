@@ -935,6 +935,7 @@ class FriendshipsView(APIView):
 
     def delete(self, request):
         """Remove a friend"""
+
         try:
             data = json.loads(request.body)
             user_id = data.get("user_id")

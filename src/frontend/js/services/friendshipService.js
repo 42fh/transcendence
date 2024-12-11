@@ -1,4 +1,5 @@
 import { CONFIG } from "../config/constants.js";
+import { manageJWT } from "./authService.js";
 
 /**
  * Backend Friendship API Endpoints:
@@ -16,10 +17,17 @@ import { CONFIG } from "../config/constants.js";
 
 // Send a new friend request
 export async function sendFriendRequest(toUserId) {
+  const accessToken = await manageJWT();
+  if (!accessToken) {
+    return { success: false, error: "AUTH_ERROR", message: "Not authenticated" };
+  }
   try {
     const response = await fetch(`${CONFIG.API_BASE_URL}/api/users/friend-requests/`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
       body: JSON.stringify({ to_user_id: toUserId }),
     });
     return await handleResponse(response);
@@ -31,9 +39,16 @@ export async function sendFriendRequest(toUserId) {
 // Remove an existing friend
 export async function removeFriend(userId) {
   try {
+    const accessToken = await manageJWT();
+    if (!accessToken) {
+      return { success: false, error: "AUTH_ERROR", message: "Not authenticated" };
+    }
     const response = await fetch(`${CONFIG.API_BASE_URL}/api/users/friends/`, {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
       body: JSON.stringify({ user_id: userId }),
     });
     return await handleResponse(response);
@@ -45,9 +60,16 @@ export async function removeFriend(userId) {
 // Accept a friend request
 export async function acceptFriendRequest(fromUserId) {
   try {
+    const accessToken = await manageJWT();
+    if (!accessToken) {
+      return { success: false, error: "AUTH_ERROR", message: "Not authenticated" };
+    }
     const response = await fetch(`${CONFIG.API_BASE_URL}/api/users/friends/`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
       body: JSON.stringify({ from_user_id: fromUserId }),
     });
     return await handleResponse(response);
@@ -59,9 +81,16 @@ export async function acceptFriendRequest(fromUserId) {
 // Withdraw a friend request you sent
 export async function withdrawFriendRequest(toUserId) {
   try {
+    const accessToken = await manageJWT();
+    if (!accessToken) {
+      return { success: false, error: "AUTH_ERROR", message: "Not authenticated" };
+    }
     const response = await fetch(`${CONFIG.API_BASE_URL}/api/users/friend-requests/`, {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
       body: JSON.stringify({
         to_user_id: toUserId,
         from_user_id: null,
@@ -78,9 +107,16 @@ export async function withdrawFriendRequest(toUserId) {
 // Reject a friend request you received
 export async function rejectFriendRequest(fromUserId) {
   try {
+    const accessToken = await manageJWT();
+    if (!accessToken) {
+      return { success: false, error: "AUTH_ERROR", message: "Not authenticated" };
+    }
     const response = await fetch(`${CONFIG.API_BASE_URL}/api/users/friend-requests/`, {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
       body: JSON.stringify({
         from_user_id: fromUserId,
         to_user_id: null,

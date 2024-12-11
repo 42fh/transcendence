@@ -96,20 +96,19 @@
 /* Button Variants */
 .modal-button--primary {
   background: var(--color-background-inverse);
-  color: var(--color-text-inverse);
-  border-color: var(--color-background-inverse);
+  border-color: var(--color-border);
 }
 
 .modal-button--secondary {
   background: var(--color-background);
-  border-color: var(--color-border);
   color: var(--color-text);
+  border-color: var(--color-border);
 }
 
 .modal-button--tertiary {
   background: none;
-  border: none;
   padding: 0.5rem;
+  border-color: var(--color-border);
 }
 
 .modal-button:hover {
