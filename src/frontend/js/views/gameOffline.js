@@ -105,8 +105,8 @@ export async function loadGameOffline(addToHistory = true) {
         const content = document.importNode(gameOfflineTemplate.content, true);
         mainContent.appendChild(content);
 
-        let gameCanvas = document.getElementById("game_offlinemode_canvas");
-        let context = gameCanvas.getContext("2d");
+        gameCanvas = document.getElementById("game_offlinemode_canvas");
+        context = gameCanvas.getContext("2d");
 
         document.addEventListener("keydown", handleKeyDown);
 
