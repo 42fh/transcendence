@@ -205,6 +205,7 @@ class TournamentManager:
                     if tournament.participants.count() == tournament.max_participants:
                         send_notifacation(player.user ,  f"Successfully enrolled in {tournament.name}. Tournament will start soon", url=None)
                         logger.info(f"Tournament[{tournament.name}]: booked in: {tournament.participants.count()} full with: {tournament.max_participants} - lets start")
+                        cls.start_matchmaking(tournament)
                         return {
                             "status": True,
                             "message": f"Enrolled in {tournament.name}. Tournament starting soon! Connect to tournament_notification_url",
@@ -347,7 +348,7 @@ class TournamentManager:
                 "error_code": "NOT_FOUND",
             }
         except Exception as e:
-            logger.error(f"schedule: {e)")
+            logger.error(f"schedule: {e}")
             return {
                 "status": False,
                 "message": f"Error getting schedule: {str(e)}",
@@ -439,8 +440,7 @@ class TournamentManager:
                             player.user,
                             f"Tournament {tournament.name}: Waiting for your opponent in Round {schedule.round_number}, Match {schedule.match_number}. You'll be notified when your game is ready."
                         )
-                            logger.debug(f"Sent waiting notification to player {player.username} for game {game.id} in round {schedule.round_number}"
-        )
+                        logger.debug(f"Sent waiting notification to player {player.username} for game {game.id} in round {schedule.round_number}")
 
 
             if tournament_completed:

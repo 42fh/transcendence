@@ -797,7 +797,22 @@ class GameCoordinator:
 
             # Create or update game record
             if is_tournament and real_game_id:
+                async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn: 
+                        tournament_id = await redis_conn.get(f"tournament_id:{game_id}")
+                if not tournament_id:
+                        raise ValueError("Tournament ID not found for tournament game")
+        
+                # Update the game in database
                 game = await cls._update_tournament_game(real_game_id, winner, finished_at)
+                # Get tournament instance and create next rounds
+                try:
+                    tournament = await sync_to_async(Tournament.objects.get)(id=tournament_id)
+                    debug = await sync_to_async(cls.create_rounds)(tournament.id)
+                    logger.info(f"Tournament {tournament.id} round creation: {debug}")
+                except Exception as e:
+                    logger.error(f"Error creating next tournament rounds: {e}")
+                    # Continue with game creation even if round creation fails
+        
             else:
                 game = await cls._create_single_game(
                     game_id,
