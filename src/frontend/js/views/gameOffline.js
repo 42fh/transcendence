@@ -23,9 +23,9 @@ export async function loadGameOffline(addToHistory = true) {
 
         // Draw paddles
         context.fillStyle = "white";
-        context.fillRect(10, paddle1Y, paddleWidth, paddleHeight);
+        context.fillRect(2, paddle1Y, paddleWidth, paddleHeight);
         context.fillStyle = "white";
-        context.fillRect(gameCanvas.width - 20, paddle2Y, paddleWidth, paddleHeight);
+        context.fillRect(gameCanvas.width - 2, paddle2Y, paddleWidth, paddleHeight);
 
         // Draw ball
         context.fillStyle = "white";
@@ -52,9 +52,9 @@ export async function loadGameOffline(addToHistory = true) {
         }
 
         // Paddle collision
-        if (ballX <= 20 && ballY >= paddle1Y && ballY <= paddle1Y + paddleHeight) {
+        if (ballX <= 12 && ballY >= paddle1Y && ballY <= paddle1Y + paddleHeight) {
             ballSpeedX = -ballSpeedX;
-        } else if (ballX >= gameCanvas.width - 20 && ballY >= paddle2Y && ballY <= paddle2Y + paddleHeight) {
+        } else if (ballX >= gameCanvas.width - 12 && ballY >= paddle2Y && ballY <= paddle2Y + paddleHeight) {
             ballSpeedX = -ballSpeedX;
         }
 
