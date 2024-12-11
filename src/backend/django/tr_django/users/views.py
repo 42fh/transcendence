@@ -920,20 +920,32 @@ class FriendshipsView(APIView):
 
     def delete(self, request):
         """Remove a friend"""
+        print("=== DELETE REQUEST DEBUG INFO ===")
+        print(f"Request user: {request.user}")
+        print(f"Request body: {request.body}")
+        print("=== END DEBUG INFO ===")
+
         try:
             data = json.loads(request.body)
+            print("Parsed data:", data)
             user_id = data.get("user_id")
+            print(f"User ID: {user_id}")
 
             if not user_id:
+                print("No user ID provided")
                 return Response({"error": "Please specify the friend to remove"}, status=status.HTTP_400_BAD_REQUEST)
 
             try:
+                print(f"Attempting to get friend with ID: {user_id}")
                 friend = CustomUser.objects.get(id=user_id)
+                print(f"Found friend: {friend.username}")
             except CustomUser.DoesNotExist:
+                print(f"No user found with ID: {user_id}")
                 return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
             # Check if they are actually friends
             if not request.user.is_friend_with(friend):
+                print("You are not friends with this user")
                 return Response({"error": "You are not friends with this user"}, status=status.HTTP_400_BAD_REQUEST)
 
             request.user.remove_friend(friend)

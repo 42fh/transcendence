@@ -331,6 +331,7 @@ async function handleFriendshipButtonClick(friendshipButtonDatasetState, userDat
         });
 
         if (removeAction === "confirm") {
+          console.log("Removing friend:", userData.id);
           const removeResult = await removeFriend(userData.id);
           if (removeResult.success) {
             try {

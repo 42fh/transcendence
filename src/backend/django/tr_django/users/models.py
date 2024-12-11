@@ -5,6 +5,7 @@ from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Q
 
+
 class CustomUser(AbstractUser):
     """
     The CustomUser model extends Django's AbstractUser with additional fields for the user app.
@@ -50,7 +51,7 @@ class CustomUser(AbstractUser):
     # It should expire after a certain time and be used only once.
     two_factor_code = models.CharField(max_length=6, null=True, blank=True)
     two_factor_code_expires_at = models.DateTimeField(null=True)
-    
+
     # Stores the user's secret key for generating 2FA codes,
     # typically used in TOTP (Time-based One-Time Password) algorithms.
     # This key is unique to the user and is used to create time-based codes.
@@ -170,18 +171,22 @@ class CustomUser(AbstractUser):
         if user in self.friend_requests_sent.all():
             self.friend_requests_sent.remove(user)
 
+    def remove_friend(self, user):
+        """Removes a user from friends list."""
+        if self.is_friend_with(user):
+            self.friends.remove(user)
+            # Since it's a symmetrical relationship, this will remove both users from each other's friends list
+
     def is_friend_with(self, user) -> bool:
         return self.friends.filter(id=user.id).exists()
 
     def __str__(self):
         return str(self.username)
-    
+
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['email'],
-                condition=Q(email__isnull=False),
-                name='unique_email_when_not_null'
+                fields=["email"], condition=Q(email__isnull=False), name="unique_email_when_not_null"
             )
         ]
 
