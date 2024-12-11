@@ -1,7 +1,7 @@
 import { showToast } from "../utils/toast.js";
 
 
-export async function loadgame_offlinemode(addToHistory = true) {
+export async function loadGameOffline(addToHistory = true) {
     let gameCanvas, context;
     let paddle1Y = 200, paddle2Y = 200;
     const paddleHeight = 100, paddleWidth = 10, ballSize = 10;

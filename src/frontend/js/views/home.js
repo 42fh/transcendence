@@ -5,7 +5,9 @@ import { updateActiveNavItem } from "../components/bottomNav.js";
 import { loadChatPage } from "./chatHome.js";
 import { loadGameHome } from "./game.js";
 import { loadGame3D } from "./game3d.js";
+import { loadGameOffline } from "./gameOffline.js";
 import { loadGameSetupPage } from "./gameSetup.js";
+
 
 export function loadHomePage(addToHistory = true) {
   try {
