@@ -33,6 +33,12 @@ export async function loadGameOffline(addToHistory = true) {
         context.arc(ballX, ballY, ballSize, 0, 2 * Math.PI);
         context.fill();
 
+        // Draw red dot in ball
+        context.fillStyle = "red";
+        context.beginPath();
+        context.arc(ballX, ballY, ballSize / 3, 0, 2 * Math.PI);
+        context.fill();
+
         // Draw scores
         context.fillStyle = "white";
         context.font = "20px Monospace";
@@ -49,13 +55,16 @@ export async function loadGameOffline(addToHistory = true) {
         // Bounce off top and bottom walls
         if (ballY - ballSize <= 0 || ballY + ballSize >= gameCanvas.height) {
             ballSpeedY = -ballSpeedY;
+            ballY += 0.1 * ballSpeedY;
         }
 
         // Paddle collision
-        if (ballX - ballSize <= 40 && ballY > paddle1Y && ballY < paddle1Y + paddleHeight) {
+        if (ballX - ballSize <= 30 && ballY > paddle1Y && ballY < paddle1Y + paddleHeight) {
             ballSpeedX = -ballSpeedX;
-        } else if (ballX >= gameCanvas.width - 20 - ballSize && ballY > paddle2Y && ballY < paddle2Y + paddleHeight) {
+            ballX += 0.1 *ballSpeedX;
+        } else if (ballX >= gameCanvas.width - 30 - ballSize && ballY > paddle2Y && ballY < paddle2Y + paddleHeight) {
             ballSpeedX = -ballSpeedX;
+            ballX += 0.1 *ballSpeedX;
         }
 
         // Scoring
@@ -121,9 +130,9 @@ export async function loadGameOffline(addToHistory = true) {
         
             const countdownInterval = setInterval(() => {
                 drawGameState();
-                context.fillStyle = "white";
-                context.font = "100px Monospace";    
-                context.fillText(`${countdown}`, gameCanvas.width / 2 - 50, gameCanvas.height / 2 - 50);
+                context.fillStyle = "grey";
+                context.font = "150px Monospace";    
+                context.fillText(`${countdown}`, gameCanvas.width / 2 - 50, gameCanvas.height / 2 );
                 countdown--;
         
                 if (countdown < 0) {
@@ -134,7 +143,7 @@ export async function loadGameOffline(addToHistory = true) {
         }
 
         resetBall();
-        countdownAnimation(3, gameLoop);
+        countdownAnimation(5, gameLoop);
 
     } catch (error) {
         console.error("Error loading loadGameOffline page:", error);
