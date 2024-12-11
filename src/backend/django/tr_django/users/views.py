@@ -99,7 +99,7 @@ class SignupView(APIView):
 
 
 @method_decorator(csrf_exempt, name="dispatch")
-class LoginView(View):
+class LoginView(APIView):
     def post(self, request):
         try:
             data = json.loads(request.body)
@@ -231,7 +231,7 @@ class ValidateEmailVerificationView(APIView):
 
 
 @method_decorator(csrf_exempt, name="dispatch")
-class DeleteUserView(View):
+class DeleteUserView(APIView):
     def _generate_unique_anon_username(self, user_id: str) -> str:
         """
         Generate a unique anonymous username.
@@ -630,7 +630,7 @@ class UserAvatarView(APIView):
 
 
 @method_decorator(csrf_exempt, name="dispatch")
-class FriendRequestsView(View):
+class FriendRequestsView(APIView):
     """
     View for managing friend requests
 
