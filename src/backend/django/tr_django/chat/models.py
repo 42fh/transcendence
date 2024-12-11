@@ -1,8 +1,11 @@
+import logging
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
+
+logger = logging.getLogger("chat")
 
 
 class ChatRoomManager(models.Manager):
@@ -10,7 +13,11 @@ class ChatRoomManager(models.Manager):
         """Create a chat room with consistent room_id generation"""
         # Sort usernames for room_id
         usernames = sorted([user1.username, user2.username])
-        room_id = f"{usernames[0]}_{usernames[1]}"
+        room_id_former = f"{usernames[0]}_{usernames[1]}"
+        room_id = f"{user1.id}_{user2.id}"
+        logger.debug("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx")
+        logger.debug("room_id_former :", room_id_former)
+        logger.debug("room_id :", room_id)
 
         # Check if room exists with either user order
         existing_room = self.filter(
