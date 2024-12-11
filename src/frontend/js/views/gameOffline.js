@@ -98,7 +98,7 @@ export async function loadGameOffline(addToHistory = true) {
         mainContent.innerHTML = "";
 
         const gameOfflineTemplate = document.getElementById("gameoffline-template");
-        if (!offlineGameTemplate) {
+        if (!gameOfflineTemplate) {
           throw new Error("Offline Game template not found");
         }
 
