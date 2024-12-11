@@ -1,0 +1,22 @@
+body {
+  background-color: pink;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+svg {
+  background-color: white;
+  width: 400px;
+  height: 300px;
+  margin-top: 20px;
+}
+
+#polygonTest2 {
+  width: 800px;
+  height: 600px;
+}

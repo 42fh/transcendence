@@ -122,7 +122,14 @@
             <div class="home__net-segment home__net-segment--black"></div>
             <div class="home__net-segment home__net-segment--white"></div>
           </div>
-          <button id="home__button-cta" class="home__button button--gradient">CTA</button>
+          <!-- <button id="home__button-cta" class="home__button button--gradient">CTA</button> -->
+          <div class="home__buttons-right">
+            <button id="home__button-cta" class="home__button button--gradient">CTA</button>
+            <button id="home__button-2d" class="home__button button--stroke">
+              <span class="actual-text">&nbsp;2D GAME&nbsp;</span>
+              <span class="hover-text" aria-hidden="true">&nbsp;OR DIE&nbsp;</span>
+            </button>
+          </div>
         </div>
       </div>
     </template>
@@ -143,7 +150,8 @@
     </template>
 
     <!-- Modal Template -->
-    <template id="modal-template">
+    <!-- Dupplicated in main.js -->
+    <!-- <template id="modal-template">
       <div class="modal-overlay" id="modal-overlay">
         <div class="modal">
           <button class="modal-close-btn" aria-label="Close Modal">&times;</button>
@@ -158,12 +166,12 @@
           </div>
         </div>
       </div>
-    </template>
+    </template> -->
 
     <!-- Game Settings Template-->
-    <template id="game-settings-template">
+    <!-- To be removed -->
+    <!-- <template id="game-settings-template">
       <p id="status" class="status"></p>
-      <!-- Status message container -->
       <div id="status" style="display: none"></div>
       <div class="tournament-container page-container--settings">
         <h2>GAME SETTINGS</h2>
@@ -229,7 +237,7 @@
           </ul>
         </div>
       </div>
-    </template>
+    </template> -->
 
     <!-- Tournament List Page Template -->
     <template id="tournament-template">
@@ -802,6 +810,133 @@
           <span class="users-list__username username"></span>
           <!-- <span class="users-list__status"></span> -->
           <span class="users-list__status-indicator"></span>
+        </div>
+      </div>
+    </template>
+
+    <!-- 2D Game Setup Template -->
+    <template id="two-d-game__setup-template">
+      <div class="two-d-game__container">
+        <form class="two-d-game__form" id="two-d-game__form">
+          <div class="two-d-game__form-group">
+            <label class="two-d-game__label" for="two-d-game__game-type">Game Type</label>
+            <select class="two-d-game__select" id="two-d-game__game-type" disabled>
+              <option value="regular">Regular Pong</option>
+              <option value="circular">Circular Pong</option>
+              <option value="irregular">Irregular Pong</option>
+              <option value="classic">Classic Pong</option>
+            </select>
+          </div>
+
+          <div class="two-d-game__form-group">
+            <label class="two-d-game__label" for="two-d-game__num-players">Number of Players</label>
+            <input
+              class="two-d-game__input"
+              type="number"
+              id="two-d-game__num-players"
+              min="2"
+              max="8"
+              value="2"
+              disabled
+            />
+            <small class="two-d-game__help-text">Min: 2, Max: 8 players</small>
+          </div>
+
+          <div class="two-d-game__form-group polygon-only">
+            <label class="two-d-game__label" for="two-d-game__num-sides">Number of Sides</label>
+            <input
+              class="two-d-game__input"
+              type="number"
+              id="two-d-game__num-sides"
+              min="3"
+              max="12"
+              value="4"
+              disabled
+            />
+            <small class="two-d-game__help-text">Min: 3, Max: 12 sides</small>
+          </div>
+
+          <div class="two-d-game__form-group">
+            <label class="two-d-game__label" for="two-d-game__num-balls">Number of Balls</label>
+            <input class="two-d-game__input" type="number" id="two-d-game__num-balls" value="1" />
+            <small class="two-d-game__help-text">Min: 1, Max: 4 balls</small>
+          </div>
+
+          <div class="two-d-game__form-group">
+            <label class="two-d-game__label" for="two-d-game__score-mode">Score Mode</label>
+            <select class="two-d-game__select" id="two-d-game__score-mode">
+              <option value="classic">Classic (First to 11)</option>
+              <option value="timed">Timed (5 minutes)</option>
+              <option value="survival">Survival</option>
+            </select>
+          </div>
+
+          <div class="two-d-game__form-group">
+            <div class="two-d-game__checkbox-container">
+              <input type="checkbox" id="two-d-game__debug-mode" class="two-d-game__checkbox" />
+              <label class="two-d-game__checkbox-label" for="two-d-game__debug-mode"> Enable Debug Mode </label>
+            </div>
+          </div>
+
+          <div class="two-d-game__form-group">
+            <button type="submit" class="two-d-game__button">Start Game</button>
+          </div>
+        </form>
+      </div>
+    </template>
+
+    <!-- 2D Game Game Template -->
+    <template id="two-d-game__game-template">
+      <!-- Game Container -->
+      <div id="two-d-game__container-game" class="two-d-game__container-game">
+        <div class="two-d-game__game-layout">
+          <div class="two-d-game__game-main">
+            <div class="two-d-game__game-canvas-container">
+              <svg id="two-d-game__pong-svg" viewBox="0 0 300 300"></svg>
+            </div>
+
+            <div class="two-d-game__panel">
+              <div class="two-d-game__panel-header">
+                <h3 class="two-d-game__panel-title">Event Log</h3>
+              </div>
+              <div id="two-d-game__event-log" class="two-d-game__event-log">
+                <div class="two-d-game__log-entry">
+                  <span id="two-d-game__event-log-message">Waiting for game events...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="two-d-game__game-sidebar">
+            <div class="two-d-game__panel">
+              <div class="two-d-game__panel-header">
+                <h3 class="two-d-game__panel-title">Game Info</h3>
+              </div>
+              <div id="two-d-game__game-info" class="two-d-game__game-info"></div>
+            </div>
+
+            <div class="two-d-game__panel">
+              <div class="two-d-game__panel-header">
+                <h3 class="two-d-game__panel-title">Scores</h3>
+              </div>
+              <div id="two-d-game__score-display" class="two-d-game__score-display">
+                <template id="two-d-game__score-item-template">
+                  <div class="two-d-game__score-item">
+                    <span class="two-d-game__player-name"></span>
+                    <span class="two-d-game__player-score"></span>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <div class="two-d-game__controls-info">
+              <h3>Controls:</h3>
+              <ul>
+                <li>Left Arrow / A: Move paddle left</li>
+                <li>Right Arrow / D: Move paddle right</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </template>

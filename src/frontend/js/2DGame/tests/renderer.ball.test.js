@@ -109,7 +109,7 @@ function animateBall(renderer) {
 
   // Clear and redraw
   renderer.svg.innerHTML = "";
-  renderPolygonGame(renderer);
+  renderPolygonGame();
 
   // Update status
   document.getElementById("ballCount").textContent = renderer.state.balls.length;
