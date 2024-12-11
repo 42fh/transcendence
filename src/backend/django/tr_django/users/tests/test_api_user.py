@@ -332,7 +332,7 @@ class APIUserAvatarTests(TestCase):
         self.assertEqual(response.status_code, 403)
 
 
-class FriendsListViewTests(TestCase):
+class FriendshipsViewTests(TestCase):
     def setUp(self):
         # Create test users
         self.user1 = CustomUser.objects.create_user(
@@ -349,11 +349,12 @@ class FriendsListViewTests(TestCase):
         self.user1.friends.add(self.user2, self.user3)
 
         self.client = Client()
-        self.base_url = f"/api/users/{self.user1.id}/friends/"
+        self.base_url = "/api/users/friends/"
+        self.list_url = f"/api/users/friends/{self.user1.id}/"
 
     def test_get_friends_list(self):
         """Test basic friend list retrieval"""
-        response = self.client.get(self.base_url)
+        response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, 200)
         data = response.json()
 
@@ -363,7 +364,7 @@ class FriendsListViewTests(TestCase):
 
     def test_friends_list_pagination(self):
         """Test pagination of friends list"""
-        response = self.client.get(f"{self.base_url}?page=1&per_page=1")
+        response = self.client.get(f"{self.list_url}?page=1&per_page=1")
         self.assertEqual(response.status_code, 200)
         data = response.json()
 
@@ -373,7 +374,7 @@ class FriendsListViewTests(TestCase):
 
     def test_friends_list_search(self):
         """Test search functionality in friends list"""
-        response = self.client.get(f"{self.base_url}?search=user2")
+        response = self.client.get(f"{self.list_url}?search=user2")
         self.assertEqual(response.status_code, 200)
         data = response.json()
 
@@ -384,3 +385,12 @@ class FriendsListViewTests(TestCase):
         """Test response for non-existent user"""
         response = self.client.get("/api/users/nonexistent-id/friends/")
         self.assertEqual(response.status_code, 404)
+
+    def test_remove_friend(self):
+        """Test removing a friend"""
+        self.client.force_login(self.user1)
+        response = self.client.delete(
+            self.base_url, data=json.dumps({"user_id": str(self.user2.id)}), content_type="application/json"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(self.user1.is_friend_with(self.user2))

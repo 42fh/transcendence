@@ -34,6 +34,24 @@
   margin-bottom: 1em;
 }
 
+.modal-button {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-small);
+  background: var(--button-background);
+  color: var(--button-color);
+  border: var(--button-border);
+  border-radius: var(--button-border-radius);
+  /* padding: var(--button-padding); */
+  padding: var(--spacing-xs) var(--spacing-sm);
+  cursor: pointer;
+  transition: var(--button-transition);
+}
+
+.modal-button:hover {
+  background: var(--button-hover-background);
+  color: var(--button-hover-color);
+}
+
 /* Close Button */
 .modal-close-btn {
   position: absolute;
@@ -73,4 +91,27 @@
   color: #999;
   opacity: 0.8;
   font-family: "Press Start 2P", cursive;
+}
+
+/* Button Variants */
+.modal-button--primary {
+  background: var(--color-background-inverse);
+  color: var(--color-text-inverse);
+  border-color: var(--color-background-inverse);
+}
+
+.modal-button--secondary {
+  background: var(--color-background);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.modal-button--tertiary {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+}
+
+.modal-button:hover {
+  transform: scale(1.05);
 }
