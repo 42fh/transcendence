@@ -7,7 +7,7 @@ export async function loadGameOffline(addToHistory = true) {
     const paddleHeight = 100, paddleWidth = 10, ballSize = 10;
     let ballX = 250, ballY = 250, ballSpeedX = 2.1, ballSpeedY = 1.4;
     let player1Score = 0, player2Score = 0;
-    const winningScore = 3;
+    const winningScore = 5;
     let gameRunning = true;
 
     function drawGameState() {
@@ -23,9 +23,9 @@ export async function loadGameOffline(addToHistory = true) {
 
         // Draw paddles
         context.fillStyle = "white";
-        context.fillRect(2, paddle1Y, paddleWidth, paddleHeight);
+        context.fillRect(20, paddle1Y, paddleWidth, paddleHeight);
         context.fillStyle = "white";
-        context.fillRect(gameCanvas.width - 2, paddle2Y, paddleWidth, paddleHeight);
+        context.fillRect(gameCanvas.width - 20 - paddleWidth, paddle2Y, paddleWidth, paddleHeight);
 
         // Draw ball
         context.fillStyle = "white";
@@ -47,14 +47,14 @@ export async function loadGameOffline(addToHistory = true) {
         ballY += ballSpeedY;
 
         // Bounce off top and bottom walls
-        if (ballY <= 0 || ballY >= gameCanvas.height) {
+        if (ballY - ballSize <= 0 || ballY + ballSize >= gameCanvas.height) {
             ballSpeedY = -ballSpeedY;
         }
 
         // Paddle collision
-        if (ballX <= 12 && ballY >= paddle1Y && ballY <= paddle1Y + paddleHeight) {
+        if (ballX - ballSize <= 40 && ballY > paddle1Y && ballY < paddle1Y + paddleHeight) {
             ballSpeedX = -ballSpeedX;
-        } else if (ballX >= gameCanvas.width - 12 && ballY >= paddle2Y && ballY <= paddle2Y + paddleHeight) {
+        } else if (ballX >= gameCanvas.width - 20 - ballSize && ballY > paddle2Y && ballY < paddle2Y + paddleHeight) {
             ballSpeedX = -ballSpeedX;
         }
 
@@ -105,8 +105,8 @@ export async function loadGameOffline(addToHistory = true) {
         const content = document.importNode(gameOfflineTemplate.content, true);
         mainContent.appendChild(content);
 
-        gameCanvas = document.getElementById("game_offlinemode_canvas");
-        context = gameCanvas.getContext("2d");
+        let gameCanvas = document.getElementById("game_offlinemode_canvas");
+        let context = gameCanvas.getContext("2d");
 
         document.addEventListener("keydown", handleKeyDown);
 
@@ -116,10 +116,28 @@ export async function loadGameOffline(addToHistory = true) {
             if (gameRunning) requestAnimationFrame(gameLoop);
         }
 
+        function countdownAnimation(countdownDuration, callback) {
+            let countdown = countdownDuration;
+        
+            const countdownInterval = setInterval(() => {
+                drawGameState();
+                context.fillStyle = "white";
+                context.font = "100px Monospace";    
+                context.fillText(`${countdown}`, gameCanvas.width / 2 - 50, gameCanvas.height / 2 - 50);
+                countdown--;
+        
+                if (countdown < 0) {
+                    clearInterval(countdownInterval);
+                    callback(); // Start the game function after countdown
+                }
+            }, 1000);
+        }
+
         resetBall();
-        gameLoop();
+        countdownAnimation(3, gameLoop);
+
     } catch (error) {
-        console.error("Error loading game_offlinemode page:", error);
-        showToast("Failed to load game_offlinemode", true);
+        console.error("Error loading loadGameOffline page:", error);
+        showToast("Failed to load loadGameOffline", true);
     }
 }
