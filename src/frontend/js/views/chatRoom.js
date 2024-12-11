@@ -157,7 +157,7 @@ console.log("Room Name:", roomName);
   }
 
   sendButton.onclick = () => {
-    if (messageInput.value.trim() === "" || currentUser === CHAT_WS_MSG_TYPE.SYSTEM) {
+    if (messageInput.value.trim() === "" || currentUserName === CHAT_WS_MSG_TYPE.SYSTEM) {
       return;
     }
 
@@ -165,7 +165,7 @@ console.log("Room Name:", roomName);
   };
 
   messageInput.onkeyup = (e) => {
-    if (e.key === "Enter" && currentUser !== CHAT_WS_MSG_TYPE.SYSTEM) {
+    if (e.key === "Enter" && currentUserName !== CHAT_WS_MSG_TYPE.SYSTEM) {
       sendMessage(chatPartner);
     }
   };
