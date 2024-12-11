@@ -62,6 +62,16 @@ export function loadHomePage(addToHistory = true) {
       ctaButton.addEventListener("click", loadGameHome);
     }
 
+    const chatsButton = document.getElementById("chats");
+    if (chatsButton) {
+      chatsButton.addEventListener("click", loadChatPage);
+    }
+
+    const tournamentsButton = document.getElementById("tournaments");
+    if (tournamentsButton) {
+      tournamentsButton.addEventListener("click", loadTournamentsPage);
+    }
+
     console.log("Looking for 2D button...");
     const twoDButton = document.getElementById("home__button-2d");
     console.log("2D button found:", twoDButton); // Should show the button element if found
@@ -73,16 +83,6 @@ export function loadHomePage(addToHistory = true) {
       });
     } else {
       console.error("2D button not found in DOM");
-    }
-
-    const chatsButton = document.getElementById("chats");
-    if (chatsButton) {
-      chatsButton.addEventListener("click", loadChatPage);
-    }
-
-    const tournamentsButton = document.getElementById("tournaments");
-    if (tournamentsButton) {
-      tournamentsButton.addEventListener("click", loadTournamentsPage);
     }
   } catch (error) {
     console.error("Error loading home page:", error);

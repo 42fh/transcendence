@@ -264,3 +264,15 @@ export const WS_RECONNECTION = {
   MAX_RECONNECT_ATTEMPTS: 5,
   RECONNECT_DELAY: 3000,
 };
+
+// Default ViewBox for Pong-like games
+export const DEFAULT_SVG_VIEWBOX = {
+  minX: 0,
+  minY: 0,
+  width: 400, // Classic Pong aspect ratio is roughly 16:10
+  height: 250, // This gives us nice round numbers to work with
+};
+
+export const DOM_IDS = {
+  GAME_SVG: "two-d-game__pong-svg",
+};

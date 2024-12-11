@@ -1,0 +1,23 @@
+body {
+  background-color: pink;
+}
+
+#gameSvgContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+#gameSvg {
+  width: 800px;
+  height: 800px;
+  border: 1px solid black;
+  background: #fafafa;
+  margin: 20px;
+}
+
+#gameSvg2 {
+  width: 800px;
+  height: 800px;
+  background: #fafafa;
+  margin: 20px;
+}

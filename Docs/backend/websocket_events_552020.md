@@ -56,7 +56,7 @@ NB: Json does't accept comments and doesn't accept type description. Some like `
 
 - `role`: String ("player" or "spectator")
   `game_type` can be ...
-  `player_index` means ...
+  `player_index`: Number | null - It means the index of the player in the array of the paddles and in the array of scores, to know which paddle is the paddle of which player
 
 Field Types:
 

@@ -22,8 +22,8 @@
 @import "pages/gameList.css";
 
 @import "pages/users.css";
-@import "pages/game2D.css";
 @import "pages/gameSetup.css";
+@import "pages/game2D.css";
 
 body {
   background-color: var(--color-background);
