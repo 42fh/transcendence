@@ -1,15 +1,8 @@
-import { updateActiveNavItem } from "../components/bottom-nav.js";
+import { updateActiveNavItem } from "../components/bottomNav.js";
 import { GameInterface2D } from "../2DGame/gameInterface.js";
-import {
-  GAME_2D_CONFIG_TYPES,
-  GAME_2D_CONFIG_TYPE_DEFAULT,
-} from "../config/constants.js";
+import { GAME_2D_CONFIG_TYPES, GAME_2D_CONFIG_TYPE_DEFAULT } from "../config/constants.js";
 import { showToast } from "../utils/toast.js";
-import {
-  fetchWaitingGames,
-  createGame,
-  findMatchingGame,
-} from "../services/gameService.js";
+import { fetchWaitingGames, createGame, findMatchingGame } from "../services/gameService.js";
 import { loadGame2DPage } from "./game2D.js";
 import { initializeGameConfig } from "../store/index.js";
 
@@ -68,21 +61,17 @@ export function loadGameSetupPage(addToHistory = true) {
   } catch (error) {
     console.error("Error loading 2D game page:", error);
   }
-  document
-    .getElementById("two-d-game__game-type")
-    .addEventListener("change", (e) => {
-      const selectedGameType = e.target.value;
-      updateGameFormInputConstraints(selectedGameType);
-      // toggleGameFormFields();
-    });
+  document.getElementById("two-d-game__game-type").addEventListener("change", (e) => {
+    const selectedGameType = e.target.value;
+    updateGameFormInputConstraints(selectedGameType);
+    // toggleGameFormFields();
+  });
 }
 
 /* with updateGameTypeFields we were updating the configuration based on the HTML */
 /* now we are updating the HTML based on the configuration */
 //   updateGameTypeFields() {
-function updateGameFormInputConstraints(
-  gameType = GAME_2D_CONFIG_TYPE_DEFAULT
-) {
+function updateGameFormInputConstraints(gameType = GAME_2D_CONFIG_TYPE_DEFAULT) {
   //   const config = this.gameConfigs[this.gameType];d
   const gameConfig = GAME_2D_CONFIG_TYPES[gameType];
   if (!gameConfig) {
@@ -90,16 +79,12 @@ function updateGameFormInputConstraints(
     return;
   }
 
-  const defaultConstraints =
-    GAME_2D_CONFIG_TYPES[GAME_2D_CONFIG_TYPE_DEFAULT].input_constraints;
+  const defaultConstraints = GAME_2D_CONFIG_TYPES[GAME_2D_CONFIG_TYPE_DEFAULT].input_constraints;
 
   // Update number of players max value
-  const numPlayersInputElement = document.getElementById(
-    "two-d-game__num-players"
-  );
+  const numPlayersInputElement = document.getElementById("two-d-game__num-players");
   if (numPlayersInputElement) {
-    const playerConstraint =
-      gameConfig.inputConstraints?.players || defaultConstraints.players;
+    const playerConstraint = gameConfig.inputConstraints?.players || defaultConstraints.players;
     numPlayersInputElement.min = playerConstraint.min;
     numPlayersInputElement.max = playerConstraint.max;
     numPlayersInputElement.value = playerConstraint.value;
@@ -113,8 +98,7 @@ function updateGameFormInputConstraints(
   // Update number of sides
   const numSidesInputElement = document.getElementById("two-d-game__num-sides");
   if (numSidesInputElement) {
-    const sidesConstraints =
-      gameConfig.inputConstraints?.sides || defaultConstraints.sides;
+    const sidesConstraints = gameConfig.inputConstraints?.sides || defaultConstraints.sides;
     numSidesInputElement.min = sidesConstraints.min;
     numSidesInputElement.max = sidesConstraints.max;
     numSidesInputElement.value = sidesConstraints.value;
@@ -208,10 +192,7 @@ function setupEventListeners(gameInterface) {
     const element = document.getElementById(fieldId);
     if (element) {
       element.addEventListener("change", (e) => {
-        gameInterface.formData[fieldId] =
-          e.target.type === "number"
-            ? parseInt(e.target.value)
-            : e.target.value;
+        gameInterface.formData[fieldId] = e.target.type === "number" ? parseInt(e.target.value) : e.target.value;
       });
     }
   });
@@ -237,15 +218,9 @@ function setupEventListeners(gameInterface) {
 
 function collectFormData() {
   const gameType = document.getElementById("two-d-game__game-type").value;
-  const numPlayers = parseInt(
-    document.getElementById("two-d-game__num-players").value
-  );
-  const numSides = parseInt(
-    document.getElementById("two-d-game__num-sides").value
-  );
-  const numBalls = parseInt(
-    document.getElementById("two-d-game__num-balls").value
-  );
+  const numPlayers = parseInt(document.getElementById("two-d-game__num-players").value);
+  const numSides = parseInt(document.getElementById("two-d-game__num-sides").value);
+  const numBalls = parseInt(document.getElementById("two-d-game__num-balls").value);
   //   const shape = document.getElementById("two-d-game__shape").value;
   const scoreMode = document.getElementById("two-d-game__score-mode").value;
   const debug = document.getElementById("two-d-game__debug-mode").checked;
@@ -262,10 +237,7 @@ function validateFormData(formData) {
     }
   } else if (gameType !== "classic") {
     if (numSides < 3 || numSides > 8) {
-      showToast(
-        "Number of sides must be between 3 and 8 for polygon modes",
-        true
-      );
+      showToast("Number of sides must be between 3 and 8 for polygon modes", true);
       return false;
     }
   }
@@ -352,19 +324,17 @@ function createGameList(games) {
             <button class="join-button">Join</button>
         `;
 
-    gameElement
-      .querySelector(".join-button")
-      .addEventListener("click", async () => {
-        // Get form data based on game settings
-        const formData = {
-          gameType: game.mode,
-          numPlayers: game.num_players,
-          numBalls: game.num_balls,
-          scoreMode: game.score_mode,
-        };
+    gameElement.querySelector(".join-button").addEventListener("click", async () => {
+      // Get form data based on game settings
+      const formData = {
+        gameType: game.mode,
+        numPlayers: game.num_players,
+        numBalls: game.num_balls,
+        scoreMode: game.score_mode,
+      };
 
-        await handleJoinGame(game.id, formData);
-      });
+      await handleJoinGame(game.id, formData);
+    });
 
     gamesList.appendChild(gameElement);
   });
