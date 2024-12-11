@@ -54,7 +54,7 @@ export function loadHomePage(addToHistory = true) {
 
     const playButton2d = document.getElementById("home__button-playoffline");
     if (playButton2d) {
-      playButton2d.addEventListener("click", loadgame_offlinemode);
+      playButton2d.addEventListener("click", loadGameOffline);
     }
 
     const ctaButton = document.getElementById("home__button-cta");
