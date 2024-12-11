@@ -115,3 +115,91 @@ button:hover {
     background-position: 0% 50%;
   }
 }
+/* ... other button styles remain the same ... */
+
+/* New stroke animation button */
+.button--stroke {
+  width: 200px;
+  --border-right: 5px;
+  --text-stroke-color: rgba(255, 255, 255, 0.6);
+  --animation-color: #37ff8b;
+  --fs-size: 1.2em;
+  letter-spacing: 2px;
+  font-size: var(--fs-size);
+  position: relative;
+  text-transform: uppercase;
+  padding: 15px 20px;
+  border: none;
+  background: rgba(0, 0, 0, 0.3); /* slight background */
+  border-radius: 8px; /* added rounded corners */
+  margin-top: 1.5rem; /* added top margin */
+}
+
+.button--stroke .actual-text {
+  width: 100%;
+  display: block;
+  text-align: center;
+  color: transparent;
+  /* -webkit-text-stroke: 1px var(--text-stroke-color); */
+  color: white;
+}
+
+.button--stroke .hover-text {
+  position: absolute;
+  box-sizing: border-box;
+  content: attr(data-text);
+  color: var(--animation-color);
+  width: 0%;
+  inset: 0;
+  border-right: var(--border-right) solid var(--animation-color);
+  overflow: hidden;
+  transition: 1s;
+  -webkit-text-stroke: 1px var(--animation-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button--stroke:hover {
+  background: rgba(55, 255, 139, 0.1); /* slight green tint on hover */
+}
+
+.button--stroke:hover .hover-text {
+  width: 100%;
+  filter: drop-shadow(0 0 15px var(--animation-color));
+}
+/* Position the text spans */
+.button--stroke span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  white-space: nowrap;
+}
+
+.button--stroke:hover .actual-text {
+  opacity: 0; /* Make the original text disappear on hover */
+  transition: opacity 0.3s;
+}
+
+/* Position the text spans */
+.button--stroke span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  white-space: nowrap;
+}
+
+.button--stroke .hover-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* Add gap between buttons in the right container */
+.home__buttons-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Pong Test</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./renderer.pong.test.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="game-container">
+        <div class="score-display">
+          <div class="score">0</div>
+          <div class="score">0</div>
+        </div>
+
+        <svg id="pongGame" width="800" height="600">
+          <line x1="400" y1="0" x2="400" y2="600" class="center-line" />
+          <rect x="0" y="0" width="800" height="600" class="boundary" />
+        </svg>
+      </div>
+
+      <button id="startButton" class="control-button">START</button>
+    </div>
+    <script type="module" src="./renderer.pong.test.js"></script>
+  </body>
+</html>

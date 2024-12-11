@@ -1,43 +1,38 @@
-from django.shortcuts import render, get_object_or_404
+import random
+import json
+from django.views.decorators.csrf import csrf_exempt
+from django.core.serializers.json import DjangoJSONEncoder
+from datetime import datetime
+from django.utils import timezone
 from django.http import HttpResponse, JsonResponse
 from .models import SingleGame as Game, GameMode, Player
-from django.views.decorators.csrf import csrf_exempt
-from django.utils import timezone
 from .models import Tournament
-import json
 from .services.tournament_service import build_tournament_data
-from datetime import datetime
-import asyncio
 from .gamecoordinator.GameCoordinator import GameCoordinator, RedisLock
-from django.core.serializers.json import DjangoJSONEncoder
-import json
 from .gamecoordinator.game_config import EnumGameMode
 from asgiref.sync import sync_to_async
 from django.views.decorators.http import require_http_methods
 from django.utils.decorators import async_only_middleware
-import random
 from .tournamentmanager.utils import get_test_tournament_data
+from .tournamentmanager.TournamentManager import TournamentManager
 
 
 def transcendance(request):
     return HttpResponse("Initial view for transcendance")
 
 
-def print_request_details(request):
-    # Print all attributes
-    #    print("Attributes:", vars(request))
+# def print_request_details(request):
+#     # Print all attributes
+#     #    print("Attributes:", vars(request))
 
-    # Print all methods and properties
-    #   print("Methods and properties:", dir(request))
+#     # Print all methods and properties
+#     #   print("Methods and properties:", dir(request))
 
-    # Print common request properties
-    #  print(f"Path: {request.path}")
-    # print(f"Method: {request.method}")
-    # print(f"GET params: {request.GET}")
-    print(f"USER: {request.user}, ID: {request.user.id} ")
-
-
-import random
+#     # Print common request properties
+#     #  print(f"Path: {request.path}")
+#     # print(f"Method: {request.method}")
+#     # print(f"GET params: {request.GET}")
+#     print(f"USER: {request.user}, ID: {request.user.id} ")
 
 
 @csrf_exempt
@@ -100,11 +95,11 @@ async def create_new_game(request, use_redis_lock: bool = True):
         )
 
     async def create_game_logic():
-        if await GameCoordinator.is_player_playing(user_id):
-            return JsonResponse(
-                {"error": "Double booking", "message": "Player already in active game"},
-                status=409,
-            )
+        # if await GameCoordinator.is_player_playing(user_id):
+        #     return JsonResponse(
+        #         {"error": "Double booking", "message": "Player already in active game"},
+        #         status=409,
+        #     )
         game_id = await GameCoordinator.create_new_game(data)
         if not game_id:
             return JsonResponse(
@@ -122,8 +117,11 @@ async def create_new_game(request, use_redis_lock: bool = True):
             return JsonResponse(
                 {
                     "available": True,
-                    "ws_url": f"ws://localhost:8000/ws/game/{game_id}/",
+                    "game_id": game_id,
+                    "ws_url": f"/ws/game/{game_id}/",
+                    "full_ws_url": f"ws://localhost:8000/ws/game/{game_id}/",
                     "message": message,
+                    "settings": data,
                 },
                 status=201,
             )
@@ -135,12 +133,8 @@ async def create_new_game(request, use_redis_lock: bool = True):
 
     try:
         if use_redis_lock:
-            async with await GameCoordinator.get_redis(
-                GameCoordinator.REDIS_GAME_URL
-            ) as redis_conn:
-                async with RedisLock(
-                    redis_conn, f"player_lock:{async_request.user.id}"
-                ):
+            async with await GameCoordinator.get_redis(GameCoordinator.REDIS_GAME_URL) as redis_conn:
+                async with RedisLock(redis_conn, f"player_lock:{async_request.user.id}"):
                     return await create_game_logic()
         return await create_game_logic()
 
@@ -170,11 +164,11 @@ async def join_game(request, game_id, use_redis_lock: bool = True):
     user_id = await sync_to_async(lambda: request.user.id)()
 
     async def join_logic():
-        if await GameCoordinator.is_player_playing(user_id):
-            return JsonResponse(
-                {"error": "Double booking", "message": "Player already in active game"},
-                status=409,
-            )
+        # if await GameCoordinator.is_player_playing(user_id):
+        #     return JsonResponse(
+        #         {"error": "Double booking", "message": "Player already in active game"},
+        #         status=409,
+        #     )
         message = "Joined Game! "
 
         response = await GameCoordinator.join_game(user_id, game_id)
@@ -183,7 +177,9 @@ async def join_game(request, game_id, use_redis_lock: bool = True):
             return JsonResponse(
                 {
                     "available": True,
-                    "ws_url": f"ws://localhost:8000/ws/game/{game_id}/",
+                    "game_id": game_id,
+                    "ws_url": f"/ws/game/{game_id}/",
+                    "full_ws_url": f"ws://localhost:8000/ws/game/{game_id}/",
                     "message": message,
                 },
                 status=201,
@@ -196,9 +192,7 @@ async def join_game(request, game_id, use_redis_lock: bool = True):
 
     try:
         if use_redis_lock:
-            async with await GameCoordinator.get_redis(
-                GameCoordinator.REDIS_GAME_URL
-            ) as redis_conn:
+            async with await GameCoordinator.get_redis(GameCoordinator.REDIS_GAME_URL) as redis_conn:
                 async with RedisLock(redis_conn, f"player_lock:{user_id}"):
                     return await join_logic()
         return await join_logic()
@@ -207,29 +201,47 @@ async def join_game(request, game_id, use_redis_lock: bool = True):
         return JsonResponse({"error": str(e)}, status=500)
 
 
+# @async_only_middleware
+# @require_http_methods(["GET"])
+# @csrf_exempt
+# async def get_all_games(request):
+#     if request.method == "GET":
+#         games = await GameCoordinator.get_all_games()
+#         first_item = next(iter(games), None)
+#         if first_item and isinstance(first_item, bytes):
+#             # If bytes, decode
+#             games_list = [member.decode("utf-8") for member in games]
+#         else:
+#             # If already strings, use directly
+#             games_list = list(games)
+
+#         json_string = json.dumps(games_list, cls=DjangoJSONEncoder)
+#         return JsonResponse(
+#             {
+#                 "games": json_string,
+#                 "message": "all game uuids ",
+#             }
+#         )
+
+#     return JsonResponse({"message": "only GET requests are allowed"}, status=400)
+
+
+# no games are stored in all games -> yiu will see always no games
 @async_only_middleware
 @require_http_methods(["GET"])
 @csrf_exempt
-async def get_all_games(request):
+async def all_games(request):
     if request.method == "GET":
-        games = await GameCoordinator.get_all_games()
-        first_item = next(iter(games), None)
-        if first_item and isinstance(first_item, bytes):
-            # If bytes, decode
-            games_list = [member.decode("utf-8") for member in games]
-        else:
-            # If already strings, use directly
-            games_list = list(games)
-
-        json_string = json.dumps(games_list, cls=DjangoJSONEncoder)
+        games = await GameCoordinator.get_running_games_info()
+        json_string = json.dumps(games, cls=DjangoJSONEncoder)
         return JsonResponse(
             {
                 "games": json_string,
-                "message": "all game uuids ",
+                "message": "allgame",
             }
         )
 
-    return JsonResponse({"message": "only GET requests are allowed"}, status=400)
+    return JsonResponse({"message": "only GET requests are allowed"}, status=405)
 
 
 # for debug
@@ -259,9 +271,7 @@ async def debug_create_games(request):
                 if game_id:
                     await GameCoordinator.set_to_waiting_game(game_id)
 
-        return JsonResponse(
-            {"message": "Debug games created successfully", "status": 201}
-        )
+        return JsonResponse({"message": "Debug games created successfully", "status": 201})
 
     except Exception as e:
         return JsonResponse({"error": str(e), "status": 500})
@@ -380,9 +390,7 @@ async def user_online_status(request):
     DELETE: Set user as offline
     """
     if not request.user.is_authenticated:
-        return JsonResponse(
-            {"error": "Unauthorized", "message": "Authentication required"}, status=401
-        )
+        return JsonResponse({"error": "Unauthorized", "message": "Authentication required"}, status=401)
 
     user_id = str(request.user.id)
 
@@ -400,9 +408,7 @@ async def user_online_status(request):
             return JsonResponse({"message": "User set to offline", "user_id": user_id})
 
     except Exception as e:
-        return JsonResponse(
-            {"error": str(e), "message": "Failed to process request"}, status=500
-        )
+        return JsonResponse({"error": str(e), "message": "Failed to process request"}, status=500)
 
 
 @csrf_exempt
@@ -421,62 +427,6 @@ async def game_settings(request, game_id):
         )
 
     return JsonResponse({"message": "only GET requests are allowed"}, status=400)
-
-
-# no games are stored in all games -> yiu will see always no games
-@async_only_middleware
-@require_http_methods(["GET"])
-@csrf_exempt
-async def all_games(request):
-    if request.method == "GET":
-        games = await GameCoordinator.get_running_games_info()
-        json_string = json.dumps(games, cls=DjangoJSONEncoder)
-        return JsonResponse(
-            {
-                "games": json_string,
-                "message": "allgame",
-            }
-        )
-
-    return JsonResponse({"message": "only GET requests are allowed"}, status=405)
-
-
-# ------ new Tournament
-from .tournamentmanager.TournamentManager import TournamentManager
-
-
-@require_http_methods(["GET", "POST"])
-@csrf_exempt
-def all_tournaments(request):
-    if request.method == "GET":
-        tournament_list = Tournament.objects.all()
-        data = [build_tournament_data(t) for t in tournament_list]
-        return JsonResponse({"tournaments": data})
-
-    elif request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            creator = Player.objects.get(user=request.user)
-            result = TournamentManager.create_tournament(
-                data, data.get("game_settings", {}), creator
-            )
-            if result["status"]:
-                tournament = Tournament.objects.get(pk=result["tournament_id"])
-                return JsonResponse(
-                    {
-                        "status": "success",
-                        "message": f"Tournament[{tournament.name}] created successfully. {result['message']}",
-                        "tournament_notification_url": result[
-                            "tournament_notification_url"
-                        ],
-                        "value_create_tournament_debug": result,
-                        "tournament_debug": build_tournament_data(tournament),
-                    }
-                )
-            return JsonResponse({"error": result["message"]}, status=400)
-
-        except (json.JSONDecodeError, Player.DoesNotExist) as e:
-            return JsonResponse({"error": str(e)}, status=400)
 
 
 @require_http_methods(["POST", "DELETE"])
@@ -535,9 +485,6 @@ def debug_tournament(request):
         return JsonResponse({"error": str(e)}, status=500)
 
 
-# ----------------  Tournament and Game  -> database?
-
-
 @csrf_exempt
 def create_game(request):
     if request.method == "POST":
@@ -562,7 +509,61 @@ def create_game(request):
     return JsonResponse({"message": "only POST requests are allowed"}, status=400)
 
 
-#
+@csrf_exempt
+def create_game_mode(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        description = request.POST.get("description")
+
+        # check if game mode already exists
+        if GameMode.objects.filter(name=name).exists():
+            return JsonResponse({"message": "GameMode already exists"}, status=400)
+
+        game_mode = GameMode.objects.create(name=name, description=description)
+
+        return JsonResponse(
+            {
+                "game_mode_id": game_mode.id,
+                "message": "GameMode created successfully!",
+            }
+        )
+
+    return JsonResponse({"message": "only POST requests are allowed"}, status=400)
+
+
+@csrf_exempt
+def get_games(request):
+    games = Game.objects.all()
+    games_list = []
+    for game in games:
+        games_list.append(
+            {
+                "id": game.id,
+                "date": game.date,
+                "duration": game.duration if game.duration else None,
+                "mode": game.mode.name if game.mode else None,
+                "winner": game.winner.username if game.winner else None,
+            }
+        )
+    return JsonResponse(games_list, safe=False)
+
+
+@csrf_exempt
+def get_game_modes(request):
+
+    game_modes = GameMode.objects.all()
+    game_modes_list = []
+    for game_mode in game_modes:
+        game_modes_list.append(
+            {
+                "id": game_mode.id,
+                "name": game_mode.name,
+                "description": game_mode.description,
+            }
+        )
+    return JsonResponse(game_modes_list, safe=False)
+
+
 @csrf_exempt
 def single_tournament(request, tournament_id):
     """
@@ -579,12 +580,104 @@ def single_tournament(request, tournament_id):
         data = build_tournament_data(tournament)
         return JsonResponse(data)
     elif request.method in ["PUT", "PATCH"]:
-        return JsonResponse(
-            {"message": "Tournament update not implemented yet"}, status=501
-        )
+        return JsonResponse({"message": "Tournament update not implemented yet"}, status=501)
     elif request.method == "DELETE":
-        return JsonResponse(
-            {"message": "Tournament deletion not implemented yet"}, status=501
-        )
+        return JsonResponse({"message": "Tournament deletion not implemented yet"}, status=501)
 
     return JsonResponse({"error": "Method not allowed"}, status=405)
+
+
+def create_tournament(request):
+    """Helper function to handle tournament creation logic"""
+    try:
+        data = json.loads(request.body)
+
+        # Get the Player instance associated with the user
+        try:
+            creator = Player.objects.get(user=request.user)
+        except Player.DoesNotExist:
+            return JsonResponse({"error": "Player profile not found"}, status=400)
+
+        # Convert frontend dates to backend format
+        start_date = timezone.make_aware(datetime.fromisoformat(data["startingDate"].replace("Z", "+00:00")))
+        reg_start = timezone.make_aware(datetime.fromisoformat(data["registrationStart"].replace("Z", "+00:00")))
+        reg_end = timezone.make_aware(datetime.fromisoformat(data["registrationClose"].replace("Z", "+00:00")))
+
+        # Create tournament
+        tournament = Tournament.objects.create(
+            name=data["name"],
+            description=data["description"],
+            start_registration=reg_start,
+            end_registration=reg_end,
+            start_date=start_date,
+            type=data["type"].lower().replace(" ", "_"),
+            start_mode=Tournament.START_MODE_FIXED,
+            is_public=data["visibility"] == "public",
+            creator=creator,
+            min_participants=2,
+            max_participants=8,
+        )
+
+        # Handle private tournament allowed users
+        if data["visibility"] == "private" and data.get("allowedUsers"):
+            allowed_players = Player.objects.filter(user__username__in=data["allowedUsers"])
+            tournament.allowed_players.set(allowed_players)
+
+        return JsonResponse(
+            {
+                "message": "Tournament created successfully",
+                "tournament": build_tournament_data(tournament),
+            }
+        )
+
+    except (json.JSONDecodeError, KeyError) as e:
+        return JsonResponse({"error": f"Invalid request data: {str(e)}"}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": f"Server error: {str(e)}"}, status=500)
+
+
+# TODO: we have a naming issue here.
+@csrf_exempt
+def all_tournaments(request):
+    """
+    GET: List all tournaments
+    POST: Create a new tournament
+    """
+    if request.method == "GET":
+        tournament_list = Tournament.objects.all()
+        data = [build_tournament_data(t) for t in tournament_list]
+        return JsonResponse({"tournaments": data})
+    elif request.method == "POST":
+        return create_tournament(request)
+
+    return JsonResponse({"error": "Method not allowed"}, status=405)
+
+
+# @require_http_methods(["GET", "POST"])
+# @csrf_exempt
+# def all_tournaments(request):
+#     if request.method == "GET":
+#         tournament_list = Tournament.objects.all()
+#         data = [build_tournament_data(t) for t in tournament_list]
+#         return JsonResponse({"tournaments": data})
+
+#     elif request.method == "POST":
+#         try:
+#             data = json.loads(request.body)
+#             creator = Player.objects.get(user=request.user)
+#             result = TournamentManager.create_tournament(data, data.get("game_settings", {}), creator)
+#             if result["status"]:
+#                 tournament = Tournament.objects.get(pk=result["tournament_id"])
+#                 return JsonResponse(
+#                     {
+#                         "status": "success",
+#                         "message": f"Tournament[{tournament.name}] created successfully. {result['message']}",
+#                         "tournament_notification_url": result["tournament_notification_url"],
+#                         "value_create_tournament_debug": result,
+#                         "tournament_debug": build_tournament_data(tournament),
+#                     }
+#                 )
+#             return JsonResponse({"error": result["message"]}, status=400)
+
+#         except (json.JSONDecodeError, Player.DoesNotExist) as e:
+#             return JsonResponse({"error": str(e)}, status=400)
