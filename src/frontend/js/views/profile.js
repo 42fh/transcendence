@@ -1,4 +1,5 @@
 import { fetchUserProfile, formatWinRatio, renderMatchHistory } from "../services/usersService.js";
+import { toggleBlockUser } from "../services/blockService.js";
 import { showToast } from "../utils/toast.js";
 import { ASSETS, LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { updateActiveNavItem } from "../components/bottomNav.js";
@@ -198,6 +199,7 @@ function populatePublicProfileHTML(content, userData) {
 
   // TODO: doppelt gemoppelt just to be sure
   const emailElement = content.querySelector(".profile__info-item--email");
+  const blockButton = content.querySelector('button[data-action="block"]');
   const phoneElement = content.querySelector(".profile__info-item--phone");
   emailElement.style.display = "none";
   phoneElement.style.display = "none";
@@ -208,30 +210,41 @@ function populatePublicProfileHTML(content, userData) {
     return;
   }
 
-  const iconSpan = friendshipButton.querySelector(".material-symbols-outlined");
-  if (!iconSpan) {
+  // if (!friendshipButton || !blockButton || !csrfToken) {
+  //   console.warn("Friend button or block button not found or CSRF token missing");
+  //   return;
+  // }
+
+  const friendIconSpan = friendshipButton.querySelector(".material-symbols-outlined");
+  if (!friendIconSpan) {
     console.warn("Icon span not found in friend button");
     return;
   }
 
+  const blockIconSpan = blockButton.querySelector(".material-symbols-outlined");
+  if (!blockIconSpan) {
+    console.warn("Icon span not found in block button");
+    return;
+  }
+
   if (userData.is_friend) {
-    iconSpan.textContent = "do_not_disturb_on";
+    friendIconSpan.textContent = "do_not_disturb_on";
     friendshipButton.setAttribute("title", "Remove Friend");
     friendshipButton.dataset.state = "friends";
   } else {
     switch (userData.friend_request_status) {
       case "sent":
-        iconSpan.textContent = "hourglass_top";
+        friendIconSpan.textContent = "hourglass_top";
         friendshipButton.setAttribute("title", "Friend Request Sent. Click to withdraw.");
         friendshipButton.dataset.state = "pending_sent";
         break;
       case "received":
-        iconSpan.textContent = "check_circle";
+        friendIconSpan.textContent = "check_circle";
         friendshipButton.setAttribute("title", "Friend Request Received. Click to accept, reject or ignore.");
         friendshipButton.dataset.state = "pending_received";
         break;
       default:
-        iconSpan.textContent = "add_circle";
+        friendIconSpan.textContent = "add_circle";
         friendshipButton.setAttribute("title", "Add Friend");
         friendshipButton.dataset.state = "not_friends";
     }
@@ -248,6 +261,27 @@ function populatePublicProfileHTML(content, userData) {
   friendshipButton.addEventListener("click", () =>
     handleFriendshipButtonClick(friendshipButton.dataset.state, userData)
   );
+
+  blockButton.addEventListener("click", async () => {
+    try {
+      const action = userData.is_blocked ? "unblock" : "block";
+      console.log("action= ", action);
+      const blockResult = await toggleBlockUser(userData.username, userData.is_blocked);
+
+      if (blockResult.success) {
+        // Update UI based on the block status
+        userData.is_blocked = !userData.is_blocked;
+        blockIconSpan.textContent = userData.is_blocked ? "block" : "block_outlined";
+        blockButton.setAttribute("title", userData.is_blocked ? "Unblock User" : "Block User");
+
+        showToast(userData.is_blocked ? "User blocked successfully" : "User unblocked successfully", true);
+      }
+    } catch (error) {
+      console.error("Error blocking/unblocking user:", true);
+      showToast("Failed to block/unblock user", true);
+    }
+  });
+
 }
 
 async function handleFriendshipButtonClick(friendshipButtonDatasetState, userData) {
