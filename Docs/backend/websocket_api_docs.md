@@ -121,7 +121,7 @@ Use this message to control paddle position during gameplay.
 // Movement Too Fast
 {
     "type": "error",
-    "message": "Your are are to fast"
+    "message": "Your are are too fast"
 }
 
 // Invalid Direction
@@ -133,12 +133,12 @@ Use this message to control paddle position during gameplay.
 // Boundary Reached
 {
     "type": "error",
-    "message": "Your are reached beginning of paddle"
+    "message": "Your have reached beginning of paddle"
 }
 // or
 {
     "type": "error",
-    "message": "Your are reached end of paddle"
+    "message": "Your have reached end of paddle"
 }
 
 // Game Not Running
@@ -150,7 +150,7 @@ Use this message to control paddle position during gameplay.
 // Spectator Attempt
 {
     "type": "error",
-    "message": "Your are only allowed to watch"
+    "message": "Your are only allowed to watch 🌋"
 }
 ```
 

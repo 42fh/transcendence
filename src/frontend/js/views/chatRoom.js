@@ -6,10 +6,11 @@ import { LOCAL_STORAGE_KEYS, ASSETS, CHAT_WS_MSG_TYPE } from "../config/constant
 //TODO: in chatHome this function is called, pass userId instead of username,
 //TODO SUITE or whole user so I can access both id and name
 export function loadChatRoom(chatPartner) {
+  console.log("......", chatPartner);
   history.pushState(
     {
       view: "chat-room",
-      chatPartner,
+      chatPartner: chatPartner.username,
     },
     ""
   );
@@ -25,6 +26,7 @@ export function loadChatRoom(chatPartner) {
   mainContent.appendChild(document.importNode(template.content, true));
   console.log("Chat room template loaded");
 
+  console.log("000second user id:", chatPartner.id);
   initializeChatRoom(chatPartner);
 }
 
@@ -41,7 +43,7 @@ function sendMessage(chatPartner) {
     type: CHAT_WS_MSG_TYPE.MESSAGE,
     username: currentUser,
     message: message,
-    chatPartner: chatPartner,
+    chatPartner: chatPartner.username,
   };
 
   chatSocket.send(JSON.stringify(messageData));
@@ -50,13 +52,16 @@ function sendMessage(chatPartner) {
 }
 
 function initializeChatRoom(chatPartner) {
-  const currentUser = localStorage.getItem("pongUsername");
+  const currentUserName = localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME);
+  const currentUserId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
+  console.log("current user id:", currentUserId);
+  console.log("second user id:", chatPartner.id);
 
   const partnerAvatar = document.getElementById("chat-room-partner-avatar");
   const partnerUsername = document.getElementById("chat-room-partner-username");
   const backButton = document.querySelector(".chat-room-header__back-btn");
 
-  partnerUsername.textContent = chatPartner;
+  partnerUsername.textContent = chatPartner.username;
 
   // TODO: FETCH ACTUAL AVATAR
   partnerAvatar.src = `${ASSETS.IMAGES.DEFAULT_AVATAR}`;
@@ -68,16 +73,8 @@ function initializeChatRoom(chatPartner) {
     history.pushState({ view: "chat-home" }, "");
     loadChatPage(false);
   });
-  
 
-  console.log("pongUsername:", currentUser);
-  console.log("Chat Partner:", chatPartner);
-
-  const currentUserID = LOCAL_STORAGE_KEYS.USER_ID;
-  console.log("____currentUserID: ", currentUserID);
-
-
-  const roomName = [currentUser, chatPartner].sort().join("_");
+  const roomName = [currentUserId, chatPartner.id].sort().join("_");
   console.log("Room Name:", roomName);
 
   const wsUrl = `/ws/chat/${roomName}/`;

@@ -20,7 +20,7 @@ def rooms(request):
         if not request.user.is_authenticated:
             return JsonResponse({"status": "error", "message": "User not authenticated"}, status=401)
 
-        users = CustomUser.objects.exclude(username=request.user.username).values("username")
+        users = CustomUser.objects.exclude(username=request.user.username).values("username", "id")
         logger.debug(f"Retrieved {len(users)} users")
 
         blocked_users = set(
@@ -39,7 +39,7 @@ def rooms(request):
         users = (
             CustomUser.objects.exclude(username=request.user.username)
             .exclude(username__in=all_blocked_users)
-            .values("username")
+            .values("username", "id")
         )
         logger.debug(f"Retrieved {len(users)} users after filtering blocked users")
 
@@ -70,6 +70,7 @@ def rooms(request):
         user_list = []
         for user in users:
             username = user["username"]
+            id = user["id"]
             unread_count = (
                 Message.objects.filter(room__user1=request.user, room__user2__username=username, is_read=False).count()
                 + Message.objects.filter(
@@ -79,6 +80,7 @@ def rooms(request):
 
             user_data = {
                 "username": username,
+                "id": id,
                 "unread_messages": unread_count,
             }
             user_list.append(user_data)
@@ -86,7 +88,7 @@ def rooms(request):
         if user_list:
             return JsonResponse({"status": "success", "users": user_list})
         else:
-            return JsonResponse({"status": "success", "users": []})  # Return empty list if no conversations
+            return JsonResponse({"status": "success", "users": []})
 
     except Exception as e:
         logger.error(f"Error in users: {str(e)}")

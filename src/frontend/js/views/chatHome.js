@@ -79,6 +79,7 @@ async function loadChatList(page = 1, perPage = 500, search = "") {
   try {
     const data = await fetchConversationList(page, perPage, search);
     if (!data || !data.users) throw new Error("Failed to fetch chat contacts");
+    console.log("xxxxx", data);
 
     const usersList = document.getElementById("chat-conversations-list");
 
@@ -123,7 +124,8 @@ async function loadChatList(page = 1, perPage = 500, search = "") {
       username.textContent = user.username;
 
       userItem.addEventListener("click", () => {
-        loadChatRoom(user.username);
+        console.log("In loadChatList ", user);
+        loadChatRoom(user);
       });
 
       usersList.appendChild(userItem);
@@ -178,7 +180,8 @@ async function loadUsersList(page = 1, perPage = 500, search = "") {
           : user.username;
 
       userItem.addEventListener("click", () => {
-        loadChatRoom(user.username);
+        console.log("In loadUsersList ", user);
+        loadChatRoom(user);
       });
 
       usersHorizontalContainer.appendChild(userItem);
