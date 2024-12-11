@@ -564,6 +564,14 @@
               <div class="profile__username-container">
                 <!-- TODO: think about this h2 if it has really to be -->
                 <span class="profile__online-status material-symbols-outlined profile__public-info">circle</span>
+                <span
+                  class="profile__online-status material-symbols-outlined profile__public-info profile__online-status--online"
+                  >circle</span
+                >
+                <span
+                  class="profile__online-status material-symbols-outlined profile__public-info profile__online-status--offline"
+                  >circle</span
+                >
                 <h2 class="profile__username username"></h2>
               </div>
               <!-- Private info will be hidden/shown based on view type -->
@@ -816,7 +824,6 @@
         </div>
       </div>
     </template>
-
-    <script type="module" src="js/main.js"></script>
+    <script type="module" src="/js/main.js"></script>
   </body>
 </html>
