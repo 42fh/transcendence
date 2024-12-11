@@ -69,7 +69,7 @@ class Message(models.Model):
 
     def __str__(self):
         return f"Message from {self.sender.username} at {self.timestamp}"
->
+
 
 @receiver(pre_save, sender=ChatRoom)
 def ensure_room_id(sender, instance, **kwargs):
