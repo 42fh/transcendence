@@ -4,6 +4,7 @@ import { initializeTournaments } from "./config/tournaments.js";
 import { initializeHistory } from "./utils/history.js";
 import { CONFIG, LOCAL_STORAGE_KEYS } from "./config/constants.js";
 import { initBottomNav } from "./components/bottomNav.js";
+import { initializeOnlineStatusTracking } from "./utils/onlineStatus.js";
 
 // deleting a cookie must be done by setting expiration to a past time
 const deleteCookie = (name) => {
@@ -24,25 +25,24 @@ document.addEventListener("DOMContentLoaded", () => {
   // Check if user is logged in
   const userId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
   const username = localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME);
-  
+
   const cookie_userId = getCookie_none("pongUserId");
   const cookie_username = getCookie_none("pongUsername");
 
   // when logging in with 42 user id and name from cookie are move to localstorage
-  if ((!userId || !username) && cookie_userId && cookie_username)
-  {
+  if ((!userId || !username) && cookie_userId && cookie_username) {
     localStorage.setItem(LOCAL_STORAGE_KEYS.USER_ID, cookie_userId);
     localStorage.setItem(LOCAL_STORAGE_KEYS.USERNAME, cookie_username);
     deleteCookie("pongUserId");
     deleteCookie("pongUsername");
     loadHomePage();
-  }
-  else if (!userId || !username) {
+  } else if (!userId || !username) {
     // User not logged in, show auth page
     loadAuthPage();
   } else {
     // User is logged in, show home page
     loadHomePage();
+    initializeOnlineStatusTracking(); // Initialize for already logged-in users
   }
 
   initializeTournaments(CONFIG.CURRENT_SOURCE);
