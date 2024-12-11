@@ -95,7 +95,7 @@ function initializeChatRoom(chatPartner) {
         textElement.textContent = message;
 
         // Apply classes based on message type
-        if (username === currentUser) {
+        if (username === currentUserName) {
           messageDiv.classList.add("chat-message-self");
         } else {
           messageDiv.classList.add("chat-message-other");
@@ -112,7 +112,7 @@ function initializeChatRoom(chatPartner) {
           handlers.addMessageToChat(
             data.username,
             data.message,
-            data.username === currentUser ? "self" : CHAT_WS_MSG_TYPE.SYSTEM,
+            data.username === currentUserName ? "self" : CHAT_WS_MSG_TYPE.SYSTEM,
             isSystemMessage
           );
         } else if (data.type === "message_history") {
@@ -123,7 +123,7 @@ function initializeChatRoom(chatPartner) {
             handlers.addMessageToChat(
               msg.username,
               msg.message,
-              msg.username === currentUser ? "self" : CHAT_WS_MSG_TYPE.SYSTEM,
+              msg.username === currentUserName ? "self" : CHAT_WS_MSG_TYPE.SYSTEM,
               isSystemMessage
             );
           });
