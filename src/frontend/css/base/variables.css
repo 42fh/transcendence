@@ -78,6 +78,7 @@
   --profile-border-radius: var(--border-radius);
   --profile-section-bg: rgba(26, 26, 26, 0.9);
 
+<<<<<<< Updated upstream
   /* Font Sizes */
   /*  New specific size for panels */
   --font-size-panel: 14px;
@@ -88,6 +89,8 @@
   /* Font Weights */
   --font-weight-label: 600;
 
+=======
+>>>>>>> Stashed changes
   /* Button Styles */
   --button-font-family: var(--font-family-primary);
   --button-background: transparent;

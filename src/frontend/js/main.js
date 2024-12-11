@@ -16,6 +16,7 @@ const getCookie_none = (name) => {
   const parts = value.split(`; ${name}=`);
   if (parts.length === 2) return parts.pop().split(";").shift();
 };
+<<<<<<< Updated upstream
 
 // deleting a cookie must be done by setting expiration to a past time
 const deleteCookie = (name) => {
@@ -28,6 +29,8 @@ const getCookie_none = (name) => {
   const parts = value.split(`; ${name}=`);
   if (parts.length === 2) return parts.pop().split(";").shift();
 };
+=======
+>>>>>>> Stashed changes
 
 // Initialize all listeners and data
 document.addEventListener("DOMContentLoaded", () => {

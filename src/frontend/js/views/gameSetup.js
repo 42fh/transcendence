@@ -1,8 +1,12 @@
-import { updateActiveNavItem } from "../components/bottom-nav.js";
+import { updateActiveNavItem } from "../components/bottomNav.js";
 import { GameInterface2D } from "../2DGame/gameInterface.js";
 import { GAME_2D_CONFIG_TYPES, GAME_2D_CONFIG_TYPE_DEFAULT } from "../config/constants.js";
 import { showToast } from "../utils/toast.js";
+<<<<<<< Updated upstream
 import { fetchWaitingGames, createGame, joinGame, findMatchingGame } from "../services/gameService.js";
+=======
+import { fetchWaitingGames, createGame, findMatchingGame, joinGame } from "../services/gameService.js";
+>>>>>>> Stashed changes
 import { loadGame2DPage } from "./game2D.js";
 import { initializeGameConfig } from "../store/index.js";
 

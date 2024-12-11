@@ -309,6 +309,7 @@ class DeleteUserView(APIView):
         except Exception as e:
             logger.error(f"Error anonymizing user account: {str(e)}")
             return JsonResponse({"error": "Failed to delete account"}, status=500)
+<<<<<<< Updated upstream
 
 
 def login_with_42(request):
@@ -378,6 +379,8 @@ def callback(request):
         return response
     else:
         return JsonResponse({"error": "Failed to fetch user info"}, status=403)
+=======
+>>>>>>> Stashed changes
 
 
 @method_decorator(csrf_exempt, name="dispatch")

@@ -32,7 +32,11 @@ function initAuthListeners() {
   });
 
   document.getElementById("auth42-button").addEventListener("click", () => {
+<<<<<<< Updated upstream
     window.location.href = "/api/users/auth/login42/";
+=======
+    window.location.href='/api/users/auth/login42/';
+>>>>>>> Stashed changes
   });
 }
 
