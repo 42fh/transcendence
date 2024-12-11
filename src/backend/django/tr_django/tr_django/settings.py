@@ -35,6 +35,12 @@ else:
     # ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1']
 
 
+# oauth2 settings for remote authentication
+FORTYTWO_CLIENT_ID = os.getenv("FORTYTWO_CLIENT_ID")
+FORTYTWO_CLIENT_SECRET = os.getenv("FORTYTWO_CLIENT_SECRET")
+FORTYTWO_REDIRECT_URI = os.getenv("FORTYTWO_REDIRECT_URI")
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -66,17 +72,13 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
 ]
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
-}
+REST_FRAMEWORK = {"DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework_simplejwt.authentication.JWTAuthentication",)}
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
 }
 
 # Add these to your Django settings.py
@@ -86,8 +88,8 @@ SESSION_COOKIE_SECURE = True  # for HTTPS
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
@@ -198,24 +200,28 @@ LOGGING = {
             "formatter": "verbose",
         },
         # docker file has to change to store t in a file
-        #"game_file": {
+        # "game_file": {
         #    "class": "logging.FileHandler",
         #    "filename": "logs/game.log",
         #    "formatter": "verbose",
-        #}
-
+        # }
     },
     "loggers": {
-        "users": {  # This matches 'users' app logs
+        "users": {
             "handlers": ["console"],
             "level": "DEBUG",  # or 'INFO'
             "propagate": True,
         },
         "game": {
             "handlers": ["console"],
-            "level": "INFO", # or "DEBUG"
+            "level": "INFO",  # or "DEBUG"
             "propagate": False,
-        }
+        },
+        "notifications": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
     },
     "root": {
         "handlers": ["console"],

@@ -81,14 +81,16 @@ class FriendRequestsAPITests(TestCase):
         # User2 sends request to user1
         self.client.force_login(self.user2)
         self.client.post(
-            self.base_url, data=json.dumps({"to_user_id": str(self.user1.id)}), content_type="application/json"
+            reverse("friend_requests"),
+            data=json.dumps({"to_user_id": str(self.user1.id)}),
+            content_type="application/json",
         )
 
-        # User1 accepts the request
+        # User1 accepts the request (now using FriendshipsView)
         self.client.force_login(self.user1)
-        response = self.client.patch(
-            self.base_url,
-            data=json.dumps({"from_user_id": str(self.user2.id), "action": "accept"}),
+        response = self.client.post(
+            "/api/users/friends/",
+            data=json.dumps({"from_user_id": str(self.user2.id)}),
             content_type="application/json",
         )
         self.assertEqual(response.status_code, 200)

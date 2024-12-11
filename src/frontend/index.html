@@ -17,6 +17,7 @@
       }
     </script>
   </head>
+
   <body>
     <!-- Main content area where other views will load -->
     <div id="main-content"></div>
@@ -43,6 +44,7 @@
         <div class="auth-buttons">
           <button id="login-button" class="auth-button">Login</button>
           <button id="signup-button" class="auth-button">Sign Up</button>
+          <button id="auth42-button" class="auth-button">Auth 42</button>
         </div>
       </div>
     </template>
@@ -63,29 +65,21 @@
           <button type="submit" class="auth-form__button">Log In</button>
         </form>
       </div>
-      <div id="2fa-container" style="display: none;">
+      <div id="2fa-container" style="display: none">
         <form id="2fa-form" class="modal-form">
           <!-- Message element added here -->
-  
+
           <label for="code">Enter the code sent to your email</label>
           <input type="text" id="code" name="code" required />
 
           <div class="resend-section">
             <span id="countdown">1:00</span>
-            <button 
-              type="button" 
-              id="resend-button" 
-              class="auth-form__button" 
-              disabled
-            >
-              Resend Code
-            </button>
-          </div>      
-  
+            <button type="button" id="resend-button" class="auth-form__button" disabled>Resend Code</button>
+          </div>
+
           <button type="submit" id="2fa-login" class="auth-form__button">Log In</button>
         </form>
       </div>
-
     </template>
 
     <!-- Signup Form Template -->
@@ -133,10 +127,9 @@
         </div>
       </div>
     </template>
-      
 
     <!-- Game list Template 
-     (list of games and button to create new game)-->
+      (list of games and button to create new game)-->
     <template id="game-item-template">
       <div id="games-container" class="page-container--games">
         <div class="game-item">
@@ -147,103 +140,97 @@
           <p>Winner: <span></span></p>
         </div>
       </div>
-      <button id="cta__button-settings" style="display: none;">Settings</button>
+      <button id="cta__button-settings">Settings</button>
     </template>
 
-
-
-
     <!-- Modal Template -->
-<template id="modal-template">
-  <div class="modal-overlay" id="modal-overlay">
-    <div class="modal">
-      <button class="modal-close-btn" aria-label="Close Modal">&times;</button>
-      <div class="modal-content">
-        <h2>Error</h2>
-        <p class="modal-message" id="modal-message">An error occurred. Please try again.</p>
-        <div class="modal-form">
-          <label for="inputField">Example Input:</label>
-          <input type="text" id="inputField" placeholder="Enter some text" />
-          <button type="button" class="form-button" id="submit-form">Submit</button>
+    <template id="modal-template">
+      <div class="modal-overlay" id="modal-overlay">
+        <div class="modal">
+          <button class="modal-close-btn" aria-label="Close Modal">&times;</button>
+          <div class="modal-content">
+            <h2>Error</h2>
+            <p class="modal-message" id="modal-message">An error occurred. Please try again.</p>
+            <div class="modal-form">
+              <label for="inputField">Example Input:</label>
+              <input type="text" id="inputField" placeholder="Enter some text" />
+              <button type="button" class="form-button" id="submit-form">Submit</button>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
-</template>
+    </template>
 
-
-<!-- Game Settings Template-->
-<template id="game-settings-template">
-  <p id="status" class="status"></p>
+    <!-- Game Settings Template-->
+    <template id="game-settings-template">
+      <p id="status" class="status"></p>
       <!-- Status message container -->
-      <div id="status" style="display: none;"></div>
-  <div class="tournament-container page-container--settings">
-    <h2>GAME SETTINGS</h2>
-    <div class="tournament-detail-container">
-      <form id="gameForm" class="tournament-detail-section">
-        <div class="game-setting-group">
-          <label for="playerId">Player ID:</label>
-          <input type="text" id="playerId" name="playerId" class="create-tournament-select">
+      <div id="status" style="display: none"></div>
+      <div class="tournament-container page-container--settings">
+        <h2>GAME SETTINGS</h2>
+        <div class="tournament-detail-container">
+          <form id="tournament-gameForm" class="tournament-detail-section">
+            <div class="game-setting-group">
+              <label for="playerId">Player ID:</label>
+              <input type="text" id="playerId" name="playerId" class="create-tournament-select" />
+            </div>
+            <div class="game-setting-group">
+              <label for="numPlayers">Number of Players:</label>
+              <input type="number" id="numPlayers" name="numPlayers" min="2" max="8" class="create-tournament-select" />
+            </div>
+            <div class="game-setting-group">
+              <label for="numSides">Number of Sides:</label>
+              <input type="number" id="numSides" name="numSides" min="3" max="100" class="create-tournament-select" />
+            </div>
+            <div class="game-setting-group">
+              <label for="numBalls">Number of Balls:</label>
+              <input type="number" id="numBalls" name="numBalls" min="1" max="4" class="create-tournament-select" />
+            </div>
+            <div class="game-setting-group">
+              <label for="mode">Select Mode:</label>
+              <select id="mode" name="mode" class="create-tournament-select">
+                <option value="regular">Regular</option>
+                <option value="classic">Classic</option>
+                <option value="circular">Circular</option>
+                <option value="irregular">Irregular</option>
+              </select>
+            </div>
+            <div class="game-setting-group">
+              <label for="shape">Shape:</label>
+              <select id="shape" name="shape" class="create-tournament-select">
+                <option value="regular">Regular</option>
+                <option value="irregular">Irregular</option>
+                <option value="star">Star</option>
+                <option value="crazy">Crazy</option>
+              </select>
+            </div>
+            <div class="game-setting-group">
+              <label for="scoreMode">Score Mode:</label>
+              <select id="scoreMode" name="scoreMode" class="create-tournament-select">
+                <option value="classic">Classic</option>
+                <option value="modern">Modern</option>
+              </select>
+            </div>
+            <div class="game-setting-group">
+              <button type="submit" class="form-button">Create Game</button>
+            </div>
+          </form>
         </div>
-        <div class="game-setting-group">
-          <label for="numPlayers">Number of Players:</label>
-          <input type="number" id="numPlayers" name="numPlayers" min="2" max="8" class="create-tournament-select">
+        <div id="descriptions-container" class="tournament-detail-descriptions">
+          <h3>Game Information</h3>
+          <p><strong>Classic:</strong> Classic 2-player pong with 2 paddles and 2 walls. Maximum players: 2.</p>
+          <p><strong>Regular:</strong> Regular polygon with all sides playable. Maximum players: 4.</p>
+          <p><strong>Circular:</strong> Circular arena with curved paddles and sides. Maximum players: 8.</p>
+          <p><strong>Irregular:</strong> Irregular polygon shape with customizable sides. Maximum players: 6.</p>
+          <ul>
+            <li><strong>Regular Shape:</strong> Standard polygon.</li>
+            <li><strong>Irregular Shape:</strong> Slightly deformed polygon with balanced sides.</li>
+            <li><strong>Star Shape:</strong> Star-like shape with alternating long and short sides.</li>
+            <li><strong>Crazy Shape:</strong> Extreme deformation with sharp transitions.</li>
+          </ul>
         </div>
-        <div class="game-setting-group">
-          <label for="numSides">Number of Sides:</label>
-          <input type="number" id="numSides" name="numSides" min="3" max="100" class="create-tournament-select">
-        </div>
-        <div class="game-setting-group">
-          <label for="numBalls">Number of Balls:</label>
-          <input type="number" id="numBalls" name="numBalls" min="1" max="4" class="create-tournament-select">
-        </div>
-        <div class="game-setting-group">
-          <label for="mode">Select Mode:</label>
-          <select id="mode" name="mode" class="create-tournament-select">
-            <option value="regular">Regular</option>
-            <option value="classic">Classic</option>
-            <option value="circular">Circular</option>
-            <option value="irregular">Irregular</option>
-          </select>
-        </div>
-        <div class="game-setting-group">
-          <label for="shape">Shape:</label>
-          <select id="shape" name="shape" class="create-tournament-select">
-            <option value="regular">Regular</option>
-            <option value="irregular">Irregular</option>
-            <option value="star">Star</option>
-            <option value="crazy">Crazy</option>
-          </select>
-        </div>
-        <div class="game-setting-group">
-          <label for="scoreMode">Score Mode:</label>
-          <select id="scoreMode" name="scoreMode" class="create-tournament-select">
-            <option value="classic">Classic</option>
-            <option value="modern">Modern</option>
-          </select>
-        </div>
-        <div class="game-setting-group">
-          <button type="submit" class="form-button">Create Game</button>
-        </div>
-      </form>
-    </div>
-    <div id="descriptions-container" class="tournament-detail-descriptions">
-      <h3>Game Information</h3>
-      <p><strong>Classic:</strong> Classic 2-player pong with 2 paddles and 2 walls. Maximum players: 2.</p>
-      <p><strong>Regular:</strong> Regular polygon with all sides playable. Maximum players: 4.</p>
-      <p><strong>Circular:</strong> Circular arena with curved paddles and sides. Maximum players: 8.</p>
-      <p><strong>Irregular:</strong> Irregular polygon shape with customizable sides. Maximum players: 6.</p>
-      <ul>
-        <li><strong>Regular Shape:</strong> Standard polygon.</li>
-        <li><strong>Irregular Shape:</strong> Slightly deformed polygon with balanced sides.</li>
-        <li><strong>Star Shape:</strong> Star-like shape with alternating long and short sides.</li>
-        <li><strong>Crazy Shape:</strong> Extreme deformation with sharp transitions.</li>
-      </ul>
-    </div>
-  </div>
-</template>
-
-
+      </div>
+    </template>
 
     <!-- Tournament List Page Template -->
     <template id="tournament-template">
@@ -287,7 +274,10 @@
 
         <div class="tournament-detail-info">
           <div class="tournament-detail-dates">
-            <div>Registration End: <span class="tournament-detail-closing-date"></span></div>
+            <div>
+              Registration End:
+              <span class="tournament-detail-closing-date"></span>
+            </div>
             <div>Start: <span class="tournament-detail-starting-date"></span></div>
           </div>
           <div class="tournament-detail-type"></div>
@@ -456,46 +446,79 @@
       </div>
     </template>
 
-    <!-- Chat Template -->
-    <template id="chat-template">
-      <div id="notification-container"></div>
-
-      <h3 class="chat-greeting">Hello, <span id="current-username-display"></span>!</h3>
-      <input type="hidden" id="current-username" />
-
-      <div class="chat-container">
-        <div>
-          <h3>Users</h3>
-          <div id="error-container"></div>
-          <ul id="users-list" class="chat-user-list-ul"></ul>
+    <template id="chat-home-template">
+      <div class="page-container page-container--chat">
+        <div class="chat__section">
+          <h2 class="chat-page__title">Users</h2>
+          <div class="chat-users-horizontal-scroll">
+            <div id="chat-users-horizontal-container" class="chat-users-horizontal-container">
+              <!-- Horizontal user items will be populated dynamically here -->
+              <div class="chat-users-horizontal-item" id="chat-users" style="display: none">
+                <img class="chat-users-list__avatar" src="" alt="User avatar" />
+                <div class="chat-users-list__info">
+                  <span id="chat-users-list-username" class="chat-users-list__username"></span>
+                  <span class="chat-users-list__status-indicator"></span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="chat-window-messages">
-          <div id="chat-messages"></div>
+        <div class="chat__section">
+          <h2 class="chat-page__title">Notifications</h2>
+          <h2 id="notification-mark-all-read">Mark all read</h2>
+          <div class="notifications-container">
+            <div id="chat-notifications" class="conversations-list">
+              <!-- Notifications -->
+            </div>
+          </div>
+        </div>
 
-          <!-- Input area for chat messages -->
-          <div class="chat-input-area">
-            <input type="text" id="chat-message-input" class="chat-input-retro" placeholder="Type your message..." />
-            <button id="chat-message-submit">Send</button>
+        <div class="chat__section">
+          <h2 class="chat-page__title">Conversations</h2>
+          <div id="chat-conversations-list" class="conversations-list">
+            <!-- Vertical list of users will be populated dynamically here -->
+            <div
+              id="chat-conversations-list-item"
+              class="chat-conversations-list__item"
+              id="chat-conversations"
+              style="display: none"
+            >
+              <img id="chat-avatar" class="chat-conversations-list__avatar" src="" alt="User avatar" />
+              <div class="chat-conversations-list__info">
+                <span id="chat-conversations-list-username" class="chat-conversations-list__username"></span>
+                <span id="chat-conversations-list-status" class="chat-conversations-list__status-indicator"></span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </template>
 
-    <!-- Chat User List Item Template -->
-    <template id="chat-user-list-item-template">
-      <li>
-        <div class="chat-user-item-container">
-          <span class="chat-user-item"></span>
-          <button class="chat-button-small"></button>
+    <template id="chat-room-template">
+      <div class="chat-room-container">
+        <div class="chat-room-header">
+          <div class="chat-room-header__back-btn">
+            <i class="icon-back">←</i>
+          </div>
+          <div class="chat-room-header__user-info">
+            <img id="chat-room-partner-avatar" class="chat-room-header__avatar" src="" alt="Chat Partner Avatar" />
+            <span id="chat-room-partner-username" class="chat-room-header__username"></span>
+          </div>
+          <div class="chat-room-header__actions">
+            <button id="chat-room-more-actions" class="chat-room-header__more-btn">⋮</button>
+          </div>
         </div>
-      </li>
+        <div id="chat-messages" class="chat-messages"></div>
+        <div class="chat-input-container">
+          <input id="chat-message-input" class="chat-input" placeholder="Type your message" />
+          <button id="chat-message-submit" class="chat-submit-button">Send</button>
+        </div>
+      </div>
     </template>
 
-    <!-- Chat Message Template -->
     <template id="chat-message-template">
       <div class="chat-message">
-        <strong class="chat-message-username"></strong>
         <span class="chat-message-text"></span>
       </div>
     </template>
@@ -517,23 +540,32 @@
         </button>
         <button class="bottom-nav__item" data-page="chat">
           <span class="bottom-nav__icon material-symbols-outlined">chat_bubble</span>
+          <span id="bottom-nav-notification-badge" class="bottom-nav__notification-badge" style="display: none"></span>
         </button>
       </nav>
     </template>
 
-    <!-- Profile Template (used for both 'private' profile and 'public' profile) -->
+    <!-- Profile Template -->
     <template id="profile-template">
       <div class="page-container page-container--profile">
+        <!-- <div class="profile__header"> -->
         <div class="profile">
           <div class="profile__section profile__section--header">
+            <!-- <div class="profile__avatar-container"> -->
             <div class="profile__avatar-wrapper">
               <img class="profile__avatar" src="" alt="Profile avatar" />
             </div>
+            <!-- <div class="profile__info">
+            <h2 class="profile__username"></h2>
+            <p class="profile__name"></p>
+            <p class="profile__email"></p>
+            <p class="profile__phone"></p>
+          </div> -->
             <div class="profile__info">
               <div class="profile__username-container">
                 <!-- TODO: think about this h2 if it has really to be -->
                 <span class="profile__online-status material-symbols-outlined profile__public-info">circle</span>
-                <h2 class="profile__username"></h2>
+                <h2 class="profile__username username"></h2>
               </div>
               <!-- Private info will be hidden/shown based on view type -->
               <p class="profile__info-item profile__info-item--name profile__private-info"></p>
@@ -544,7 +576,7 @@
           <!-- Public Profile Actions -->
           <div class="profile__section profile__section--public-actions profile__public-info">
             <button class="profile__action-button" data-action="friend" title="Add Friend">
-              <span class="material-symbols-outlined">person_add</span>
+              <span class="material-symbols-outlined">add_circle</span>
             </button>
             <button class="profile__action-button" data-action="chat" title="Send Message">
               <span class="material-symbols-outlined">maps_ugc</span>
@@ -560,6 +592,10 @@
             <h3 class="profile__section-title">Bio</h3>
             <p class="profile__bio-text"></p>
           </div>
+          <div class="profile__section profile__section--friends profile__private-info">
+            <h3 class="profile__section-title">Friends</h3>
+            <span class="profile__friends-count">0</span>
+          </div>
           <div class="profile__section profile__section--stats">
             <div class="profile__stats-item">
               <span class="profile__stats-label">Wins</span>
@@ -574,6 +610,8 @@
               <span class="profile__stats-value profile__stats-ratio"></span>
             </div>
           </div>
+
+          <!-- <div class="profile__matches"> -->
           <div class="profile__section profile__section--matches">
             <h3 class="profile__section-title">Recent Matches</h3>
             <div class="profile__matches-list">
@@ -591,7 +629,6 @@
       </div>
     </template>
 
-    <!-- Profile Match Template -->
     <template id="profile-match-template">
       <div class="profile__match-item">
         <span class="profile__match-date"></span>
@@ -695,10 +732,13 @@
     <!-- 3D Game -->
     <template id="3d-game-template">
       <canvas class="webgl"></canvas>
-      <div class="end-screen">
-        <h1 class="title"></h1>
-        <div class="scores"></div>
-        <button class="exit-button">Exit Game</button>
+      <div class="mobile-controls">
+        <button class="control-btn left-btn">
+          <i class="fas fa-arrow-left"></i>
+        </button>
+        <button class="control-btn right-btn">
+          <i class="fas fa-arrow-right"></i>
+        </button>
       </div>
       <div class="game-menu-overlay" id="menu">
         <div class="game-menu-container">
@@ -707,26 +747,14 @@
               <h2 class="text-center mb-0">Game Setup</h2>
             </div>
             <div class="card-body">
-              <form id="gameSetupForm">
-                <div class="mb-4">
-                  <label for="gameType">Game Type</label>
-                  <input type="text" id="gameType" />
-                </div>
+              <div class="mb-4">
+                <label for="playerCount">Player count</label>
+                <input type="text" id="playerCount" />
+              </div>
 
-                <div class="mb-4">
-                  <label for="gameId">Game ID</label>
-                  <input type="text" id="gameId" />
-                </div>
-
-                <div class="mb-4">
-                  <label for="playerCount">Player count</label>
-                  <input type="text" id="playerCount" />
-                </div>
-
-                <div class="text-center">
-                  <div class="joinGame btn btn-primary">Join</div>
-                </div>
-              </form>
+              <div class="text-center">
+                <div class="joinGame btn btn-primary">Join</div>
+              </div>
             </div>
           </div>
         </div>
@@ -737,11 +765,18 @@
 
     <template id="users-template">
       <div class="page-container page-container--users">
-        <!-- TODO: Folks around maybe is nicer instead of users -->
-        <h2 class="users-page__title">Users</h2>
-        <div class="users-search">
-          <input type="text" class="users-search__input" placeholder="Search users..." />
-          <!-- <span class="material-symbols-outlined users-search__icon">search</span> -->
+        <h2 class="users-page__title">Folks around</h2>
+        <div class="users-selection">
+          <div class="users-filter">
+            <button class="users-filter__button users-filter__button--all users-filter__button--active">
+              All of Them
+            </button>
+            <button class="users-filter__button users-filter__button--friends">Only Friends</button>
+          </div>
+          <div class="users-search">
+            <input type="text" class="users-search__input" placeholder="Search users..." />
+            <!-- <span class="material-symbols-outlined users-search__icon">search</span> -->
+          </div>
         </div>
         <div id="users-list" class="users-list"></div>
         <div id="users-pagination" class="pagination">
@@ -765,9 +800,20 @@
       <div class="users-list__item">
         <img class="users-list__avatar" src="" alt="User avatar" />
         <div class="users-list__info">
-          <span class="users-list__username"></span>
+          <span class="users-list__username username"></span>
           <!-- <span class="users-list__status"></span> -->
           <span class="users-list__status-indicator"></span>
+        </div>
+      </div>
+    </template>
+
+    <!-- Friendship Action Modal Template -->
+    <template id="friendship-action-template">
+      <div class="modal-content">
+        <h2 id="modal-title"></h2>
+        <p id="modal-message" class="modal-message"></p>
+        <div class="modal-actions">
+          <!-- Buttons will be added dynamically -->
         </div>
       </div>
     </template>
