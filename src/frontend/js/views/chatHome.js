@@ -1,6 +1,6 @@
 import { displayModalError } from "../components/modal.js";
 import { updateActiveNavItem } from "../components/bottomNav.js";
-import { fetchConversationList } from "../services/chatService.js";
+import { fetchConversationList } from "../services/conversationService.js";
 import { fetchUsers } from "../services/usersService.js";
 import { loadChatRoom } from "./chatRoom.js";
 import { ASSETS } from "../config/constants.js";
