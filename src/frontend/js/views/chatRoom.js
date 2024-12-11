@@ -2,6 +2,9 @@ import { initializeChatWebSocket } from "../services/chatSocketService.js";
 import { loadChatPage } from "./chatHome.js";
 import { LOCAL_STORAGE_KEYS, ASSETS, CHAT_WS_MSG_TYPE } from "../config/constants.js";
 
+
+//TODO: in chatHome this function is called, pass userId instead of username,
+//TODO SUITE or whole user so I can access both id and name
 export function loadChatRoom(chatPartner) {
   history.pushState(
     {
@@ -69,6 +72,10 @@ function initializeChatRoom(chatPartner) {
 
   console.log("pongUsername:", currentUser);
   console.log("Chat Partner:", chatPartner);
+
+  const currentUserID = LOCAL_STORAGE_KEYS.USER_ID;
+  console.log("____currentUserID: ", currentUserID);
+
 
   const roomName = [currentUser, chatPartner].sort().join("_");
   console.log("Room Name:", roomName);

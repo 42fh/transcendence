@@ -24,6 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Check if user is logged in
   const userId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
   const username = localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME);
+  // console.log("userId =", userId);
   
   const cookie_userId = getCookie_none("pongUserId");
   const cookie_username = getCookie_none("pongUsername");
