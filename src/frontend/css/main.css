@@ -2,6 +2,7 @@
 @import "base/variables.css";
 @import "base/reset.css";
 @import "base/typography.css";
+@import "base/layout.css";
 
 /* Components */
 @import "components/buttons.css";
@@ -12,7 +13,6 @@
 @import "components/toast.css";
 
 /* Pages */
-@import "pages/layout.css";
 @import "pages/home.css";
 @import "pages/tournaments.css";
 @import "pages/profile.css";
@@ -31,9 +31,10 @@ body {
   background-color: var(--color-background);
   color: var(--color-text-primary);
   font-family: "Press Start 2P", cursive;
-  display: flex;
+  /* display: flex; */
   justify-content: center;
   align-items: center;
+  height: 100vh;
 }
 
 /* Material Icons Configuration */
@@ -43,31 +44,16 @@ body {
   line-height: 1;
 }
 
-/* Modal and Toast Button Styling */
-/* TODO: solve this */
-
-.modal-button,
-.toast-button {
-  font-family: "Press Start 2P", cursive;
-  background: transparent;
-  color: white;
-  border: 2px solid white;
-  border-radius: 10px;
-  padding: 0.8rem 1.5rem;
-  cursor: pointer;
-  transition: background-color 0.3s, color 0.3s;
-}
-
 .modal-button:hover,
 .toast-button:hover {
-  background: white;
-  color: black;
+  background: var(--button-hover-background);
+  color: var(--button-hover-color);
 }
 
 .modal-error,
 .toast-error {
-  color: red;
-  border-color: red;
+  color: var(--error-color);
+  border-color: var(--error-color);
 }
 
 /* Daniils */
@@ -191,4 +177,37 @@ body {
   font-size: 14px;
   text-align: center;
   white-space: nowrap;
+}
+.mobile-controls {
+  position: fixed;
+  bottom: 60px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px;
+  pointer-events: none;
+}
+
+.control-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+  color: white;
+  font-size: 24px;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+.control-btn:active {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Hide on desktop */
+@media (min-width: 768px) {
+  .mobile-controls {
+    display: none;
+  }
 }

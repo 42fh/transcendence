@@ -3,7 +3,19 @@ import { loadHomePage } from "./views/home.js";
 import { initializeTournaments } from "./config/tournaments.js";
 import { initializeHistory } from "./utils/history.js";
 import { CONFIG, LOCAL_STORAGE_KEYS } from "./config/constants.js";
-import { initBottomNav } from "./components/bottom-nav.js";
+import { initBottomNav } from "./components/bottomNav.js";
+
+// deleting a cookie must be done by setting expiration to a past time
+const deleteCookie = (name) => {
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+};
+
+// needed when using sing in with 42
+const getCookie_none = (name) => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(";").shift();
+};
 
 // deleting a cookie must be done by setting expiration to a past time
 const deleteCookie = (name) => {

@@ -12,25 +12,25 @@ logger = logging.getLogger(__name__)
 async def start_game(self):
     """Start game with process-safe checks"""
     try:
-        min_players = self.settings.get("min_players")
+        num_players = self.settings.get("num_players")
         await GameCoordinator.set_to_waiting_game(self.game_id)
         while True:
             player_count = await self.redis_conn.scard(self.players_key)
             if player_count == 0:
                 await self.end_game()
                 return
-            if player_count >= min_players:
+            if player_count >= num_players:
                 break
             logger.info(
-                f"{self.game_id}: Waiting for players... ({player_count}/{min_players})"
+                f"{self.game_id}: Waiting for players... ({player_count}/{num_players})"
             )
             await self.channel_layer.group_send(
                 f"game_{self.game_id}",
                 {
                     "type": "waiting",
                     "current_players": player_count,
-                    "required_players": min_players,
-                    "message": f"Waiting for players... ({player_count}/{min_players})",
+                    "required_players": num_players,
+                    "message": f"Waiting for players... ({player_count}/{num_players})",
                 },
             )
 
@@ -70,6 +70,7 @@ async def end_game(self):
         # await self.redis_conn.set(self.running_key, b"0")
         await GameCoordinator.set_to_finished_game(self.game_id)
         # Keep game state briefly for end-game display
+        # would be handle by GameCoordinator 
         for key in [
             self.state_key,
             self.players_key,
@@ -87,7 +88,7 @@ async def end_game(self):
 
     except Exception as e:
         logger.error(f"Error ending game: {e}")
-
+        # TODO: cleanup requierd
 
 async def update_game(self):
     """Process-safe game update with enhanced error handling"""

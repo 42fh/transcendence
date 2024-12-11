@@ -1,6 +1,6 @@
 import { showToast } from "../utils/toast.js";
 import { handleCreateTournamentSubmit } from "../services/tournamentService.js";
-import { updateActiveNavItem } from "../components/bottom-nav.js";
+import { updateActiveNavItem } from "../components/bottomNav.js";
 function setDefaultDates() {
   // Get current date and time
   const now = new Date();

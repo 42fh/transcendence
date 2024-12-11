@@ -8,6 +8,8 @@ import msgpack
 import redis.asyncio as redis
 import logging
 from django.core.serializers.json import DjangoJSONEncoder
+from django.contrib.auth import get_user_model
+from asgiref.sync import sync_to_async
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +28,8 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.check_connection_task = None
 
     async def connect(self):
+        print("hallo world")
+
         self.game_id = self.scope["url_route"]["kwargs"]["game_id"]
         self.user = self.scope["user"]
         self.player_id = str(self.user.id)
@@ -75,6 +79,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                     {
                         "type": "player_joined",
                         "player_id": self.player_id,
+                        "player_name": self.user.username,    
                         "player_index": self.player_index,
                         "current_players": player_count + 1,
                     },
@@ -82,6 +87,8 @@ class PongConsumer(AsyncWebsocketConsumer):
 
             # Send initial game state
             try:
+
+                player_names = await self.get_connected_players()
                 await self.send(
                     text_data=json.dumps(
                         {
@@ -93,6 +100,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                                 if self.role == "player"
                                 else None
                             ),
+                            "player_names" : player_names, 
                             "message": player_index.get("message", "no message given"),
                             "player_values": self.player_values,
                             "game_setup": {
@@ -212,7 +220,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         if current_time - self.last_move_time < self.player_values["move_cooldown"]:
             await self.send(
                 text_data=json.dumps(
-                    {"type": "error", "message": "Your are are to fast"}
+                    {"type": "error", "message": "You are to fast"}
                 )
             )
             return  # could send back feedback that is too fast or and log it in cheatlog
@@ -333,6 +341,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                     "player_id": event["player_id"],
                     "player_index": event["player_index"],
                     "current_players": event["current_players"],
+                    "player_name": event["player_name"] 
                 }
             )
         )
@@ -391,3 +400,43 @@ class PongConsumer(AsyncWebsocketConsumer):
             return data
         else:
             return str(data)  # Convert any other types to strings
+
+
+    @sync_to_async
+    def get_user_info(self, user_id):
+        User = get_user_model()
+        try:
+            user = User.objects.get(id=user_id)
+            return {
+                'username': user.username,
+            }
+        except User.DoesNotExist:
+            return None
+
+    async def get_connected_players(self):
+        player_data = []
+        
+        # Get all player IDs
+        player_ids = await self.game_manager.redis_conn.smembers(self.game_manager.players_key)
+        print("hallo ", player_ids) 
+        # Get index for each player
+        for player_id in player_ids:
+            index = await self.game_manager.redis_conn.get(f"{self.game_id}:player_side:{player_id.decode('utf-8')}")
+            logger.info(f"{self.game_id}:player_side:{str(player_id)} //  {index}")
+            if index:
+                player_data.append({
+                    'player_id': player_id.decode('utf-8'),
+                    'index': int(index)  # Renamed from 'position' to 'index'
+                })
+        
+        # Sort by index
+        player_data.sort(key=lambda x: x['index'])
+        
+        # Fetch user info for each player
+        for player in player_data:
+            user_info = await self.get_user_info(player['player_id'])
+            if user_info:
+                player.update(user_info)
+        
+        return player_data
+

@@ -62,7 +62,10 @@ postgres_data/
 
 # Logs
 **/logs/
+**/logs/*.log
 *.log
+src/nginx/logs/*.log
+src/nginx/logs/access.log
 
 # Ignore all files in media/avatars
 media/avatars/*

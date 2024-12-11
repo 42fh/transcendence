@@ -114,6 +114,36 @@ export async function joinGame(gameId) {
   }
 }
 
+/**
+ * Finds a matching game from available games based on form data
+ * @param {Array<GameInfo>} games - Array of available games
+ * @param {Object} formData - Form data with game preferences
+ * @returns {string|null} gameId of matching game or null if no match found
+ */
+export function findMatchingGame(games, formData) {
+  console.log("findMatchingGame", games, formData);
+  const matchingGame =
+    games.find(
+      (game) =>
+        // Match game mode
+        game.mode === formData.gameType &&
+        // Match number of players
+        game.num_players === formData.num_players &&
+        // Match number of sides (for non-classic modes)
+        (formData.gameType === "classic" || game.sides === formData.sides) &&
+        // TODO: Future matching criteria could include:
+        // && game.score.max === formData.scoreLimit
+        // && game.initial_ball_speed === formData.ballSpeed
+        // && game.paddle_length === formData.paddleLength
+        // && game.ball_size === formData.ballSize
+        // && game.score_mode === formData.scoreMode
+        // Ensure there's room for more players
+        game.players.current + game.players.reserved < game.players.total_needed
+    )?.game_id || null;
+  console.log("matchingGame", matchingGame);
+  return matchingGame;
+}
+
 export async function showAvailableGames() {
   try {
     const games = await fetchAvailableGames();

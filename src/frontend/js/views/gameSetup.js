@@ -2,7 +2,7 @@ import { updateActiveNavItem } from "../components/bottom-nav.js";
 import { GameInterface2D } from "../2DGame/gameInterface.js";
 import { GAME_2D_CONFIG_TYPES, GAME_2D_CONFIG_TYPE_DEFAULT } from "../config/constants.js";
 import { showToast } from "../utils/toast.js";
-import { fetchWaitingGames, createGame, joinGame } from "../services/gameService.js";
+import { fetchWaitingGames, createGame, joinGame, findMatchingGame } from "../services/gameService.js";
 import { loadGame2DPage } from "./game2D.js";
 import { initializeGameConfig } from "../store/index.js";
 
@@ -249,35 +249,6 @@ function validateFormData(formData) {
   return true;
 }
 
-/**
- * Finds a matching game from available games based on form data
- * @param {Array<GameInfo>} games - Array of available games
- * @param {Object} formData - Form data with game preferences
- * @returns {string|null} gameId of matching game or null if no match found
- */
-function findMatchingGame(games, formData) {
-  console.log("findMatchingGame", games, formData);
-  const matchingGame =
-    games.find(
-      (game) =>
-        // Match game mode
-        game.mode === formData.gameType &&
-        // Match number of players
-        game.num_players === formData.numPlayers &&
-        // Match number of sides (for non-classic modes)
-        (formData.gameType === "classic" || game.sides === formData.numSides) &&
-        // TODO: Future matching criteria could include:
-        // && game.score.max === formData.scoreLimit
-        // && game.initial_ball_speed === formData.ballSpeed
-        // && game.paddle_length === formData.paddleLength
-        // && game.ball_size === formData.ballSize
-        // && game.score_mode === formData.scoreMode
-        // Ensure there's room for more players
-        game.players.current + game.players.reserved < game.players.total_needed
-    )?.game_id || null;
-  console.log("matchingGame", matchingGame);
-  return matchingGame;
-}
 // Note this fucntion is meant to be used if you want to join or create a certain type of game not to join a specific waiting gamej
 async function handleStartGame(gameInterface) {
   const formData = collectFormData();

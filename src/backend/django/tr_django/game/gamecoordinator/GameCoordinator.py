@@ -8,7 +8,7 @@ import asyncio
 from .GameSettingsManager import GameSettingsManager
 import math
 import logging
-
+from asgiref.sync import sync_to_async
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +54,7 @@ class GameCoordinator:
     # invidual Player Managment
     BOOKED_USER_PREFIX = "booked_"
     PLAYING_USER_PREFIX = "playing_"
+    TOURNAMENT_USER_PREFIX = "tournament_"
 
     # user online
     USER_ONLINE_PREFIX = "user_online_"
@@ -186,6 +187,49 @@ class GameCoordinator:
             )
 
             await pipeline.execute()
+
+    @classmethod
+    async def create_tournament_game(
+        cls,
+        real_game_id: str,
+        tournament_id: str,
+        players: list[str],
+        game_settings: dict,
+    ) -> dict:
+        """Create tournament game with pre-assigned players"""
+        try:
+            game_id = None
+            async with await cls.get_redis(cls.REDIS_URL) as redis_conn:
+                async with RedisLock(redis_conn, cls.LOCK_KEYS["game_id"]):
+                    game_id = await cls.generate_game_id(redis_conn)
+
+            if not game_id:
+                return {"status": "error", "message": "Failed to generate game ID"}
+
+            # Setup base game
+            await cls.game_setup(redis_conn, game_settings, game_id)
+
+            # Set tournament flags
+            async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
+                pipe = redis_conn.pipeline()
+                pipe.set(f"game_is_tournament:{game_id}", "1")
+                pipe.set(f"tournament_game:{game_id}", real_game_id)
+                pipe.set(f"tournament_id:{game_id}", tournament_id)
+                await pipe.execute()
+                player_urls = []
+                for user_id in players:
+                    print(f"user_id: {user_id}/{type(user_id)}")
+                    # Book player
+                    booking_key = f"{cls.TOURNAMENT_USER_PREFIX}{user_id}:{game_id}"
+                    await redis_conn.set(booking_key, "1")
+                    # Add URL to list
+                    player_urls.append((user_id, f"ws/game/{game_id}/"))
+            print("F")
+            return {"status": "running", "game_id": game_id, "player_urls": player_urls}
+
+        except Exception as e:
+            logger.error(f"Error creating tournament game: {e}")
+            return {"status": "error", "message": str(e)}
 
     # view
 
@@ -348,14 +392,14 @@ class GameCoordinator:
                 async for key in redis_conn.scan_iter(
                     f"{cls.BOOKED_USER_PREFIX}{user_id}:*"
                 ):
-                    logger.debug("player is booked: ", key)
+                    logger.debug("player is booked: {key}")
                     return True
 
                 # Check for playing status
                 async for key in redis_conn.scan_iter(
                     f"{cls.PLAYING_USER_PREFIX}{user_id}:*"
                 ):
-                    logger.debug("player is playing: ", key)
+                    logger.debug("player is playing: {key}")
                     return True
 
                 return False

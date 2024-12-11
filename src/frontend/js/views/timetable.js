@@ -2,7 +2,7 @@ import { showToast } from "../utils/toast.js";
 import { CONFIG, LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { getGlobalTournaments } from "../store/index.js";
 import { tournaments } from "../config/tournaments.js";
-import { updateActiveNavItem } from "../components/bottom-nav.js";
+import { updateActiveNavItem } from "../components/bottomNav.js";
 
 export async function loadTimetablePage(tournamentName, addToHistory = true) {
   try {

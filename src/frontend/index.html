@@ -17,6 +17,7 @@
       }
     </script>
   </head>
+
   <body>
     <!-- Main content area where other views will load -->
     <div id="main-content"></div>
@@ -68,6 +69,7 @@
         <form id="2fa-form" class="modal-form">
           <!-- Message element added here -->
 
+
           <label for="code">Enter the code sent to your email</label>
           <input type="text" id="code" name="code" required />
 
@@ -105,8 +107,8 @@
         <h1 class="page-container__title page-container__title--home">PONG</h1>
 
         <div class="home__content">
-          <div class="home__buttons-left">
-            <button id="logout-button">Logout</button>
+          <div class="home__buttonsetleft">
+            <button id="home__button-logout" class="home__button button--red">Logout</button>
             <button id="home__button-play" class="home__button button--neon">PLAY</button>
           </div>
           <div class="home__net">
@@ -121,19 +123,13 @@
             <div class="home__net-segment home__net-segment--black"></div>
             <div class="home__net-segment home__net-segment--white"></div>
           </div>
-          <div class="home__buttons-right">
-            <button id="home__button-cta" class="home__button button--gradient">CTA</button>
-            <button id="home__button-2d" class="home__button button--stroke">
-              <span class="actual-text">&nbsp;2D GAME&nbsp;</span>
-              <span class="hover-text" aria-hidden="true">&nbsp;OR DIE&nbsp;</span>
-            </button>
-          </div>
+          <button id="home__button-cta" class="home__button button--gradient">CTA</button>
         </div>
       </div>
     </template>
 
     <!-- Game list Template 
-     (list of games and button to create new game)-->
+      (list of games and button to create new game)-->
     <template id="game-item-template">
       <div id="games-container" class="page-container--games">
         <div class="game-item">
@@ -144,7 +140,7 @@
           <p>Winner: <span></span></p>
         </div>
       </div>
-      <button id="cta__button-settings" style="display: none">Settings</button>
+      <button id="cta__button-settings">Settings</button>
     </template>
 
     <!-- Modal Template -->
@@ -165,6 +161,9 @@
       </div>
     </template>
 
+    <!-- Game Settings Template-->
+    <template id="game-settings-template">
+      <p id="status" class="status"></p>
     <!-- Game Settings Template-->
     <template id="game-settings-template">
       <p id="status" class="status"></p>
@@ -278,7 +277,10 @@
 
         <div class="tournament-detail-info">
           <div class="tournament-detail-dates">
-            <div>Registration End: <span class="tournament-detail-closing-date"></span></div>
+            <div>
+              Registration End:
+              <span class="tournament-detail-closing-date"></span>
+            </div>
             <div>Start: <span class="tournament-detail-starting-date"></span></div>
           </div>
           <div class="tournament-detail-type"></div>
@@ -447,46 +449,79 @@
       </div>
     </template>
 
-    <!-- Chat Template -->
-    <template id="chat-template">
-      <div id="notification-container"></div>
-
-      <h3 class="chat-greeting">Hello, <span id="current-username-display"></span>!</h3>
-      <input type="hidden" id="current-username" />
-
-      <div class="chat-container">
-        <div>
-          <h3>Users</h3>
-          <div id="error-container"></div>
-          <ul id="users-list" class="chat-user-list-ul"></ul>
+    <template id="chat-home-template">
+      <div class="page-container page-container--chat">
+        <div class="chat__section">
+          <h2 class="chat-page__title">Users</h2>
+          <div class="chat-users-horizontal-scroll">
+            <div id="chat-users-horizontal-container" class="chat-users-horizontal-container">
+              <!-- Horizontal user items will be populated dynamically here -->
+              <div class="chat-users-horizontal-item" id="chat-users" style="display: none">
+                <img class="chat-users-list__avatar" src="" alt="User avatar" />
+                <div class="chat-users-list__info">
+                  <span id="chat-users-list-username" class="chat-users-list__username"></span>
+                  <span class="chat-users-list__status-indicator"></span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="chat-window-messages">
-          <div id="chat-messages"></div>
+        <div class="chat__section">
+          <h2 class="chat-page__title">Notifications</h2>
+          <h2 id="notification-mark-all-read">Mark all read</h2>
+          <div class="notifications-container">
+            <div id="chat-notifications" class="conversations-list">
+              <!-- Notifications -->
+            </div>
+          </div>
+        </div>
 
-          <!-- Input area for chat messages -->
-          <div class="chat-input-area">
-            <input type="text" id="chat-message-input" class="chat-input-retro" placeholder="Type your message..." />
-            <button id="chat-message-submit">Send</button>
+        <div class="chat__section">
+          <h2 class="chat-page__title">Conversations</h2>
+          <div id="chat-conversations-list" class="conversations-list">
+            <!-- Vertical list of users will be populated dynamically here -->
+            <div
+              id="chat-conversations-list-item"
+              class="chat-conversations-list__item"
+              id="chat-conversations"
+              style="display: none"
+            >
+              <img id="chat-avatar" class="chat-conversations-list__avatar" src="" alt="User avatar" />
+              <div class="chat-conversations-list__info">
+                <span id="chat-conversations-list-username" class="chat-conversations-list__username"></span>
+                <span id="chat-conversations-list-status" class="chat-conversations-list__status-indicator"></span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </template>
 
-    <!-- Chat User List Item Template -->
-    <template id="chat-user-list-item-template">
-      <li>
-        <div class="chat-user-item-container">
-          <span class="chat-user-item"></span>
-          <button class="chat-button-small"></button>
+    <template id="chat-room-template">
+      <div class="chat-room-container">
+        <div class="chat-room-header">
+          <div class="chat-room-header__back-btn">
+            <i class="icon-back">←</i>
+          </div>
+          <div class="chat-room-header__user-info">
+            <img id="chat-room-partner-avatar" class="chat-room-header__avatar" src="" alt="Chat Partner Avatar" />
+            <span id="chat-room-partner-username" class="chat-room-header__username"></span>
+          </div>
+          <div class="chat-room-header__actions">
+            <button id="chat-room-more-actions" class="chat-room-header__more-btn">⋮</button>
+          </div>
         </div>
-      </li>
+        <div id="chat-messages" class="chat-messages"></div>
+        <div class="chat-input-container">
+          <input id="chat-message-input" class="chat-input" placeholder="Type your message" />
+          <button id="chat-message-submit" class="chat-submit-button">Send</button>
+        </div>
+      </div>
     </template>
 
-    <!-- Chat Message Template -->
     <template id="chat-message-template">
       <div class="chat-message">
-        <strong class="chat-message-username"></strong>
         <span class="chat-message-text"></span>
       </div>
     </template>
@@ -508,6 +543,7 @@
         </button>
         <button class="bottom-nav__item" data-page="chat">
           <span class="bottom-nav__icon material-symbols-outlined">chat_bubble</span>
+          <span id="bottom-nav-notification-badge" class="bottom-nav__notification-badge" style="display: none"></span>
         </button>
       </nav>
     </template>
@@ -529,24 +565,40 @@
             <p class="profile__phone"></p>
           </div> -->
             <div class="profile__info">
-              <h2 class="profile__username"></h2>
-              <p class="profile__info-item profile__info-item--name"></p>
-              <p class="profile__info-item profile__info-item--location"></p>
-              <p class="profile__info-item profile__info-item--email"></p>
-              <p class="profile__info-item profile__info-item--phone"></p>
+              <div class="profile__username-container">
+                <!-- TODO: think about this h2 if it has really to be -->
+                <span class="profile__online-status material-symbols-outlined profile__public-info">circle</span>
+                <h2 class="profile__username username"></h2>
+              </div>
+              <!-- Private info will be hidden/shown based on view type -->
+              <p class="profile__info-item profile__info-item--name profile__private-info"></p>
+              <p class="profile__info-item profile__info-item--email profile__private-info"></p>
+              <p class="profile__info-item profile__info-item--phone profile__private-info"></p>
             </div>
           </div>
-
-          <!-- <div class="profile__bio">
-          <h3 class="profile__bio-title">Bio</h3>
-          <p class="profile__bio-text"></p>
-        </div> -->
+          <!-- Public Profile Actions -->
+          <div class="profile__section profile__section--public-actions profile__public-info">
+            <button class="profile__action-button" data-action="friend" title="Add Friend">
+              <span class="material-symbols-outlined">add_circle</span>
+            </button>
+            <button class="profile__action-button" data-action="chat" title="Send Message">
+              <span class="material-symbols-outlined">maps_ugc</span>
+            </button>
+            <button class="profile__action-button" data-action="play" title="Challenge to Game">
+              <span class="material-symbols-outlined">play_circle</span>
+            </button>
+            <button class="profile__action-button" data-action="block" title="Block User">
+              <span class="material-symbols-outlined">block</span>
+            </button>
+          </div>
           <div class="profile__section profile__section--bio">
             <h3 class="profile__section-title">Bio</h3>
             <p class="profile__bio-text"></p>
           </div>
-
-          <!-- <div class="profile__stats"> -->
+          <div class="profile__section profile__section--friends profile__private-info">
+            <h3 class="profile__section-title">Friends</h3>
+            <span class="profile__friends-count">0</span>
+          </div>
           <div class="profile__section profile__section--stats">
             <div class="profile__stats-item">
               <span class="profile__stats-label">Wins</span>
@@ -570,9 +622,8 @@
             </div>
           </div>
 
-          <!-- <div class="profile__actions"> -->
-          <div class="profile__section profile__section--actions">
-            <!-- <button class="profile__edit-button">Edit Profile</button> -->
+          <!-- Private Profile Actions -->
+          <div class="profile__section profile__section--private-actions profile__private-info">
             <button class="profile__button profile__button--edit">Edit Profile</button>
             <button class="profile__button profile__button--2fa">2FA Settings</button>
             <!-- TODO: Add password change button if we decide to implement it -->
@@ -684,10 +735,13 @@
     <!-- 3D Game -->
     <template id="3d-game-template">
       <canvas class="webgl"></canvas>
-      <div class="end-screen">
-        <h1 class="title"></h1>
-        <div class="scores"></div>
-        <button class="exit-button">Exit Game</button>
+      <div class="mobile-controls">
+        <button class="control-btn left-btn">
+          <i class="fas fa-arrow-left"></i>
+        </button>
+        <button class="control-btn right-btn">
+          <i class="fas fa-arrow-right"></i>
+        </button>
       </div>
       <div class="game-menu-overlay" id="menu">
         <div class="game-menu-container">
@@ -696,17 +750,6 @@
               <h2 class="text-center mb-0">Game Setup</h2>
             </div>
             <div class="card-body">
-              <form id="gameSetupForm">
-                <div class="mb-4">
-                  <label for="gameType">Game Type</label>
-                  <input type="text" id="gameType" />
-                </div>
-
-                <div class="mb-4">
-                  <label for="gameId">Game ID</label>
-                  <input type="text" id="gameId" />
-                </div>
-
                 <div class="mb-4">
                   <label for="playerCount">Player count</label>
                   <input type="text" id="playerCount" />
@@ -726,11 +769,18 @@
 
     <template id="users-template">
       <div class="page-container page-container--users">
-        <!-- TODO: Folks around maybe is nicer instead of users -->
-        <h2 class="users-page__title">Users</h2>
-        <div class="users-search">
-          <input type="text" class="users-search__input" placeholder="Search users..." />
-          <!-- <span class="material-symbols-outlined users-search__icon">search</span> -->
+        <h2 class="users-page__title">Folks around</h2>
+        <div class="users-selection">
+          <div class="users-filter">
+            <button class="users-filter__button users-filter__button--all users-filter__button--active">
+              All of Them
+            </button>
+            <button class="users-filter__button users-filter__button--friends">Only Friends</button>
+          </div>
+          <div class="users-search">
+            <input type="text" class="users-search__input" placeholder="Search users..." />
+            <!-- <span class="material-symbols-outlined users-search__icon">search</span> -->
+          </div>
         </div>
         <div id="users-list" class="users-list"></div>
         <div id="users-pagination" class="pagination">
@@ -754,7 +804,7 @@
       <div class="users-list__item">
         <img class="users-list__avatar" src="" alt="User avatar" />
         <div class="users-list__info">
-          <span class="users-list__username"></span>
+          <span class="users-list__username username"></span>
           <!-- <span class="users-list__status"></span> -->
           <span class="users-list__status-indicator"></span>
         </div>
@@ -893,6 +943,13 @@
               </li>
             </ul>
           </div>
+    <!-- Friendship Action Modal Template -->
+    <template id="friendship-action-template">
+      <div class="modal-content">
+        <h2 id="modal-title"></h2>
+        <p id="modal-message" class="modal-message"></p>
+        <div class="modal-actions">
+          <!-- Buttons will be added dynamically -->
         </div>
       </div>
     </template>
