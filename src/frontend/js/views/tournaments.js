@@ -2,9 +2,9 @@ import { CONFIG } from "../config/constants.js";
 import { fetchTournaments } from "../services/tournamentService.js";
 import { formatDate } from "../utils/date.js";
 import { showToast } from "../utils/toast.js";
-import { loadTournamentDetailsPage } from "./tournament-detail.js";
-import { loadCreateTournamentPage } from "./tournament-create.js";
-import { updateActiveNavItem } from "../components/bottom-nav.js";
+import { loadTournamentDetailsPage } from "./tournamentDetail.js";
+import { loadCreateTournamentPage } from "./tournamentCreate.js";
+import { updateActiveNavItem } from "../components/bottomNav.js";
 function renderTournamentCard(tournament) {
   const template = document.getElementById("tournament-card-template");
   const card = document.importNode(template.content, true);

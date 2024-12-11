@@ -220,7 +220,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         if current_time - self.last_move_time < self.player_values["move_cooldown"]:
             await self.send(
                 text_data=json.dumps(
-                    {"type": "error", "message": "Your are are to fast"}
+                    {"type": "error", "message": "You are to fast"}
                 )
             )
             return  # could send back feedback that is too fast or and log it in cheatlog

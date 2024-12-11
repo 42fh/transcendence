@@ -1,13 +1,15 @@
 import { loadAuthPage } from "../views/auth.js";
 import { loadHomePage } from "../views/home.js";
 import { loadUsersPage } from "../views/users.js";
+import { loadChatPage } from "../views/chatHome.js";
+import { loadChatRoom } from "../views/chatRoom.js";
 import { loadTournamentsPage } from "../views/tournaments.js";
-import { loadTournamentDetailsPage } from "../views/tournament-detail.js";
-import { loadCreateTournamentPage } from "../views/tournament-create.js";
+import { loadTournamentDetailsPage } from "../views/tournamentDetail.js";
+import { loadCreateTournamentPage } from "../views/tournamentCreate.js";
 import { loadTimetablePage } from "../views/timetable.js";
 import { loadProfilePage } from "../views/profile.js";
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
-import { updateActiveNavItem } from "../components/bottom-nav.js";
+import { updateActiveNavItem } from "../components/bottomNav.js";
 
 // TODO: Implement state management system to cache API responses
 // Consider using:
@@ -22,14 +24,12 @@ import { updateActiveNavItem } from "../components/bottom-nav.js";
 // };
 
 export function initializeHistory() {
-  // Initial state on load
+
   window.addEventListener("load", () => {
     const username = localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME);
 
     const initialView = username ? "home" : "auth";
     history.replaceState({ view: initialView }, "");
-
-    // Load initial view
     if (username) {
       loadHomePage();
     } else {
@@ -37,15 +37,15 @@ export function initializeHistory() {
     }
   });
 
-  // Handle browser back/forward
   window.addEventListener("popstate", (event) => {
     event.preventDefault();
 
     if (event.state) {
       // TODO: Check cache before making API calls in each case
       // If cached data exists and is not stale, use it instead of making new API calls
-
+      
       const state = event.state || { view: "home" };
+      console.log("Navigating to:", state.view);
       if (state && state.view) {
         // Update active nav state
         updateActiveNavItem(state.view);
@@ -70,6 +70,17 @@ export function initializeHistory() {
               loadTournamentsPage(false);
             }
             break;
+          case "chat-room":
+            if (state.chatPartner) {
+              loadChatRoom(state.chatPartner, false);
+            } else {
+              console.error("No chat partner in state");
+              loadChatPage(false);
+            }
+            break;
+          case "chat-home":
+            loadChatPage(false);
+            break;            
           case "create-tournament":
             loadCreateTournamentPage(false);
             break;
@@ -87,11 +98,8 @@ export function initializeHistory() {
             break;
           case "profile":
             // TODO: Implement profile data caching
-            // Cache user profiles with timestamp for invalidation
-            // Consider different cache durations for own profile vs other users
             const userId = state.userId || localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
 
-            // loadProfilePage(false);
             loadProfilePage(userId, false);
             break;
           default:
@@ -109,9 +117,7 @@ export function initializeHistory() {
     }
   });
 
-  // Prevent default link behavior for navigation
   document.addEventListener("click", (event) => {
-    // Check if the clicked element is a navigation link
     if (event.target.matches("[data-nav]")) {
       event.preventDefault();
       const view = event.target.getAttribute("data-nav");
@@ -131,8 +137,9 @@ export function initializeHistory() {
           break;
         case "profile":
           const userId = event.target.dataset.userId || localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
-
-          //   loadProfilePage();
+        case "chat-home":
+          loadChatPage();
+          break;
           loadProfilePage(userId, false);
           break;
         default:

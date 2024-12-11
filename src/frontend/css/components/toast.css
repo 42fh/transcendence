@@ -34,3 +34,19 @@
     transform: translate(-50%, -20px);
   }
 }
+
+.toast-button {
+  font-family: var(--button-font-family);
+  background: var(--button-background);
+  color: var(--button-color);
+  border: var(--button-border);
+  border-radius: var(--button-border-radius);
+  padding: var(--button-padding);
+  cursor: pointer;
+  transition: var(--button-transition);
+}
+
+.toast-button:hover {
+  background: var(--button-hover-background);
+  color: var(--button-hover-color);
+}

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Ball Physics Test</title>
+    <link rel="stylesheet" href="./renderer.ball.test.css" />
+  </head>
+  <body>
+    <div class="test-container">
+      <h2>Ball Physics Test</h2>
+
+      <div class="canvas-container">
+        <svg id="ballPhysics" width="300" height="300"></svg>
+      </div>
+
+      <div class="controls">
+        <div class="control-group">
+          <label>Ball Controls</label>
+          <button id="resetBall">Reset Ball</button>
+          <button id="addBall">Add Ball</button>
+          <button id="clearBalls">Clear All</button>
+        </div>
+
+        <div class="control-group">
+          <label>Physics Controls</label>
+          <button id="toggleGravity">Toggle Gravity</button>
+          <button id="toggleBounce">Toggle Bounce</button>
+        </div>
+
+        <div class="control-group">
+          <div class="slider-container">
+            <label>Speed Control: <span id="speedValue">100%</span></label>
+            <input type="range" id="speedControl" min="0" max="200" value="100" />
+          </div>
+        </div>
+
+        <div class="control-group">
+          <div class="slider-container">
+            <label>Bounce Factor: <span id="bounceValue">0.98</span></label>
+            <input type="range" id="bounceControl" min="50" max="100" value="98" />
+          </div>
+        </div>
+
+        <div class="status">
+          <div>Balls: <span id="ballCount">1</span></div>
+          <div>Gravity: <span id="gravityStatus">Off</span></div>
+          <div>FPS: <span id="fpsCounter">0</span></div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./renderer.ball.test.js"></script>
+  </body>
+</html>

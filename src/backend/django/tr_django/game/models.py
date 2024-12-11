@@ -5,7 +5,6 @@ from users.models import CustomUser
 from django.utils import timezone
 from datetime import timedelta, datetime
 
-
 class Player(models.Model):
     user = models.OneToOneField(
         CustomUser, on_delete=models.CASCADE, related_name="player"
@@ -428,6 +427,10 @@ class SingleGame(BaseGame):
         return True
 
 
+
+
+
+
 class TournamentGame(BaseGame):
     GAME_TYPE_DIRECT_ELIMINATION = "direct_elimination"
     GAME_TYPE_ROUND_ROBIN = "round_robin"
@@ -440,7 +443,6 @@ class TournamentGame(BaseGame):
     ]
 
     game_type = models.CharField(max_length=20, choices=GAME_TYPE_CHOICES)
-
     # Fields from DirectEliminationTournamentGame
     source_game1 = models.ForeignKey(
         "self",
@@ -462,16 +464,52 @@ class TournamentGame(BaseGame):
 
     # Fields from SwissTournamentGame
     swiss_round = models.PositiveIntegerField(null=True, blank=True)
-
-    def get_game_logic(self):
+    
+    from .tournamentmanager.mode_logic import DirectEliminationLogic, RoundRobinLogic
+    def get_mode_logic(self):
         """Factory method to get the appropriate game logic handler"""
         if self.game_type == self.GAME_TYPE_DIRECT_ELIMINATION:
             return DirectEliminationLogic(self)
         elif self.game_type == self.GAME_TYPE_ROUND_ROBIN:
             return RoundRobinLogic(self)
-        elif self.game_type == self.GAME_TYPE_SWISS:
-            return SwissSystemLogic(self)
+        
+        #elif self.game_type == self.GAME_TYPE_SWISS:
+        #    return SwissSystemLogic(self)
+    
+    def set_finished(self, winner):
+        """Called by GameCoordinator when game finishes"""
+        from .tournamentmanager.TournamentManager  import RedisSyncLock, TournamentManager
+        self.status = self.FINISHED
+        self.winner = winner
+        self.save()
+        
+        # Get game logic and handle completion before checking rounds
+        self.get_game_logic().handle_game_completion()
+        
+        # Then trigger round check with lock
+        with RedisSyncLock(TournamentManager.get_redis(), f"tournament_round_lock_{self.tournament.id}"):
+            TournamentManager.create_rounds(self.tournament.id)
+        
 
+
+    def handle_game_completion(self):
+        """
+        Updates next round's games with this game's winner
+        """
+        if self.status != self.FINISHED or not self.winner:
+            return
+            
+        # Update next_game1 if this game feeds into it
+        for next_game in self.next_game1.all():
+            next_game.players.add(self.winner)
+            
+        # Update next_game2 if this game feeds into it    
+        for next_game in self.next_game2.all():
+            next_game.players.add(self.winner)
+         
+        self.completion_handled = True
+        self.save()
+            
     class Meta:
         abstract = False
 

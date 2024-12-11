@@ -110,7 +110,7 @@ export default class World {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // ratio more than 2 is too computationally expensive
   }
 
-  addGame(newGame, isASCII = false) {
+  addGame(newGame) {
     this.game = newGame;
 
     this.controls = new OrbitControls(this.camera, this.canvas);
@@ -131,8 +131,8 @@ export default class World {
     this.game.water.material.uniforms["time"].value += 1.0 / 240.0;
 
     // shark animation
-    const sharkAngle = 0.0003 * deltaTime;
     if (this.game.fin1) {
+      const sharkAngle = 0.0003 * deltaTime;
       this.game.fin1.position.x = Math.cos(sharkAngle) * 25 + 6;
       this.game.fin1.position.z = Math.sin(sharkAngle) * 25 + 6;
       this.game.fin1.rotation.y = Math.PI - sharkAngle;
@@ -148,10 +148,10 @@ export default class World {
 
     // move paddle
     if (this.moveDown && this.game.websocket) {
-      this.game.drawer.movePaddle("left");
+      this.game.drawer.movePaddle("right");
     }
     if (this.moveUp && this.game.websocket) {
-      this.game.drawer.movePaddle("right");
+      this.game.drawer.movePaddle("left");
     }
 
     // UI
@@ -206,29 +206,16 @@ export default class World {
     this.cameraAnimation.pause();
     gsap.killTweensOf(this.cameraAnimation);
 
-    if (this.game.type == "circular") {
-      gsap.to(this.camera.position, {
-        duration: 2,
-        x: 0,
-        y: 1,
-        z: 1.8,
-        ease: "power2.inOut",
-        onUpdate: () => {
-          this.camera.lookAt(1, 1, 1);
-        },
-      });
-    } else {
-      gsap.to(this.camera.position, {
-        duration: 2,
-        x: 6,
-        y: 7,
-        z: 35,
-        ease: "power2.inOut",
-        onUpdate: () => {
-          this.camera.lookAt(1, 1, 1);
-        },
-      });
-    }
+    gsap.to(this.camera.position, {
+      duration: 2,
+      x: 0,
+      y: 1,
+      z: 2.1,
+      ease: "power2.inOut",
+      onUpdate: () => {
+        this.camera.lookAt(1, 1, 1);
+      },
+    });
   }
 
   addEventListeners() {

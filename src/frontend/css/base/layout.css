@@ -1,0 +1,18 @@
+/* Base page container */
+.page-container {
+  /* width: var(--page-width); */
+  /* height: var(--page-height); */
+  min-height: var(--page-min-height);
+  padding-bottom: var(--page-padding-bottom);
+  position: relative;
+  align-items: center;
+}
+
+.page-container__title {
+  /* This is basically replacing the h1 rule */
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-title);
+  letter-spacing: 10px;
+  text-align: center;
+  margin-bottom: 3rem;
+}

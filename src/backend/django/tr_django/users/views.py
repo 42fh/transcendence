@@ -40,7 +40,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.hashers import make_password
 
 logger = logging.getLogger(__name__)
-load_dotenv(override=False)
+
 
 @method_decorator(csrf_exempt, name="dispatch")
 class SignupView(APIView):
@@ -55,7 +55,7 @@ class SignupView(APIView):
         try:
             data = json.loads(request.body)
         except json.JSONDecodeError:
-            return Response({"success": False, "error": "Invalid JSON format", "action": "signup"}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({"success": False, "error": "Invalid JSON format", "action": "signup"}, status=400)
 
         username = data.get("username")
         password = data.get("password")
@@ -114,7 +114,7 @@ class SignupView(APIView):
 
 
 @method_decorator(csrf_exempt, name="dispatch")
-class LoginView(APIView):    
+class LoginView(APIView):
     def post(self, request):
         try:
             data = json.loads(request.body)
@@ -166,10 +166,11 @@ class LogoutView(APIView):
                 return Response({"success": True, "message": "User logged out successfully."})
             except Exception as e:
                 logger.error("Logout failed for user '%s': %s", user.username, e)
-                return Response({"success": False, "error": f"Logout failed: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return JsonResponse({"success": False, "error": f"Logout failed: {str(e)}"}, status=500)
         else:
             logger.warning("Unauthorized logout attempt detected.")
-            return Response({"success": False, "error": "User is not logged in."}, status=status.HTTP_401_UNAUTHORIZED)
+            return JsonResponse({"success": False, "error": "User is not logged in."}, status=401)
+
 
 @method_decorator(csrf_exempt, name="dispatch")
 class SendEmailVerificationView(APIView):
@@ -199,10 +200,11 @@ class SendEmailVerificationView(APIView):
             request.user.two_factor_code = verification_code
             request.user.two_factor_code_expires_at = timezone.now() + timedelta(minutes=1)
             request.user.save()
-            
+
             return Response({"message": "Email verification sent successfully"})
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @method_decorator(csrf_exempt, name="dispatch")
 class ValidateEmailVerificationView(APIView):
@@ -225,7 +227,10 @@ class ValidateEmailVerificationView(APIView):
 
             if request.user.last_2fa_code == verification_code:
                 return Response({"error": "Verification code is already used"}, status=status.HTTP_400_BAD_REQUEST)
-            if request.user.two_factor_code == verification_code and request.user.two_factor_code_expires_at > timezone.now():
+            if (
+                request.user.two_factor_code == verification_code
+                and request.user.two_factor_code_expires_at > timezone.now()
+            ):
                 request.user.last_2fa_code = verification_code
                 request.user.email_verified = True
                 request.user.save()
@@ -238,6 +243,7 @@ class ValidateEmailVerificationView(APIView):
             return Response({"error": "Invalid request format"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @method_decorator(csrf_exempt, name="dispatch")
 class DeleteUserView(APIView):
@@ -309,7 +315,7 @@ class DeleteUserView(APIView):
             # Logout the user
             logout(request)
 
-            return Response(
+            return JsonResponse(
                 {"message": "User account successfully deleted and data anonymized", "user_id": user_id}
             )
 
@@ -317,76 +323,7 @@ class DeleteUserView(APIView):
             return Response({"error": "Invalid request format"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.error(f"Error anonymizing user account: {str(e)}")
-            return Response({"error": "Failed to delete account"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-def login_with_42(request):
-    base_url = "https://api.intra.42.fr/oauth/authorize"
-    params = {
-        "client_id": settings.FORTYTWO_CLIENT_ID,
-        "redirect_uri": settings.FORTYTWO_REDIRECT_URI,
-        "response_type": "code",
-        "scope": "public",
-    }
-    query_string = "&".join([f"{key}={value}" for key, value in params.items()])
-    return redirect(f"{base_url}?{query_string}")
-
-
-def callback(request):
-    code = request.GET.get('code')
-    if not code:
-        return redirect("/")
-
-    # Exchange the code for an access token
-    token_url = "https://api.intra.42.fr/oauth/token"
-    data = {
-        "grant_type": "authorization_code",
-        "client_id": settings.FORTYTWO_CLIENT_ID,
-        "client_secret": settings.FORTYTWO_CLIENT_SECRET,
-        "code": code,
-        "redirect_uri": settings.FORTYTWO_REDIRECT_URI,
-    }
-
-    response = requests.post(token_url, data=data)
-    if response.status_code != 200:
-        return JsonResponse({"error": "Failed to obtain access token"}, status=403)
-    
-    access_token = response.json().get("access_token")
-
-    # Fetch user information
-    user_info_url = "https://api.intra.42.fr/v2/me"
-    headers = {"Authorization": f"Bearer {access_token}"}
-    user_info_response = requests.get(user_info_url, headers=headers)
-    if user_info_response.status_code != 200:
-        return JsonResponse({"error": "Failed to fetch user info"}, status=403)
-
-    user_data = user_info_response.json()
-
-    # Create or log in the user
-    username = user_data["login"]
-    user, created = CustomUser.objects.get_or_create(username=f"42_{username}")
-
-    if user is not None:
-        login(request, user)  # Creates the session for the new user
-        print("Session Data:", request.session.items())  # Debug session contents
-        
-        # Generate token pair
-        token_serializer = TokenObtainPairSerializer()
-        tokens = token_serializer.get_token(user)
-        access_token = str(tokens.access_token)
-        refresh_token = str(tokens)
-
-        response = redirect('/')  # Redirect to a post-login page
-
-        # Set tokens and UUID in cookies
-        response.set_cookie("pongUserId", str(user.id), httponly=False, samesite="Strict")
-        response.set_cookie("pongUsername", str(user.username), httponly=False, samesite="Strict")
-        response.set_cookie("access_token", access_token, httponly=False, samesite="Strict")
-        response.set_cookie("refresh_token", refresh_token, httponly=False, samesite="Strict")
-
-        return response
-    else:
-        return JsonResponse({"error": "Failed to fetch user info"}, status=403)
+            return JsonResponse({"error": "Failed to delete account"}, status=500)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -480,6 +417,21 @@ class UserDetailView(APIView):
                 "pronoun": user.pronoun,
                 "is_active": user.is_active,
             }
+
+            # Add friendship status if not own profile
+            if not is_own_profile:
+                user_data.update(
+                    {
+                        "is_friend": request.user.is_friend_with(user),
+                        "friend_request_status": "none",
+                    }
+                )
+
+                # Check friend request status
+                if user in request.user.friend_requests_sent.all():
+                    user_data["friend_request_status"] = "sent"
+                elif user in request.user.friend_requests_received.all():
+                    user_data["friend_request_status"] = "received"
 
             # Add sensitive data only if it's the user's own profile
             if is_own_profile:
@@ -671,13 +623,13 @@ class UserAvatarView(APIView):
         avatar_file = request.FILES["avatar"]
         # Validate file type
         if avatar_file.content_type not in self.ALLOWED_TYPES:
-            return Response(
-                {"error": f"Invalid file type. Allowed types: {', '.join(self.ALLOWED_TYPES)}"}, status=status.HTTP_400_BAD_REQUEST
+            return JsonResponse(
+                {"error": f"Invalid file type. Allowed types: {', '.join(self.ALLOWED_TYPES)}"}, status=400
             )
 
         # Validate file size
         if avatar_file.size > self.MAX_AVATAR_SIZE:
-            return Response({"error": f"Avatar size exceeds the limit of {self.MAX_AVATAR_SIZE} bytes"}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({"error": f"Avatar size exceeds the limit of {self.MAX_AVATAR_SIZE} bytes"}, status=400)
 
         # Add debug logging
         logger.debug(f"Saving avatar to: {settings.MEDIA_ROOT}")
@@ -693,15 +645,216 @@ class UserAvatarView(APIView):
 
 
 @method_decorator(csrf_exempt, name="dispatch")
-class FriendsListView(View):
-    """View for listing a user's friends with pagination and search capabilities"""
+class FriendRequestsView(APIView):
+    """
+    View for managing friend requests
+
+    Endpoints:
+    GET: List all pending friend requests (sent and received)
+    POST: {"to_user_id": "<uuid>"} - Send new request
+    DELETE: {
+        "to_user_id": "<uuid>",  # For withdrawing a sent request
+        "from_user_id": "<uuid>" # For rejecting a received request
+        "action": "withdraw|reject"
+    }"""
 
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, user_id):
-        try:
-            user = CustomUser.objects.get(id=user_id)
+    def get(self, request):
+        """List friend requests (both sent and received)"""
+        if not request.user.is_authenticated:
+            return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
 
+        sent_requests = [
+            {
+                "id": str(user.id),
+                "username": user.username,
+                "avatar": user.avatar.url if user.avatar else None,
+                "status": "sent",
+            }
+            for user in request.user.friend_requests_sent.all()
+        ]
+
+        received_requests = [
+            {
+                "id": str(user.id),
+                "username": user.username,
+                "avatar": user.avatar.url if user.avatar else None,
+                "status": "received",
+            }
+            for user in request.user.friend_requests_received.all()
+        ]
+
+        return Response({"sent": sent_requests, "received": received_requests})
+
+    def post(self, request):
+        """Send a new friend request to 'to_user_id'"""
+        if not request.user.is_authenticated:
+            return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        try:
+            data = json.loads(request.body)
+            to_user_id = data.get("to_user_id")
+
+            if not to_user_id:
+                return JsonResponse(
+                    {"error": "Please specify the user you want to send a friend request to"}, status=400
+                )
+
+            # Add validation for sending request to self
+            if str(to_user_id) == str(request.user.id):
+                return Response({"error": "Cannot send friend request to yourself"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # First validate UUID format
+            try:
+                uuid_obj = uuid.UUID(str(to_user_id))
+            except ValueError:
+                return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+            # Then try to get the user
+            try:
+                to_user = CustomUser.objects.get(id=uuid_obj)
+            except CustomUser.DoesNotExist:
+                return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+            # Check if already friends
+            if request.user.is_friend_with(to_user):
+                return Response({"error": "You are already friends with this user"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Check if request already sent
+            if to_user in request.user.friend_requests_sent.all():
+                return JsonResponse({"error": "You have already sent a friend request to this user"}, status=400)
+
+            request.user.send_friend_request(to_user)
+            return JsonResponse(
+                {
+                    "message": "Friend request sent successfully",
+                    "to_user": {"id": str(to_user.id), "username": to_user.username},
+                }
+            )
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid request format"}, status=400)
+
+    # def patch(self, request):
+    #     """Accept/reject friend request"""
+    #     if not request.user.is_authenticated:
+    #         return JsonResponse({"error": "Authentication required"}, status=401)
+
+    #     try:
+    #         data = json.loads(request.body)
+    #         from_user_id = data.get("from_user_id")
+    #         action = data.get("action")
+
+    #         if not from_user_id:
+    #             return JsonResponse(
+    #                 {"error": "Please specify the user whose friend request you want to respond to"}, status=400
+    #             )
+
+    #         if action not in ["accept", "reject"]:
+    #             return JsonResponse(
+    #                 {"error": "Please specify whether you want to accept or reject the friend request"}, status=400
+    #             )
+
+    #         try:
+    #             from_user = CustomUser.objects.get(id=from_user_id)
+    #         except CustomUser.DoesNotExist:
+    #             return JsonResponse({"error": "User not found"}, status=404)
+
+    #         # Check if there's a pending request
+    #         if from_user not in request.user.friend_requests_received.all():
+    #             return JsonResponse({"error": "No pending friend request from this user"}, status=404)
+
+    #         if action == "accept":
+    #             request.user.accept_friend_request(from_user)
+    #             message = "Friend request accepted successfully"
+    #         else:
+    #             request.user.reject_friend_request(from_user)
+    #             message = "Friend request rejected"
+
+    #         return JsonResponse({"message": message})
+
+    #     except json.JSONDecodeError:
+    #         return JsonResponse({"error": "Invalid request format"}, status=400)
+    #     except Exception as e:
+    #         return JsonResponse({"error": str(e)}, status=500)
+
+    def delete(self, request):
+        """
+        Withdraw a friend request previously sent OR reject a received friend request (depending on the request type "sent" or "received")
+        The target user is specified in the request body as 'to_user_id' for 'sent' and 'from_user_id' for 'received'
+        """
+        print("Received DELETE request at friend-requests/")
+        print("Request body:", request.body)
+
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Authentication required"}, status=401)
+
+        try:
+            data = json.loads(request.body)
+            print("Parsed data:", data)
+            request_type = data.get("request_type")
+
+            if request_type not in ["sent", "received"]:
+                return JsonResponse({"error": "Invalid request type"}, status=400)
+
+            if request_type == "sent":
+                to_user_id = data.get("to_user_id")
+                if not to_user_id:
+                    return JsonResponse(
+                        {"error": "Please specify the user whose friend request you want to cancel"}, status=400
+                    )
+                try:
+                    to_user = CustomUser.objects.get(id=to_user_id)
+                    print(f"Found target user: {to_user.username}")
+                    if to_user not in request.user.friend_requests_sent.all():
+                        return JsonResponse({"error": "No pending friend request to this user"}, status=404)
+                    request.user.cancel_friend_request(to_user)
+                    return JsonResponse({"message": "Friend request cancelled successfully"})
+                except CustomUser.DoesNotExist:
+                    print(f"No user found with ID: {to_user_id}")
+                    return JsonResponse({"error": "User not found"}, status=404)
+
+            elif request_type == "received":
+                from_user_id = data.get("from_user_id")
+                if not from_user_id:
+                    return JsonResponse(
+                        {"error": "Please specify the user whose friend request you want to reject"}, status=400
+                    )
+                try:
+                    from_user = CustomUser.objects.get(id=from_user_id)
+                    print(f"Found user: {from_user.username}")
+                    if from_user not in request.user.friend_requests_received.all():
+                        return JsonResponse({"error": "No pending friend request from this user"}, status=404)
+                    request.user.reject_friend_request(from_user)
+                    return JsonResponse({"message": "Friend request rejected"})
+                except CustomUser.DoesNotExist:
+                    print(f"No user found with ID: {from_user_id}")
+                    return JsonResponse({"error": "User not found"}, status=404)
+            else:
+                return JsonResponse({"error": "Invalid request type"}, status=400)
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid request format"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class FriendshipsView(APIView):
+    """
+    View for managing friendships
+
+    Endpoints:
+    GET: /api/friends/<user_id>/ - List all of the user's friends with pagination and search capabilities
+    POST: /api/friends/ {"from_user_id": "<uuid>"} - Accept a friend request
+    DELETE: /api/friends/ {"user_id": "<uuid>"} - Remove an existing friend
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
             # Get query parameters
             search = request.GET.get("search", "")
             page = request.GET.get("page", 1)
@@ -716,7 +869,7 @@ class FriendsListView(View):
                 return Response({"error": "Invalid pagination parameters"}, status=status.HTTP_400_BAD_REQUEST)
 
             # Get friends with search filter
-            friends = user.friends.filter(Q(username__icontains=search)).order_by("username")
+            friends = request.user.friends.filter(Q(username__icontains=search)).order_by("username")
 
             # Paginate results
             paginator = Paginator(friends, per_page)
@@ -755,133 +908,25 @@ class FriendsListView(View):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-@method_decorator(csrf_exempt, name="dispatch")
-class FriendRequestsView(View):
-    """
-    Handle friend requests
-
-    Expected request body formats:
-    POST: {"to_user_id": "<uuid>"}
-    PATCH: {"from_user_id": "<uuid>", "action": "accept" | "reject"}
-    DELETE: {"to_user_id": "<uuid>"}
-    """
-
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        """List friend requests (both sent and received)"""
-        if not request.user.is_authenticated:
-            return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
-
-        sent_requests = [
-            {
-                "id": str(user.id),
-                "username": user.username,
-                "avatar": user.avatar.url if user.avatar else None,
-                "status": "sent",
-            }
-            for user in request.user.friend_requests_sent.all()
-        ]
-
-        received_requests = [
-            {
-                "id": str(user.id),
-                "username": user.username,
-                "avatar": user.avatar.url if user.avatar else None,
-                "status": "received",
-            }
-            for user in request.user.friend_requests_received.all()
-        ]
-
-        return Response({"sent": sent_requests, "received": received_requests})
-
     def post(self, request):
-        """Send a friend request"""
-        if not request.user.is_authenticated:
-            return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
-
-        try:
-            data = json.loads(request.body)
-            to_user_id = data.get("to_user_id")
-
-            if not to_user_id:
-                return Response(
-                    {"error": "Please specify the user you want to send a friend request to"}, status=status.HTTP_400_BAD_REQUEST
-                )
-
-            # Add validation for sending request to self
-            if str(to_user_id) == str(request.user.id):
-                return Response({"error": "Cannot send friend request to yourself"}, status=status.HTTP_400_BAD_REQUEST)
-
-            # First validate UUID format
-            try:
-                uuid_obj = uuid.UUID(str(to_user_id))
-            except ValueError:
-                return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-
-            # Then try to get the user
-            try:
-                to_user = CustomUser.objects.get(id=uuid_obj)
-            except CustomUser.DoesNotExist:
-                return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-
-            # Check if already friends
-            if request.user.is_friend_with(to_user):
-                return Response({"error": "You are already friends with this user"}, status=status.HTTP_400_BAD_REQUEST)
-
-            # Check if request already sent
-            if to_user in request.user.friend_requests_sent.all():
-                return Response({"error": "You have already sent a friend request to this user"}, status=status.HTTP_400_BAD_REQUEST)
-
-            request.user.send_friend_request(to_user)
-            return (
-                {
-                    "message": "Friend request sent successfully",
-                    "to_user": {"id": str(to_user.id), "username": to_user.username},
-                }
-            )
-
-        except json.JSONDecodeError:
-            return Response({"error": "Invalid request format"}, status=status.HTTP_400_BAD_REQUEST)
-
-    def patch(self, request):
-        """Accept/reject friend request"""
-        if not request.user.is_authenticated:
-            return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
-
+        """Accept friend request"""
         try:
             data = json.loads(request.body)
             from_user_id = data.get("from_user_id")
-            action = data.get("action")
 
             if not from_user_id:
-                return Response(
-                    {"error": "Please specify the user whose friend request you want to respond to"}, status=status.HTTP_400_BAD_REQUEST
-                )
-
-            if action not in ["accept", "reject"]:
-                return Response(
-                    {"error": "Please specify whether you want to accept or reject the friend request"}, status=status.HTTP_400_BAD_REQUEST
-                )
+                return Response({"error": "Please specify from_user_id"}, status=status.HTTP_400_BAD_REQUEST)
 
             try:
                 from_user = CustomUser.objects.get(id=from_user_id)
             except CustomUser.DoesNotExist:
                 return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
-            # Check if there's a pending request
             if from_user not in request.user.friend_requests_received.all():
                 return Response({"error": "No pending friend request from this user"}, status=status.HTTP_404_NOT_FOUND)
 
-            if action == "accept":
-                request.user.accept_friend_request(from_user)
-                message = "Friend request accepted successfully"
-            else:
-                request.user.reject_friend_request(from_user)
-                message = "Friend request rejected"
-
-            return Response({"message": message})
+            request.user.accept_friend_request(from_user)
+            return Response({"message": "Friend request accepted successfully"})
 
         except json.JSONDecodeError:
             return Response({"error": "Invalid request format"}, status=status.HTTP_400_BAD_REQUEST)
@@ -889,32 +934,96 @@ class FriendRequestsView(View):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def delete(self, request):
-        """Cancel friend request"""
-        if not request.user.is_authenticated:
-            return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
-
+        """Remove a friend"""
         try:
             data = json.loads(request.body)
-            to_user_id = data.get("to_user_id")
+            user_id = data.get("user_id")
 
-            if not to_user_id:
-                return Response(
-                    {"error": "Please specify the user whose friend request you want to cancel"}, status=status.HTTP_400_BAD_REQUEST
-                )
+            if not user_id:
+                return Response({"error": "Please specify the friend to remove"}, status=status.HTTP_400_BAD_REQUEST)
 
             try:
-                to_user = CustomUser.objects.get(id=to_user_id)
+                friend = CustomUser.objects.get(id=user_id)
             except CustomUser.DoesNotExist:
                 return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
-            # Check if there's a pending request
-            if to_user not in request.user.friend_requests_sent.all():
-                return Response({"error": "No pending friend request to this user"}, status=status.HTTP_404_NOT_FOUND)
+            # Check if they are actually friends
+            if not request.user.is_friend_with(friend):
+                return Response({"error": "You are not friends with this user"}, status=status.HTTP_400_BAD_REQUEST)
 
-            request.user.cancel_friend_request(to_user)
-            return Response({"message": "Friend request cancelled successfully"})
+            request.user.remove_friend(friend)
+            return Response({"message": "Friend removed successfully"})
 
         except json.JSONDecodeError:
             return Response({"error": "Invalid request format"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+def login_with_42(request):
+    base_url = "https://api.intra.42.fr/oauth/authorize"
+    params = {
+        "client_id": settings.FORTYTWO_CLIENT_ID,
+        "redirect_uri": settings.FORTYTWO_REDIRECT_URI,
+        "response_type": "code",
+        "scope": "public",
+    }
+    query_string = "&".join([f"{key}={value}" for key, value in params.items()])
+    return redirect(f"{base_url}?{query_string}")
+
+
+def callback(request):
+    code = request.GET.get("code")
+    if not code:
+        return redirect("/")
+
+    # Exchange the code for an access token
+    token_url = "https://api.intra.42.fr/oauth/token"
+    data = {
+        "grant_type": "authorization_code",
+        "client_id": settings.FORTYTWO_CLIENT_ID,
+        "client_secret": settings.FORTYTWO_CLIENT_SECRET,
+        "code": code,
+        "redirect_uri": settings.FORTYTWO_REDIRECT_URI,
+    }
+
+    response = requests.post(token_url, data=data)
+    if response.status_code != 200:
+        return JsonResponse({"error": "Failed to obtain access token"}, status=403)
+
+    access_token = response.json().get("access_token")
+
+    # Fetch user information
+    user_info_url = "https://api.intra.42.fr/v2/me"
+    headers = {"Authorization": f"Bearer {access_token}"}
+    user_info_response = requests.get(user_info_url, headers=headers)
+    if user_info_response.status_code != 200:
+        return JsonResponse({"error": "Failed to fetch user info"}, status=403)
+
+    user_data = user_info_response.json()
+
+    # Create or log in the user
+    username = user_data["login"]
+    user, created = CustomUser.objects.get_or_create(username=f"42_{username}")
+
+    if user is not None:
+        login(request, user)  # Creates the session for the new user
+        print("Session Data:", request.session.items())  # Debug session contents
+
+        # Generate token pair
+        token_serializer = TokenObtainPairSerializer()
+        tokens = token_serializer.get_token(user)
+        access_token = str(tokens.access_token)
+        refresh_token = str(tokens)
+
+        response = redirect("/")  # Redirect to a post-login page
+
+        # Set tokens and UUID in cookies
+        response.set_cookie("pongUserId", str(user.id), httponly=False, samesite="Strict")
+        response.set_cookie("pongUsername", str(user.username), httponly=False, samesite="Strict")
+        response.set_cookie("access_token", access_token, httponly=False, samesite="Strict")
+        response.set_cookie("refresh_token", refresh_token, httponly=False, samesite="Strict")
+
+        return response
+    else:
+        return JsonResponse({"error": "Failed to fetch user info"}, status=403)

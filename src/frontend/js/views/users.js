@@ -1,9 +1,9 @@
 import { displayModalError } from "../components/modal.js";
 import { ASSETS } from "../config/constants.js";
-import { updateActiveNavItem } from "../components/bottom-nav.js";
-import { fetchUsers } from "../services/usersService.js";
+import { updateActiveNavItem } from "../components/bottomNav.js";
+import { fetchUsers, fetchFriends } from "../services/usersService.js";
 import { loadProfilePage } from "./profile.js";
-
+import { applyUsernameTruncation } from "../utils/strings.js";
 export async function loadUsersPage(addToHistory = true) {
   try {
     if (addToHistory) {
@@ -36,6 +36,22 @@ export async function loadUsersPage(addToHistory = true) {
     //   );
     // }
 
+    const filterButtons = document.querySelectorAll(".users-filter__button");
+    filterButtons.forEach((button) => {
+      button.addEventListener("click", async () => {
+        // Don't do anything if button is already active
+        if (button.classList.contains("users-filter__button--active")) return;
+
+        // Toggle active state
+        filterButtons.forEach((btn) => btn.classList.remove("users-filter__button--active"));
+        button.classList.add("users-filter__button--active");
+
+        // Use CSS class to determine type instead of text content
+        const showFriendsOnly = button.classList.contains("users-filter__button--friends");
+        await loadUsersList(1, 10, "", showFriendsOnly);
+      });
+    });
+
     // Initial load of first page
     await loadUsersList(1, 10, "");
   } catch (error) {
@@ -44,46 +60,69 @@ export async function loadUsersPage(addToHistory = true) {
   }
 }
 
-async function loadUsersList(page = 1, perPage = 10, search = "") {
-  try {
-    const data = await fetchUsers(page, perPage, search);
-    if (!data) throw new Error("Failed to fetch users");
+async function loadUsersList(page = 1, perPage = 10, search = "", showFriendsOnly = false) {
+  const usersList = document.getElementById("users-list");
+  const paginationContainer = document.getElementById("users-pagination");
+  const userListItemTemplate = document.getElementById("users-list-item-template");
 
-    const usersList = document.getElementById("users-list");
-    const paginationContainer = document.getElementById("users-pagination");
-    const userListItemTemplate = document.getElementById("users-list-item-template");
+  if (!usersList || !paginationContainer || !userListItemTemplate) {
+    console.error("Required DOM elements not found");
+    displayModalError("Failed to initialize users list");
+    return;
+  }
+
+  try {
+    console.log(`Fetching ${showFriendsOnly ? "friends" : "users"} list:`, {
+      page,
+      perPage,
+      search,
+      showFriendsOnly,
+    });
+    const data = showFriendsOnly ? await fetchFriends(page, perPage, search) : await fetchUsers(page, perPage, search);
+    console.log("Received data:", data);
 
     usersList.innerHTML = "";
+    const users = showFriendsOnly ? data.friends : data.users;
+    // Handle empty state
+
+    if (!users || users.length === 0) {
+      console.log("No users found in response");
+      // TODO: move to the template and make it beautiful
+      usersList.innerHTML = `<div class="users-list__empty">
+			  No ${showFriendsOnly ? "friends" : "users"} found
+			</div>`;
+      return;
+    }
 
     // Render users
-    data.users.forEach((user, index) => {
+    console.log(`Rendering ${users.length} users`);
+    users.forEach((user, index) => {
       try {
         const userItem = document.importNode(userListItemTemplate.content, true);
         const userElement = userItem.firstElementChild;
+        // const userElement = renderUserItem(user, userListItemTemplate);
         if (!userElement) {
-          throw new Error("Could not find users-list__item in cloned template");
+          throw new Error("Invalid template structure");
         }
 
         const avatarImg = userElement.querySelector(".users-list__avatar");
 
         avatarImg.src = user.avatar || ASSETS.IMAGES.DEFAULT_AVATAR;
         avatarImg.onerror = function () {
-          this.src = ASSETS.IMAGES.DEFAULT_AVATAR;
+          avatarImg.src = ASSETS.IMAGES.DEFAULT_AVATAR;
           console.warn(`Avatar image failed to load for ${user.username}, using default`);
         };
 
         const username = userElement.querySelector(".users-list__username");
-        username.textContent = user.username;
+        applyUsernameTruncation(username, user.username, 15);
 
+        // Set online status
         const statusIndicator = userElement.querySelector(".users-list__status-indicator");
-
-        if (user.is_active && user.visibility_online_status) {
-          statusIndicator.classList.add("users-list__status-indicator--online");
-          statusIndicator.title = "Online";
-        } else {
-          statusIndicator.classList.add("users-list__status-indicator--offline");
-          statusIndicator.title = "Offline";
-        }
+        const isOnline = user.is_active && user.visibility_online_status;
+        statusIndicator.classList.add(
+          isOnline ? "users-list__status-indicator--online" : "users-list__status-indicator--offline"
+        );
+        statusIndicator.title = isOnline ? "Online" : "Offline";
         userElement.addEventListener("click", () => {
           const userId = user.id; // Make sure the backend sends this
           loadProfilePage(userId, true);
@@ -94,14 +133,25 @@ async function loadUsersList(page = 1, perPage = 10, search = "") {
       }
     });
 
-    // Update pagination
-    renderPagination(data.pagination, paginationContainer);
+    if (data.pagination) {
+      renderPagination(data.pagination, paginationContainer, showFriendsOnly);
+    } else {
+      paginationContainer.style.display = "none";
+    }
   } catch (error) {
-    displayModalError(`Failed to load users: ${error.message}`);
+    console.error(`Error loading ${showFriendsOnly ? "friends" : "users"}:`, error);
+    displayModalError(`Failed to load ${showFriendsOnly ? "friends" : "users"}: ${error.message}`);
+
+    // Show empty state on error
+    usersList.innerHTML = `<div class="users-list__error">
+      Unable to load ${showFriendsOnly ? "friends" : "users"}
+    </div>`;
   }
 }
 
-function renderPagination(pagination, container) {
+function renderPagination(pagination, container, showFriendsOnly) {
+  console.log("Rendering pagination:", pagination);
+  console.log("Container:", container);
   const { total_pages, page, per_page } = pagination;
 
   const prevButton = container.querySelector(".pagination__button--prev");
@@ -122,9 +172,9 @@ function renderPagination(pagination, container) {
   prevButton.disabled = page <= 1;
   nextButton.disabled = page >= total_pages;
 
-  // Add click handlers
-  prevButton.onclick = () => loadUsersList(page - 1);
-  nextButton.onclick = () => loadUsersList(page + 1);
+  // Add click handlers with showFriendsOnly parameter
+  prevButton.onclick = () => loadUsersList(page - 1, per_page, "", showFriendsOnly);
+  nextButton.onclick = () => loadUsersList(page + 1, per_page, "", showFriendsOnly);
 
   // Hide pagination if there's only one page
   container.style.display = total_pages <= 1 ? "none" : "flex";

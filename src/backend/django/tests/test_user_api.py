@@ -238,7 +238,7 @@ class TestUserAPI(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_friend_request_flow(self):
-        """Test the complete friend request flow through the API"""
+        """Test complete friend request flow: send, check, accept, verify"""
         # Create sessions for both users
         session1 = requests.Session()
         session2 = requests.Session()
@@ -316,9 +316,9 @@ class TestUserAPI(unittest.TestCase):
         self.assertEqual(data["received"][0]["id"], user1_id)
 
         # Accept friend request (as user2)
-        response = session2.patch(
-            f"{self.api_url}/friend-requests/",
-            json={"from_user_id": user1_id, "action": "accept"},
+        response = session2.post(
+            f"{self.api_url}/friends/",
+            json={"from_user_id": user1_id},
             headers={"Content-Type": "application/json"},
         )
         print(f"\nAccept Friend Request Response Status: {response.status_code}")
@@ -326,7 +326,7 @@ class TestUserAPI(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         # Verify friendship status through friends list
-        response = session1.get(f"{self.api_url}/{user1_id}/friends/", headers={"Content-Type": "application/json"})
+        response = session1.get(f"{self.api_url}/friends/{user1_id}/", headers={"Content-Type": "application/json"})
         print(f"\nVerify Friendship Status Response Status: {response.status_code}")
         print(f"Verify Friendship Status Content: {response.text}")
         self.assertEqual(response.status_code, 200)
@@ -335,7 +335,7 @@ class TestUserAPI(unittest.TestCase):
         self.assertIn(user2_id, friend_ids)
 
     def test_friend_requests_error_cases(self):
-        """Test error cases for friend request endpoints"""
+        """Test various error cases for friend requests"""
         # Create test user
         signup_data = {
             "username": f"user_{os.urandom(4).hex()}",
@@ -369,6 +369,22 @@ class TestUserAPI(unittest.TestCase):
             headers={"Content-Type": "application/json"},
         )
         self.assertEqual(response.status_code, 400)
+
+        # Test accepting non-existent friend request
+        response = session2.post(
+            f"{self.api_url}/friends/",
+            json={"from_user_id": "123e4567-e89b-12d3-a456-999999999999"},
+            headers={"Content-Type": "application/json"},
+        )
+        self.assertEqual(response.status_code, 404)
+
+        # Test removing non-existent friend
+        response = session1.delete(
+            f"{self.api_url}/friends/",
+            json={"user_id": "123e4567-e89b-12d3-a456-999999999999"},
+            headers={"Content-Type": "application/json"},
+        )
+        self.assertEqual(response.status_code, 404)
 
     def test_friends_list_features(self):
         """Test friends list features including pagination and search"""
@@ -528,6 +544,24 @@ class TestUserAPI(unittest.TestCase):
 
             print(f"Avatar URL from upload: {avatar_url}")
             print(f"Avatar URL in profile: {profile_data['avatar']}")
+
+    def test_remove_friend(self):
+        """Test removing a friend after accepting request"""
+        # First run through the friend request flow
+        self.test_friend_request_flow()
+
+        # Now test removing the friend
+        response = session1.delete(
+            f"{self.api_url}/friends/", json={"user_id": user2_id}, headers={"Content-Type": "application/json"}
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Verify friend is removed by checking friends list
+        response = session1.get(f"{self.api_url}/friends/{user1_id}/", headers={"Content-Type": "application/json"})
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        friend_ids = [friend["id"] for friend in data["friends"]]
+        self.assertNotIn(user2_id, friend_ids)
 
 
 if __name__ == "__main__":
