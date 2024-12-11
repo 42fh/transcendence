@@ -3,7 +3,7 @@ import { loadHomePage } from "./views/home.js";
 import { initializeTournaments } from "./config/tournaments.js";
 import { initializeHistory } from "./utils/history.js";
 import { CONFIG, LOCAL_STORAGE_KEYS } from "./config/constants.js";
-import { initBottomNav } from "./components/bottom-nav.js";
+import { initBottomNav } from "./components/bottomNav.js";
 
 // deleting a cookie must be done by setting expiration to a past time
 const deleteCookie = (name) => {

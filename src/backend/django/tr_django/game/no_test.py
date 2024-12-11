@@ -30,6 +30,51 @@ class TournamentWebsocketTest(TransactionTestCase):
             ])
         )
 
+    async def monitor_tournament_messages(self, communicator, player_name):
+        """Monitor tournament notification messages"""
+        try:
+            while True:
+                message = await communicator.receive_json_from()
+                logger.info(f"{player_name} Tournament Message: {message}")
+                
+                # If we receive a game_ready message, connect to the game
+                if message.get("type") == "game_ready":
+                    game_id = message["game_id"]
+                    game_url = message["ws_url"]
+                    
+                    # Connect to game WebSocket
+                    game_comm = WebsocketCommunicator(
+                        self.application,
+                        game_url
+                    )
+                    game_comm.scope["user"] = self.test_users[player_name]
+                    connected = await game_comm.connect()
+                    logger.info(f"{player_name} connected to game: {connected}")
+                    
+                    # Start monitoring game messages
+                    asyncio.create_task(self.monitor_game_messages(game_comm, player_name, game_id))
+                    
+        except Exception as e:
+            logger.error(f"Error in tournament monitor for {player_name}: {e}")
+
+    async def monitor_game_messages(self, communicator, player_name, game_id):
+        """Monitor game WebSocket messages"""
+        try:
+            while True:
+                message = await communicator.receive_json_from()
+                if message.get("type") != "game_state":  # Don't log frequent state updates
+                    logger.info(f"{player_name} Game Message: {message}")
+                    
+                if message.get("type") == "game_over":
+                    # Verify game in database
+                    game = await self.verify_game_in_database(game_id)
+                    logger.info(f"Game {game_id} verified in database")
+                    break
+                    
+        except Exception as e:
+            logger.error(f"Error in game monitor for {player_name}: {e}")
+
+
     def setUp(self):
         """Initialize the test environment and run async setup"""
         super().setUp()
@@ -352,17 +397,37 @@ class TournamentWebsocketTest(TransactionTestCase):
             )
             enrollment_data = json.loads(response.content)
             logger.info(f"disconnect player 3: {enrollment_data}")
-        
-        finally:
-            if communicator1:
-                await communicator1.disconnect()
-            if communicator2:
-                await communicator2.disconnect()
-            if communicator3:
-                await communicator3.disconnect()
-            if communicator4:
-                await communicator4.disconnect()
-          
+    
+
+
+
+            # In _test_tournament_notifications:
+            # After player connects to tournament WebSocket:
+            monitor_task1 = asyncio.create_task(
+                self.monitor_tournament_messages(communicator1, "player1")
+            )
+
+            # Do the same for other players
+            monitor_task2 = asyncio.create_task(
+                self.monitor_tournament_messages(communicator2, "player2")
+            )
+
+            # Add tasks to a list for cleanup
+            monitor_tasks = [monitor_task1, monitor_task2]
+
+            try:
+                # Rest of the test code...
+                await asyncio.sleep(30)  # Give time for game to complete
+                
+            finally:
+                # Clean up monitoring tasks
+                for task in monitor_tasks:
+                    task.cancel()
+                await asyncio.gather(*monitor_tasks, return_exceptions=True)
+
+
+
+
 
     
     def test_tournament_notifications(self):
