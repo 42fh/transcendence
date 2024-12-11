@@ -74,14 +74,10 @@ function initializeChatRoom(chatPartner) {
     loadChatPage(false);
   });
 
-  // const roomName = [currentUserId, chatPartner.id].sort().join("_");
-  // console.log("Room Name:", roomName);
-
   const roomName = [currentUserId, chatPartner.id]  // Create an array of the two user IDs
   .sort()                                       // Sort the IDs alphabetically
   .join("_");                                  // Join them with an underscore
 
-console.log("Room Name:", roomName);
 
   const wsUrl = `/ws/chat/${roomName}/`;
 
@@ -122,7 +118,7 @@ console.log("Room Name:", roomName);
             isSystemMessage
           );
         } else if (data.type === "message_history") {
-          console.log("Processing history messages:", data.messages);
+          // console.log("Processing history messages:", data.messages);
           data.messages.forEach((msg) => {
             const isSystemMessage = msg.username === CHAT_WS_MSG_TYPE.SYSTEM;
 
@@ -151,7 +147,7 @@ console.log("Room Name:", roomName);
       },
     };
 
-    initializeChatWebSocket(wsUrl, chatPartner, handlers);
+    initializeChatWebSocket(wsUrl, chatPartner.username, handlers);
   } catch (error) {
     displayModalError(`Failed to connect to chat: ${error.message}`);
   }

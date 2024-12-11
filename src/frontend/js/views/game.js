@@ -52,7 +52,6 @@ export async function loadGameHome(addToHistory = true) {
 
 async function initializegameHome() {
   try {
-    console.log("gameHome");
     const games = await fetchGames();
 
     const gamesContainer = document.getElementById("games-container");
