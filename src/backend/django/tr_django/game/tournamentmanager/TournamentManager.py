@@ -14,6 +14,9 @@ import logging
 from channels.layers import get_channel_layer
 from ..models import Tournament, TournamentGame, TournamentGameSchedule, Player
 from ..gamecoordinator.GameCoordinator import GameCoordinator
+from django.db.models import Q
+from chat.models import Notification
+
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +38,53 @@ class RedisSyncLock:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.redis_conn.delete(self.lock_key)
+
+def send_notifacation(user , message, url=None):
+    try:
+        if not url:
+            notification = Notification.objects.create(
+                user=user,
+                message= message,
+            )
+        else:
+            notification = Notification.objects.create(
+                user=user,
+                message= message,
+                url=url,
+            )
+
+  
+    except Exception as e:
+        logger.error(f"Error creating notification: {str(e)}", exc_info=True)
+
+def send_tournament_notification(tournament, message: str, url: str = None):
+    """
+    Send a notification to all participants in a tournament using the existing send_notifacation function.
+    
+    Args:
+        tournament: Tournament instance to send notifications for
+        message: Message content for the notification
+        url: Optional URL to include in the notification
+    """
+    try:
+        # Get all participants in the tournament
+        participants = tournament.participants.all()
+        
+        # Send notification to each participant using existing function
+        for player in participants:
+            try:
+                send_notifacation(player.user, message, url)
+            except Exception as e:
+                logger.error(
+                    f"Failed to send notification to player {player.username}: {str(e)}",
+                    exc_info=True
+                )
+                
+    except Exception as e:
+        logger.error(f"Error sending tournament notifications: {str(e)}", exc_info=True)
+
+
+
 
 
 class TournamentManager:
@@ -101,7 +151,7 @@ class TournamentManager:
             with cls.get_redis() as redis_conn:
                 with RedisSyncLock(redis_conn, f"tournament_lock_{tournament_id}"):
                     tournament = Tournament.objects.get(pk=tournament_id)
-
+                    
                     # Validate enrollment
                     if tournament.participants.filter(id=player.id).exists():
                         return {
@@ -109,6 +159,22 @@ class TournamentManager:
                             "message": "Player already enrolled",
                             "error_code": "ALREADY_ENROLLED",
                         }
+                        # Check if player is enrolled in any other tournament that hasn't finished
+                    existing_tournaments = Tournament.objects.filter(
+                        participants=player
+                    ).exclude(
+                        Q(games__status=TournamentGame.FINISHED)  # Or tournaments where all games are finished
+                    )
+                    
+                    if existing_tournaments.exists():
+                        tournament_names = ", ".join([t.name for t in existing_tournaments])
+                        return {
+                            "status": False,
+                            "message": f"Player is already enrolled in tournament(s): {tournament_names}. "
+                                      "You must wait until your current tournament is finished.",
+                            "error_code": "ALREADY_IN_TOURNAMENT"
+                        }
+                    
 
                     if (
                         not tournament.is_public
@@ -128,40 +194,38 @@ class TournamentManager:
                         }
 
                     # Add player
+
+
+                    send_tournament_notification(tournament, f"Player: {player.username} joind Tournament: {tournament.name}")
                     tournament.participants.add(player)
-
-                    ws_url = f"ws/tournament/{tournament_id}/"
-
-                    # Schedule async notification
-                    notifier = TournamentNotifier(tournament_id)
-                    async_to_sync(notifier.player_joined)(player.username)
                     logger.debug(
                         f"Tournament: booked in: {tournament.participants.count()} full with: {tournament.max_participants}"
                     )
                     # Check if tournament is ready to start matchmaking
                     if tournament.participants.count() == tournament.max_participants:
-                        redis_conn.set(f"tournament_pending_start:{tournament_id}", "1")
+                        send_notifacation(player.user ,  f"Successfully enrolled in {tournament.name}. Tournament will start soon", url=None)
+                        logger.info(f"Tournament[{tournament.name}]: booked in: {tournament.participants.count()} full with: {tournament.max_participants} - lets start")
                         return {
                             "status": True,
                             "message": f"Enrolled in {tournament.name}. Tournament starting soon! Connect to tournament_notification_url",
                             "tournament_starting": True,
-                            "tournament_notification_url": ws_url,
                         }
-
+                    send_notifacation(player.user ,  f"Successfully enrolled in {tournament.name}. Waiting for other player. More new over Notification", url=None)
                     return {
                         "status": True,
-                        "message": f"Successfully enrolled in {tournament.name}. Waiting for other player.i  Connect to tournament_notification_url",
+                        "message": f"Successfully enrolled in {tournament.name}. Waiting for other player.  Connect to tournament_notification_url",
                         "tournament_starting": False,
-                        "tournament_notification_url": ws_url,
                     }
 
         except Tournament.DoesNotExist:
+            logger.error("add_player: Tournament not found")
             return {
                 "status": False,
                 "message": "Tournament not found",
                 "error_code": "NOT_FOUND",
             }
         except Exception as e:
+            logger.error(f"SERVER_ERROR: {str(e)}")
             return {
                 "status": False,
                 "message": f"Error: {str(e)}",
@@ -190,33 +254,21 @@ class TournamentManager:
                         }
 
                     tournament.participants.remove(player)
-                    # Schedule async notification
-                    channel_layer = get_channel_layer()
-                    async_to_sync(channel_layer.group_send)(
-                        f"tournament_{tournament_id}",
-                        {
-                            "type": "player_left",
-                            "message": {
-                                "type": "force_disconnect",
-                                "player_id": player.id,
-                            },
-                        },
-                    )
-
-                    notifier = TournamentNotifier(tournament_id)
-                    async_to_sync(notifier.player_left)(player.display_name)
+                    send_tournament_notification(tournament, f"Player: {player.username} left Tournament: {tournament.name}")
                     return {
                         "status": True,
                         "message": f"Successfully left {tournament.name}",
                     }
 
         except Tournament.DoesNotExist:
+            logger.error("remove_player: Tournament not found")
             return {
                 "status": False,
                 "message": "Tournament not found",
                 "error_code": "NOT_FOUND",
             }
         except Exception as e:
+            logger.error(f"SERVER_ERROR: {str(e)}")
             return {
                 "status": False,
                 "message": f"Error leaving tournament: {str(e)}",
@@ -226,6 +278,9 @@ class TournamentManager:
     @classmethod
     def start_matchmaking(cls, tournament: Tournament):
         """Creates and schedules tournament games based on tournament type"""
+
+        
+        send_tournament_notification(tournament, f"HEY LETS GOOOOO TOURNAMENT ON THE WAY")
         if tournament.type == Tournament.TYPE_SINGLE_ELIMINATION:
             cls._create_single_elimination_bracket(tournament)
         elif tournament.type == Tournament.TYPE_ROUND_ROBIN:
@@ -233,7 +288,7 @@ class TournamentManager:
 
         tournament.save()
         debug = cls.create_rounds(tournament.id)
-        print("debug: ", debug)
+        logger.info(f"Tournamnet: {debug}")
 
     @classmethod
     def get_game_schedule(cls, tournament_id: int) -> Dict:
@@ -285,12 +340,14 @@ class TournamentManager:
             }
 
         except Tournament.DoesNotExist:
+            logger.error("schedule: Tournament not found")
             return {
                 "status": False,
                 "message": "Tournament not found",
                 "error_code": "NOT_FOUND",
             }
         except Exception as e:
+            logger.error(f"schedule: {e)")
             return {
                 "status": False,
                 "message": f"Error getting schedule: {str(e)}",
@@ -328,7 +385,7 @@ class TournamentManager:
 
                 tournament_completed = False
                 if len(players) == 2:
-                    print("A: ", players)
+                    logger.debug(f"Create_Rounds/A: {players}")
                     # Check if any players are in a READY game
                     players_in_ready = any(
                         TournamentGame.objects.filter(
@@ -336,13 +393,13 @@ class TournamentManager:
                         ).exists()
                         for player in players
                     )
-                    print(game.status)
+                    logger.debug(f"Create_Rounds: game.status: {game.status}")
                     if not players_in_ready and game.status == "draft":
                         game.status = "ready"
                         game.save()
 
                     if game.status == "ready":
-                        print("AA")
+                        logger.debug(f"Create_Rounds/AA")
                         player_data = [str(player.user.id) for player in players]
                         response = async_to_sync(
                             GameCoordinator.create_tournament_game
@@ -352,38 +409,50 @@ class TournamentManager:
                             players=player_data,
                             game_settings={"mode": "classic"},
                         )
-                        print("AA: ", response)
+                        logger.debug(f"Create_Rounds/AA: Response: {response}")
                         if response["status"] == "running":
                             game.status = "activ"
                             game.save()
                             games_started += 1
-
+                            
+                            # Create a mapping of user IDs to players for easy lookup
+                            player_map = {str(p.user.id): p for p in players}
+                            
                             # Notify players
-                            notifier = TournamentNotifier(tournament_id)
                             for player_id, ws_url in response["player_urls"]:
-                                print(
+                                logger.debug(
                                     f"player_id: {player_id}/{type(player_id)} , ws_url: {ws_url}/{type(ws_url)}"
                                 )
-                                async_to_sync(notifier.game_ready)(
-                                    str(game.id), ws_url, player_id
-                                )
+                                # Get the corresponding player from our mapping
+                                if player := player_map.get(str(player_id)):
+                                    send_notifacation(
+                                        player.user,
+                                        f"Your game in tournament {tournament.name} is ready! Round {schedule.round_number}, Match {schedule.match_number}",
+                                        url=ws_url
+                                    )
                 else:
                     # Players waiting for opponents
                     tournament_completed = False
-                    print("B", players)
-                    notifier = TournamentNotifier(tournament_id)
+                    logger.debug(f"B: {players}")
                     for player in players:
-                        async_to_sync(notifier.waiting_for_opponent)(
-                            game.id,
-                            f"Waiting for opponent in Game {schedule.match_number} (Round {schedule.round_number})",
-                            player.id,
+                        send_notifacation(
+                            player.user,
+                            f"Tournament {tournament.name}: Waiting for your opponent in Round {schedule.round_number}, Match {schedule.match_number}. You'll be notified when your game is ready."
                         )
+                            logger.debug(f"Sent waiting notification to player {player.username} for game {game.id} in round {schedule.round_number}"
+        )
+
 
             if tournament_completed:
                 tournament.status = Tournament.STATUS_COMPLETED
                 tournament.save()
-                notifier = TournamentNotifier(tournament_id)
-                async_to_sync(notifier.tournament_complete)(tournament_id)
+                message = f"Tournament {tournament.name} has completed!"
+                send_tournament_notification(
+                    tournament,
+                    message,
+                    url=None
+                )
+    
 
             return {
                 "status": True,
@@ -392,12 +461,14 @@ class TournamentManager:
             }
 
         except Tournament.DoesNotExist:
+            logger.error("create_rounds: Tournament not found")
             return {
                 "status": False,
                 "message": "Tournament not found",
                 "error_code": "NOT_FOUND",
             }
         except Exception as e:
+            logger.error(f"create_rounds: {e}")
             return {
                 "status": False,
                 "message": f"Error processing rounds: {str(e)}",
