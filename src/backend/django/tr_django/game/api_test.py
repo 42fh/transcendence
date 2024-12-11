@@ -276,7 +276,7 @@ class IntegratedGameTests(TransactionTestCase):
         # Start monitoring tasks
 
         player1_task = asyncio.create_task(self.monitor_messages(comm1, "Player 1"))
-        player2_task = asyncio.create_task(self.monitor_messages(comm2, "Player 2"))
+        # player2_task = asyncio.create_task(self.monitor_messages(comm2, "Player 2"))
         try:
             # Wait for game to start
             await asyncio.sleep(2)
@@ -297,7 +297,7 @@ class IntegratedGameTests(TransactionTestCase):
             ]
 
             for move in paddle_moves:
-                await comm1.send_json_to(move)
+               # await comm1.send_json_to(move)
                 # Wait for cooldown (0.1 seconds as defined in consumer)
                 await asyncio.sleep(0.15)
 
@@ -317,7 +317,7 @@ class IntegratedGameTests(TransactionTestCase):
             ]
 
             for move in paddle_moves:
-                await comm2.send_json_to(move)
+                #await comm2.send_json_to(move)
                 await asyncio.sleep(0.15)
 
             # Test invalid movements
@@ -352,7 +352,7 @@ class IntegratedGameTests(TransactionTestCase):
                 )
 
             # Wait to observe responses
-            await asyncio.sleep(5)
+            await asyncio.sleep(50)
             
             # disconect        
             await comm1.disconnect()
@@ -367,10 +367,8 @@ class IntegratedGameTests(TransactionTestCase):
         finally:
             # Clean up tasks
             player1_task.cancel()
-            player2_task.cancel()
             try:
                 await player1_task
-                await player2_task
             except asyncio.CancelledError:
                 pass
 

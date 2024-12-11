@@ -96,11 +96,65 @@ def handle_tunneling(self, ball, current_sector, new_state):
         if side_index is None:
             return None
 
-        # Calculate approach speed using dot product of velocity and normal
+        # Get normal and calculate initial approach speed
         normal = self.side_normals[side_index]
-        approach_speed = abs(
-            ball["velocity_x"] * normal["x"] + ball["velocity_y"] * normal["y"]
+        dot_product = (ball["velocity_x"] * normal["x"] + 
+                      ball["velocity_y"] * normal["y"])
+        approach_speed = abs(dot_product)
+
+        # Calculate how far the ball has penetrated beyond the boundary
+        penetration_depth = abs(
+            (ball["x"] - intersection["x"]) * normal["x"] +
+            (ball["y"] - intersection["y"]) * normal["y"]
         )
+
+        # Store original position for distance preservation
+        original_x = ball["x"]
+        original_y = ball["y"]
+
+        # Calculate reflection vector
+        reflected_vx = ball["velocity_x"] - 2 * dot_product * normal["x"]
+        reflected_vy = ball["velocity_y"] - 2 * dot_product * normal["y"]
+
+        # Calculate the magnitude of movement needed to place ball at correct distance
+        ball_size = ball["size"]
+        buffer = 0.001  # Small buffer to prevent immediate re-collision
+        target_distance = ball_size + buffer
+
+        # Calculate new position that preserves the ball's tangential position
+        # but puts it at the correct distance from the boundary
+        if dot_product > 0:  # Ball was moving against the normal
+            # Place ball on the side it came from
+            ball["x"] = intersection["x"] + normal["x"] * target_distance
+            ball["y"] = intersection["y"] + normal["y"] * target_distance
+            
+            # Preserve tangential position
+            tangent_x = -normal["y"]  # Perpendicular to normal
+            tangent_y = normal["x"]
+            tangent_component = (
+                (original_x - intersection["x"]) * tangent_x +
+                (original_y - intersection["y"]) * tangent_y
+            )
+            ball["x"] += tangent_x * tangent_component
+            ball["y"] += tangent_y * tangent_component
+        else:
+            # Same as above but place on opposite side
+            ball["x"] = intersection["x"] - normal["x"] * target_distance
+            ball["y"] = intersection["y"] - normal["y"] * target_distance
+            
+            # Preserve tangential position
+            tangent_x = -normal["y"]
+            tangent_y = normal["x"]
+            tangent_component = (
+                (original_x - intersection["x"]) * tangent_x +
+                (original_y - intersection["y"]) * tangent_y
+            )
+            ball["x"] += tangent_x * tangent_component
+            ball["y"] += tangent_y * tangent_component
+
+        # Apply reflected velocity
+        ball["velocity_x"] = reflected_vx
+        ball["velocity_y"] = reflected_vy
 
         # Create standardized movement info
         movement_info = {
@@ -110,7 +164,6 @@ def handle_tunneling(self, ball, current_sector, new_state):
             "type": "tunneling",
         }
 
-        # Create standardized sector info
         standardized_sector = {
             "side_index": side_index,
             "movement": movement_info,
@@ -118,14 +171,19 @@ def handle_tunneling(self, ball, current_sector, new_state):
             "projection": intersection,
         }
 
-        # Set ball position to intersection point
-        ball["x"], ball["y"] = intersection["x"], intersection["y"]
-
         # Handle based on side type
         if side_index in self.active_sides:
             return self.handle_paddle(ball, standardized_sector, new_state)
         else:
             return self.handle_wall(ball, standardized_sector, new_state)
+        # Handle based on side type
+        if side_index in self.active_sides:
+            return self.handle_paddle(ball, standardized_sector, new_state)
+        else:
+            return self.handle_wall(ball, standardized_sector, new_state)
+
+
+
 
     # Case 2: Already have sector info - use it directly
     side_index = current_sector["side_index"]
