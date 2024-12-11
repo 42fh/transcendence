@@ -1,4 +1,5 @@
 import json
+import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.core.exceptions import ObjectDoesNotExist
@@ -6,6 +7,8 @@ from django.utils import timezone
 from chat.models import ChatRoom, Message, BlockedUser
 from users.models import CustomUser
 from django.db import models
+
+logger = logging.getLogger("chat")
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -15,32 +18,32 @@ class ChatConsumer(AsyncWebsocketConsumer):
         try:
             self.room_name = self.scope["url_route"]["kwargs"].get("room_name")
             if not self.room_name:
-                # print("DEBUG: Room name is missing")
+                logger.debug("Room name is missing")
                 await self.close()
                 return
 
             self.room_group_name = f"chat_{self.room_name}"
 
             if self.scope["user"].is_anonymous:
-                # print("DEBUG: Anonymous user connection rejected")
+                logger.debug("Anonymous user connection rejected")
                 await self.close()
                 return
 
             self.username = self.scope["user"].username
-            # print(f"DEBUG: User {self.username} connecting to room {self.room_name}")
+            logger.debug(f"User {self.username} connecting to room {self.room_name}")
 
             try:
                 self.chat_room = await self.get_or_create_chat_room()
                 if not self.chat_room:
-                    print("DEBUG: Failed to create or get chat room")
+                    logger.debug("Failed to create or get chat room")
                     await self.close()
                     return
             except ObjectDoesNotExist as e:
-                print(f"DEBUG: User not found error: {str(e)}")
+                logger.debug(f"User not found error: {str(e)}")
                 await self.close()
                 return
             except Exception as e:
-                print(f"DEBUG: Chat room error: {str(e)}")
+                logger.debug(f"Chat room error: {str(e)}")
                 await self.close()
                 return
 
@@ -61,11 +64,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 )
             )
 
-            print("calling send_message_history")
+            logger.debug("calling send_message_history")
             await self.send_message_history()
 
         except Exception as e:
-            print(f"DEBUG: Connection error: {str(e)}")
+            logger.debug(f"Connection error: {str(e)}")
             await self.close()
             return
 
@@ -95,7 +98,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         """Fetch and send message history to the newly connected client."""
         try:
             messages = await self.get_message_history()
-            print(f"Sending message history: {messages}")
+            logger.debug(f"Sending message history: {messages}")
             if messages:
                 await self.send(
                     text_data=json.dumps(
@@ -106,9 +109,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     )
                 )
             else:
-                print("DEBUG: No messages found in history")
+                logger.debug("No messages found in history")
         except Exception as e:
-            print(f"DEBUG: Error sending message history: {str(e)}")
+            logger.debug(f"Error sending message history: {str(e)}")
             await self.send(
                 text_data=json.dumps(
                     {
@@ -135,24 +138,24 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 chat_room.last_message_at = timezone.now()
                 chat_room.save(update_fields=["last_message_at"])
 
-            print(f"DEBUG: Chat room {'created' if created else 'retrieved'}: {chat_room}")
+            logger.debug(f"Chat room {'created' if created else 'retrieved'}: {chat_room}")
             return chat_room
 
         except CustomUser.DoesNotExist as e:
             raise ObjectDoesNotExist(f"User not found: {str(e)}")
         except Exception as e:
-            print(f"DEBUG: Error in get_or_create_chat_room: {str(e)}")
+            logger.debug(f"Error in get_or_create_chat_room: {str(e)}")
             raise
 
     async def disconnect(self, close_code):
         try:
-            print(f"DEBUG: User {self.username} disconnected from room {self.room_name}")
+            logger.debug(f"User {self.username} disconnected from room {self.room_name}")
             if hasattr(self, "room_group_name"):
                 if self.room_group_name in self.connected_users:
                     self.connected_users[self.room_group_name].discard(self.username)
                 await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
         except Exception as e:
-            print(f"DEBUG: Disconnect error: {str(e)}")
+            logger.debug(f"Disconnect error: {str(e)}")
 
     async def receive(self, text_data):
         try:
@@ -188,17 +191,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
         except json.JSONDecodeError:
             await self.send(text_data=json.dumps({"type": "error", "message": "Invalid message format"}))
         except Exception as e:
-            print(f"DEBUG: Error in receive: {str(e)}")
             await self.send(text_data=json.dumps({"type": "error", "message": "Failed to process message"}))
 
     @database_sync_to_async
     def save_message(self, content):
         try:
             message = Message.objects.create(room=self.chat_room, sender=self.scope["user"], content=content)
-            print(f"DEBUG: Message saved: {message.content} at {message.timestamp}")
             return message.timestamp
         except Exception as e:
-            print(f"DEBUG: Error saving message: {str(e)}")
             raise
 
     async def chat_message(self, event):
@@ -219,3 +219,32 @@ class ChatConsumer(AsyncWebsocketConsumer):
         return BlockedUser.objects.filter(
             models.Q(user=sender, blocked_user=recipient) | models.Q(user=recipient, blocked_user=sender)
         ).exists()
+
+
+class NotificationConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        try:
+            if self.scope["user"] is None or self.scope["user"].is_anonymous:
+                await self.close()
+                return
+
+            self.group_name = f"notifications_{self.scope['user'].username}"
+            await self.channel_layer.group_add(self.group_name, self.channel_name)
+            await self.accept()
+        except Exception as e:
+            await self.close()
+
+    async def disconnect(self, close_code):
+        # Remove user from the group
+        if hasattr(self, "group_name"):
+            await self.channel_layer.group_discard(self.group_name, self.channel_name)
+
+    async def send_notification(self, event):
+        # Send notification to WebSocket
+        notification = event.get("notification", {})
+
+        await self.send(
+            text_data=json.dumps(
+                {"type": "send_notification", "username": event.get("username", "system"), "notification": notification}
+            )
+        )

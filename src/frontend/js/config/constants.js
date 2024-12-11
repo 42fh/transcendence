@@ -250,3 +250,17 @@ export const GAME_2D_CONFIG_TYPES = {
     },
   },
 };
+
+export const CHAT_WS_MSG_TYPE = {
+  MESSAGE: "chat_message",
+  SYSTEM: "system",
+  SELF: "self",
+  OTHER: "other",
+  MESSAGE_HISTORY: "message_history",
+  SEND_NOTIFICATION: "send_notification",
+};
+
+export const WS_RECONNECTION = {
+  MAX_RECONNECT_ATTEMPTS: 5,
+  RECONNECT_DELAY: 3000,
+};

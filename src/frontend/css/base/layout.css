@@ -1,7 +1,7 @@
 /* Base page container */
 .page-container {
-  width: var(--page-width);
-  height: var(--page-height);
+  /* width: var(--page-width); */
+  /* height: var(--page-height); */
   min-height: var(--page-min-height);
   padding-bottom: var(--page-padding-bottom);
   position: relative;
