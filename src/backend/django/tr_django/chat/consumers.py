@@ -13,8 +13,6 @@ logger = logging.getLogger("chat")
 
 class ChatConsumer(AsyncWebsocketConsumer):
     connected_users = {}
-    print("00000000000000000000000000000000")
-
     async def connect(self):
         try:
             self.room_name = self.scope["url_route"]["kwargs"].get("room_name")
@@ -125,7 +123,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_or_create_chat_room(self):
         try:
-            print("111111111111111111111111111", self.room_name)
             # Sort usernames to ensure consistent room_id regardless of order
             user_id = sorted(self.room_name.split("_"))
             print("user_ids: ", user_id, user_id[0], user_id[1])
@@ -134,12 +131,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
             user1 = CustomUser.objects.get(id=user_id[0])
             user2 = CustomUser.objects.get(id=user_id[1])
-            # user1 = CustomUser.objects.get(id=user_ids[0])
-            # user2 = CustomUser.objects.get(id=user_ids[1])
+
             
-            print("-----------------before chat-room", user1)
             chat_room, created = ChatRoom.objects.create_room(user1, user2)
-            print("-----------------after chat-room", user2)
 
             if chat_room:
                 chat_room.last_message_at = timezone.now()
