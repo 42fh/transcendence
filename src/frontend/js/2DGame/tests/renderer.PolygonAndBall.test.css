@@ -1,0 +1,16 @@
+body {
+  background-color: pink;
+}
+
+#container {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+#gameTest {
+  width: 800px;
+  height: 800px;
+  border: 1px solid black;
+  background: #fafafa;
+}
