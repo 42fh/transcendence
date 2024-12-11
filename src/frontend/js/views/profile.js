@@ -197,36 +197,37 @@ function populatePublicProfileHTML(content, userData) {
     element.style.display = "none";
   });
 
+  
   // TODO: doppelt gemoppelt just to be sure
   const emailElement = content.querySelector(".profile__info-item--email");
   const blockButton = content.querySelector('button[data-action="block"]');
   const phoneElement = content.querySelector(".profile__info-item--phone");
   emailElement.style.display = "none";
   phoneElement.style.display = "none";
-
+  
   const friendshipButton = content.querySelector('button[data-action="friend"]');
   if (!friendshipButton) {
     console.warn("Friend button not found in template");
     return;
   }
-
+  
   // if (!friendshipButton || !blockButton || !csrfToken) {
   //   console.warn("Friend button or block button not found or CSRF token missing");
   //   return;
   // }
-
+  
   const friendIconSpan = friendshipButton.querySelector(".material-symbols-outlined");
   if (!friendIconSpan) {
     console.warn("Icon span not found in friend button");
     return;
   }
-
+  
   const blockIconSpan = blockButton.querySelector(".material-symbols-outlined");
   if (!blockIconSpan) {
     console.warn("Icon span not found in block button");
     return;
   }
-
+  
   if (userData.is_friend) {
     friendIconSpan.textContent = "do_not_disturb_on";
     friendshipButton.setAttribute("title", "Remove Friend");
@@ -238,34 +239,33 @@ function populatePublicProfileHTML(content, userData) {
         friendshipButton.setAttribute("title", "Friend Request Sent. Click to withdraw.");
         friendshipButton.dataset.state = "pending_sent";
         break;
-      case "received":
-        friendIconSpan.textContent = "check_circle";
-        friendshipButton.setAttribute("title", "Friend Request Received. Click to accept, reject or ignore.");
-        friendshipButton.dataset.state = "pending_received";
-        break;
-      default:
-        friendIconSpan.textContent = "add_circle";
-        friendshipButton.setAttribute("title", "Add Friend");
-        friendshipButton.dataset.state = "not_friends";
+        case "received":
+          friendIconSpan.textContent = "check_circle";
+          friendshipButton.setAttribute("title", "Friend Request Received. Click to accept, reject or ignore.");
+          friendshipButton.dataset.state = "pending_received";
+          break;
+          default:
+            friendIconSpan.textContent = "add_circle";
+            friendshipButton.setAttribute("title", "Add Friend");
+            friendshipButton.dataset.state = "not_friends";
     }
   }
   // Add click handler for friend button
   //   friendButton.addEventListener("click", async () => {
-  //     // TODO: Implement friend request actions
-  //     // We'll add this functionality next
-  //     console.log("Friend button clicked:", {
-  //       is_friend: userData.is_friend,
-  //       status: userData.friend_request_status,
-  //     });
-  //   });
-  friendshipButton.addEventListener("click", () =>
-    handleFriendshipButtonClick(friendshipButton.dataset.state, userData)
-  );
-
-  blockButton.addEventListener("click", async () => {
-    try {
+    //     // TODO: Implement friend request actions
+    //     // We'll add this functionality next
+    //     console.log("Friend button clicked:", {
+      //       is_friend: userData.is_friend,
+      //       status: userData.friend_request_status,
+      //     });
+      //   });
+      friendshipButton.addEventListener("click", () =>
+      handleFriendshipButtonClick(friendshipButton.dataset.state, userData)
+      );
+      
+      blockButton.addEventListener("click", async () => {
+        try {
       const action = userData.is_blocked ? "unblock" : "block";
-      console.log("action= ", action);
       const blockResult = await toggleBlockUser(userData.username, userData.is_blocked);
 
       if (blockResult.success) {
@@ -274,6 +274,9 @@ function populatePublicProfileHTML(content, userData) {
         blockIconSpan.textContent = userData.is_blocked ? "block" : "block_outlined";
         blockButton.setAttribute("title", userData.is_blocked ? "Unblock User" : "Block User");
 
+        //TODO: Fix the toast, it's not showing, probably due to DOM elements timeline (added before EventListener would work)
+        //TODO ALTERNATIVE: replace by an icon changing like slombard friend adding
+        showToast("test toast 2", false);
         showToast(userData.is_blocked ? "User blocked successfully" : "User unblocked successfully", true);
       }
     } catch (error) {

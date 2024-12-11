@@ -75,9 +75,8 @@ export async function loadChatPage(addToHistory = true) {
   }
 }
 
-async function loadChatList(page = 1, perPage = 100, search = "") {
+async function loadChatList(page = 1, perPage = 500, search = "") {
   try {
-    console.log("perPaage    ", perPage);
     const data = await fetchConversationList(page, perPage, search);
     if (!data || !data.users) throw new Error("Failed to fetch chat contacts");
 
@@ -135,7 +134,7 @@ async function loadChatList(page = 1, perPage = 100, search = "") {
   }
 }
 
-async function loadUsersList(page = 1, perPage = 100, search = "") {
+async function loadUsersList(page = 1, perPage = 500, search = "") {
   try {
     const data = await fetchUsers(page, perPage, search);
     if (!data || !data.users) throw new Error("Failed to fetch users");
