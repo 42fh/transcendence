@@ -122,7 +122,14 @@
             <div class="home__net-segment home__net-segment--black"></div>
             <div class="home__net-segment home__net-segment--white"></div>
           </div>
-          <button id="home__button-cta" class="home__button button--gradient">CTA</button>
+          <!-- <button id="home__button-cta" class="home__button button--gradient">CTA</button> -->
+          <div class="home__buttons-right">
+            <button id="home__button-cta" class="home__button button--gradient">CTA</button>
+            <button id="home__button-2d" class="home__button button--stroke">
+              <span class="actual-text">&nbsp;2D GAME&nbsp;</span>
+              <span class="hover-text" aria-hidden="true">&nbsp;OR DIE&nbsp;</span>
+            </button>
+          </div>
         </div>
       </div>
     </template>
@@ -478,16 +485,12 @@
           <h2 class="chat-page__title">Conversations</h2>
           <div id="chat-conversations-list" class="conversations-list">
             <!-- Vertical list of users will be populated dynamically here -->
-<<<<<<< Updated upstream
             <div
               id="chat-conversations-list-item"
               class="chat-conversations-list__item"
               id="chat-conversations"
               style="display: none"
             >
-=======
-            <div id="chat-conversations-list-item" class="chat-conversations-list__item" style="display: none">
->>>>>>> Stashed changes
               <img id="chat-avatar" class="chat-conversations-list__avatar" src="" alt="User avatar" />
               <div class="chat-conversations-list__info">
                 <span id="chat-conversations-list-username" class="chat-conversations-list__username"></span>
