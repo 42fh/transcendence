@@ -158,6 +158,79 @@ class LogoutView(APIView):
 
 
 @method_decorator(csrf_exempt, name="dispatch")
+class SendEmailVerificationView(APIView):
+    """
+    View to handle sending email verification emails.
+    https://docs.djangoproject.com/en/5.1/topics/email/
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        if not request.user.is_authenticated:
+            return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        try:
+            # Generate random 6-digit code
+            verification_code = str(random.randint(100000, 999999))
+            # Send email with verification code
+            send_mail(
+                "PONG | Verification code",
+                f"Your verification code is: {verification_code}",
+                f"{os.getenv("EMAIL_HOST_USER")}",
+                [request.user.email],
+                fail_silently=False,
+            )
+            # Store verification code and expiry time in user object
+            request.user.two_factor_code = verification_code
+            request.user.two_factor_code_expires_at = timezone.now() + timedelta(minutes=1)
+            request.user.save()
+
+            return Response({"message": "Email verification sent successfully"})
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class ValidateEmailVerificationView(APIView):
+    """
+    View to handle email verification.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        if not request.user.is_authenticated:
+            return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        try:
+            data = json.loads(request.body)
+            verification_code = data.get("token")
+
+            if not verification_code:
+                return Response({"error": "Verification code is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+            if request.user.last_2fa_code == verification_code:
+                return Response({"error": "Verification code is already used"}, status=status.HTTP_400_BAD_REQUEST)
+            if (
+                request.user.two_factor_code == verification_code
+                and request.user.two_factor_code_expires_at > timezone.now()
+            ):
+                request.user.last_2fa_code = verification_code
+                request.user.email_verified = True
+                request.user.save()
+                return Response({"message": "Email verification successful"})
+            elif request.user.two_factor_code_expires_at < timezone.now():
+                return Response({"error": "Verification code expired"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({"error": "Invalid verification code"}, status=status.HTTP_400_BAD_REQUEST)
+        except json.JSONDecodeError:
+            return Response({"error": "Invalid request format"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@method_decorator(csrf_exempt, name="dispatch")
 class DeleteUserView(View):
     def _generate_unique_anon_username(self, user_id: str) -> str:
         """
@@ -870,3 +943,72 @@ class FriendshipsView(APIView):
             return Response({"error": "Invalid request format"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+def login_with_42(request):
+    base_url = "https://api.intra.42.fr/oauth/authorize"
+    params = {
+        "client_id": settings.FORTYTWO_CLIENT_ID,
+        "redirect_uri": settings.FORTYTWO_REDIRECT_URI,
+        "response_type": "code",
+        "scope": "public",
+    }
+    query_string = "&".join([f"{key}={value}" for key, value in params.items()])
+    return redirect(f"{base_url}?{query_string}")
+
+
+def callback(request):
+    code = request.GET.get("code")
+    if not code:
+        return redirect("/")
+
+    # Exchange the code for an access token
+    token_url = "https://api.intra.42.fr/oauth/token"
+    data = {
+        "grant_type": "authorization_code",
+        "client_id": settings.FORTYTWO_CLIENT_ID,
+        "client_secret": settings.FORTYTWO_CLIENT_SECRET,
+        "code": code,
+        "redirect_uri": settings.FORTYTWO_REDIRECT_URI,
+    }
+
+    response = requests.post(token_url, data=data)
+    if response.status_code != 200:
+        return JsonResponse({"error": "Failed to obtain access token"}, status=403)
+
+    access_token = response.json().get("access_token")
+
+    # Fetch user information
+    user_info_url = "https://api.intra.42.fr/v2/me"
+    headers = {"Authorization": f"Bearer {access_token}"}
+    user_info_response = requests.get(user_info_url, headers=headers)
+    if user_info_response.status_code != 200:
+        return JsonResponse({"error": "Failed to fetch user info"}, status=403)
+
+    user_data = user_info_response.json()
+
+    # Create or log in the user
+    username = user_data["login"]
+    user, created = CustomUser.objects.get_or_create(username=f"42_{username}")
+
+    if user is not None:
+        login(request, user)  # Creates the session for the new user
+        print("Session Data:", request.session.items())  # Debug session contents
+
+        # Generate token pair
+        token_serializer = TokenObtainPairSerializer()
+        tokens = token_serializer.get_token(user)
+        access_token = str(tokens.access_token)
+        refresh_token = str(tokens)
+
+        response = redirect("/")  # Redirect to a post-login page
+
+        # Set tokens and UUID in cookies
+        response.set_cookie("pongUserId", str(user.id), httponly=False, samesite="Strict")
+        response.set_cookie("pongUsername", str(user.username), httponly=False, samesite="Strict")
+        response.set_cookie("access_token", access_token, httponly=False, samesite="Strict")
+        response.set_cookie("refresh_token", refresh_token, httponly=False, samesite="Strict")
+
+        return response
+    else:
+        return JsonResponse({"error": "Failed to fetch user info"}, status=403)
