@@ -1,3 +1,4 @@
+// import { CONFIG, LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { CONFIG, LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { manageJWT } from "./authService.js";
 
@@ -259,7 +260,7 @@ export async function fetchFriends(page = 1, perPage = 10, search = "") {
 //   }
 // }
 
-async function sendUserOnlineStatus(isOnline, expirationTimestamp) {
+export async function sendUserOnlineStatus(isOnline, expirationTimestamp) {
   try {
     const accessToken = await manageJWT();
     const response = await fetch("/user_online_status", {

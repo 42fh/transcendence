@@ -1,8 +1,9 @@
+import { sendUserOnlineStatus } from "../services/usersService.js";
+
 let lastStatus = null; // Tracks the last sent online/offline status
 let lastExpirationTimestamp = 0; // Tracks the last sent expiration timestamp
 const EXPIRATION_INTERVAL = 60000; // Expiration interval in milliseconds (1 minute)
 const PING_BUFFER = 5000; // Buffer time before expiration to ensure timely updates (5 seconds)
-import { sendUserOnlineStatus } from "../services/usersService";
 
 export function checkUserStatus() {
   const isOnline =
@@ -33,7 +34,7 @@ export function checkUserStatus() {
 }
 
 // Add this to your initialization code (e.g., in main.js or app.js)
-function initializeOnlineStatusTracking() {
+export function initializeOnlineStatusTracking() {
   // Check status initially
   checkUserStatus();
 
