@@ -5,8 +5,8 @@ from django.utils import timezone
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
-logger = logging.getLogger("chat")
-
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 # class ChatRoomManager(models.Manager):
 #     def create_room(self, user1, user2):

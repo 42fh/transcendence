@@ -13,37 +13,38 @@ logger = logging.getLogger("chat")
 
 class ChatConsumer(AsyncWebsocketConsumer):
     connected_users = {}
+    print("00000000000000000000000000000000")
 
     async def connect(self):
         try:
             self.room_name = self.scope["url_route"]["kwargs"].get("room_name")
             if not self.room_name:
-                logger.debug("Room name is missing")
+                print("Room name is missing")
                 await self.close()
                 return
 
             self.room_group_name = f"chat_{self.room_name}"
 
             if self.scope["user"].is_anonymous:
-                logger.debug("Anonymous user connection rejected")
+                print("Anonymous user connection rejected")
                 await self.close()
                 return
 
             self.username = self.scope["user"].username
-            logger.debug(f"User {self.username} connecting to room {self.room_name}")
+            print(f"User {self.username} connecting to room {self.room_name}")
 
             try:
                 self.chat_room = await self.get_or_create_chat_room()
                 if not self.chat_room:
-                    logger.debug("Failed to create or get chat room")
+                    print("Failed to create or get chat room")
                     await self.close()
                     return
             except ObjectDoesNotExist as e:
-                logger.debug(f"User not found error: {str(e)}")
+                print(f"User not found error: {str(e)}")
                 await self.close()
                 return
             except Exception as e:
-                logger.debug(f"Chat room error: {str(e)}")
+                print(f"Chat room error: {str(e)}")
                 await self.close()
                 return
 
@@ -64,11 +65,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 )
             )
 
-            logger.debug("calling send_message_history")
+            print("calling send_message_history")
             await self.send_message_history()
 
         except Exception as e:
-            logger.debug(f"Connection error: {str(e)}")
+            print(f"Connection error: {str(e)}")
             await self.close()
             return
 
@@ -98,7 +99,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         """Fetch and send message history to the newly connected client."""
         try:
             messages = await self.get_message_history()
-            logger.debug(f"Sending message history: {messages}")
+            print(f"Sending message history: {messages}")
             if messages:
                 await self.send(
                     text_data=json.dumps(
@@ -109,9 +110,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     )
                 )
             else:
-                logger.debug("No messages found in history")
+                print("No messages found in history")
         except Exception as e:
-            logger.debug(f"Error sending message history: {str(e)}")
+            print(f"Error sending message history: {str(e)}")
             await self.send(
                 text_data=json.dumps(
                     {
@@ -124,40 +125,44 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_or_create_chat_room(self):
         try:
+            print("111111111111111111111111111", self.room_name)
             # Sort usernames to ensure consistent room_id regardless of order
-            usernames = sorted(self.room_name.split("_"))
-            if len(usernames) != 2:
+            user_id = sorted(self.room_name.split("_"))
+            print("user_ids: ", user_id, user_id[0], user_id[1])
+            if len(user_id) != 2:
                 raise ValueError("Invalid room name format")
 
-            # user1 = CustomUser.objects.get(username=usernames[0])
-            # user2 = CustomUser.objects.get(username=usernames[1])
-            user1 = CustomUser.objects.get(id=user_ids[0])
-            user2 = CustomUser.objects.get(id=user_ids[1])
-
+            user1 = CustomUser.objects.get(id=user_id[0])
+            user2 = CustomUser.objects.get(id=user_id[1])
+            # user1 = CustomUser.objects.get(id=user_ids[0])
+            # user2 = CustomUser.objects.get(id=user_ids[1])
+            
+            print("-----------------before chat-room", user1)
             chat_room, created = ChatRoom.objects.create_room(user1, user2)
+            print("-----------------after chat-room", user2)
 
             if chat_room:
                 chat_room.last_message_at = timezone.now()
                 chat_room.save(update_fields=["last_message_at"])
 
-            logger.debug(f"Chat room {'created' if created else 'retrieved'}: {chat_room}")
+            print(f"Chat room {'created' if created else 'retrieved'}: {chat_room}")
             return chat_room
 
         except CustomUser.DoesNotExist as e:
             raise ObjectDoesNotExist(f"User not found: {str(e)}")
         except Exception as e:
-            logger.debug(f"Error in get_or_create_chat_room: {str(e)}")
+            print(f"Error in get_or_create_chat_room: {str(e)}")
             raise
 
     async def disconnect(self, close_code):
         try:
-            logger.debug(f"User {self.username} disconnected from room {self.room_name}")
+            print(f"User {self.username} disconnected from room {self.room_name}")
             if hasattr(self, "room_group_name"):
                 if self.room_group_name in self.connected_users:
                     self.connected_users[self.room_group_name].discard(self.username)
                 await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
         except Exception as e:
-            logger.debug(f"Disconnect error: {str(e)}")
+            print(f"Disconnect error: {str(e)}")
 
     async def receive(self, text_data):
         try:
