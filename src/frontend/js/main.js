@@ -46,8 +46,6 @@ document.addEventListener("DOMContentLoaded", () => {
     loadHomePage();
   }
 
-  //   initModalListeners();
-  //   initAuthListeners(); // moved to loadAuthPage
   initializeTournaments(CONFIG.CURRENT_SOURCE);
   initializeHistory();
   // TODO: is initBottomBav the correct name, and should be initialised anywaay also if loadAuthPage?

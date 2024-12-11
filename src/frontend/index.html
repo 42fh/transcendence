@@ -168,7 +168,7 @@
       <div class="tournament-container page-container--settings">
         <h2>GAME SETTINGS</h2>
         <div class="tournament-detail-container">
-          <form id="gameForm" class="tournament-detail-section">
+          <form id="tournament-gameForm" class="tournament-detail-section">
             <div class="game-setting-group">
               <label for="playerId">Player ID:</label>
               <input type="text" id="playerId" name="playerId" class="create-tournament-select" />
@@ -544,14 +544,22 @@
       </nav>
     </template>
 
-    <!-- Profile Template (used for both 'private' profile and 'public' profile) -->
+    <!-- Profile Template -->
     <template id="profile-template">
       <div class="page-container page-container--profile">
+        <!-- <div class="profile__header"> -->
         <div class="profile">
           <div class="profile__section profile__section--header">
+            <!-- <div class="profile__avatar-container"> -->
             <div class="profile__avatar-wrapper">
               <img class="profile__avatar" src="" alt="Profile avatar" />
             </div>
+            <!-- <div class="profile__info">
+            <h2 class="profile__username"></h2>
+            <p class="profile__name"></p>
+            <p class="profile__email"></p>
+            <p class="profile__phone"></p>
+          </div> -->
             <div class="profile__info">
               <div class="profile__username-container">
                 <!-- TODO: think about this h2 if it has really to be -->
@@ -601,6 +609,8 @@
               <span class="profile__stats-value profile__stats-ratio"></span>
             </div>
           </div>
+
+          <!-- <div class="profile__matches"> -->
           <div class="profile__section profile__section--matches">
             <h3 class="profile__section-title">Recent Matches</h3>
             <div class="profile__matches-list">
@@ -618,7 +628,6 @@
       </div>
     </template>
 
-    <!-- Profile Match Template -->
     <template id="profile-match-template">
       <div class="profile__match-item">
         <span class="profile__match-date"></span>
@@ -722,10 +731,13 @@
     <!-- 3D Game -->
     <template id="3d-game-template">
       <canvas class="webgl"></canvas>
-      <div class="end-screen">
-        <h1 class="title"></h1>
-        <div class="scores"></div>
-        <button class="exit-button">Exit Game</button>
+      <div class="mobile-controls">
+        <button class="control-btn left-btn">
+          <i class="fas fa-arrow-left"></i>
+        </button>
+        <button class="control-btn right-btn">
+          <i class="fas fa-arrow-right"></i>
+        </button>
       </div>
       <div class="game-menu-overlay" id="menu">
         <div class="game-menu-container">
@@ -734,26 +746,14 @@
               <h2 class="text-center mb-0">Game Setup</h2>
             </div>
             <div class="card-body">
-              <form id="gameSetupForm">
-                <div class="mb-4">
-                  <label for="gameType">Game Type</label>
-                  <input type="text" id="gameType" />
-                </div>
+              <div class="mb-4">
+                <label for="playerCount">Player count</label>
+                <input type="text" id="playerCount" />
+              </div>
 
-                <div class="mb-4">
-                  <label for="gameId">Game ID</label>
-                  <input type="text" id="gameId" />
-                </div>
-
-                <div class="mb-4">
-                  <label for="playerCount">Player count</label>
-                  <input type="text" id="playerCount" />
-                </div>
-
-                <div class="text-center">
-                  <div class="joinGame btn btn-primary">Join</div>
-                </div>
-              </form>
+              <div class="text-center">
+                <div class="joinGame btn btn-primary">Join</div>
+              </div>
             </div>
           </div>
         </div>

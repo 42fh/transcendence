@@ -10,8 +10,8 @@ class EnumGameMode(Enum):
 
 DEFAULT_PLAYER = {
     "player_settings": {
-        "move_cooldown": float(0.1),
-        "move_speed": float(0.05),
+        "move_cooldown": float(0.02),
+        "move_speed": float(0.03),
         "move_speed_boost": float(1.0),
         "reverse_controls": False,
         "paddle_length": float(0.3),
@@ -53,7 +53,7 @@ DEFAULT_CIRCULAR = {
     "num_players": int(2),
     "num_balls": int(1),
     "min_players": int(2),
-    "initial_ball_speed": float(0.006),
+    "initial_ball_speed": float(0.02),
     "sides": int(3),
     "paddle_length": float(0.3),
     "paddle_width": float(0.06),

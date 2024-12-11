@@ -1,10 +1,11 @@
-import { createNewGame } from "../services/gameSettingsService.js";
+// import { createNewGame } from "../services/gameSettingsService.js";
+import { createGame } from "../services/gameService.js";
 
 export function gameSettings() {
-  console.log("print from inside gameSettings");
+  console.log("Entering gameSettings");
   const state = {
     showSettings: false,
-    eventLog: document.getElementById("eventLog"),
+    eventLog: document.getElementById("two-d-game__event-log"),
     formData: {
       playerId: "",
       numPlayers: 2,
@@ -53,6 +54,7 @@ export function gameSettings() {
     mainContent.innerHTML = "";
   }
 
+  // The game settings temp
   const settingsTemplate = document.getElementById("game-settings-template");
   if (settingsTemplate) {
     const settingsContent = document.importNode(settingsTemplate.content, true);
@@ -82,29 +84,25 @@ export function gameSettings() {
   function setupEventListeners() {
     console.log("Setting up event listeners");
     console.log("print    from setupEventListeners");
-    const toggleSettingsButton = document.getElementById("toggleSettings");
-    if (toggleSettingsButton) {
-      toggleSettingsButton.addEventListener("click", () => {
-        state.showSettings = !state.showSettings;
-        const advancedSettings = document.getElementById("advancedSettings");
-        const toggleText = document.getElementById("toggleText");
-        const toggleIcon = document.getElementById("toggleIcon");
+    // const toggleSettingsButton = document.getElementById("toggleSettings");
+    // if (toggleSettingsButton) {
+    //   toggleSettingsButton.addEventListener("click", () => {
+    //     state.showSettings = !state.showSettings;
+    //     const advancedSettings = document.getElementById("advancedSettings");
+    //     const toggleText = document.getElementById("toggleText");
+    //     const toggleIcon = document.getElementById("toggleIcon");
 
-        if (advancedSettings) {
-          advancedSettings.style.display = state.showSettings
-            ? "block"
-            : "none";
-        }
-        if (toggleText) {
-          toggleText.textContent = state.showSettings
-            ? "Hide Settings"
-            : "Show Settings";
-        }
-        if (toggleIcon) {
-          toggleIcon.textContent = state.showSettings ? "▼" : "▶";
-        }
-      });
-    }
+    //     if (advancedSettings) {
+    //       advancedSettings.style.display = state.showSettings ? "block" : "none";
+    //     }
+    //     if (toggleText) {
+    //       toggleText.textContent = state.showSettings ? "Hide Settings" : "Show Settings";
+    //     }
+    //     if (toggleIcon) {
+    //       toggleIcon.textContent = state.showSettings ? "▼" : "▶";
+    //     }
+    //   });
+    // }
 
     const shapeSelect = document.getElementById("shape");
     if (shapeSelect) {
@@ -123,29 +121,19 @@ export function gameSettings() {
       });
     }
 
-    const gameForm = document.getElementById("gameForm");
-    if (gameForm) {
-      gameForm.addEventListener("submit", (e) => {
+    const tournamentGameForm = document.getElementById("tournament-gameForm");
+    if (tournamentGameForm) {
+      tournamentGameForm.addEventListener("submit", (e) => {
         e.preventDefault();
         submitSettings();
       });
     }
 
-    [
-      "playerId",
-      "numPlayers",
-      "numSides",
-      "numBalls",
-      "shape",
-      "scoreMode",
-    ].forEach((fieldId) => {
+    ["playerId", "numPlayers", "numSides", "numBalls", "shape", "scoreMode"].forEach((fieldId) => {
       const element = document.getElementById(fieldId);
       if (element) {
         element.addEventListener("change", (e) => {
-          state.formData[fieldId] =
-            e.target.type === "number"
-              ? parseInt(e.target.value)
-              : e.target.value;
+          state.formData[fieldId] = e.target.type === "number" ? parseInt(e.target.value) : e.target.value;
         });
       }
     });
@@ -175,40 +163,13 @@ export function gameSettings() {
 
     const sidesField = document.getElementById("sidesField");
     if (sidesField) {
-      sidesField.style.display =
-        state.formData.mode === "classic" ? "none" : "block";
+      sidesField.style.display = state.formData.mode === "classic" ? "none" : "block";
     }
 
     const shapeFields = document.querySelectorAll(".shape-fields");
     shapeFields.forEach((field) => {
-      field.style.display =
-        state.formData.mode === "irregular" ? "block" : "none";
+      field.style.display = state.formData.mode === "irregular" ? "block" : "none";
     });
-  }
-
-  function logEvent(event) {
-    if (!state.eventLog) return;
-
-    const logEntry = document.createElement("div");
-    logEntry.className = `log-entry ${event.type}`;
-
-    const timestamp = new Date().toLocaleTimeString();
-
-    logEntry.innerHTML = `
-      <span class="log-timestamp">[${timestamp}]</span>
-      <span class="log-message">${event.message}</span>
-      ${event.details ? `<div class="log-details">${event.details}</div>` : ""}
-    `;
-
-    if (state.eventLog.firstChild) {
-      state.eventLog.insertBefore(logEntry, state.eventLog.firstChild);
-    } else {
-      state.eventLog.appendChild(logEntry);
-    }
-
-    while (state.eventLog.children.length > 50) {
-      state.eventLog.removeChild(state.eventLog.lastChild);
-    }
   }
 
   function showStatus(message, isError = false) {
@@ -252,15 +213,8 @@ export function gameSettings() {
       return;
     }
 
-    if (
-      numPlayers < 1 ||
-      numPlayers > state.gameConfigs[state.formData.mode].maxPlayers
-    ) {
-      showStatus(
-        `Number of players must be between 1 and ${
-          state.gameConfigs[state.formData.mode].maxPlayers
-        }.`
-      );
+    if (numPlayers < 1 || numPlayers > state.gameConfigs[state.formData.mode].maxPlayers) {
+      showStatus(`Number of players must be between 1 and ${state.gameConfigs[state.formData.mode].maxPlayers}.`);
       console.error(
         "ERROR: Invalid number of players. Please enter a number between 1 and",
         state.gameConfigs[state.formData.mode].maxPlayers
@@ -282,16 +236,14 @@ export function gameSettings() {
     console.log("DEBUG: Prepared settings to submit:", settings);
 
     try {
-      const response = await createNewGame(settings);
+      //   const response = await createNewGame(settings);
+      const response = await createGame(settings);
 
       if (response.success) {
         console.log("SUCCESS: Game created successfully:", response);
         showStatus("Game created successfully!", 0);
       } else {
-        console.error(
-          "ERROR: Failed to create game:",
-          response.message || "Unknown error"
-        );
+        console.error("ERROR: Failed to create game:", response.message || "Unknown error");
         showStatus(response.message || "Failed to create game.", 1);
       }
     } catch (error) {

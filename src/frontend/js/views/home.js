@@ -5,6 +5,7 @@ import { updateActiveNavItem } from "../components/bottomNav.js";
 import { loadChatPage } from "./chatHome.js";
 import { loadGameHome } from "./game.js";
 import { loadGame3D } from "./game3d.js";
+import { loadGameSetupPage } from "./gameSetup.js";
 
 export function loadHomePage(addToHistory = true) {
   try {
@@ -52,6 +53,19 @@ export function loadHomePage(addToHistory = true) {
     const ctaButton = document.getElementById("home__button-cta");
     if (ctaButton) {
       ctaButton.addEventListener("click", loadGameHome);
+    }
+
+    console.log("Looking for 2D button...");
+    const twoDButton = document.getElementById("home__button-2d");
+    console.log("2D button found:", twoDButton); // Should show the button element if found
+    if (twoDButton) {
+      console.log("Adding click listener to 2D button");
+      twoDButton.addEventListener("click", () => {
+        console.log("2D button clicked!"); // This should show when button is clicked
+        loadGameSetupPage();
+      });
+    } else {
+      console.error("2D button not found in DOM");
     }
 
     const chatsButton = document.getElementById("chats");

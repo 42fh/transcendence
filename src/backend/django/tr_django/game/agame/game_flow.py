@@ -12,25 +12,25 @@ logger = logging.getLogger(__name__)
 async def start_game(self):
     """Start game with process-safe checks"""
     try:
-        min_players = self.settings.get("min_players")
+        num_players = self.settings.get("num_players")
         await GameCoordinator.set_to_waiting_game(self.game_id)
         while True:
             player_count = await self.redis_conn.scard(self.players_key)
             if player_count == 0:
                 await self.end_game()
                 return
-            if player_count >= min_players:
+            if player_count >= num_players:
                 break
             logger.info(
-                f"{self.game_id}: Waiting for players... ({player_count}/{min_players})"
+                f"{self.game_id}: Waiting for players... ({player_count}/{num_players})"
             )
             await self.channel_layer.group_send(
                 f"game_{self.game_id}",
                 {
                     "type": "waiting",
                     "current_players": player_count,
-                    "required_players": min_players,
-                    "message": f"Waiting for players... ({player_count}/{min_players})",
+                    "required_players": num_players,
+                    "message": f"Waiting for players... ({player_count}/{num_players})",
                 },
             )
 

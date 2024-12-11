@@ -25,10 +25,10 @@ export default class Drawer {
     this.field = new THREE.Group();
 
     if (this.game.type == "circular") {
-      this.generatePaddlesCircular(this.config.paddles.length, this.radius);
+      this.generatePaddlesCircular(this.config.paddles, this.radius);
       this.createGameFieldCircular(this.radius);
     } else {
-      this.generatePaddles(this.config.paddles.length);
+      this.generatePaddles();
       this.createGameField();
     }
     this.game.scene.add(this.field);
@@ -36,7 +36,7 @@ export default class Drawer {
   }
 
   createGameField() {
-    const wallGeometry = new THREE.BoxGeometry(0.05, 0.5, GAME_HEIGHT * 2);
+    const wallGeometry = new THREE.BoxGeometry(0.05, 0.2, GAME_HEIGHT * 2);
     const wallMaterial = new THREE.MeshStandardMaterial({
       color: 0x000000,
     });
@@ -50,7 +50,7 @@ export default class Drawer {
     this.field.add(wall2);
   }
 
-  generatePaddles(_player_count) {
+  generatePaddles() {
     const playerGeometry = new THREE.BoxGeometry(
       this.config.dimensions.paddle_length,
       this.config.dimensions.paddle_width * 2.5,
@@ -73,31 +73,35 @@ export default class Drawer {
     this.field.add(this.game.paddles.get(0));
     this.field.add(this.game.paddles.get(1));
   }
-  generatePaddlesCircular(player_count, radius) {
-    const sectorSize = (2 * Math.PI) / player_count;
+  generatePaddlesCircular(paddles, radius) {
+    const sectorSize = (2 * Math.PI) / paddles.length;
     const playerGeometry = new THREE.BoxGeometry(
       this.config.dimensions.paddle_length * sectorSize,
       this.config.dimensions.paddle_width * 2.5,
       this.config.dimensions.paddle_width
     );
 
-    for (let i = 0; i < player_count; i++) {
-      const playerMaterial = new THREE.MeshMatcapMaterial({
-        map: this.game.skins[0],
-      });
-      const paddle = new THREE.Mesh(playerGeometry, playerMaterial);
+    for (let i = 0; i < paddles.length; i++) {
+      if (paddles[i].active) {
+        const playerMaterial = new THREE.MeshMatcapMaterial({
+          map: this.game.loader.items["floorColorTexture"],
+        });
+        const paddle = new THREE.Mesh(playerGeometry, playerMaterial);
+        paddle.receiveShadow = true;
+        paddle.castShadow = true;
 
-      const angle = -(i * sectorSize - Math.PI / 2 + sectorSize / 2);
+        const angle = -(i * sectorSize - Math.PI / 2 + sectorSize / 2);
 
-      const x = 0.96 * Math.cos(angle);
-      const z = 0.96 * Math.sin(angle);
-      paddle.position.set(x, 0.15, z);
-      paddle.lookAt(0, 0.11, 0);
-      paddle.castShadow = true;
-      paddle.receiveShadow = true;
+        const x = 0.96 * Math.cos(angle);
+        const z = 0.96 * Math.sin(angle);
+        paddle.position.set(x, 0.1, z);
+        paddle.lookAt(0, 0.11, 0);
+        paddle.castShadow = true;
+        paddle.receiveShadow = true;
 
-      this.game.paddles.set(i, paddle);
-      this.field.add(this.game.paddles.get(i));
+        this.game.paddles.set(i, paddle);
+        this.field.add(this.game.paddles.get(i));
+      }
 
       const ringAngle = i * sectorSize - Math.PI / 2;
       const ringGeometry = new THREE.RingGeometry(
@@ -196,25 +200,19 @@ export default class Drawer {
         const x = radius * Math.cos(angle);
         const z = radius * Math.sin(angle);
 
-        paddle.position.set(x, 0.15, z);
+        paddle.position.set(x, 0.1, z);
         paddle.lookAt(0, -0.28, 0);
       }
     } else {
-      for (let i = 0; i < gameState.balls.length; i++) {
-        this.game.balls[i].position.set(
-          gameState.balls[i].y,
-          0.08,
-          gameState.balls[i].x
-        );
-      }
-      // update paddles
-      for (let i = 0; i < gameState.paddles.length; i++) {
-        const paddle = this.game.paddles.get(i);
-        if (!paddle) continue;
-
-        console.log(gameState.paddles[i].position);
-        paddle.position.x = (gameState.paddles[i].position - GAME_WIDTH) * -1;
-      }
+      this.game.balls[0].position.set(
+        gameState.balls[0].y,
+        0.08,
+        gameState.balls[0].x
+      );
+      const paddle1 = this.game.paddles.get(0);
+      paddle1.position.x = (gameState.paddles[1].position - GAME_WIDTH) * -1;
+      const paddle2 = this.game.paddles.get(1);
+      paddle2.position.x = (gameState.paddles[3].position - GAME_WIDTH) * -1;
     }
   }
 
@@ -222,7 +220,7 @@ export default class Drawer {
     this.game.websocket.sendMessage({
       action: "move_paddle",
       direction,
-      user_id: this.game.playerId,
+      user_id: this.game.userId,
     });
   }
 }
