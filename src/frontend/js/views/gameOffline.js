@@ -33,12 +33,6 @@ export async function loadGameOffline(addToHistory = true) {
         context.arc(ballX, ballY, ballSize, 0, 2 * Math.PI);
         context.fill();
 
-        // Draw red dot in ball
-        context.fillStyle = "red";
-        context.beginPath();
-        context.arc(ballX, ballY, ballSize / 3, 0, 2 * Math.PI);
-        context.fill();
-
         // Draw scores
         context.fillStyle = "white";
         context.font = "20px Monospace";
