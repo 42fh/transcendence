@@ -74,8 +74,14 @@ function initializeChatRoom(chatPartner) {
     loadChatPage(false);
   });
 
-  const roomName = [currentUserId, chatPartner.id].sort().join("_");
-  console.log("Room Name:", roomName);
+  // const roomName = [currentUserId, chatPartner.id].sort().join("_");
+  // console.log("Room Name:", roomName);
+
+  const roomName = [currentUserId, chatPartner.id]  // Create an array of the two user IDs
+  .sort()                                       // Sort the IDs alphabetically
+  .join("_");                                  // Join them with an underscore
+
+console.log("Room Name:", roomName);
 
   const wsUrl = `/ws/chat/${roomName}/`;
 

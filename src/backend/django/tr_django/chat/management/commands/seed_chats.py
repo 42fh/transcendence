@@ -17,6 +17,7 @@ class Command(BaseCommand):
         # Specify the users to seed conversations with:
         other_players = Player.objects.filter(user__username__in=["ThePrimeagen", "CheGuevara"])
 
+        #TODO:probably now user id has to be sent here
         for player in other_players:
             room, created = ChatRoom.objects.create_room(dev_user, player.user)
 

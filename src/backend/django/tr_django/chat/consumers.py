@@ -129,8 +129,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
             if len(usernames) != 2:
                 raise ValueError("Invalid room name format")
 
-            user1 = CustomUser.objects.get(username=usernames[0])
-            user2 = CustomUser.objects.get(username=usernames[1])
+            # user1 = CustomUser.objects.get(username=usernames[0])
+            # user2 = CustomUser.objects.get(username=usernames[1])
+            user1 = CustomUser.objects.get(id=user_ids[0])
+            user2 = CustomUser.objects.get(id=user_ids[1])
 
             chat_room, created = ChatRoom.objects.create_room(user1, user2)
 
