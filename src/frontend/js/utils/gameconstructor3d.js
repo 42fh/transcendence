@@ -3,16 +3,10 @@ import { Sky } from "three/addons/objects/Sky.js";
 import { Water } from "three/addons/objects/Water.js";
 import Loader from "./loader3d.js";
 import World from "./world3d.js";
-import Debug from "./debug3d.js";
 import GameWebSocket from "./websocket3d.js";
 import Drawer from "./drawer3d.js";
 import GameUI from "./gameui3d.js";
-import { createGame } from "../services/gameService.js";
-import {
-  fetchWaitingGames,
-  joinGame,
-  findMatchingGame,
-} from "../services/gameService.js";
+import { joinGame } from "../services/gameService.js";
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { showToast } from "./toast.js";
 
@@ -164,6 +158,7 @@ export default class GameConstructor {
           console.log("initial_state: ", message);
           this.playerIndex = message.player_index;
           this.playerNames = message.player_names;
+          this.playerCount = message.game_state.paddles.length;
           this.lastWaitingMessage = Date.now();
           this.createGame(message.game_state);
 
@@ -175,7 +170,6 @@ export default class GameConstructor {
             this.drawer.field.rotation.y = -playerAngle - Math.PI / 2;
             this.drawer.field.position.y = -0.4;
           }
-          this.world.zoomToPlayer();
           break;
 
         case "game_state":
@@ -197,6 +191,10 @@ export default class GameConstructor {
             this.paddles.get(message.player_index).material.map = this.skins[0];
             message.player_index--;
           }
+
+          if (this.playerCount == this.playerNames.length)
+            this.world.zoomToPlayer();
+
           showToast(`${message.player_name} joined the game`);
           break;
         case "waiting":
