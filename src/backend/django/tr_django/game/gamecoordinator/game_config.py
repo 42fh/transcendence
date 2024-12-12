@@ -53,7 +53,7 @@ DEFAULT_CIRCULAR = {
     "num_players": int(2),
     "num_balls": int(1),
     "min_players": int(2),
-    "initial_ball_speed": float(0.02),
+    "initial_ball_speed": float(0.04),
     "sides": int(3),
     "paddle_length": float(0.3),
     "paddle_width": float(0.06),

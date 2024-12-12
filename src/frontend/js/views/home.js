@@ -1,11 +1,8 @@
-import { handleLogout } from "./auth.js";
 import { displayLogoutError } from "../utils/errors.js";
 import { loadTournamentsPage } from "./tournaments.js";
 import { updateActiveNavItem } from "../components/bottomNav.js";
 import { loadChatPage } from "./chatHome.js";
-import { loadGameHome } from "./game.js";
-import { loadGame3D } from "./game3d.js";
-import { loadGameSetupPage } from "./gameSetup.js";
+import { loadGameList } from "./gameList.js";
 
 export function loadHomePage(addToHistory = true) {
   try {
@@ -40,19 +37,9 @@ export function loadHomePage(addToHistory = true) {
       bottomNavContainer.style.display = "block";
     }
 
-    const logoutButton = document.getElementById("home__button-logout");
-    if (logoutButton) {
-      logoutButton.addEventListener("click", handleLogout);
-    }
-
     const playButton = document.getElementById("home__button-play");
     if (playButton) {
-      playButton.addEventListener("click", loadGame3D);
-    }
-
-    const ctaButton = document.getElementById("home__button-cta");
-    if (ctaButton) {
-      ctaButton.addEventListener("click", loadGameHome);
+      playButton.addEventListener("click", loadGameList);
     }
 
     const chatsButton = document.getElementById("chats");
@@ -63,19 +50,6 @@ export function loadHomePage(addToHistory = true) {
     const tournamentsButton = document.getElementById("tournaments");
     if (tournamentsButton) {
       tournamentsButton.addEventListener("click", loadTournamentsPage);
-    }
-
-    console.log("Looking for 2D button...");
-    const twoDButton = document.getElementById("home__button-2d");
-    console.log("2D button found:", twoDButton); // Should show the button element if found
-    if (twoDButton) {
-      console.log("Adding click listener to 2D button");
-      twoDButton.addEventListener("click", () => {
-        console.log("2D button clicked!"); // This should show when button is clicked
-        loadGameSetupPage();
-      });
-    } else {
-      console.error("2D button not found in DOM");
     }
   } catch (error) {
     console.error("Error loading home page:", error);

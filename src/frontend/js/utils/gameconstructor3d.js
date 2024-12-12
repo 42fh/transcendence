@@ -51,6 +51,8 @@ export default class GameConstructor {
 
     // User ID
     this.userId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
+
+    this.type = "circular";
   }
 
   addAmbientLight(intensity, color) {
@@ -128,42 +130,10 @@ export default class GameConstructor {
     this.setupResources = setupResources;
   }
 
-  async connectToWebsockets() {
+  async connectToWebsockets(gameId) {
     try {
-      console.log("Connecting to websocket...");
-      const numPlayers = document.getElementById("playerCount").value;
-      console.log("Num players:", numPlayers);
-      const data = {
-        mode: "circular",
-        gameType: "circular",
-        num_players: Number(numPlayers),
-        sides: Number(numPlayers),
-        num_balls: 1,
-        score_mode: "classic",
-        debug: true,
-      };
-      // const data = {
-      //   mode: "classic",
-      //   gameType: "classic",
-      //   num_players: 2,
-      //   num_sides: 4,
-      //   num_balls: 1,
-      //   scoreMode: "classic",
-      //   debug: true,
-      // };
-      this.type = "circular";
-
-      const games = await fetchWaitingGames();
-      const matchingGameId = findMatchingGame(games, data);
-
-      let result = null;
-      if (matchingGameId) {
-        result = await joinGame(matchingGameId);
-        console.log("Join game result:", result);
-      } else {
-        result = await createGame(data);
-        console.log("Game creation result:", result);
-      }
+      let result = await joinGame(gameId);
+      console.log("Join game result:", result);
 
       this.websocket = new GameWebSocket(this.handleMessage.bind(this));
       this.websocket.connect(result.ws_url);
@@ -196,9 +166,6 @@ export default class GameConstructor {
           this.playerNames = message.player_names;
           this.lastWaitingMessage = Date.now();
           this.createGame(message.game_state);
-
-          const div = document.getElementById("menu");
-          div.style.display = "none";
 
           if (this.type == "circular") {
             const playerAngle =

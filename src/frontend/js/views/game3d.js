@@ -1,11 +1,11 @@
 import * as THREE from "three";
 import GameConstructor from "../utils/gameconstructor3d.js";
 
-export async function loadGame3D() {
+export async function loadGame3D(gameId) {
   try {
     const template = document.getElementById("3d-game-template");
     if (!template) {
-      throw new Error("Chat template not found");
+      throw new Error("Game template not found");
     }
     const mainContent = document.getElementById("main-content");
     mainContent.innerHTML = "";
@@ -159,9 +159,7 @@ export async function loadGame3D() {
       this.fin3 = this.scene.children[0].getObjectByName("sharkFin3");
     }
   );
-  document.querySelector(".joinGame").addEventListener("click", () => {
-    game.connectToWebsockets();
-  });
+  game.connectToWebsockets(gameId);
   game.world.addPerspectiveCamera();
   game.world.addGame(game, false);
 }
