@@ -20,6 +20,7 @@
 @import "pages/auth.css";
 @import "pages/chat.css";
 @import "pages/gameList.css";
+@import "pages/gameOffline.css";
 
 @import "pages/users.css";
 @import "pages/gameSetup.css";
