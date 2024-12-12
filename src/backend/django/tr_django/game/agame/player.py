@@ -23,6 +23,9 @@ async def add_player(self, player_id):
             }
        
 
+=======
+ 
+>>>>>>> main
         # Check if player is booked -> add also already tournament key
         booking_key = f"{GC.BOOKED_USER_PREFIX}{player_id}:{self.game_id}"
         tournament_key = f"{GC.TOURNAMENT_USER_PREFIX}{player_id}:{self.game_id}"   # f"{GC.TOURNAMENT_USER_PREFIX}{player_id}:{self.game_id}" 

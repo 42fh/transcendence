@@ -1,6 +1,6 @@
 import { gameSettings } from "./gameSettings.js";
 import { updateActiveNavItem } from "../components/bottomNav.js";
-import { fetchGames } from "../services/fetchGamesService.js";
+import { fetchWaitingGames } from "../services/gameService.js";
 
 let currentView = "home";
 
@@ -53,7 +53,7 @@ export async function loadGameHome(addToHistory = true) {
 async function initializegameHome() {
   try {
     console.log("gameHome");
-    const games = await fetchGames();
+    const games = await fetchWaitingGames();
 
     const gamesContainer = document.getElementById("games-container");
     if (gamesContainer) {

@@ -1,9 +1,5 @@
 import { displayLogoutError } from "../utils/errors.js";
-import {
-  renderModal,
-  closeModal,
-  displayModalError,
-} from "../components/modal.js";
+import { renderModal, closeModal, displayModalError } from "../components/modal.js";
 import { fetchUserProfile } from "../services/usersService.js";
 import { loadHomePage } from "./home.js";
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
@@ -21,19 +17,47 @@ import { showToast } from "../utils/toast.js";
 function initAuthListeners() {
   document.getElementById("login-button").addEventListener("click", () => {
     renderModal("login-template", {
+      isFormModal: true,
+      setup: (modalElement) => setupAuthForm(modalElement, "login"),
       submitHandler: handleLogin,
     });
   });
 
   document.getElementById("signup-button").addEventListener("click", () => {
     renderModal("signup-template", {
+      isFormModal: true,
+      setup: (modalElement) => setupAuthForm(modalElement, "signup"),
       submitHandler: handleSignup,
     });
   });
 
   document.getElementById("auth42-button").addEventListener("click", () => {
-    window.location.href='/api/users/auth/login42/';
+    window.location.href = "/api/users/auth/login42/";
   });
+}
+
+function setupAuthForm(modalElement, type) {
+  const form = modalElement.querySelector("form");
+  const inputs = form.querySelectorAll("input");
+
+  // Clear any existing values and messages
+  inputs.forEach((input) => (input.value = ""));
+  const messageElement = modalElement.querySelector("#modal-message");
+  if (messageElement) {
+    messageElement.textContent = "";
+  }
+
+  // Focus username field
+  const usernameInput = form.querySelector('input[name="username"]');
+  if (usernameInput) {
+    usernameInput.focus();
+  }
+
+  // Set appropriate title
+  const title = modalElement.querySelector("h2");
+  if (title) {
+    title.textContent = type === "login" ? "Login" : "Sign Up";
+  }
 }
 
 export async function loadAuthPage(addToHistory = true) {
@@ -121,7 +145,7 @@ async function handleAuth(form, authFunction) {
       await handleAuthSuccess(result, form);
     }
   } catch (error) {
-    messageElement.style.color = "var(--color-text-error)";
+    messageElement.style.color = "var(--color-error)";
     messageElement.innerText = error.message;
     console.error("Error submitting form:", error);
   }
@@ -138,9 +162,7 @@ export async function handleLogout() {
     loadAuthPage();
   } catch (error) {
     console.error("Logout error:", error);
-    displayLogoutError(
-      "An error occurred while logging out. Please try again."
-    );
+    displayLogoutError("An error occurred while logging out. Please try again.");
   }
 }
 
@@ -148,9 +170,7 @@ async function handleAuthSuccess(result, form) {
   const messageElement = document.getElementById("modal-message");
 
   messageElement.style.color = "white";
-  messageElement.innerText = `${
-    result.message || "Signup or Login successful! 🎉 Redirecting..."
-  }`;
+  messageElement.innerText = `${result.message || "Signup or Login successful! 🎉 Redirecting..."}`;
 
   localStorage.setItem(LOCAL_STORAGE_KEYS.USERNAME, result.username);
   localStorage.setItem(LOCAL_STORAGE_KEYS.USER_ID, result.id);
@@ -185,37 +205,33 @@ async function startResendTimer() {
 }
 
 function resendButtonListener(userData) {
-  document
-    .getElementById("resend-button")
-    .addEventListener("click", async () => {
-      try {
-        console.log("Resending email verification...");
-        await sendEmailVerification(userData);
-        console.log("Email verification sent");
-        await startResendTimer(userData);
-        showToast("Verification code resent");
-      } catch (error) {
-        console.error("Error resending email verification:", error);
-        showToast("Failed to resend verification code", true);
-      }
-    });
+  document.getElementById("resend-button").addEventListener("click", async () => {
+    try {
+      console.log("Resending email verification...");
+      await sendEmailVerification(userData);
+      console.log("Email verification sent");
+      await startResendTimer(userData);
+      showToast("Verification code resent");
+    } catch (error) {
+      console.error("Error resending email verification:", error);
+      showToast("Failed to resend verification code", true);
+    }
+  });
 }
 
 function twoFaFormListener(result, form) {
-  document
-    .getElementById("2fa-form")
-    .addEventListener("submit", async (event) => {
-      event.preventDefault();
+  document.getElementById("2fa-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
 
-      const code = document.getElementById("code").value.trim();
+    const code = document.getElementById("code").value.trim();
 
-      try {
-        await validateEmailVerification(code);
-        console.log("Email verification successful");
-        handleAuthSuccess(result, form);
-      } catch (error) {
-        console.error("Error validating email verification:", error);
-        showToast("Verification code is invalid", true);
-      }
-    });
+    try {
+      await validateEmailVerification(code);
+      console.log("Email verification successful");
+      handleAuthSuccess(result, form);
+    } catch (error) {
+      console.error("Error validating email verification:", error);
+      showToast("Verification code is invalid", true);
+    }
+  });
 }

@@ -17,6 +17,7 @@ services:
         # echo 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;' | python tr_django/manage.py dbshell &&
         python tr_django/manage.py migrate &&
         python tr_django/manage.py seed_users &&
+        # python tr_django/manage.py seed_users_with_friends &&
         python tr_django/manage.py seed_tournaments &&
         python tr_django/manage.py seed_chats &&
         python tr_django/manage.py seed_blocked_user &&

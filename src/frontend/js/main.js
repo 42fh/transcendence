@@ -24,20 +24,18 @@ document.addEventListener("DOMContentLoaded", () => {
   // Check if user is logged in
   const userId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
   const username = localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME);
-  
+
   const cookie_userId = getCookie_none("pongUserId");
   const cookie_username = getCookie_none("pongUsername");
 
   // when logging in with 42 user id and name from cookie are move to localstorage
-  if ((!userId || !username) && cookie_userId && cookie_username)
-  {
+  if ((!userId || !username) && cookie_userId && cookie_username) {
     localStorage.setItem(LOCAL_STORAGE_KEYS.USER_ID, cookie_userId);
     localStorage.setItem(LOCAL_STORAGE_KEYS.USERNAME, cookie_username);
     deleteCookie("pongUserId");
     deleteCookie("pongUsername");
     loadHomePage();
-  }
-  else if (!userId || !username) {
+  } else if (!userId || !username) {
     // User not logged in, show auth page
     loadAuthPage();
   } else {
@@ -45,8 +43,6 @@ document.addEventListener("DOMContentLoaded", () => {
     loadHomePage();
   }
 
-  //   initModalListeners();
-  //   initAuthListeners(); // moved to loadAuthPage
   initializeTournaments(CONFIG.CURRENT_SOURCE);
   initializeHistory();
   // TODO: is initBottomBav the correct name, and should be initialised anywaay also if loadAuthPage?

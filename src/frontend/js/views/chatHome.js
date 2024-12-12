@@ -1,6 +1,6 @@
 import { displayModalError } from "../components/modal.js";
 import { updateActiveNavItem } from "../components/bottomNav.js";
-import { fetchConversationList } from "../services/chatService.js";
+import { fetchConversationList } from "../services/conversationService.js";
 import { fetchUsers } from "../services/usersService.js";
 import { loadChatRoom } from "./chatRoom.js";
 import { ASSETS } from "../config/constants.js";
@@ -79,7 +79,7 @@ export async function loadChatPage(addToHistory = true) {
   }
 }
 
-async function loadChatList(page = 1, perPage = 100, search = "") {
+async function loadChatList(page = 1, perPage = 500, search = "") {
   try {
     const data = await fetchConversationList(page, perPage, search);
     if (!data || !data.users) throw new Error("Failed to fetch chat contacts");
@@ -138,7 +138,7 @@ async function loadChatList(page = 1, perPage = 100, search = "") {
   }
 }
 
-async function loadUsersList(page = 1, perPage = 100, search = "") {
+async function loadUsersList(page = 1, perPage = 500, search = "") {
   try {
     const data = await fetchUsers(page, perPage, search);
     if (!data || !data.users) throw new Error("Failed to fetch users");

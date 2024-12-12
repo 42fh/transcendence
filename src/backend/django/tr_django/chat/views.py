@@ -12,7 +12,7 @@ from django.conf import settings
 import logging
 
 logger = logging.getLogger(__name__)
-
+logger.setLevel(logging.DEBUG)  # Set the appropriate logging level
 
 @login_required
 def rooms(request):
@@ -21,16 +21,18 @@ def rooms(request):
             return JsonResponse({"status": "error", "message": "User not authenticated"}, status=401)
 
         users = CustomUser.objects.exclude(username=request.user.username).values("username")
-        # print(f"DEBUG: Retrieved {len(users)} users")
+        logger.debug(f"Retrieved {len(users)} users")
 
         blocked_users = set(
             BlockedUser.objects.filter(user=request.user).values_list("blocked_user__username", flat=True)
         )
-        print(f"DEBUG: Blocked users: {blocked_users}")
+        logger.debug(f"Blocked users: {blocked_users}")
+        
         blocked_by_users = set(
             BlockedUser.objects.filter(blocked_user=request.user).values_list("user__username", flat=True)
         )
-        print(f"DEBUG: Blocked by users: {blocked_by_users}")
+        logger.debug(f"Blocked by users: {blocked_by_users}")
+        
         all_blocked_users = blocked_users.union(blocked_by_users)
 
         # Exclude blocked users from the users queryset
@@ -39,10 +41,10 @@ def rooms(request):
             .exclude(username__in=all_blocked_users)
             .values("username")
         )
-        print(f"DEBUG: Retrieved {len(users)} users after filtering blocked users")
+        logger.debug(f"Retrieved {len(users)} users after filtering blocked users")
 
         # Log the current user
-        print(f"DEBUG: Current user: {request.user.username}")
+        logger.debug(f"Current user: {request.user.username}")
 
         recent_chats = (
             ChatRoom.objects.filter(
@@ -55,7 +57,7 @@ def rooms(request):
         )
 
         # Log the retrieved recent chats
-        print(f"DEBUG: Retrieved {recent_chats.count()} recent chats for user: {request.user.username}")
+        logger.debug(f"Retrieved {recent_chats.count()} recent chats for user: {request.user.username}")
 
         # Create a set of users with whom the current user has conversations
         users_with_chats = set()
@@ -80,14 +82,16 @@ def rooms(request):
                 "unread_messages": unread_count,
             }
             user_list.append(user_data)
+        
         if user_list:
             return JsonResponse({"status": "success", "users": user_list})
         else:
             return JsonResponse({"status": "success", "users": []})  # Return empty list if no conversations
 
     except Exception as e:
-        print(f"DEBUG: Error in users: {str(e)}")
+        logger.error(f"Error in users: {str(e)}")
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
 
 
 # TODO: Not currently used
