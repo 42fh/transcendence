@@ -23,10 +23,7 @@ export default class World {
 
     // Audio
     this.audio = new Audio(this.camera);
-    this.audio.addBackgroundMusic(
-      ["/static/music/song1.mp3", "/static/music/song2.mp3"],
-      this.gui
-    );
+    this.audio.addBackgroundMusic([], this.gui);
 
     // Raycaster
     this.raycaster = new THREE.Raycaster();
@@ -132,17 +129,17 @@ export default class World {
 
     // shark animation
     if (this.game.fin1) {
-      const sharkAngle = 0.0003 * deltaTime;
-      this.game.fin1.position.x = Math.cos(sharkAngle) * 25 + 6;
-      this.game.fin1.position.z = Math.sin(sharkAngle) * 25 + 6;
+      const sharkAngle = 0.00023 * deltaTime;
+      this.game.fin1.position.x = Math.cos(sharkAngle) * 4;
+      this.game.fin1.position.z = Math.sin(sharkAngle) * 4;
       this.game.fin1.rotation.y = Math.PI - sharkAngle;
 
-      this.game.fin2.position.x = Math.cos(-sharkAngle) * 30 + 6;
-      this.game.fin2.position.z = Math.sin(-sharkAngle) * 30 + 6;
+      this.game.fin2.position.x = Math.cos(-sharkAngle) * 7;
+      this.game.fin2.position.z = Math.sin(-sharkAngle) * 7;
       this.game.fin2.rotation.y = Math.PI - sharkAngle;
 
-      this.game.fin3.position.x = Math.cos(sharkAngle) * 45 + 6;
-      this.game.fin3.position.z = Math.sin(sharkAngle) * 45 + 6;
+      this.game.fin3.position.x = Math.cos(sharkAngle) * 10;
+      this.game.fin3.position.z = Math.sin(sharkAngle) * 10;
       this.game.fin3.rotation.y = sharkAngle;
     }
 
