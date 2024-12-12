@@ -13,3 +13,8 @@
 #gameoffline-container p span{
     color: var(--color-text-primary);
 }
+
+#game_offlinemode_canvas {
+    max-width: 100%;
+    padding-top: var(--spacing-sm);
+}
