@@ -13,7 +13,7 @@ def reset_ball(self, ball, ball_index, speed=0.006):
         dict: Updated ball object
     """
     BallUtils.reset_ball_position(
-        ball, self.active_sides, self.settings.get("initial_ball_speed", speed)
-    )
+        ball, self.active_sides, self.initial_ball_speed * self.scale)
+    
 
     return ball

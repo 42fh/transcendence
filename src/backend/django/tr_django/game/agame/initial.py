@@ -18,9 +18,9 @@ async def initialize(self, create_new=False):
         self.game_shape = self.settings.get("shape")  # Get mode from settings
         self.score_mode = self.settings.get("score")
         self.active_sides = self.settings.get("players_sides")
-        print("ACTIVE SIDES:  ", self.active_sides)
         self.vertices = self.settings.get("vertices")
         self.scale = self.settings.get("scale")
+        self.initial_ball_speed = self.settings.get("initial_ball_speed")
         self.side_normals = self.settings.get("normals")
         self.inner_boundary = self.settings.get("inner_boundary")
         self.previous_movements = self.settings.get("ballmovements")

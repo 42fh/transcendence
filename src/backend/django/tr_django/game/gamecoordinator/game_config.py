@@ -71,8 +71,8 @@ CLASSIC_FIXED = {
     "paddle_length": float(0.1),
     "paddle_width": float(0.015),
     "ball_size": float(0.015),
-    "initial_ball_speed": float(0.003),
-    "scale": float(2.0),
+    "initial_ball_speed": float(0.008),
+    "scale": float(1.8),
 }
 
 DEFAULT_CLASSIC = {"score": "first11"}

@@ -42,6 +42,7 @@ class PolygonPongGame(AGameManager):
         self.hit_combo = 0
         self.last_hit_time = 0
         self.combo_timeout = 1.5  # seconds
+        self.outer_boundary = 1.2
         self.highest_recorded_speed = 0
     #
     # not sure if needed
@@ -75,7 +76,7 @@ class PolygonPongGame(AGameManager):
             dict: Updated ball object
         """
         # Call parent method first
-        ball = super().reset_ball(ball, ball_index, speed)
+        ball = super().reset_ball(ball,  ball_index, speed)
 
         # Add our polygon-specific reset
         self.reset_ball_movement(ball_index)

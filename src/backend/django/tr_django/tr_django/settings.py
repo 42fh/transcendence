@@ -214,7 +214,7 @@ LOGGING = {
         },
         "game": {
             "handlers": ["console"],
-            "level": "DEBUG",  # or "DEBUG"
+            "level": "INFO",  # or "DEBUG"
             "propagate": False,
         },
         "notifications": {

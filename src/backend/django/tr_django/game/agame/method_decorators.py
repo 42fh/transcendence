@@ -70,6 +70,7 @@ def add_game_logic(cls):
         bounce_paddle,
         collision_wall,
         bounce_wall,
+        apply_wall_bounce_effect,
         apply_ball_bounce_effect,
         collision_miss,
         check_winner,
@@ -101,6 +102,7 @@ def add_game_logic(cls):
         "collision_miss": collision_miss,
         "check_winner": check_winner,
         "initialize_cycle_data": initialize_cycle_data,
+        "apply_wall_bounce_effect" : apply_wall_bounce_effect
     }
 
     for name, method in methods.items():
