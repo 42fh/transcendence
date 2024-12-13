@@ -52,8 +52,8 @@ function sendMessage(chatPartner) {
 function initializeChatRoom(chatPartner) {
   const currentUserName = localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME);
   const currentUserId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
-  console.log("current user id:", currentUserId);
-  console.log("second user id:", chatPartner.id);
+  // console.log("current user id:", currentUserId);
+  // console.log("second user id:", chatPartner.id);
 
   const partnerAvatar = document.getElementById("chat-room-partner-avatar");
   const partnerUsername = document.getElementById("chat-room-partner-username");
