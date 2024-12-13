@@ -79,7 +79,6 @@ async function loadChatList(page = 1, perPage = 500, search = "") {
   try {
     const data = await fetchConversationList(page, perPage, search);
     if (!data || !data.users) throw new Error("Failed to fetch chat contacts");
-    console.log("xxxxx", data);
 
     const usersList = document.getElementById("chat-conversations-list");
 
@@ -124,7 +123,6 @@ async function loadChatList(page = 1, perPage = 500, search = "") {
       username.textContent = user.username;
 
       userItem.addEventListener("click", () => {
-        console.log("In loadChatList ", user);
         loadChatRoom(user);
       });
 
