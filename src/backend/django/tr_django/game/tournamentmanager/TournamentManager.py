@@ -199,7 +199,7 @@ class TournamentManager:
                     send_tournament_notification(tournament, f"Player: {player.username} joind Tournament: {tournament.name}")
                     tournament.participants.add(player)
                     logger.debug(
-                        f"Tournament: booked in: {tournament.participants.count()} full with: {tournament.max_participants}"
+                        f"Tournament[{tournament.name}]: booked in: {tournament.participants.count()} full with: {tournament.max_participants}"
                     )
                     # Check if tournament is ready to start matchmaking
                     if tournament.participants.count() == tournament.max_participants:
