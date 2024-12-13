@@ -16,7 +16,7 @@ export function initializeChatWebSocket(wsUrl, otherUser, handlers) {
 
       handlers.addMessageToChat(
         "System",
-        `Connected to chat with ${otherUser.username}`,
+        `Connected to chat with ${otherUser}`,
         "system"
       );
 

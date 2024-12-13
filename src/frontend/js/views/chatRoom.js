@@ -6,7 +6,6 @@ import { LOCAL_STORAGE_KEYS, ASSETS, CHAT_WS_MSG_TYPE } from "../config/constant
 //TODO: in chatHome this function is called, pass userId instead of username,
 //TODO SUITE or whole user so I can access both id and name
 export function loadChatRoom(chatPartner) {
-  console.log("......", chatPartner);
   history.pushState(
     {
       view: "chat-room",
@@ -26,7 +25,6 @@ export function loadChatRoom(chatPartner) {
   mainContent.appendChild(document.importNode(template.content, true));
   console.log("Chat room template loaded");
 
-  console.log("000second user id:", chatPartner.id);
   initializeChatRoom(chatPartner);
 }
 
@@ -74,9 +72,9 @@ function initializeChatRoom(chatPartner) {
     loadChatPage(false);
   });
 
-  const roomName = [currentUserId, chatPartner.id]  // Create an array of the two user IDs
-  .sort()                                       // Sort the IDs alphabetically
-  .join("_");                                  // Join them with an underscore
+  const roomName = [currentUserId, chatPartner.id]
+  .sort()
+  .join("_");
 
 
   const wsUrl = `/ws/chat/${roomName}/`;
