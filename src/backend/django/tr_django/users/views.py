@@ -673,6 +673,8 @@ class UserAvatarView(APIView):
 
     MAX_AVATAR_SIZE = 2 * 1024 * 1024  # 2MB in bytes
 
+    print("ENTERED USER AVATAR VIEW")
+
     def post(self, request, user_id):
         """Upload a new avatar"""
         if not request.user.is_authenticated:
