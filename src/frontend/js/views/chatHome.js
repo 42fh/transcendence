@@ -61,7 +61,7 @@ export async function loadChatPage(addToHistory = true) {
       console.error("No current user found for notifications");
     }
     console.log("Before button");
-    testButtonForNotificationsWithUrl();
+    // testButtonForNotificationsWithUrl();
     await loadChatList(1, "", "");
 
     // Load users list (Horizontal scroll), filtering out users in conversations with current user
