@@ -207,6 +207,8 @@ export default class GameConstructor {
             this.lastWaitingMessage = Date.now();
           }
           break;
+        case "timer":
+          const number = message.timer;
         case "game_finished":
           console.log("game_finished: ", message);
           showToast("Game finished, Winner: " + message.winner);

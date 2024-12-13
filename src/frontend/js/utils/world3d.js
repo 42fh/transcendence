@@ -3,6 +3,7 @@ import * as THREE from "three";
 import Debug from "./debug3d.js";
 import Audio from "./audio3d.js";
 import gsap from "gsap";
+import { websocket } from "./gameconstructor3d.js";
 
 export default class World {
   constructor(canvas, isPerspectiveCamera = true, game) {
@@ -144,10 +145,10 @@ export default class World {
     }
 
     // move paddle
-    if (this.moveDown && this.game.websocket) {
+    if (this.moveDown && websocket) {
       this.game.drawer.movePaddle("right");
     }
-    if (this.moveUp && this.game.websocket) {
+    if (this.moveUp && websocket) {
       this.game.drawer.movePaddle("left");
     }
 

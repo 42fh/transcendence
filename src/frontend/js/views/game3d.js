@@ -15,6 +15,7 @@ export async function loadGame3D(wsUrl) {
     return;
   }
 
+  console.log("Loading 3D game...");
   const game = new GameConstructor();
   game.addAmbientLight(1, 0xffffff);
   game.addDirectionalLight(1, 0xffffff, new THREE.Vector3(3, 7.5, 3));

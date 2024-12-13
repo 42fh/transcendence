@@ -74,6 +74,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             # self.ping_task = asyncio.create_task(self.send_ping())
             # self.check_connection_task = asyncio.create_task(self.check_connection())
             if self.role == "player":
+                print("player_index", self.player_index)
                 await self.channel_layer.group_send(
                     self.game_group,
                     {

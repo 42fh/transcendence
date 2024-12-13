@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { websocket } from "./gameconstructor3d.js";
 
 const GAME_HEIGHT = 1;
 const GAME_WIDTH = 0.5;
@@ -217,7 +218,8 @@ export default class Drawer {
   }
 
   movePaddle(direction) {
-    this.game.websocket.sendMessage({
+    console.log("user_id: ", this.game.userId);
+    websocket.sendMessage({
       action: "move_paddle",
       direction,
       user_id: this.game.userId,
