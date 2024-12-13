@@ -5,7 +5,9 @@ import { updateActiveNavItem } from "../components/bottomNav.js";
 import { loadChatPage } from "./chatHome.js";
 import { loadGameHome } from "./game.js";
 import { loadGame3D } from "./game3d.js";
+import { loadGameOffline } from "./gameOffline.js";
 import { loadGameSetupPage } from "./gameSetup.js";
+
 
 export function loadHomePage(addToHistory = true) {
   try {
@@ -48,6 +50,11 @@ export function loadHomePage(addToHistory = true) {
     const playButton = document.getElementById("home__button-play");
     if (playButton) {
       playButton.addEventListener("click", loadGame3D);
+    }
+
+    const playButton2d = document.getElementById("home__button-playoffline");
+    if (playButton2d) {
+      playButton2d.addEventListener("click", loadGameOffline);
     }
 
     const ctaButton = document.getElementById("home__button-cta");

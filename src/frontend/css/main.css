@@ -1,7 +1,6 @@
 /* Base styles */
 @import "base/variables.css";
 @import "base/reset.css";
-@import "base/typography.css";
 @import "base/layout.css";
 
 /* Components */
@@ -19,9 +18,9 @@
 @import "pages/profileEdit.css";
 @import "pages/2faEdit.css";
 @import "pages/auth.css";
-@import "pages/game.css";
 @import "pages/chat.css";
 @import "pages/gameList.css";
+@import "pages/gameOffline.css";
 
 @import "pages/users.css";
 @import "pages/gameSetup.css";

@@ -1,4 +1,5 @@
 import { CONFIG } from "../config/constants.js";
+import { manageJWT } from "./authService.js";
 
 /**
  * Fetches all waiting games from the server
@@ -35,10 +36,12 @@ import { CONFIG } from "../config/constants.js";
  */
 export async function fetchWaitingGames() {
   try {
+    const accessToken = await manageJWT();
     const response = await fetch(`${CONFIG.API_BASE_URL}/api/game/waiting/`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 
@@ -69,10 +72,12 @@ export async function fetchWaitingGames() {
  */
 export async function createGame(gameConfig) {
   try {
+    const accessToken = await manageJWT();
     const response = await fetch(`${CONFIG.API_BASE_URL}/api/game/games/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify(gameConfig),
     });
@@ -120,26 +125,65 @@ export async function joinGame(gameId) {
  * @param {Object} formData - Form data with game preferences
  * @returns {string|null} gameId of matching game or null if no match found
  */
+// export function findMatchingGame(games, formData) {
+//   console.log("formData.gameType", formData.gameType);
+//   console.log("formData.num_players", formData.num_players);
+//   console.log("formData.sides", formData.sides);
+//   console.log("findMatchingGame", games, formData);
+//   const matchingGame =
+//     games.find(
+//       (game) =>
+//         // Match game mode
+//         game.mode === formData.gameType &&
+//         // Match number of players
+//         game.num_players === formData.num_players &&
+//         // Match number of sides (for non-classic modes)
+//         (formData.gameType === "classic" || game.sides === formData.sides) &&
+//         // TODO: Future matching criteria could include:
+//         // && game.score.max === formData.scoreLimit
+//         // && game.initial_ball_speed === formData.ballSpeed
+//         // && game.paddle_length === formData.paddleLength
+//         // && game.ball_size === formData.ballSize
+//         // && game.score_mode === formData.scoreMode
+//         // Ensure there's room for more players
+//         game.players.current + game.players.reserved < game.players.total_needed
+//     )?.game_id || null;
+//   console.log("matchingGame", matchingGame);
+//   return matchingGame;
+// }
+
 export function findMatchingGame(games, formData) {
   console.log("findMatchingGame", games, formData);
-  const matchingGame =
-    games.find(
-      (game) =>
-        // Match game mode
-        game.mode === formData.gameType &&
-        // Match number of players
-        game.num_players === formData.num_players &&
-        // Match number of sides (for non-classic modes)
-        (formData.gameType === "classic" || game.sides === formData.sides) &&
-        // TODO: Future matching criteria could include:
-        // && game.score.max === formData.scoreLimit
-        // && game.initial_ball_speed === formData.ballSpeed
-        // && game.paddle_length === formData.paddleLength
-        // && game.ball_size === formData.ballSize
-        // && game.score_mode === formData.scoreMode
-        // Ensure there's room for more players
-        game.players.current + game.players.reserved < game.players.total_needed
-    )?.game_id || null;
+  let matchingGame = null;
+
+  games.forEach((game) => {
+    // Skip if we already found a match
+    if (matchingGame) return;
+
+    console.log("game", game);
+
+    // Check if there's room for more players
+    const hasSpace = game.players.current + game.players.reserved < game.players.total_needed;
+
+    // Match conditions
+    const modeMatches = game.mode === formData.gameType;
+    console.log("game.num_players", game.num_players);
+    console.log("formData.num_players", formData.numPlayers);
+    const playerCountMatches = game.num_players === formData.numPlayers;
+    const sidesMatch = formData.gameType === "classic" || game.sides === formData.sides;
+
+    console.log("Checking game:", game.game_id, {
+      hasSpace,
+      modeMatches,
+      playerCountMatches,
+      sidesMatch,
+    });
+
+    if (modeMatches && playerCountMatches && sidesMatch && hasSpace) {
+      matchingGame = game.game_id;
+    }
+  });
+
   console.log("matchingGame", matchingGame);
   return matchingGame;
 }
