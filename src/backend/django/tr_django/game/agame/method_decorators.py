@@ -31,12 +31,13 @@ def add_game_flow(cls):
     Decorator that adds game flow management methods to a class.
     Includes methods for starting, updating, and ending games with process-safe checks.
     """
-    from .game_flow import start_game, update_game, end_game
+    from .game_flow import start_game, update_game, end_game, error_exit
 
     methods = {
         "start_game": start_game,
         "update_game": update_game,
         "end_game": end_game,
+        "error_exit": error_exit
     }
 
     for name, method in methods.items():
@@ -169,9 +170,9 @@ def add_player(cls):
     """
     player
     """
-    from .player import add_player, remove_player
+    from .player import add_player, remove_player, _handle_normal_pregame_leave, _handle_tournament_pregame_leave, _handle_ingame_leave
 
-    methods = {"add_player": add_player, "remove_player": remove_player}
+    methods = {"add_player": add_player, "remove_player": remove_player, "_handle_normal_pregame_leave": _handle_normal_pregame_leave, "_handle_tournament_pregame_leave": _handle_tournament_pregame_leave, "_handle_ingame_leave" : _handle_ingame_leave}
 
     for name, method in methods.items():
         setattr(cls, name, method)
