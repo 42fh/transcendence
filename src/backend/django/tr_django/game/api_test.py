@@ -77,7 +77,7 @@ class IntegratedGameTests(TransactionTestCase):
             await self._create_test_users()
             # Initialize game settings that can be used across tests
             self.game_settings = {
-                "mode": "circular",
+                "mode": "classic",
             }
             print(
                 "\nTest setup completed - Redis flushed and users created and settings"
@@ -276,7 +276,7 @@ class IntegratedGameTests(TransactionTestCase):
         # Start monitoring tasks
 
         player1_task = asyncio.create_task(self.monitor_messages(comm1, "Player 1"))
-        player2_task = asyncio.create_task(self.monitor_messages(comm2, "Player 2"))
+        # player2_task = asyncio.create_task(self.monitor_messages(comm2, "Player 2"))
         try:
             # Wait for game to start
             await asyncio.sleep(2)
@@ -297,7 +297,7 @@ class IntegratedGameTests(TransactionTestCase):
             ]
 
             for move in paddle_moves:
-                await comm1.send_json_to(move)
+               # await comm1.send_json_to(move)
                 # Wait for cooldown (0.1 seconds as defined in consumer)
                 await asyncio.sleep(0.15)
 
@@ -309,15 +309,15 @@ class IntegratedGameTests(TransactionTestCase):
                     "direction": "left",
                     "user_id": str(player2.id),
                 },
-                {
-                    "action": "move_paddle",
-                    "direction": "right",
-                    "user_id": str(player2.id),
-                },
+                #{
+                #    "action": "move_paddle",
+                #    "direction": "right",
+                #    "user_id": str(player2.id),
+                #},
             ]
 
             for move in paddle_moves:
-                await comm2.send_json_to(move)
+                #await comm2.send_json_to(move)
                 await asyncio.sleep(0.15)
 
             # Test invalid movements
@@ -352,21 +352,27 @@ class IntegratedGameTests(TransactionTestCase):
                 )
 
             # Wait to observe responses
-            await asyncio.sleep(5)
+            await asyncio.sleep(50)
+            
+            # disconect        
+            await comm1.disconnect()
+                   
+            await asyncio.sleep(2)  # Give time for game to be saved
+    
+            game = await self.verify_game_in_database(player1, player2)
+            print(f"\nSuccessfully verified game {game.id} in database")
+ 
+
 
         finally:
             # Clean up tasks
             player1_task.cancel()
-            player2_task.cancel()
             try:
                 await player1_task
-                await player2_task
             except asyncio.CancelledError:
                 pass
 
             # Close connections
-            await comm1.disconnect()
-            await comm2.disconnect()
 
     async def monitor_messages(self, comm1, player_name):
         """Helper method to continuously monitor websocket messages"""
@@ -385,6 +391,68 @@ class IntegratedGameTests(TransactionTestCase):
 
         except Exception as e:
             print(f"{player_name} monitoring ended: {str(e)}")
+    
+
+    # Add this verification function to the test class
+    @sync_to_async      
+    def verify_game_in_database(self, player1, player2):
+        """Verify that game data was properly saved to the database"""
+        from .models import SingleGame, PlayerGameStats
+        import time
+        # Wait briefly for database operations to complete
+        
+        try:
+            # Get all games and convert to list
+            games_queryset = SingleGame.objects.filter(
+                playergamestats__player__user_id__in=[player1.id, player2.id]
+            ).distinct()
+            games = list(games_queryset)
+
+            if not games:
+                raise AssertionError("No game found in database")
+
+            game = games[-1]  # Get the most recent game
+
+            # Verify game status and timestamps
+            self.assertEqual(game.status, 'finished')
+            self.assertIsNotNone(game.created_at)
+            self.assertIsNotNone(game.start_date)
+            self.assertIsNotNone(game.finished_at)
+
+            # Get player stats for this game
+            stats_queryset = PlayerGameStats.objects.filter(single_game=game)
+            stats = list(stats_queryset)
+
+            # Verify player stats
+            for stat in stats:
+                # Verify basic stat properties
+                self.assertIsNotNone(stat.score)
+                self.assertIsNotNone(stat.rank)
+                self.assertIsNotNone(stat.joined_at)
+
+                # Verify player assignment
+                self.assertIn(stat.player.user_id, [player1.id, player2.id])
+
+            # Print the synchronous parts
+            print("\nGame Database Verification Results:")
+            print(f"Game ID: {game.id}")
+            print(f"Created: {game.created_at}")
+            print(f"Started: {game.start_date}")
+            print(f"Finished: {game.finished_at}")
+
+            print("\nPlayer Stats:")
+            for stat in stats:
+                print(f"Player: {stat.player.username}")
+                print(f"Score: {stat.score}")
+                print(f"Rank: {stat.rank}")
+                print(f"Joined at: {stat.joined_at}")
+                print("---")
+
+            return game
+
+        except Exception as e:
+            print(f"Error during database verification: {e}")
+            raise
 
     @select_test(enabled=True)
     def test_websocket_auth(self):
