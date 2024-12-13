@@ -480,7 +480,95 @@ class GameCoordinator:
             logger.error(f"Error getting invitations: {e}")
             return []
 
+    """ n
+from channels.layers import get_channel_layer
 
+class GameCoordinator:
+    @classmethod
+    async def create_invitation(cls, from_user_id: str, to_user_id: str, game_settings: dict) -> dict:
+        try:
+            async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
+                invitation_key = f"{cls.INVITATION_PREFIX}{to_user_id}:{from_user_id}"
+                if await redis_conn.exists(invitation_key):
+                    return {"status": False, "message": "Invitation already sent"}
+                
+                game_id = await cls.create_new_game(game_settings)
+                if not game_id:
+                    return {"status": False, "message": "Failed to create game"}
+
+                invitation_data = {
+                    "from_user": from_user_id,
+                    "game_id": game_id,
+                    "timestamp": time.time()
+                }
+                
+                await redis_conn.set(invitation_key, json.dumps(invitation_data), ex=cls.INVITATION_EXPIRY)
+                
+                @database_sync_to_async
+                def create_notification():
+                    Notification.objects.create(
+                        user_id=to_user_id,
+                        message=json.dumps({
+                            "type": "game_invitation",
+                            "data": {
+                                "from_user": from_user_id,
+                                "game_id": game_id,
+                                "action_url": f"/api/game/{game_id}/join/"
+                            }
+                        })
+                    )
+                await create_notification()
+                
+                return {"status": True, "game_id": game_id}
+
+        except Exception as e:
+            logger.error(f"Error creating invitation: {e}")
+            return {"status": False, "message": str(e)}
+
+    @classmethod
+    async def accept_invitation(cls, user_id: str, game_id: str) -> dict:
+        try:
+            async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
+                async for key in redis_conn.scan_iter(f"{cls.INVITATION_PREFIX}{user_id}:*"):
+                    data = json.loads(await redis_conn.get(key))
+                    if data["game_id"] == game_id:
+                        from_user_id = key.split(":")[-1]
+                        
+                        join_result = await cls.join_game(user_id, game_id)
+                        if not join_result.get("available", False):
+                            return join_result
+
+                        @database_sync_to_async
+                        def handle_notifications():
+                            # Mark invitation as read
+                            Notification.objects.filter(
+                                user_id=user_id,
+                                message__contains=f'"from_user": "{from_user_id}"'
+                            ).update(is_read=True)
+                            
+                            # Create acceptance notification
+                            Notification.objects.create(
+                                user_id=from_user_id,
+                                message=json.dumps({
+                                    "type": "invitation_accepted",
+                                    "data": {
+                                        "user": user_id,
+                                        "game_id": game_id,
+                                        "ws_url": f"ws/game/{game_id}/"
+                                    }
+                                })
+                            )
+                        await handle_notifications()
+                        
+                        await redis_conn.delete(key)
+                        return join_result
+                        
+                return {"available": False, "message": "Invitation not found"}
+                
+        except Exception as e:
+            logger.error(f"Error accepting invitation: {e}")
+            return {"available": False, "message": str(e)}
+        """
 
 
 
