@@ -9,6 +9,8 @@ urlpatterns = [
     # Game operations
     path("games/", views.create_new_game, name="games"),  # POST: create new game
     path("booking/cancel/", views.cancel_booking, name="cancel_booking"),
+    # Chat inventation
+    path("invitation/", views.invitation, name="invitation"),
     # Tournament operations
     path("tournaments/", views.all_tournaments, name="all_tournaments"),
     path("tournaments/<int:tournament_id>/", views.single_tournament, name="single_tournament"),

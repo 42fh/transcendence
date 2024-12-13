@@ -21,20 +21,6 @@ def transcendance(request):
     return HttpResponse("Initial view for transcendance")
 
 
-# def print_request_details(request):
-#     # Print all attributes
-#     #    print("Attributes:", vars(request))
-
-#     # Print all methods and properties
-#     #   print("Methods and properties:", dir(request))
-
-#     # Print common request properties
-#     #  print(f"Path: {request.path}")
-#     # print(f"Method: {request.method}")
-#     # print(f"GET params: {request.GET}")
-#     print(f"USER: {request.user}, ID: {request.user.id} ")
-
-
 @csrf_exempt
 @async_only_middleware
 @require_http_methods(["POST"])
@@ -199,6 +185,64 @@ async def join_game(request, game_id, use_redis_lock: bool = True):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+@csrf_exempt
+@async_only_middleware
+@require_http_methods(["POST", "GET"])
+async def invitation(request):
+    """Handle game invitations"""
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            "error": "Unauthorized",
+            "message": "Authentication required"
+        }, status=401)
+
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            to_user_id = data.get("to_user_id")
+            
+            if not to_user_id:
+                return JsonResponse({
+                    "error": "Bad Request",
+                    "message": "to_user_id is required"
+                }, status=400)
+            
+            # Default game settings for invitation
+            game_settings = {
+                "mode": "classic",
+            }
+            
+            result = await GameCoordinator.create_invitation(
+                str(request.user.id),
+                str(to_user_id),
+                game_settings
+            )
+            
+            if result["status"]:
+                return JsonResponse({
+                    "message": result["message"],
+                    "game_id": result["game_id"]
+                })
+            else:
+                return JsonResponse({
+                    "error": "Invitation Failed",
+                    "message": result["message"]
+                }, status=400)
+                
+        except json.JSONDecodeError:
+            return JsonResponse({
+                "error": "Invalid JSON",
+                "message": "Invalid request format"
+            }, status=400)
+            
+    elif request.method == "GET":
+        invitations = await GameCoordinator.get_pending_invitations(str(request.user.id))
+        return JsonResponse({
+            "invitations": invitations
+        })
+
+
 
 
 # @async_only_middleware
