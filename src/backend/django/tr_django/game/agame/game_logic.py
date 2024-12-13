@@ -34,7 +34,7 @@ async def game_logic(self, current_state):
             # Boundary Phase
             distance_from_center = self.get_distance(ball)
             # self.update_distance_metrics(distance_from_center, cycle_data)
-            logger.info(f"{self.game_id}/ball[{ball_index}]: {distance_from_center} / ball ({ball['x']} / {ball['x']})")
+            logger.debug(f"{self.game_id}/ball[{ball_index}]: {distance_from_center} / ball ({ball['x']} / {ball['x']})")
             boundary_check = self.handle_distance_check(
                 ball_index, ball, distance_from_center, new_state, cycle_data
             )
@@ -137,12 +137,12 @@ def handle_distance_check(self, ball_index, ball, distance, state, cycle_data):
     # Normal deadzone transitioni
     # Only reset when entering deadzone
     elif is_in_deadzone and not was_in_deadzone:
-        logger.info(f"{self.game_id}/ball[{ball_index}]: set deadzone")
+        logger.debug(f"{self.game_id}/ball[{ball_index}]: set deadzone")
         self.reset_ball_movement(ball_index)
     # When exiting, just update the state
     elif was_in_deadzone and not is_in_deadzone:
         self.previous_movements[ball_index]["in_deadzone"] = False
-        logger.info(f"{self.game_id}/ball[{ball_index}]: out of deadzone")
+        logger.debug(f"{self.game_id}/ball[{ball_index}]: out of deadzone")
     # Store current position for next frame's comparison
     self.previous_movements[ball_index]["last_position"] = {
         "x": ball["x"],
@@ -404,28 +404,14 @@ def collision_wall(self, collision, ball, new_state, cycle_data):
 
 
 def bounce_wall(self, ball, collision):
-    """
-    Apply wall-specific bounce effects and return physics data.
-    Similar pattern to paddle bounce but with wall-specific behavior.
-
-    Args:
-        ball (dict): Ball object to update
-        collision (dict): Wall collision information
-
-    Returns:
-        dict: Physics data from bounce
-    """
-    # Store initial state for physics data
+    """Wall-specific bounce with minimum angle and direction preservation."""
     initial_position = {"x": ball["x"], "y": ball["y"]}
     initial_velocity = {"x": ball["velocity_x"], "y": ball["velocity_y"]}
-
-    # Apply basic bounce effect - walls don't modify angles
-    new_velocities = self.apply_ball_bounce_effect(
-        ball, collision["normal"], 0  # No offset for wall bounces
-    )
+    
+    # Apply wall bounce effect
+    new_velocities = self.apply_wall_bounce_effect(ball, collision["normal"])
     ball.update(new_velocities)
-
-    # Return complete physics data
+    
     return {
         "pre_collision_position": initial_position,
         "post_collision_position": {"x": ball["x"], "y": ball["y"]},
@@ -435,6 +421,33 @@ def bounce_wall(self, ball, collision):
         "hit_position": collision["hit_position"],
     }
 
+def apply_wall_bounce_effect(self, ball, normal):
+    """Wall-specific bounce that maintains player-to-player direction."""
+    # Get current overall direction (before bounce)
+    pre_bounce_direction = math.atan2(ball["velocity_y"], ball["velocity_x"])
+    is_moving_right = math.cos(pre_bounce_direction) > 0
+    
+    # Basic reflection
+    dot_product = ball["velocity_x"] * normal["x"] + ball["velocity_y"] * normal["y"]
+    reflected_x = ball["velocity_x"] - 2 * dot_product * normal["x"]
+    reflected_y = ball["velocity_y"] - 2 * dot_product * normal["y"]
+    
+    # Check if reflection maintains general direction
+    post_bounce_direction = math.atan2(reflected_y, reflected_x)
+    will_move_right = math.cos(post_bounce_direction) > 0
+    
+    # If direction changed (left->right or right->left), adjust the angle
+    if is_moving_right != will_move_right:
+        current_speed = math.sqrt(ball["velocity_x"]**2 + ball["velocity_y"]**2)
+        if is_moving_right:
+            new_angle = -math.pi/4  # 45° down-right
+        else:
+            new_angle = -3*math.pi/4  # 45° down-left
+        
+        reflected_x = current_speed * math.cos(new_angle)
+        reflected_y = current_speed * math.sin(new_angle)
+    
+    return {"velocity_x": reflected_x, "velocity_y": reflected_y}
 
 def apply_ball_bounce_effect(self, ball, normal, offset=0, speed_multiplier=1.05):
     """
@@ -484,9 +497,9 @@ def apply_ball_bounce_effect(self, ball, normal, offset=0, speed_multiplier=1.05
     new_speed = current_speed * speed_multiplier
     
     # Limit speed to prevent tunneling
-    MAX_SPEED = ball["size"] * 1.5
-    if new_speed > MAX_SPEED:
-        new_speed = MAX_SPEED
+    #MAX_SPEED = ball["size"] * 1.5
+    #if new_speed > MAX_SPEED:
+    #    new_speed = MAX_SPEED
     
     final_x = new_speed * math.cos(final_angle)
     final_y = new_speed * math.sin(final_angle)
@@ -499,50 +512,13 @@ def apply_ball_bounce_effect(self, ball, normal, offset=0, speed_multiplier=1.05
         final_y = reflected_y
         # Apply speed limit
         current_speed = math.sqrt(final_x ** 2 + final_y ** 2)
-        if current_speed > MAX_SPEED:
-            scale = MAX_SPEED / current_speed
-            final_x *= scale
-            final_y *= scale
+        #if current_speed > MAX_SPEED:
+        #    scale = MAX_SPEED / current_speed
+        #    final_x *= scale
+        #    final_y *= scale
 
     return {"velocity_x": final_x, "velocity_y": final_y}
 
-   #def apply_ball_bounce_effect(self, ball, normal, offset=0, speed_multiplier=1.05):
-    """
-    Apply bounce effect to ball including reflection and speed increase
-    Args:
-        ball (dict): Ball object
-        normal (dict): Normal vector of collision
-        offset (float): Normalized offset from center (-1 to 1)
-        speed_multiplier (float): Speed increase factor
-    Returns:
-        dict: Updated ball velocities
-    """
-    # Calculate reflection
-    """dot_product = ball["velocity_x"] * normal["x"] + ball["velocity_y"] * normal["y"]
-
-    reflected_x = ball["velocity_x"] - 2 * dot_product * normal["x"]
-    reflected_y = ball["velocity_y"] - 2 * dot_product * normal["y"]
-
-    # Apply angle modification based on offset
-    angle_mod = offset * math.pi * 0.25
-    cos_mod = math.cos(angle_mod)
-    sin_mod = math.sin(angle_mod)
-
-    final_x = reflected_x * cos_mod - reflected_y * sin_mod
-    final_y = reflected_x * sin_mod + reflected_y * cos_mod
-
-    # Apply speed increase
-    current_speed = math.sqrt(ball["velocity_x"] ** 2 + ball["velocity_y"] ** 2)
-    new_speed = current_speed * speed_multiplier
-    # Limit speed to 80% of ball size to prevent tunneling
-    MAX_SPEED = ball["size"] * 1.5
-    if new_speed > MAX_SPEED:
-        scale = MAX_SPEED / new_speed
-        final_x *= scale
-        final_y *= scale
-
-    return {"velocity_x": (final_x), "velocity_y": (final_y)}
-    """
 
 def collision_miss(self, collision, ball, new_state, cycle_data, ball_index):
     """
