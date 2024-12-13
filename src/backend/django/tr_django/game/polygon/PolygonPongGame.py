@@ -42,7 +42,6 @@ class PolygonPongGame(AGameManager):
         self.hit_combo = 0
         self.last_hit_time = 0
         self.combo_timeout = 1.5  # seconds
-
         self.highest_recorded_speed = 0
     #
     # not sure if needed
