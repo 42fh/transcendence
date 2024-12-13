@@ -418,15 +418,13 @@ class GameCoordinator:
         """Create a game invitation from one user to another"""
         try:
             async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
-                invitation_key = f"{cls.INVITATION_PREFIX}{to_user_id}:{from_user_id}"
                 
-                # Check if invitation already exists
-                if await redis_conn.exists(invitation_key):
-                    return {
-                        "status": False,
-                        "message": "Invitation already sent to this user"
-                    }
-                
+                async with redis_conn.scan_iter(match=f"{cls.INVITATION_PREFIX}{to_user_id}:*:{from_user_id}") as scan:
+                    async for key in scan:
+                        return {
+                                    "status": False, 
+                                    "message": "Invitation already exists between these users"
+                        }
                 # Create game
                 game_id = await cls.create_new_game(game_settings)
                 if not game_id:
@@ -434,7 +432,7 @@ class GameCoordinator:
                         "status": False,
                         "message": "Failed to create game"
                     }
-                
+                invitation_key = f"{cls.INVITATION_PREFIX}{to_user_id}:{game_id}:{from_user_id}"  
                 # Store invitation with game_id
                 invitation_data = {
                     "from_user": from_user_id,
@@ -475,7 +473,7 @@ class GameCoordinator:
                         invitations.append(json.loads(data))
                         
                 return invitations
-                
+                     
         except Exception as e:
             logger.error(f"Error getting invitations: {e}")
             return []

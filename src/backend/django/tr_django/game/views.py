@@ -186,6 +186,31 @@ async def join_game(request, game_id, use_redis_lock: bool = True):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
+
+@sync_to_async
+def is_user_blocked(user, to_user_id):
+    """Check if either user has blocked the other.
+    
+    Args:
+        user: User object
+        to_user_id: Target user's ID
+        
+    Returns:
+        bool: True if either user has blocked the other
+    """
+    blocked_users = set(
+        BlockedUser.objects.filter(user=user).values_list("blocked_user__username", flat=True)
+    )
+    
+    blocked_by_users = set(
+        BlockedUser.objects.filter(blocked_user=user).values_list("user__username", flat=True)
+    )
+    
+    all_blocked_users = blocked_users.union(blocked_by_users)
+    return to_user_id in all_blocked_users
+
+
+
 @csrf_exempt
 @async_only_middleware
 @require_http_methods(["POST", "GET"])
@@ -201,13 +226,19 @@ async def invitation(request):
         try:
             data = json.loads(request.body)
             to_user_id = data.get("to_user_id")
-            
+            # to_user_id is required
             if not to_user_id:
                 return JsonResponse({
                     "error": "Bad Request",
                     "message": "to_user_id is required"
                 }, status=400)
-            
+            # check for blocking
+            if await is_user_blocked(user, to_user_id):
+                return JsonResponse({
+                    "error": "Bad Request",
+                    "message": "to_user_id"
+                }, status=403)
+                
             # Default game settings for invitation
             game_settings = {
                 "mode": "classic",
