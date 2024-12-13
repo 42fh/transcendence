@@ -1,46 +1,121 @@
-.page-container--games {
-	gap: 20px;
-	padding: 20px;
+.game-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    align-items: center;
+    margin: auto;
   }
   
- .page-container--settings {
-	gap: 20px;
-	padding: 20px;
-  }
-
-.game-item {
-	background-color: var(--color-surface);
-	color: var(--color-text-primary);
-	padding: var(--spacing-sm);
-	margin-bottom: var(--spacing-md);
-	border: var(--border-width) solid var(--color-border);
-	border-radius: var(--border-radius);
-	font-family: var(--font-family-primary);
-	font-size: var(--font-size-base);
-	transition: background-color var(--transition-duration) var(--transition-timing);
+  /* Optional: Custom scrollbar styling */
+  .game-list-container::-webkit-scrollbar {
+    width: 8px;
   }
   
-  .game-item:hover {
-	background-color: var(--color-hover);
+  .game-list-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
   }
   
-  #status {
-	margin-top: 20px;
-	padding: 10px;
-	border-radius: 5px;
-	font-family: var(--font-family-primary);
-	font-size: var(--font-size-base);
-	display: none;
-	transition: opacity 0.5s ease;
+  .game-list-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
   }
   
-  #status.success {
-	color: #155724;
-	border: 1px solid #c3e6cb;
+  .game-list-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
   }
   
-  #status.error {
-	color: #721c24;
-	border: 1px solid #f5c6cb;
+  .game-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 20px;
   }
   
+  .game-info h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #f9ecec;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .game-info p {
+    margin: 0;
+    font-size: 14px;
+    color: #74b6f4;
+    padding: 4px 0;
+  }
+  
+  .player-count {
+    font-weight: 500;
+    color: #666 !important;
+  }
+  
+  .player-count span {
+    color: #4CAF50;
+    font-weight: bold;
+  }
+  
+  .mode-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #eee;
+    padding-top: 8px;
+  }
+  
+  .game-mode {
+    color: #2196F3;
+    font-weight: 500;
+  }
+  
+  .dimension-type {
+    color: #9c27b0;
+    font-weight: bold;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  
+  
+  @media (min-width: 1400px) {
+    .game-list {
+        display: grid;
+        grid-template-columns: repeat(5, 0.2fr);
+        gap: 10px;
+        justify-items: center;
+    }
+  }
+  
+  @media (min-width: 1200px) and (max-width: 1399px) {
+    .game-list {
+        display: grid;
+        grid-template-columns: repeat(4, 0.25fr);
+        gap: 10px;
+        justify-items: center;
+    }
+  }
+  
+  @media (min-width: 992px) and (max-width: 1199px) {
+    .game-list {
+        display: grid;
+        grid-template-columns: repeat(3, 0.33fr);
+        gap: 10px;
+        justify-items: center;
+    }
+  }
+  
+  @media (min-width: 768px) and (max-width: 991px) {
+    .game-list {
+        display: grid;
+        grid-template-columns: repeat(2, 0.5fr);
+        gap: 10px;
+        justify-items: center;
+    }
+  }
