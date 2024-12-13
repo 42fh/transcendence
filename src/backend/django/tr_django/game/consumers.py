@@ -377,6 +377,17 @@ class PongConsumer(AsyncWebsocketConsumer):
             )
         )
 
+    async def timer(self, event):
+        """Handle waiting state events"""
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "type": "timer",
+                    "timer": event.get("current_players", 0),
+                }
+            )
+        )
+
     async def error(self, event):
         # Create error message with all fields except 'type'
         error_data = {
