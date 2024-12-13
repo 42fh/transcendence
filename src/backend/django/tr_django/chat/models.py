@@ -100,6 +100,7 @@ class Notification(models.Model):
     message = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
+    url = models.URLField(blank=True, null=True)
 
     class Meta:
         ordering = ["-created_at"]
