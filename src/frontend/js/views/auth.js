@@ -174,6 +174,7 @@ async function handleAuthSuccess(result, form) {
 
   localStorage.setItem(LOCAL_STORAGE_KEYS.USERNAME, result.username);
   localStorage.setItem(LOCAL_STORAGE_KEYS.USER_ID, result.id);
+
   form.style.display = "none";
 
   setTimeout(() => {

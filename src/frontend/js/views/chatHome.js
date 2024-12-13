@@ -61,7 +61,7 @@ export async function loadChatPage(addToHistory = true) {
       console.error("No current user found for notifications");
     }
     console.log("Before button");
-    testButtonForNotificationsWithUrl();
+    // testButtonForNotificationsWithUrl();
     await loadChatList(1, "", "");
 
     // Load users list (Horizontal scroll), filtering out users in conversations with current user
@@ -127,7 +127,7 @@ async function loadChatList(page = 1, perPage = 500, search = "") {
       username.textContent = user.username;
 
       userItem.addEventListener("click", () => {
-        loadChatRoom(user.username);
+        loadChatRoom(user);
       });
 
       usersList.appendChild(userItem);
@@ -182,7 +182,8 @@ async function loadUsersList(page = 1, perPage = 500, search = "") {
           : user.username;
 
       userItem.addEventListener("click", () => {
-        loadChatRoom(user.username);
+        console.log("In loadUsersList ", user);
+        loadChatRoom(user);
       });
 
       usersHorizontalContainer.appendChild(userItem);

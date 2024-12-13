@@ -10,7 +10,6 @@
   margin-bottom: var(--spacing-sm);
   width: 100%;
   word-wrap: break-word;
-  /* box-sizing: border-box; */
 }
 
 .page-container--chat__title {
@@ -189,11 +188,9 @@
 .chat-users-list__username {
   color: var(--color-text-primary);
   align-items: center;
-
   font-size: 0.5rem;
 }
 
-/* Chat Room Styles */
 .chat-room-container {
   display: flex;
   flex-direction: column;
@@ -201,9 +198,9 @@
   background-color: var(--color-background);
   overflow: hidden;
   max-width: 100%;
+  font-size: 0.9rem;
 }
 
-/* Chat Room Header */
 .chat-room-header {
   display: flex;
   align-items: center;
@@ -234,7 +231,7 @@
 }
 
 .chat-room-header__username {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: bold;
   color: var(--color-text-primary);
 }
@@ -248,11 +245,9 @@
   background: none;
   border: none;
   font-size: 1.5rem;
-  /* color: var(--color-primary); */
   cursor: pointer;
 }
 
-/* Chat messages */
 .chat-messages {
   flex: 1;
   padding: 1rem;
@@ -260,9 +255,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  /* background: var(--color-surface-transparent); */
   border-radius: var(--border-radius);
-  font-size: 0.8rem;
+  font-size: 0.85rem;
 }
 
 .chat-message-self {
@@ -289,29 +283,35 @@
 
 .chat-input-container {
   display: flex;
-  gap: 0.5rem;
   align-items: center;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem;
+  gap: 0.5rem;
+  overflow: hidden;
 }
 
 .chat-input {
   flex: 1;
-  padding: 0.5rem;
-  border: 2px solid var(--color-primary);
-  border-radius: 0.3125rem;
+  min-width: 0;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.85rem;
+  border: 1.5px solid var(--color-primary);
+  border-radius: 0.3rem;
   font-family: var(--font-family-primary);
 }
 
 .chat-submit-button {
-  padding: 0.5rem 1rem;
+  flex-shrink: 0;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
   background-color: var(--color-primary);
-  color: var(--color-text-secondary);
+  color: var(--color-background);
   border: none;
-  border-radius: 0.3125rem;
-  font-family: var(--font-family-primary);
+  border-radius: 0.3rem;
   cursor: pointer;
   transition: background-color var(--transition-duration);
+  max-width: none;
 }
 
-.chat-submit-button:hover {
-  background-color: var(--color-hover);
-}

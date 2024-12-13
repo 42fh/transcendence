@@ -225,7 +225,6 @@ class GameCoordinator:
                     await redis_conn.set(booking_key, "1")
                     # Add URL to list
                     player_urls.append((user_id, f"ws/game/{game_id}/"))
-            print("F")
             return {"status": "running", "game_id": game_id, "player_urls": player_urls}
 
         except Exception as e:
