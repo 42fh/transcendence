@@ -42,6 +42,7 @@ export function loadGameSetupPage(addToHistory = true) {
 
     // The most popular type of game
     const formData = {
+      name: "My game",
       "game-type": "circular",
       "num-players": 2,
       "num-sides": 2,
@@ -59,6 +60,7 @@ export function loadGameSetupPage(addToHistory = true) {
 
         const data = {
           mode: formData.gameType,
+          name: formData.name,
           gameType: formData.gameType,
           num_players: Number(formData.numPlayers),
           sides: Number(formData.numSides),
@@ -108,13 +110,14 @@ function collectFormData() {
   //   document.getElementById("two-d-game__num-sides").value
   // );
   // while only circular mode is ready
+  const name = document.getElementById("two-d-game__name").value;
   const numSides = numPlayers;
   const numBalls = parseInt(
     document.getElementById("two-d-game__num-balls").value
   );
   const scoreMode = document.getElementById("two-d-game__score-mode").value;
   const debug = true;
-  return { gameType, numPlayers, numSides, numBalls, scoreMode, debug };
+  return { gameType, numPlayers, numSides, numBalls, scoreMode, debug, name };
 }
 
 function validateFormData(formData) {

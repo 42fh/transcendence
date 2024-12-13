@@ -219,6 +219,7 @@ export default class GameConstructor {
             numberDisplay.offsetHeight;
             numberDisplay.style.animation = "pulse 0.5s";
           }
+          break;
         case "game_finished":
           console.log("game_finished: ", message);
           showToast("Game finished, Winner: " + message.winner);

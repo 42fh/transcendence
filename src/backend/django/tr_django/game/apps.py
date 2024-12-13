@@ -31,11 +31,11 @@ class GameConfig(AppConfig):
                 # Calculate how many games we need to create
                 games_to_create = 3 - len(empty_games)
                 
-                game_configs = [
-                    {"mode": "classic"},   # 2-player classic game
-                    {"mode": "circular"},  # 4-player circular game
-                    {"mode": "circular", "sides": 6}  # 6-player circular game
-                ][:games_to_create]  # Only take as many as we need
+                # game_configs = [
+                #     {"mode": "classic","name":"lets play"},   # 2-player classic game
+                #     {"mode": "circular", "name": "cool"},  # 4-player circular game
+                #     {"mode": "circular", "sides": 6, "name": "salad"}  # 6-player circular game
+                # ][:games_to_create]  # Only take as many as we need
                 
                 for config in game_configs:
                     game_id = await GameCoordinator.create_new_game(config)

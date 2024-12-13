@@ -35,7 +35,7 @@ function generateGameListHTML(games) {
     gameCard.className = "game-card";
     gameCard.innerHTML = `
     <div class="game-info">
-        <h3>${index}</h3>
+        <h3>${game.name}</h3>
         <p class="player-count">Players: <span>${game.players.current}/${
       game.players.total_needed
     }</span></p>
