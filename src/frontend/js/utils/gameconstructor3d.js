@@ -123,13 +123,10 @@ export default class GameConstructor {
     this.setupResources = setupResources;
   }
 
-  async connectToWebsockets(gameId) {
+  async connectToWebsockets(ws_url) {
     try {
-      let result = await joinGame(gameId);
-      console.log("Join game result:", result);
-
       websocket = new GameWebSocket(this.handleMessage.bind(this));
-      websocket.connect(result.ws_url);
+      websocket.connect(ws_url);
     } catch (error) {
       console.error("Error creating game:", error);
     }

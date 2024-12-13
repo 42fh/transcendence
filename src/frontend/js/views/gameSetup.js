@@ -70,7 +70,7 @@ export function loadGameSetupPage(addToHistory = true) {
         let result = await createGame(data);
         console.log("Game creation result:", result);
 
-        loadGame3D(result.game_id);
+        loadGame3D(result.ws_url);
       }
     });
   } catch (error) {

@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import GameConstructor from "../utils/gameconstructor3d.js";
 
-export async function loadGame3D(gameId) {
+export async function loadGame3D(wsUrl) {
   try {
     const template = document.getElementById("3d-game-template");
     if (!template) {
@@ -159,7 +159,7 @@ export async function loadGame3D(gameId) {
       this.fin3 = this.scene.children[0].getObjectByName("sharkFin3");
     }
   );
-  game.connectToWebsockets(gameId);
+  game.connectToWebsockets(wsUrl);
   game.world.addPerspectiveCamera();
   game.world.addGame(game, false);
 }

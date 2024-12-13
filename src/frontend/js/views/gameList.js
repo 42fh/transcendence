@@ -1,4 +1,5 @@
-import { fetchWaitingGames } from "../services/gameService.js";
+import { fetchWaitingGames, joinGame } from "../services/gameService.js";
+import { showToast } from "../utils/toast.js";
 import { loadGame3D } from "./game3d.js";
 import { loadGameSetupPage } from "./gameSetup.js";
 
@@ -46,8 +47,14 @@ function generateGameListHTML(games) {
         </div>
     </div>
 `;
-    gameCard.addEventListener("click", () => {
-      loadGame3D(game.game_id);
+    gameCard.addEventListener("click", async () => {
+      try {
+        const result = await joinGame(game.game_id);
+        loadGame3D(result.ws_url);
+      } catch (error) {
+        console.error("Error joining game:", error);
+        showToast("Error joining game", CubeTexture);
+      }
     });
     gameList.append(gameCard);
   });
