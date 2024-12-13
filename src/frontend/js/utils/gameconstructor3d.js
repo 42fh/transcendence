@@ -209,6 +209,16 @@ export default class GameConstructor {
           break;
         case "timer":
           const number = message.timer;
+          console.log("timer: ", number);
+          const numberDisplay = document.getElementById("number-display");
+          if (Number(number) == 0) {
+            numberDisplay.style.display = "none";
+          } else {
+            numberDisplay.textContent = number;
+            numberDisplay.style.animation = "none";
+            numberDisplay.offsetHeight;
+            numberDisplay.style.animation = "pulse 0.5s";
+          }
         case "game_finished":
           console.log("game_finished: ", message);
           showToast("Game finished, Winner: " + message.winner);

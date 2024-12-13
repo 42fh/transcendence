@@ -384,7 +384,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             text_data=json.dumps(
                 {
                     "type": "timer",
-                    "timer": event.get("current_players", 0),
+                    "timer": event.get("timer", 0),
                 }
             )
         )

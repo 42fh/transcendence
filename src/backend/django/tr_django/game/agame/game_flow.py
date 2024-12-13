@@ -51,11 +51,11 @@ async def start_game(self):
         inner_boundary: {self.inner_boundary}  
         ball_mov: {self.previous_movements, type(self.previous_movements)}"""
         )
-        await GameCoordinator.set_to_running_game(self.game_id)
         # countdown
-        timer = 10
+        timer = 11
         while timer:
  
+            timer -= 1       
             await self.channel_layer.group_send(
                 f"game_{self.game_id}",
                 {
@@ -63,7 +63,8 @@ async def start_game(self):
                     "timer": timer,
                 })
             await asyncio.sleep(1) 
-            timer -= 1       
+
+        await GameCoordinator.set_to_running_game(self.game_id)
 
         while await self.redis_conn.get(self.running_key) == b"1":
             game_over = await self.update_game()
