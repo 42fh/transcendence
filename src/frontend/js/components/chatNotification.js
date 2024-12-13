@@ -1,6 +1,7 @@
 import { fetchNotifications } from "../services/chatNotificationService.js";
 import { updateNotificationBadge } from "./bottomNav.js";
 
+//Render notifications in the chat home template
 export async function renderNotifications() {
   const chatHomeTemplate = document.querySelector("#chat-home-template");
   if (!chatHomeTemplate) {
@@ -58,6 +59,6 @@ export async function renderNotifications() {
     });
 
   } catch (error) {
-    console.error("Error fetching notifications:", error);
+    console.log("Error fetching notifications:", error);
   }
 }
