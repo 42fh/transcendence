@@ -35,7 +35,6 @@ async def add_player(self, player_id):
                 "role": "spectator", 
                 "message": "No booking found - joining as spectator", 
             }
-        print("aa") 
         # check max player
         max_players = self.settings.get("num_players")
         current_count = await self.redis_conn.scard(self.players_key)
@@ -214,7 +213,6 @@ async def _handle_ingame_leave(self, player_id: str, side_index: int, player_cou
                     current_state["balls"][i] = self.reset_ball(ball, i)
                 game_over = False
             # Update state within the same lock
-            print("STAAAATE: ", current_state)
             await self.redis_conn.set(self.state_key, msgpack.packb(current_state))
         
         # Notify other players

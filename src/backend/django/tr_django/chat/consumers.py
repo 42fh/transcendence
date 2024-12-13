@@ -240,7 +240,6 @@ class NotificationConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         if hasattr(self, "group_name"):
-            print("hallo")
             await TournamentDisconnectHandler.handle_tournament_disconnect(self.scope["user"])
             await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
