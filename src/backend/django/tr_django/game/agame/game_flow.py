@@ -130,11 +130,9 @@ async def end_game(self):
     """End game with process-safe cleanup"""
     try:
         await GameCoordinator.set_to_finished_game(self.game_id)
-        print("end now the datavbase")
         await GameCoordinator.store_game_in_database(self.game_id)
         # Keep game state briefly for end-game display
         # would be handle by GameCoordinator 
-        print ("the END")
     except Exception as e:
         logger.error(f"Error ending game: {e}")
         await self.error_exit("Error in ending game" , f"{e}")
