@@ -10,6 +10,8 @@ import { joinGame } from "../services/gameService.js";
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { showToast } from "./toast.js";
 
+export let websocket = null;
+
 export default class GameConstructor {
   constructor() {
     this.type = null;
@@ -25,9 +27,6 @@ export default class GameConstructor {
 
     // Loader
     this.loader = null;
-
-    // Websocket
-    this.websocket = null;
 
     // Skins
     this.skins = [];
@@ -129,8 +128,8 @@ export default class GameConstructor {
       let result = await joinGame(gameId);
       console.log("Join game result:", result);
 
-      this.websocket = new GameWebSocket(this.handleMessage.bind(this));
-      this.websocket.connect(result.ws_url);
+      websocket = new GameWebSocket(this.handleMessage.bind(this));
+      websocket.connect(result.ws_url);
     } catch (error) {
       console.error("Error creating game:", error);
     }

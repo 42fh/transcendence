@@ -88,7 +88,6 @@ function updateFormElement(prefix, key, formData) {
     } else {
       element.value = formData[key];
     }
-    console.log(`Updated ${elementId} with value: ${formData[key]}`);
   } else {
     console.warn(`Element or form data not found for: ${elementId}`);
   }
