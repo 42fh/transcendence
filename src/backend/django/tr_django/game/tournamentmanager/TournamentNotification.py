@@ -67,12 +67,10 @@ class TournamentNotificationConsumer(AsyncWebsocketConsumer):
             await self.close(4008)
 
     async def tournament_notification(self, event):
-        print("fdg")
         if (
             "player_id" not in event["message"]
             or str(self.player_id) == event["message"]["player_id"]
         ):
-            print("almooooost")
             await self.send(text_data=json.dumps(event["message"]))
 
 
@@ -137,7 +135,6 @@ class TournamentNotifier:
 
     async def notify(self, message):
         message["timestamp"] = timezone.now().isoformat()
-        print("ssdfdxi: ", message)
 
         await self.channel_layer.group_send(
             self.group_name, {"type": "tournament.notification", "message": message}

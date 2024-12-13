@@ -29,8 +29,6 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.check_connection_task = None
 
     async def connect(self):
-        print("hallo world")
-
         self.game_id = self.scope["url_route"]["kwargs"]["game_id"]
         self.user = self.scope["user"]
         self.player_id = str(self.user.id)
@@ -50,9 +48,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                 player_count = await self.game_manager.redis_conn.scard(
                     self.game_manager.players_key
                 )
-                print("a")
                 player_index = await self.game_manager.add_player(self.player_id)
-                print("b")
                 if not player_index:
                     await self.close(code=1011)
                     logger.error("get instance: Error in add player")
