@@ -243,6 +243,19 @@ export default class World {
           break;
       }
     });
+    // Mobile controls buttons
+    document.getElementById("right-btn").addEventListener("touchstart", () => {
+      this.moveDown = true;
+    });
+    document.getElementById("right-btn").addEventListener("touchend", () => {
+      this.moveDown = false;
+    });
+    document.getElementById("left-btn").addEventListener("touchstart", () => {
+      this.moveUp = true;
+    });
+    document.getElementById("left-btn").addEventListener("touchend", () => {
+      this.moveUp = false;
+    });
     // Fullscreen
     document.addEventListener("dblclick", () => {
       if (!document.fullscreenElement) {

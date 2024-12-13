@@ -153,16 +153,6 @@ body {
   text-align: center;
   white-space: nowrap;
 }
-.mobile-controls {
-  position: fixed;
-  bottom: 60px;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: space-between;
-  padding: 0 20px;
-  pointer-events: none;
-}
 
 .control-btn {
   width: 60px;
@@ -179,13 +169,6 @@ body {
 .control-btn:active {
   background: rgba(255, 255, 255, 0.5);
 }
-
-/* Hide on desktop */
-/* @media (min-width: 768px) {
-  .mobile-controls {
-    display: none;
-  }
-} */
 
 .webgl {
   position: fixed;
@@ -250,13 +233,48 @@ body {
   }
 }
 
-
 .mobile-controls {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 20px;
-    z-index: 1000;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: none; /* Hidden by default */
+  width: 80%;
+  justify-content: space-between;
+  z-index: 1000;
 }
+
+/* Show controls only on mobile devices */
+@media (max-width: 768px) {
+  .mobile-controls {
+      display: flex;
+  }
+}
+
+/* Optional: Adjust layout for smaller phones */
+@media (max-width: 480px) {
+  .mobile-controls {
+      width: 95%;
+  }
+}
+.control-btn {
+  padding: 15px 25px;
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 24px;
+  color: #333;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.control-btn:hover {
+  background-color: rgba(255, 255, 255, 1);
+  transform: scale(1.1);
+}
+
+.control-btn:active {
+  transform: scale(0.95);
+}
+
