@@ -4,6 +4,7 @@ import {
   renderMatchHistory,
 } from "../services/usersService.js";
 import { toggleBlockUser } from "../services/blockService.js";
+import { isUserBlockedByCurrentUser } from "../services/blockService.js";
 import { showToast } from "../utils/toast.js";
 import { ASSETS, LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { updateActiveNavItem } from "../components/bottomNav.js";
@@ -290,24 +291,37 @@ function populatePublicProfileHTML(content, userData) {
   friendshipButton.addEventListener("click", () =>
     handleFriendshipButtonClick(friendshipButton.dataset.state, userData)
   );
+  console.log("3__________", userData);
 
   blockButton.addEventListener("click", async () => {
+    const isBlocked = await isUserBlockedByCurrentUser('userData.id');
+    console.log(isBlocked);
+
     try {
+      console.log("Block button clicked");
       const action = userData.is_blocked ? "unblock" : "block";
+      console.log("Action:", action);
+      if (!userData.username) {
+        console.error("No username found for block action");
+      }
+      console.log("Username:", username);
+      console.log("Is currently blocked:", isBlocked);
       const blockResult = await toggleBlockUser(
         userData.username,
-        userData.is_blocked
+        isBlocked
       );
+      console.log("Block result:", blockResult);
 
       if (blockResult.success) {
         // Update UI based on the block status
         userData.is_blocked = !userData.is_blocked;
         updateBlockButton(userData.is_blocked);
+        console.log(userData.is_blocked ? "User blocked" : "User unblocked");
         showToast(
           userData.is_blocked
             ? "User blocked successfully"
             : "User unblocked successfully",
-          true
+          false
         );
       }
     } catch (error) {
