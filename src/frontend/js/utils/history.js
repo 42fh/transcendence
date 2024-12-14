@@ -24,7 +24,6 @@ import { updateActiveNavItem } from "../components/bottomNav.js";
 // };
 
 export function initializeHistory() {
-
   window.addEventListener("load", () => {
     const username = localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME);
 
@@ -43,7 +42,7 @@ export function initializeHistory() {
     if (event.state) {
       // TODO: Check cache before making API calls in each case
       // If cached data exists and is not stale, use it instead of making new API calls
-      
+
       const state = event.state || { view: "home" };
       console.log("Navigating to:", state.view);
       if (state && state.view) {
@@ -80,7 +79,7 @@ export function initializeHistory() {
             break;
           case "chat-home":
             loadChatPage(false);
-            break;            
+            break;
           case "create-tournament":
             loadCreateTournamentPage(false);
             break;
@@ -101,6 +100,9 @@ export function initializeHistory() {
             const userId = state.userId || localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
 
             loadProfilePage(userId, false);
+            break;
+          case "local-tournament-setup":
+            loadLocalTournamentSetupPage(false);
             break;
           default:
             loadHomePage(false);

@@ -52,6 +52,9 @@ export function loadCreateTournamentPage(addToHistory = true) {
 
     // Set default values when page loads
     setDefaultDates(); // Call this after adding content to DOM
+    initLocationToggle();
+    initTimingToggle();
+    initPlayersToggle();
 
     // Add event listeners for form interactions
     const form = mainContent.querySelector(".create-tournament-form");
@@ -81,12 +84,17 @@ export function loadCreateTournamentPage(addToHistory = true) {
         name: formData.get("name"),
         description: formData.get("description"),
         type: formData.get("type"),
-        startingDate: formData.get("startingDate"),
-        registrationStart: formData.get("registrationStart"),
-        registrationClose: formData.get("registrationClose"),
+        location: formData.get("location"), // Add location
+        timing: formData.get("timing"), // Add timing
+        maxPlayers: formData.get("maxPlayers"), // Add max players
+        // Only include dates if timing is "planned"
+        ...(formData.get("timing") === "planned" && {
+          startingDate: formData.get("startingDate"),
+          registrationStart: formData.get("registrationStart"),
+          registrationClose: formData.get("registrationClose"),
+        }),
         visibility: formData.get("visibility"),
         gameMode: formData.get("gameMode"),
-        // Add allowed users if private
         allowedUsers: formData.get("visibility") === "private" ? Array.from(allowedUsers) : [],
       };
 
@@ -96,4 +104,89 @@ export function loadCreateTournamentPage(addToHistory = true) {
     console.error("Error loading create tournament page:", error);
     showToast("Failed to load create tournament page", true);
   }
+}
+
+function initLocationToggle() {
+  const locationToggle = document.getElementById("location-toggle");
+  const locationButtons = locationToggle.querySelectorAll(".create-tournament-toggle__btn");
+  const locationInput = document.getElementById("location-value");
+
+  locationButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      locationButtons.forEach((btn) => btn.classList.remove("create-tournament-toggle__btn--active"));
+      button.classList.add("create-tournament-toggle__btn--active");
+      locationInput.value = button.dataset.value;
+    });
+  });
+}
+
+// function initTimingToggle() {
+//   const timingToggle = document.getElementById("timing-toggle");
+//   console.log("Timing toggle:", timingToggle); // Debug
+//   const timingButtons = timingToggle.querySelectorAll(".create-tournament-toggle__btn");
+//   console.log("Timing buttons:", timingButtons); // Debug
+//   const timingInput = document.getElementById("timing-value");
+
+//   timingButtons.forEach((button) => {
+//     button.addEventListener("click", () => {
+//       console.log("Button clicked:", button.dataset.value); // Debug
+
+//       timingButtons.forEach((btn) => btn.classList.remove("create-tournament-toggle__btn--active"));
+//       button.classList.add("create-tournament-toggle__btn--active");
+//       timingInput.value = button.dataset.value;
+
+//       const plannedDates = document.getElementById("planned-dates");
+//       const dateInputs = plannedDates.querySelectorAll('input[type="datetime-local"]');
+//       console.log("Planned dates element:", plannedDates); // Debug
+
+//       if (button.dataset.value === "planned") {
+//         plannedDates.classList.remove("create-tournament-form-group--hidden");
+//         dateInputs.forEach((input) => (input.required = true));
+//         setDefaultDates();
+//       } else {
+//         plannedDates.classList.add("create-tournament-form-group--hidden");
+//         dateInputs.forEach((input) => (input.required = false));
+//       }
+//     });
+//   });
+// }
+
+function initTimingToggle() {
+  const timingToggle = document.getElementById("timing-toggle");
+  const timingButtons = timingToggle.querySelectorAll(".create-tournament-toggle__btn");
+  const timingInput = document.getElementById("timing-value"); // Now it will find the input
+
+  timingButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      timingButtons.forEach((btn) => btn.classList.remove("create-tournament-toggle__btn--active"));
+      button.classList.add("create-tournament-toggle__btn--active");
+      timingInput.value = button.dataset.value;
+
+      const plannedDates = document.getElementById("planned-dates");
+      const dateInputs = plannedDates.querySelectorAll('input[type="datetime-local"]');
+
+      if (button.dataset.value === "planned") {
+        plannedDates.classList.remove("create-tournament-form-group--hidden");
+        dateInputs.forEach((input) => (input.required = true));
+        setDefaultDates();
+      } else {
+        plannedDates.classList.add("create-tournament-form-group--hidden");
+        dateInputs.forEach((input) => (input.required = false));
+      }
+    });
+  });
+}
+
+function initPlayersToggle() {
+  const playersToggle = document.getElementById("players-toggle");
+  const playerButtons = playersToggle.querySelectorAll(".create-tournament-toggle__btn");
+  const playersInput = document.getElementById("players-value");
+
+  playerButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      playerButtons.forEach((btn) => btn.classList.remove("create-tournament-toggle__btn--active"));
+      button.classList.add("create-tournament-toggle__btn--active");
+      playersInput.value = button.dataset.value;
+    });
+  });
 }

@@ -210,10 +210,13 @@ function sendPaddleMove(direction, debug = false) {
     return;
   }
 
+  const moveSpeed = gameContext.player_values.move_speed;
+
   sendGameMessage({
     action: "move_paddle",
     direction,
     user_id: gameContext.player_id,
+    move_speed: moveSpeed,
   });
 
   lastMoveTime = currentTime;

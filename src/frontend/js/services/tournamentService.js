@@ -4,6 +4,7 @@ import { showToast } from "../utils/toast.js";
 import { loadTournamentsPage } from "../views/tournaments.js";
 import { updateGlobalTournaments } from "../store/index.js";
 import { manageJWT } from "./authService.js";
+import { loadLocalTournamentSetupPage } from "../views/localTournamentSetup.js";
 // Fetch and enhance tournaments
 export async function fetchTournaments(source = CONFIG.CURRENT_SOURCE) {
   try {
@@ -139,6 +140,14 @@ export async function handleTournamentAction(tournament, isEnrolled) {
 
 export async function handleCreateTournamentSubmit(tournamentData) {
   try {
+    // If it's a local tournament, redirect to player registration page
+    if (tournamentData.location === "local") {
+      // Store tournament data in sessionStorage for the next page
+      sessionStorage.setItem("pendingLocalTournament", JSON.stringify(tournamentData));
+      // Load the local tournament setup page
+      loadLocalTournamentSetupPage(tournamentData, false);
+      return;
+    }
     switch (CONFIG.CURRENT_SOURCE) {
       case CONFIG.DATA_SOURCE.API:
         const accessToken = await manageJWT();
