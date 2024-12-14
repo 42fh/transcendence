@@ -42,6 +42,7 @@ export function setupNotificationListener(wsUrl) {
         console.log("Received WebSocket message:", data);
 
         if (data.type === "CHAT_WS_MSG_TYPE.SEND_NOTIFICATION") {
+          console.log("Received notification:", data.notification);
           showToast(data.notification.message, false);
 
           const unread = data.notification.is_read ? 0 : 1;

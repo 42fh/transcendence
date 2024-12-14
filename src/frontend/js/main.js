@@ -4,6 +4,11 @@ import { initializeTournaments } from "./config/tournaments.js";
 import { initializeHistory } from "./utils/history.js";
 import { CONFIG, LOCAL_STORAGE_KEYS } from "./config/constants.js";
 import { initBottomNav } from "./components/bottomNav.js";
+import { setupNotificationListener } from "./utils/notifications.js";
+// import { fetchNotifications } from "./services/chatNotificationService.js";
+
+let notificationSocket = null;
+
 
 // deleting a cookie must be done by setting expiration to a past time
 const deleteCookie = (name) => {
@@ -38,12 +43,50 @@ document.addEventListener("DOMContentLoaded", () => {
     // User not logged in, show auth page
     loadAuthPage();
   } else {
-    // User is logged in, show home page
+    // User is logged in, load notiication and show home page
+
+
+
+
+    ///////////////////////////     moved notifications from chatHome
+    try {
+      if (notificationSocket) {
+        try {
+          notificationSocket.close();
+        } catch (closeError) {
+          console.warn(
+            "Error closing existing notification socket:",
+            closeError
+          );
+        }
+      }
+        
+      const currentUser = LOCAL_STORAGE_KEYS.USERNAME;
+      if (currentUser) {
+        const wsUrl = `/ws/notifications/${currentUser}/`;
+    
+        notificationSocket = setupNotificationListener(wsUrl);
+      } else {
+        console.error("No current user found for notifications");
+      }
+  
+    } catch (error) {
+          console.error("Error with notification in main", error);
+          // displayModalError("Failed to load chat home");
+        }
+
+    ///////////////////////////     moved notifications from chatHome
+
+
+
+
+
+
     loadHomePage();
   }
 
   initializeTournaments(CONFIG.CURRENT_SOURCE);
   initializeHistory();
-  // TODO: is initBottomBav the correct name, and should be initialised anywaay also if loadAuthPage?
+  // TODO: is initBottomBav the correct name, and should be initialised anyway also if loadAuthPage?
   initBottomNav();
 });
