@@ -87,7 +87,7 @@
             </button>
           </div>
 
-          <button type="submit" id="2fa-login" class="auth-form__button">
+          <button type="submit" verify" class="auth-form__button">
             Log In
           </button>
         </form>
@@ -125,6 +125,29 @@
           </div>
       </div>
     </template>
+
+    <template id="2fa-template">
+      <div class="modal-form">
+        <label for="code">Enter the code sent to your email</label>
+        <input type="text" id="code" name="code" required />
+    
+        <div class="resend-section">
+          <span id="countdown">1:00</span>
+          <button
+            type="button"
+            id="resend-button"
+            class="auth-form__button"
+            disabled
+          >
+            Resend Code
+          </button>
+        </div>
+    
+        <button id="2fa-verify" class="auth-form__button">
+          Verify
+        </button>
+      </div>
+      </template>
   
 
     <!-- Home Page Template -->
@@ -841,7 +864,8 @@
     <template id="2fa-edit-template">
       <div class="profile-edit">
         <h2 class="profile-edit__title">Edit 2FA</h2>
-        <p class="email-warning" style="display: none">Email is not set</p>
+        <p class="email-warning email-not-set" style="display: none">Email is not set</p>
+        <p class="email-warning email-not-verified" style="display: none">Email is not verified</p>
         <form class="profile-edit__form">
           <div class="profile-edit__field form-field">
             <label class="profile-edit__label form-label" for="email"
@@ -886,6 +910,12 @@
             </div>
           </div>
           <div class="profile-edit__buttons">
+            <button
+              type="button"
+              class="profile-edit__button profile-edit__button--verify-email"
+            >
+              Verify
+            </button>
             <button
               type="button"
               class="profile-edit__button profile-edit__button--cancel"

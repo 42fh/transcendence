@@ -507,6 +507,7 @@ class UserDetailView(APIView):
             if is_own_profile:
                 user_data.update(
                     {
+                        "email_verified": user.email_verified,
                         "email": user.email,
                         "two_factor_enabled": user.two_factor_enabled,
                         "telephone_number": user.telephone_number,
@@ -592,6 +593,8 @@ class UserDetailView(APIView):
                     "first_name": user.first_name,
                     "last_name": user.last_name,
                     "email": user.email,
+                    "email_verified": user.email_verified,
+                    "two_factor_enabled": user.two_factor_enabled,
                     "bio": user.bio,
                     "telephone_number": user.telephone_number,
                     "pronoun": user.pronoun,
@@ -604,6 +607,7 @@ class UserDetailView(APIView):
                 "first_name",
                 "last_name",
                 "email",
+                "email_verified",
                 "bio",
                 "telephone_number",
                 "pronoun",
@@ -626,6 +630,7 @@ class UserDetailView(APIView):
                     "first_name": user.first_name,
                     "last_name": user.last_name,
                     "email": user.email,
+                    "email_verified": user.email_verified,
                     "bio": user.bio,
                     "telephone_number": user.telephone_number,
                     "pronoun": user.pronoun,

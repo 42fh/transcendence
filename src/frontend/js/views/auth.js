@@ -116,7 +116,7 @@ async function handleAuth(form, authFunction) {
   try {
     const result = await authFunction(data);
 
-    const _accessToken = await manageJWT(data, true);
+    await manageJWT(data, true);
 
     let userData = await fetchUserProfile(result.id);
     if (!userData.success) {
@@ -192,7 +192,7 @@ async function handleAuthSuccess(result, form) {
   }, 2000);
 }
 
-async function startResendTimer() {
+export async function startResendTimer() {
   const countdown = document.getElementById("countdown");
   const resendButton = document.getElementById("resend-button");
 
@@ -213,7 +213,7 @@ async function startResendTimer() {
   }, 1000);
 }
 
-function resendButtonListener(userData) {
+export function resendButtonListener(userData) {
   document
     .getElementById("resend-button")
     .addEventListener("click", async () => {
