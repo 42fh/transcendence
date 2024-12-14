@@ -32,6 +32,23 @@ class Command(BaseCommand):
         # Create users with full profile data
         users_data = [
             {
+                "username": "dev",
+                "email": "dev@1719.anonaddy.com",
+                "password": "dev",
+                "first_name": "Dev",
+                "last_name": "User",
+                "bio": "Development user for local testing",
+                "telephone_number": "+1234567890",
+                "pronoun": "they/them",
+                "two_factor_enabled": False,
+                "visibility_online_status": "everyone",
+                "visibility_user_profile": "everyone",
+                "email_verified": True,
+                "is_active": True,
+                "avatar": "avatars/dev.jpg",
+                "game_stats": {"wins": 5, "losses": 2},
+            },
+            {
                 "username": "ThePrimeagen",
                 "email": "prime@1719.anonaddy.com",
                 "password": "test1pass",
@@ -152,7 +169,6 @@ class Command(BaseCommand):
             },
         ]
 
-
         # Create users and their game history
         for user_data in users_data:
             game_stats = user_data.pop("game_stats")
@@ -162,7 +178,9 @@ class Command(BaseCommand):
             # Create game history
             self._create_game_history(player, game_mode, game_stats)
             self.stdout.write(self.style.SUCCESS(f'Created user "{user.username}" with game history'))
-            self.stdout.write(self.style.SUCCESS(f'User "{user.username}" has been successfully seeded with game stats.'))
+            self.stdout.write(
+                self.style.SUCCESS(f'User "{user.username}" has been successfully seeded with game stats.')
+            )
 
     def _create_game_history(self, player, game_mode, stats):
         """Create game history for a player"""
