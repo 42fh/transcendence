@@ -5,7 +5,7 @@ import { loadGameSetupPage } from "./gameSetup.js";
 import { loadGame2D } from "./game2D.js";
 import { loadGameOffline } from "./gameOffline.js";
 
-export async function loadGameList() {
+export async function loadGameList(addToHistory = true) {
   try {
     const template = document.getElementById("game-list-template");
     if (!template) {
@@ -29,6 +29,15 @@ export async function loadGameList() {
       .addEventListener("click", () => {
         loadGameOffline();
       });
+
+    if (addToHistory) {
+      history.pushState(
+        {
+          view: "game-list",
+        },
+        ""
+      );
+    }
   } catch (error) {
     console.error("Error loading game list page:", error);
     return;

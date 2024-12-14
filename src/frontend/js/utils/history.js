@@ -7,6 +7,8 @@ import { loadTournamentsPage } from "../views/tournaments.js";
 import { loadTournamentDetailsPage } from "../views/tournamentDetail.js";
 import { loadCreateTournamentPage } from "../views/tournamentCreate.js";
 import { loadTimetablePage } from "../views/timetable.js";
+import { loadGameList } from "../views/gameList.js";
+import { loadGameSetupPage } from "../views/gameSetup.js";
 import { loadProfilePage } from "../views/profile.js";
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { updateActiveNavItem } from "../components/bottomNav.js";
@@ -24,7 +26,6 @@ import { updateActiveNavItem } from "../components/bottomNav.js";
 // };
 
 export function initializeHistory() {
-
   window.addEventListener("load", () => {
     const username = localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME);
 
@@ -43,7 +44,7 @@ export function initializeHistory() {
     if (event.state) {
       // TODO: Check cache before making API calls in each case
       // If cached data exists and is not stale, use it instead of making new API calls
-      
+
       const state = event.state || { view: "home" };
       console.log("Navigating to:", state.view);
       if (state && state.view) {
@@ -53,6 +54,12 @@ export function initializeHistory() {
         switch (state.view) {
           case "auth":
             loadAuthPage(false);
+            break;
+          case "game-list":
+            loadGameList(false);
+            break;
+          case "game-setup":
+            loadGameSetupPage(false);
             break;
           case "home":
             loadHomePage(false);
@@ -80,7 +87,7 @@ export function initializeHistory() {
             break;
           case "chat-home":
             loadChatPage(false);
-            break;            
+            break;
           case "create-tournament":
             loadCreateTournamentPage(false);
             break;
@@ -98,7 +105,8 @@ export function initializeHistory() {
             break;
           case "profile":
             // TODO: Implement profile data caching
-            const userId = state.userId || localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
+            const userId =
+              state.userId || localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
 
             loadProfilePage(userId, false);
             break;
@@ -136,7 +144,9 @@ export function initializeHistory() {
           loadTimetablePage(event.target.dataset.tournamentName);
           break;
         case "profile":
-          const userId = event.target.dataset.userId || localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
+          const userId =
+            event.target.dataset.userId ||
+            localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
         case "chat-home":
           loadChatPage();
           break;

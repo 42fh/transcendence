@@ -11,7 +11,7 @@ export function loadGameSetupPage(addToHistory = true) {
     if (addToHistory) {
       history.pushState(
         {
-          view: "game2d",
+          view: "game-setup",
         },
         ""
       );
