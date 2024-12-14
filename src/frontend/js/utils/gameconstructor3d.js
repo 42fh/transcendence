@@ -223,7 +223,8 @@ export default class GameConstructor {
           showToast("Game finished, Winner: " + message.winner);
           break;
         case "error":
-          console.error("Error message:", message);
+          if (message != "You are too fast")
+            console.error("Error message:", message);
           break;
         default:
           console.log("Unknown message type:", message);

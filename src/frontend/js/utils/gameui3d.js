@@ -116,7 +116,7 @@ export default class GameUI {
       const textGeometry = new TextGeometry(text, {
         font: font,
         size: height * 0.5,
-        height: 0.01,
+        depth: 0.01,
       });
       const textMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
       const textMesh = new THREE.Mesh(textGeometry, textMaterial);
@@ -218,7 +218,7 @@ export default class GameUI {
             const newGeometry = new TextGeometry(score.toString(), {
               font: font,
               size: 0.1,
-              height: 0.01,
+              depth: 0.01,
             });
             newGeometry.computeBoundingBox();
             const centerOffset =

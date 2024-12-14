@@ -69,6 +69,21 @@
   }
   
   
+  .game-list-button-container {
+    display: flex;
+    flex-direction: row;
+  }
+  
+  .game-list-button-container button {
+    margin: 20px;
+  }
+  
+  @media (max-width: 768px) {
+    .game-list-button-container {
+      flex-direction: column;
+    }
+  }
+
   @media (min-width: 1400px) {
     .game-list {
         display: grid;

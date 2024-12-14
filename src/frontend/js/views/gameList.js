@@ -3,6 +3,7 @@ import { showToast } from "../utils/toast.js";
 import { loadGame3D } from "./game3d.js";
 import { loadGameSetupPage } from "./gameSetup.js";
 import { loadGame2D } from "./game2D.js";
+import { loadGameOffline } from "./gameOffline.js";
 
 export async function loadGameList() {
   try {
@@ -23,6 +24,11 @@ export async function loadGameList() {
     document.querySelector(".create-game-btn").addEventListener("click", () => {
       loadGameSetupPage();
     });
+    document
+      .querySelector(".offline-game-btn")
+      .addEventListener("click", () => {
+        loadGameOffline();
+      });
   } catch (error) {
     console.error("Error loading game list page:", error);
     return;
