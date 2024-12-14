@@ -3,11 +3,6 @@ import {
   formatWinRatio,
   renderMatchHistory,
 } from "../services/usersService.js";
-import {
-  fetchUserProfile,
-  formatWinRatio,
-  renderMatchHistory,
-} from "../services/usersService.js";
 import { toggleBlockUser } from "../services/blockService.js";
 import { isUserBlockedByCurrentUser } from "../services/blockService.js";
 import { showToast } from "../utils/toast.js";
@@ -243,18 +238,12 @@ function populatePublicProfileHTML(content, userData) {
   const friendshipButton = content.querySelector(
     'button[data-action="friend"]'
   );
-
-  const friendshipButton = content.querySelector(
-    'button[data-action="friend"]'
-  );
   if (!friendshipButton) {
     console.warn("Friend button not found in template");
     return;
   }
 
-  // Check and set block button state
-  const blockIconSpan = blockButton.querySelector(".material-symbols-outlined");
-  
+  // Check and set block button state  
   // Async function to set up block button
   const setupBlockButton = async () => {
     try {
@@ -393,7 +382,7 @@ function populatePublicProfileHTML(content, userData) {
   
       // if (!user) throw new Error("User not found");
   
-      loadChatRoom(user);
+      loadChatRoom(userData);
     } catch (error) {
       console.error(error);
     }
