@@ -987,6 +987,32 @@
       </div>
     </template>
 
+    <!-- Tournament Round Template -->
+    <template id="tournament-round-template">
+      <div class="tournament-round">
+        <div class="tournament-round__header">
+          <h2 class="tournament-round__title">ROUND ${currentRound}</h2>
+        </div>
+
+        <div class="tournament-round__games">
+          <!-- Games will be added here dynamically -->
+        </div>
+      </div>
+    </template>
+
+    <!-- Tournament Game Template -->
+    <template id="tournament-game-template">
+      <div class="tournament-game">
+        <div class="tournament-game__players">
+          <div id="tournament-game__player1" class="tournament-game__player"></div>
+          <div class="tournament-game__vs">VS</div>
+          <div id="tournament-game__player2" class="tournament-game__player"></div>
+        </div>
+        <div class="tournament-game__result"></div>
+        <button class="tournament-game__play-btn">PLAY</button>
+      </div>
+    </template>
+
     <!-- Friendship Action Modal Template -->
     <template id="friendship-action-template">
       <div class="modal-content">
