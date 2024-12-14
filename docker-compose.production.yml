@@ -12,6 +12,8 @@ services:
     environment:
       - Debug=False
       - ENVIRONMENT=production
+    volumes:
+      - ./media:/app/media
   nginx:
     ports:
       - "${PORT:-8443}:443"

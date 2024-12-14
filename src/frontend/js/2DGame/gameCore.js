@@ -1,12 +1,9 @@
-// TODO: Implement game controller functional
-// TODO: Rename maybe to gameCore.js
-// Import necessary dependencies
 import { gameState, gameConfig, updateGameState } from "../store/index.js";
 import { initializeRenderer, updateRenderer } from "./renderer.js";
-import { disconnectGameSocket, sendGameMessage } from "../services/gameSocketService.js";
 import { showGameOver } from "./utils.js";
 import { updateGameContext, getGameContext } from "../store/index.js";
 import { updateGameInfo } from "./utils.js";
+import { websocket } from "../views/game2D.js";
 
 export function handleGameMessage(message, onEvent = null) {
   try {
@@ -69,7 +66,8 @@ function handleInitialState(message, onEvent) {
       "gameContext.player_index": gameContext.player_index,
       "gameContext.game_setup.type": gameContext.game_setup.type,
       "gameContext.players.length": gameContext.players.length,
-      "gameContext.game_state.balls.length": gameContext.game_state.balls.length,
+      "gameContext.game_state.balls.length":
+        gameContext.game_state.balls.length,
     });
     return;
   }
@@ -77,14 +75,23 @@ function handleInitialState(message, onEvent) {
     { label: "Player ID", value: gameContext.player_index },
     { label: "Game Type", value: gameContext.game_setup.type },
     { label: "Players", value: gameContext.players.length || INVALID_VALUE },
-    { label: "Balls", value: gameContext.game_state.balls.length || INVALID_VALUE },
+    {
+      label: "Balls",
+      value: gameContext.game_state.balls.length || INVALID_VALUE,
+    },
   ];
 
   if (gameContext.game_setup.sides) {
-    gameContextInfoItems.push({ label: "Sides", value: gameContext.game_setup.sides || INVALID_VALUE });
+    gameContextInfoItems.push({
+      label: "Sides",
+      value: gameContext.game_setup.sides || INVALID_VALUE,
+    });
   }
   if (gameContext.game_setup.shape) {
-    gameContextInfoItems.push({ label: "Shape", value: gameContext.game_setup.shape || INVALID_VALUE });
+    gameContextInfoItems.push({
+      label: "Shape",
+      value: gameContext.game_setup.shape || INVALID_VALUE,
+    });
   }
 
   updateGameInfo(gameContextInfoItems);
@@ -130,9 +137,9 @@ export function handleGameEvent(message, onEvent) {
   }
 
   // Update renderer if available
-  if (renderer?.type) {
-    renderer.update(message.game_state);
-  }
+  // if (renderer?.type) {
+  //   renderer.update(message.game_state);
+  // }
 
   // Notify through callback
   if (onEvent) {
@@ -150,7 +157,7 @@ export function handleGameFinished(message, onEvent) {
   // Show game over in renderer
   showGameOver(message.winner === "you");
   updateRenderer(message);
-  disconnectGameSocket();
+  websocket.disconnect();
 
   if (onEvent) {
     onEvent({
@@ -198,10 +205,6 @@ let lastMoveTime = 0;
 const MOVE_COOLDOWN = 0.1; // seconds, should come from player_values
 
 function sendPaddleMove(direction, debug = false) {
-  debug = true;
-  if (debug) {
-    console.log("Sending paddle move:", direction);
-  }
   const gameContext = getGameContext();
   const currentTime = Date.now() / 1000; // Convert to seconds
 
@@ -210,13 +213,11 @@ function sendPaddleMove(direction, debug = false) {
     return;
   }
 
-  const moveSpeed = gameContext.player_values.move_speed;
-
-  sendGameMessage({
+  console.log("gameContext:", gameContext);
+  websocket.sendMessage({
     action: "move_paddle",
     direction,
     user_id: gameContext.player_id,
-    move_speed: moveSpeed,
   });
 
   lastMoveTime = currentTime;

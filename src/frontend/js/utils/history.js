@@ -7,6 +7,8 @@ import { loadTournamentsPage } from "../views/tournaments.js";
 import { loadTournamentDetailsPage } from "../views/tournamentDetail.js";
 import { loadCreateTournamentPage } from "../views/tournamentCreate.js";
 import { loadTimetablePage } from "../views/timetable.js";
+import { loadGameList } from "../views/gameList.js";
+import { loadGameSetupPage } from "../views/gameSetup.js";
 import { loadProfilePage } from "../views/profile.js";
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { updateActiveNavItem } from "../components/bottomNav.js";
@@ -55,6 +57,12 @@ export function initializeHistory() {
           case "auth":
             loadAuthPage(false);
             break;
+          case "game-list":
+            loadGameList(false);
+            break;
+          case "game-setup":
+            loadGameSetupPage(false);
+            break;
           case "home":
             loadHomePage(false);
             break;
@@ -99,7 +107,8 @@ export function initializeHistory() {
             break;
           case "profile":
             // TODO: Implement profile data caching
-            const userId = state.userId || localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
+            const userId =
+              state.userId || localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
 
             loadProfilePage(userId, false);
             break;
@@ -140,7 +149,9 @@ export function initializeHistory() {
           loadTimetablePage(event.target.dataset.tournamentName);
           break;
         case "profile":
-          const userId = event.target.dataset.userId || localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
+          const userId =
+            event.target.dataset.userId ||
+            localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
           loadProfilePage(userId);
           break;
         case "chat-home":

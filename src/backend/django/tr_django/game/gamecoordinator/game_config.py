@@ -58,6 +58,7 @@ DEFAULT_CIRCULAR = {
     "paddle_length": float(0.3),
     "paddle_width": float(0.06),
     "ball_size": float(0.05),
+    "name": "unknown",
 }
 
 CLASSIC_FIXED = {
@@ -75,4 +76,4 @@ CLASSIC_FIXED = {
     "scale": float(2.0),
 }
 
-DEFAULT_CLASSIC = {"score": "first11"}
+DEFAULT_CLASSIC = {"score": "first11", "name": "unknown"}

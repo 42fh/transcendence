@@ -98,12 +98,11 @@ export default class GameUI {
     this.selector.rotation.y = 0;
 
     this.isActive = true;
-    if (this.game.type == "regular") {
-      this.selector.scale.setScalar(7);
-      this.selector.position.set(6.5, 5.5, -1.5);
-    } else {
-      this.selector.position.set(0.12, 0.5, -1.5);
-    }
+    this.selector.position.set(0.12, 0.6, -2.5);
+    // this.game.world.gui.gui.add(this.selector.position, "x", -2, 2);
+    // this.game.world.gui.gui.add(this.selector.position, "y", -2, 2);
+    // this.game.world.gui.gui.add(this.selector.position, "z", -8, 2);
+
     this.game.scene.add(this.selector);
   }
 
@@ -117,7 +116,7 @@ export default class GameUI {
       const textGeometry = new TextGeometry(text, {
         font: font,
         size: height * 0.5,
-        height: 0.01,
+        depth: 0.01,
       });
       const textMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
       const textMesh = new THREE.Mesh(textGeometry, textMaterial);
@@ -200,7 +199,7 @@ export default class GameUI {
     });
 
     this.tableGroup.rotation.y = 0;
-    this.tableGroup.position.set(0.12, 0.5, -1.5);
+    this.tableGroup.position.set(0.12, 0.9, -1.5);
     this.game.scene.add(this.tableGroup);
   }
 
@@ -219,7 +218,7 @@ export default class GameUI {
             const newGeometry = new TextGeometry(score.toString(), {
               font: font,
               size: 0.1,
-              height: 0.01,
+              depth: 0.01,
             });
             newGeometry.computeBoundingBox();
             const centerOffset =
