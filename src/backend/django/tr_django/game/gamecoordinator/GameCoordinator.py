@@ -412,9 +412,12 @@ class GameCoordinator:
                 user_from = await sync_to_async(CustomUser.objects.get)(id=from_user_id)
                 user_to = await sync_to_async(CustomUser.objects.get)(id=to_user_id)
 
-                send_notification(user_from, f"Here is your Game to play against {user_to.username}", url)
-                send_notification(user_to, f"Player: {user_to.username} invited you", url)
-
+                await asyncio.gather(
+                    asyncio.to_thread(
+                        send_notification, user_from, f"Here is your Game to play against {user_to.username}", url
+                    ),
+                    asyncio.to_thread(send_notification, user_to, f"Player: {user_to.username} invited you", url),
+                )
                 return {"status": True, "game_id": game_id, "message": "Invitation sent successfully"}
 
         except Exception as e:
