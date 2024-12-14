@@ -1,5 +1,6 @@
 import { showToast } from "../utils/toast.js";
 import { tournamentState } from "../store/tournament/state.js";
+import { loadLocalTournamentRoundPage } from "./localTournamentRound.js";
 
 export async function loadGameOffline(addToHistory = true, player1 = null, player2 = null, isTournament = false) {
   let gameCanvas, context;
@@ -184,5 +185,5 @@ export function handleGameComplete(winner) {
   }
 
   // Return to tournament round view
-  loadTournamentRoundPage();
+  loadLocalTournamentRoundPage();
 }
