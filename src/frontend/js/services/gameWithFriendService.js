@@ -21,8 +21,7 @@ export async function inviteFriend(friendUuid) {
       "Content-Type": "application/json",
     },
     // body: JSON.stringify({ currentUserId, friendId }),
-    body: JSON.stringify({ friendUuid }),
-
+    body: JSON.stringify({ to_user_id: friendUuid }), 
   });
 
   if (!response.ok) throw new Error("API request to invite friend failed");
