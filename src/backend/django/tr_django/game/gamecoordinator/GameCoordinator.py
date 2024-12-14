@@ -773,7 +773,6 @@ class GameCoordinator:
                             "side_index": side_index,
                             "joined_at": float(join_time) if join_time else None
                         })           
-            print(players_data) 
             # Sort by score to determine winner and rankings
             players_data.sort(key=lambda x: x["score"], reverse=True)
             for rank, player_data in enumerate(players_data, 1):
