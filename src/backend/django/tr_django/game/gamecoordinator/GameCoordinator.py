@@ -278,6 +278,7 @@ class GameCoordinator:
 
                     game_info = {
                         "game_id": game_id,
+                        "name": game_settings.get("name"),
                         "mode": game_settings.get("mode"),
                         "type": game_settings.get("type"),
                         "sides": game_settings.get("sides"),

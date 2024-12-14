@@ -3,6 +3,7 @@ import * as THREE from "three";
 import Debug from "./debug3d.js";
 import Audio from "./audio3d.js";
 import gsap from "gsap";
+import { ws as websocket } from "./websocket.js";
 
 export default class World {
   constructor(canvas, isPerspectiveCamera = true, game) {
@@ -144,11 +145,11 @@ export default class World {
     }
 
     // move paddle
-    if (this.moveDown && this.game.websocket) {
-      this.game.drawer.movePaddle("right");
+    if (this.moveDown && websocket) {
+      this.game.movePaddle("right");
     }
-    if (this.moveUp && this.game.websocket) {
-      this.game.drawer.movePaddle("left");
+    if (this.moveUp && websocket) {
+      this.game.movePaddle("left");
     }
 
     // UI
@@ -241,6 +242,19 @@ export default class World {
           this.moveDown = false;
           break;
       }
+    });
+    // Mobile controls buttons
+    document.getElementById("right-btn").addEventListener("touchstart", () => {
+      this.moveDown = true;
+    });
+    document.getElementById("right-btn").addEventListener("touchend", () => {
+      this.moveDown = false;
+    });
+    document.getElementById("left-btn").addEventListener("touchstart", () => {
+      this.moveUp = true;
+    });
+    document.getElementById("left-btn").addEventListener("touchend", () => {
+      this.moveUp = false;
     });
     // Fullscreen
     document.addEventListener("dblclick", () => {

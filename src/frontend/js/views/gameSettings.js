@@ -1,7 +1,7 @@
 // import { createNewGame } from "../services/gameSettingsService.js";
 import { createGame } from "../services/gameService.js";
 
-export function gameSettings() {
+export function loadGameSettings() {
   console.log("Entering gameSettings");
   const state = {
     showSettings: false,
@@ -129,11 +129,21 @@ export function gameSettings() {
       });
     }
 
-    ["playerId", "numPlayers", "numSides", "numBalls", "shape", "scoreMode"].forEach((fieldId) => {
+    [
+      "playerId",
+      "numPlayers",
+      "numSides",
+      "numBalls",
+      "shape",
+      "scoreMode",
+    ].forEach((fieldId) => {
       const element = document.getElementById(fieldId);
       if (element) {
         element.addEventListener("change", (e) => {
-          state.formData[fieldId] = e.target.type === "number" ? parseInt(e.target.value) : e.target.value;
+          state.formData[fieldId] =
+            e.target.type === "number"
+              ? parseInt(e.target.value)
+              : e.target.value;
         });
       }
     });
@@ -163,12 +173,14 @@ export function gameSettings() {
 
     const sidesField = document.getElementById("sidesField");
     if (sidesField) {
-      sidesField.style.display = state.formData.mode === "classic" ? "none" : "block";
+      sidesField.style.display =
+        state.formData.mode === "classic" ? "none" : "block";
     }
 
     const shapeFields = document.querySelectorAll(".shape-fields");
     shapeFields.forEach((field) => {
-      field.style.display = state.formData.mode === "irregular" ? "block" : "none";
+      field.style.display =
+        state.formData.mode === "irregular" ? "block" : "none";
     });
   }
 
@@ -213,8 +225,15 @@ export function gameSettings() {
       return;
     }
 
-    if (numPlayers < 1 || numPlayers > state.gameConfigs[state.formData.mode].maxPlayers) {
-      showStatus(`Number of players must be between 1 and ${state.gameConfigs[state.formData.mode].maxPlayers}.`);
+    if (
+      numPlayers < 1 ||
+      numPlayers > state.gameConfigs[state.formData.mode].maxPlayers
+    ) {
+      showStatus(
+        `Number of players must be between 1 and ${
+          state.gameConfigs[state.formData.mode].maxPlayers
+        }.`
+      );
       console.error(
         "ERROR: Invalid number of players. Please enter a number between 1 and",
         state.gameConfigs[state.formData.mode].maxPlayers
@@ -243,7 +262,10 @@ export function gameSettings() {
         console.log("SUCCESS: Game created successfully:", response);
         showStatus("Game created successfully!", 0);
       } else {
-        console.error("ERROR: Failed to create game:", response.message || "Unknown error");
+        console.error(
+          "ERROR: Failed to create game:",
+          response.message || "Unknown error"
+        );
         showStatus(response.message || "Failed to create game.", 1);
       }
     } catch (error) {

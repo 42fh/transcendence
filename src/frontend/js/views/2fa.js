@@ -9,6 +9,12 @@ import {
   setupFormValidation,
   validateFormField,
 } from "../utils/formValidation.js";
+import { closeModal, renderModal } from "../components/modal.js";
+import { startResendTimer, resendButtonListener } from "./auth.js";
+import {
+  sendEmailVerification,
+  validateEmailVerification,
+} from "../services/authService.js";
 
 export async function load2FAPage() {
   try {
@@ -64,17 +70,25 @@ export async function load2FAPage() {
     const userData = result.data;
     console.log("User data fetched:", userData);
 
-    if (userData.email == null || userData.email == "") {
-      document.querySelector(".email-warning").style.display = "block";
+    if (!userData.email || userData.email == "") {
+      document.querySelector(".email-not-set").style.display = "block";
       document.querySelector(".radio-form").style.display = "none";
     } else {
-      document.querySelector(".email-warning").style.display = "none";
+      document.querySelector(".email-not-set").style.display = "none";
+      document.querySelector(".radio-form").style.display = "block";
+    }
+
+    if (!userData.email_verified || userData.email_verified == false) {
+      document.querySelector(".email-not-verified").style.display = "block";
+      document.querySelector(".radio-form").style.display = "none";
+    } else {
+      document.querySelector(".email-not-verified").style.display = "none";
       document.querySelector(".radio-form").style.display = "block";
     }
 
     populateFormFields(mainContent, userData);
     setupFormValidation(form);
-    setupFormSubmission(form, userId);
+    setupFormSubmission(form, userId, userData);
   } catch (error) {
     showToast("Failed to load profile editor", "error");
   }
@@ -142,6 +156,10 @@ async function handleFormSubmission(form, userId) {
     console.log("Data collected via querySelector:", updatedDataFromInputs);
 
     const dataToSend = updatedDataFromInputs;
+    if (!dataToSend.email || dataToSend.email == "") {
+      dataToSend.email_verified = false;
+      dataToSend.two_factor_enabled = false;
+    }
 
     if (Object.keys(dataToSend).length === 0) {
       console.warn("No data to update");
@@ -160,13 +178,13 @@ async function handleFormSubmission(form, userId) {
 }
 
 // Setup event listeners for form submission
-function setupFormSubmission(form, userId) {
+function setupFormSubmission(form, userId, userData = {}) {
   if (!form) {
     console.error("Form element not found");
     return;
   }
 
-  // Add event listners to cancel button and save button
+  // Add event listners to cancel button, verify and save button
   const cancelButton = form.querySelector(".profile-edit__button--cancel");
 
   if (cancelButton) {
@@ -175,8 +193,51 @@ function setupFormSubmission(form, userId) {
     });
   }
 
+  const verifyButton = form.querySelector(
+    ".profile-edit__button--verify-email"
+  );
+
+  if (verifyButton) {
+    verifyButton.addEventListener("click", async () => {
+      const email = form.querySelector('input[name="email"]').value;
+      console.log("Verifying email:", email);
+      renderModal("2fa-template", {
+        isFormModal: false,
+        setup: () => {},
+        submitHandler: {},
+      });
+
+      await startResendTimer();
+      resendButtonListener(userData);
+
+      await sendEmailVerification(userData);
+      console.log("Email verification sent:");
+
+      twoFaFormListener();
+    });
+  }
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     handleFormSubmission(form, userId);
+  });
+}
+
+function twoFaFormListener() {
+  document.getElementById("2fa-verify").addEventListener("click", async () => {
+    event.preventDefault();
+
+    const code = document.getElementById("code").value.trim();
+
+    try {
+      await validateEmailVerification(code);
+      console.log("Email verification successful");
+      showToast("Email verified successfully");
+      closeModal();
+      document.querySelector(".email-not-verified").style.display = "none";
+    } catch (error) {
+      console.error("Error validating email verification:", error);
+      showToast("Verification code is invalid", true);
+    }
   });
 }

@@ -113,14 +113,14 @@ export default class Drawer {
         sectorSize
       );
       const ringMaterial = new THREE.MeshMatcapMaterial({
-        color: sectorColors[i],
+        color: paddles[i].active ? sectorColors[i] : "0xC2B280",
         transparent: true,
         opacity: 0.5,
         side: THREE.DoubleSide,
       });
       const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
       ringMesh.rotation.x = -Math.PI / 2;
-      ringMesh.position.y = 0.01;
+      ringMesh.position.y = 0.015;
 
       this.field.add(ringMesh);
     }
@@ -214,13 +214,5 @@ export default class Drawer {
       const paddle2 = this.game.paddles.get(1);
       paddle2.position.x = (gameState.paddles[3].position - GAME_WIDTH) * -1;
     }
-  }
-
-  movePaddle(direction) {
-    this.game.websocket.sendMessage({
-      action: "move_paddle",
-      direction,
-      user_id: this.game.userId,
-    });
   }
 }

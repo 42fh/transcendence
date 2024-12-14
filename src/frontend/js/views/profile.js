@@ -3,6 +3,11 @@ import {
   formatWinRatio,
   renderMatchHistory,
 } from "../services/usersService.js";
+import {
+  fetchUserProfile,
+  formatWinRatio,
+  renderMatchHistory,
+} from "../services/usersService.js";
 import { toggleBlockUser } from "../services/blockService.js";
 import { isUserBlockedByCurrentUser } from "../services/blockService.js";
 import { showToast } from "../utils/toast.js";
@@ -123,6 +128,13 @@ export async function loadProfilePage(userId = null, addToHistory = true) {
         console.log("2FA button clicked");
         load2FAPage(userData);
       });
+      // Add logout button handler
+      const logoutButton = mainContent.querySelector(
+        ".profile__button--logout"
+      );
+      if (logoutButton) {
+        logoutButton.addEventListener("click", handleLogout);
+      }
     }
 
     // TODO: probably we don't need this
@@ -141,6 +153,9 @@ function populateProfileHTML(content, userData, isOwnProfile) {
   // Shared elements
   populateSharedProfileHTML(content, userData);
 
+  const avatarElement = content.querySelector(".profile__avatar");
+  avatarElement.src = userData.avatar || ASSETS.IMAGES.DEFAULT_AVATAR;
+
   // Split based on profile type
   if (isOwnProfile) {
     populateOwnProfileHTML(content, userData);
@@ -150,13 +165,6 @@ function populateProfileHTML(content, userData, isOwnProfile) {
 }
 
 function populateSharedProfileHTML(content, userData) {
-  // Avatar
-  const avatarElement = content.querySelector(".profile__avatar");
-  avatarElement.onerror = function () {
-    console.log("Avatar failed to load, falling back to default");
-    avatarElement.src = ASSETS.IMAGES.DEFAULT_AVATAR;
-  };
-
   // Username
   const usernameElement = content.querySelector(".profile__username");
   applyUsernameTruncation(usernameElement, userData.username, 15);
@@ -167,6 +175,10 @@ function populateSharedProfileHTML(content, userData) {
 
   // Stats (always visible)
   if (userData.stats) {
+    content.querySelector(".profile__stats-wins").textContent =
+      userData.stats.wins;
+    content.querySelector(".profile__stats-losses").textContent =
+      userData.stats.losses;
     content.querySelector(".profile__stats-wins").textContent =
       userData.stats.wins;
     content.querySelector(".profile__stats-losses").textContent =
@@ -218,7 +230,7 @@ function populatePublicProfileHTML(content, userData) {
     element.style.display = "none";
   });
 
-  // Hide email and phone elements
+  // TODO: doppelt gemoppelt just to be sure
   const emailElement = content.querySelector(".profile__info-item--email");
   const phoneElement = content.querySelector(".profile__info-item--phone");
   const blockButton = content.querySelector('button[data-action="block"]');
@@ -227,6 +239,10 @@ function populatePublicProfileHTML(content, userData) {
 
   emailElement.style.display = "none";
   phoneElement.style.display = "none";
+
+  const friendshipButton = content.querySelector(
+    'button[data-action="friend"]'
+  );
 
   const friendshipButton = content.querySelector(
     'button[data-action="friend"]'
@@ -309,7 +325,12 @@ function populatePublicProfileHTML(content, userData) {
     return;
   }
 
-  // Set friendship button state and icon
+  const blockIconSpan = blockButton.querySelector(".material-symbols-outlined");
+  if (!blockIconSpan) {
+    console.warn("Icon span not found in block button");
+    return;
+  }
+
   if (userData.is_friend) {
     friendIconSpan.textContent = "do_not_disturb_on";
     friendshipButton.setAttribute("title", "Remove Friend");
@@ -383,10 +404,7 @@ function populatePublicProfileHTML(content, userData) {
 }
 
 
-async function handleFriendshipButtonClick(
-  friendshipButtonDatasetState,
-  userData
-) {
+async function handleFriendshipButtonClick(friendshipButtonDatasetState, userData) {
   try {
     switch (friendshipButtonDatasetState) {
       case "not_friends":
