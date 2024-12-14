@@ -376,12 +376,18 @@ async def user_online_status(request):
     POST: Set user as online
     DELETE: Set user as offline
     """
-    if not request.user.is_authenticated:
-        return JsonResponse({"error": "Unauthorized", "message": "Authentication required"}, status=401)
-
-    user_id = str(request.user.id)
-
     try:
+        is_authenticated = await sync_to_async(lambda: request.user.is_authenticated)()
+        if not is_authenticated:
+            return JsonResponse(
+            {
+                "error": "Unauthorized - missing authentication",
+                "message": "only login users can create new game",
+            },
+            status=401,
+        )
+        user_id = await sync_to_async(lambda: request.user.id)()
+
         if request.method == "GET":
             is_online = await GameCoordinator.is_user_online(user_id)
             return JsonResponse({"online": is_online, "user_id": user_id})
@@ -395,6 +401,7 @@ async def user_online_status(request):
             return JsonResponse({"message": "User set to offline", "user_id": user_id})
 
     except Exception as e:
+        print(f"hello: {e}") 
         return JsonResponse({"error": str(e), "message": "Failed to process request"}, status=500)
 
 
