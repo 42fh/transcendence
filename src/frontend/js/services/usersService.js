@@ -262,6 +262,7 @@ export async function fetchFriends(page = 1, perPage = 10, search = "") {
 
 export async function sendUserOnlineStatus(isOnline, expirationTimestamp) {
   try {
+    console.log("Sending user online status", isOnline ? "Online" : "Offline");
     const accessToken = await manageJWT();
     const response = await fetch("/api/game/user/online/", {
       method: isOnline ? "POST" : "DELETE", // Use POST for online, DELETE for offline
@@ -276,6 +277,7 @@ export async function sendUserOnlineStatus(isOnline, expirationTimestamp) {
     });
 
     if (!response.ok) {
+      console.error("Failed to notify server about user status:", response.statusText);
       throw new Error(`Failed to notify server: ${response.statusText}`);
     }
 
@@ -291,6 +293,7 @@ export async function sendUserOnlineStatus(isOnline, expirationTimestamp) {
 
 export async function fetchUserOnlineStatus() {
   try {
+    console.log("Fetching user online status");
     const accessToken = await manageJWT();
     const response = await fetch("/api/game/user/online/", {
       headers: {
@@ -299,10 +302,12 @@ export async function fetchUserOnlineStatus() {
     });
 
     if (!response.ok) {
+      console.error("Failed to fetch user status:", response.statusText);
       throw new Error(`Failed to fetch user status: ${response.statusText}`);
     }
 
     const data = await response.json();
+    console.log("User online status:", data);
     return data.online; // This will return a boolean
   } catch (error) {
     console.error("Error fetching user online status:", error);

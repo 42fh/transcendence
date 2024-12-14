@@ -15,12 +15,13 @@ from django.views.decorators.http import require_http_methods
 from django.utils.decorators import async_only_middleware
 from .tournamentmanager.utils import get_test_tournament_data
 from .tournamentmanager.TournamentManager import TournamentManager
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def transcendance(request):
     return HttpResponse("Initial view for transcendance")
-
-
 
 
 @csrf_exempt
@@ -376,32 +377,38 @@ async def user_online_status(request):
     POST: Set user as online
     DELETE: Set user as offline
     """
+
+    logger.info(f"Online status request received: {request.method}")
     try:
         is_authenticated = await sync_to_async(lambda: request.user.is_authenticated)()
         if not is_authenticated:
             return JsonResponse(
-            {
-                "error": "Unauthorized - missing authentication",
-                "message": "only login users can create new game",
-            },
-            status=401,
-        )
+                {
+                    "error": "Unauthorized - missing authentication",
+                    "message": "only login users can create new game",
+                },
+                status=401,
+            )
         user_id = await sync_to_async(lambda: request.user.id)()
+        logger.info(f"Processing online status for user_id: {user_id}")
 
         if request.method == "GET":
             is_online = await GameCoordinator.is_user_online(user_id)
+            logger.info(f"User {user_id} is online: {is_online}")
             return JsonResponse({"online": is_online, "user_id": user_id})
 
         elif request.method == "POST":
+            logger.info(f"Setting user {user_id} to online")
             await GameCoordinator.set_user_online(user_id)
             return JsonResponse({"message": "User set to online", "user_id": user_id})
 
         elif request.method == "DELETE":
+            logger.info(f"Setting user {user_id} to offline")
             await GameCoordinator.set_user_offline(user_id)
             return JsonResponse({"message": "User set to offline", "user_id": user_id})
 
     except Exception as e:
-        print(f"hello: {e}") 
+        logger.error(f"Error processing online status request: {str(e)}")
         return JsonResponse({"error": str(e), "message": "Failed to process request"}, status=500)
 
 
@@ -654,7 +661,7 @@ def all_tournaments(request):
                         "message": f"Tournament[{tournament.name}] created successfully. {result['message']}",
                         "value_create_tournament_debug": result,
                         "tournament": build_tournament_data(tournament),
-                     }
+                    }
                 )
             return JsonResponse({"error": result["message"]}, status=400)
 
