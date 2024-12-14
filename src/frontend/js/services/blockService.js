@@ -18,7 +18,6 @@ export async function toggleBlockUser(username, isCurrentlyBlocked) {
 
 
 export async function isUserBlockedByCurrentUser(username) {
-  console.log("username in isUserBlockedByCurrentUser", username);
   try {
     const response = await fetch("/api/chat/blocked_user/", {
       method: "GET",
@@ -32,11 +31,11 @@ export async function isUserBlockedByCurrentUser(username) {
     }
 
     const data = await response.json();
-    console.log("Data", data);
+    // console.log("Data", data);
     const blockedUsers = new Set(data.blocked_users);
-    console.log("blockedUsers", blockedUsers);
+    // console.log("blockedUsers", blockedUsers);
     const isBlocked = blockedUsers.has(username);
-    console.log("isBlocked", isBlocked);
+    // console.log("isBlocked", isBlocked);
 
     return isBlocked;
   } catch (error) {
