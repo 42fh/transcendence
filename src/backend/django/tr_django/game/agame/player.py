@@ -48,7 +48,7 @@ async def add_player(self, player_id):
         is_booked, is_tournament_player = await pipeline.execute() 
         
     
-        if not (is_booked or is_tournament_player or has_pending_invitations(player_id, self.redis):
+        if not (is_booked or is_tournament_player or has_pending_invitations(player_id, self.redis)):
   
             return {  
                 "role": "spectator", 
