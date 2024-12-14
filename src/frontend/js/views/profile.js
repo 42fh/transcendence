@@ -302,17 +302,7 @@ function populatePublicProfileHTML(content, userData) {
       if (blockResult.success) {
         // Update UI based on the block status
         userData.is_blocked = !userData.is_blocked;
-        blockIconSpan.textContent = userData.is_blocked
-          ? "block"
-          : "block_outlined";
-        blockButton.setAttribute(
-          "title",
-          userData.is_blocked ? "Unblock User" : "Block User"
-        );
-
-        //TODO: Fix the toast, it's not showing, probably due to DOM elements timeline (added before EventListener would work)
-        //TODO ALTERNATIVE: replace by an icon changing like slombard friend adding
-        showToast("test toast 2", false);
+        updateBlockButton(userData.is_blocked);
         showToast(
           userData.is_blocked
             ? "User blocked successfully"
@@ -533,5 +523,25 @@ function updateFriendButton(newStatus) {
       friendshipButton.setAttribute("title", "Remove Friend");
       friendshipButton.dataset.state = "friends";
       break;
+  }
+}
+
+function updateBlockButton(isBlocked) {
+  const blockButton = document.querySelector('button[data-action="block"]');
+  const blockIconSpan = blockButton.querySelector(".material-symbols-outlined");
+  if (!blockButton || !blockIconSpan) {
+    console.warn("Block button or icon not found");
+    return;
+  }
+  if (isBlocked) {
+    console.log("The user is currently blocked");
+    blockIconSpan.textContent = "block";
+    blockButton.setAttribute("title", "Unblock User");
+    blockButton.dataset.state = "blocked";
+  } else {
+    console.log("The user is NOT currently blocked");
+    blockIconSpan.textContent = "block_outlined";
+    blockButton.setAttribute("title", "Block User");
+    blockButton.dataset.state = "not_blocked";
   }
 }
