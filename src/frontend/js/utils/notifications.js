@@ -15,7 +15,7 @@ function reconnectWebSocket(wsUrl) {
 
   setTimeout(() => {
     setupNotificationListener(wsUrl);
-  }, RECONNECT_DELAY);
+  }, WS_RECONNECTION.RECONNECT_DELAY);
 }
 
 
