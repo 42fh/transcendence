@@ -1,4 +1,4 @@
-import { gameSettings } from "./gameSettings.js";
+import { loadGameSettings } from "./gameSettings.js";
 import { updateActiveNavItem } from "../components/bottomNav.js";
 import { fetchWaitingGames } from "../services/gameService.js";
 
@@ -89,5 +89,5 @@ function showSettings() {
   gamesContainer.innerHTML = "";
   settingsButton.style.display = "none";
 
-  gameSettings();
+  loadGameSettings();
 }

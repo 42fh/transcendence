@@ -34,7 +34,7 @@ urlpatterns = [
     path("friends/<uuid:user_id>/", FriendshipsView.as_view(), name="friends_list"),
     path("friends/", FriendshipsView.as_view(), name="friends_manage"),
     # User endpoints (specific prefixes)
-    path("users/<uuid:user_id>/avatar/", UserAvatarView.as_view(), name="user_avatar"),
+    path("<uuid:user_id>/avatar/", UserAvatarView.as_view(), name="user_avatar"),
     # Generic user endpoints (catch-all should be last)
     path("auth/oauth2/redirection/", callback, name="callback"),
     path("auth/login42/", login_with_42, name="login_with_42"),

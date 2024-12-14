@@ -1,11 +1,15 @@
 import { initializeChatWebSocket } from "../services/chatSocketService.js";
 import { loadChatPage } from "./chatHome.js";
-import { LOCAL_STORAGE_KEYS, ASSETS, CHAT_WS_MSG_TYPE } from "../config/constants.js";
-
+import {
+  LOCAL_STORAGE_KEYS,
+  ASSETS,
+  CHAT_WS_MSG_TYPE,
+} from "../config/constants.js";
+import { fetchUserProfile } from "../services/usersService.js";
 
 //TODO: in chatHome this function is called, pass userId instead of username,
 //TODO SUITE or whole user so I can access both id and name
-export function loadChatRoom(chatPartner) {
+export async function loadChatRoom(chatPartner) {
   history.pushState(
     {
       view: "chat-room",
@@ -25,7 +29,7 @@ export function loadChatRoom(chatPartner) {
   mainContent.appendChild(document.importNode(template.content, true));
   console.log("Chat room template loaded");
 
-  initializeChatRoom(chatPartner);
+  await initializeChatRoom(chatPartner);
 }
 
 function sendMessage(chatPartner) {
@@ -49,7 +53,7 @@ function sendMessage(chatPartner) {
   messageInput.value = "";
 }
 
-function initializeChatRoom(chatPartner) {
+async function initializeChatRoom(chatPartner) {
   const currentUserName = localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME);
   const currentUserId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
   // console.log("current user id:", currentUserId);
@@ -61,8 +65,8 @@ function initializeChatRoom(chatPartner) {
 
   partnerUsername.textContent = chatPartner.username;
 
-  // TODO: FETCH ACTUAL AVATAR
-  partnerAvatar.src = `${ASSETS.IMAGES.DEFAULT_AVATAR}`;
+  const result = await fetchUserProfile(chatPartner.id);
+  partnerAvatar.src = result.data.avatar;
   partnerAvatar.onerror = function () {
     this.src = ASSETS.IMAGES.DEFAULT_AVATAR;
   };
@@ -72,10 +76,7 @@ function initializeChatRoom(chatPartner) {
     loadChatPage(false);
   });
 
-  const roomName = [currentUserId, chatPartner.id]
-  .sort()
-  .join("_");
-
+  const roomName = [currentUserId, chatPartner.id].sort().join("_");
 
   const wsUrl = `/ws/chat/${roomName}/`;
 
@@ -112,7 +113,9 @@ function initializeChatRoom(chatPartner) {
           handlers.addMessageToChat(
             data.username,
             data.message,
-            data.username === currentUserName ? "self" : CHAT_WS_MSG_TYPE.SYSTEM,
+            data.username === currentUserName
+              ? "self"
+              : CHAT_WS_MSG_TYPE.SYSTEM,
             isSystemMessage
           );
         } else if (data.type === "message_history") {
@@ -123,13 +126,14 @@ function initializeChatRoom(chatPartner) {
             handlers.addMessageToChat(
               msg.username,
               msg.message,
-              msg.username === currentUserName ? "self" : CHAT_WS_MSG_TYPE.SYSTEM,
+              msg.username === currentUserName
+                ? "self"
+                : CHAT_WS_MSG_TYPE.SYSTEM,
               isSystemMessage
             );
           });
           handlers.state.messageHistoryLoaded = true;
         } else if (data.type === "send_notification") {
-
           handlers.addMessageToChat(
             CHAT_WS_MSG_TYPE.SYSTEM,
             data.notification.message,
@@ -151,7 +155,10 @@ function initializeChatRoom(chatPartner) {
   }
 
   sendButton.onclick = () => {
-    if (messageInput.value.trim() === "" || currentUserName === CHAT_WS_MSG_TYPE.SYSTEM) {
+    if (
+      messageInput.value.trim() === "" ||
+      currentUserName === CHAT_WS_MSG_TYPE.SYSTEM
+    ) {
       return;
     }
 

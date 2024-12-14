@@ -1,5 +1,6 @@
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { handleLogout } from "../views/auth.js";
+import { displayModalError } from "../components/modal.js";
 
 export async function loginUser(data) {
   return handleAuthRequest(data, "/api/users/auth/login/");

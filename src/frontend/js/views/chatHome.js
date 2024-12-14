@@ -8,6 +8,7 @@ import { setupNotificationListener } from "../utils/notifications.js";
 import { showToast } from "../utils/toast.js";
 import { renderNotifications } from "../components/chatNotification.js";
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
+import { fetchUserProfile } from "../services/usersService.js";
 
 // import { testButtonForNotificationsWithUrl } from "../dirtyTesting/testButtonForNotificationsWithUrl.js";
 
@@ -103,7 +104,7 @@ async function loadChatList(page = 1, perPage = 500, search = "") {
       "chat-conversations-list-item"
     );
 
-    data.users.forEach((user) => {
+    data.users.forEach(async (user) => {
       if (!userTemplate) {
         console.error("User template not found");
         return;
@@ -115,12 +116,13 @@ async function loadChatList(page = 1, perPage = 500, search = "") {
       const avatarImg = userItem.querySelector(
         ".chat-conversations-list__avatar"
       );
-      // const avatarImg = document.getElementById("chat-avatar");
-      avatarImg.src = user.avatarUrl || ASSETS.IMAGES.DEFAULT_AVATAR;
-      avatarImg.onerror = function () {
-        this.src = ASSETS.IMAGES.DEFAULT_AVATAR;
-      };
-
+      if (avatarImg) {
+        const result = await fetchUserProfile(user.id);
+        avatarImg.src = result.data.avatar || ASSETS.IMAGES.DEFAULT_AVATAR;
+        avatarImg.onerror = function () {
+          this.src = ASSETS.IMAGES.DEFAULT_AVATAR;
+        };
+      }
       const username = userItem.querySelector(
         ".chat-conversations-list__username"
       );
@@ -154,7 +156,7 @@ async function loadUsersList(page = 1, perPage = 500, search = "") {
       ".chat-users-horizontal-item"
     );
 
-    data.users.forEach((user) => {
+    data.users.forEach(async (user) => {
       if (!userTemplate) {
         console.error("User template not found");
         return;
@@ -170,10 +172,13 @@ async function loadUsersList(page = 1, perPage = 500, search = "") {
 
       // Populate user data
       const avatarImg = userItem.querySelector(".chat-users-list__avatar");
-      avatarImg.src = user.avatarUrl || ASSETS.IMAGES.DEFAULT_AVATAR;
-      avatarImg.onerror = function () {
-        this.src = ASSETS.IMAGES.DEFAULT_AVATAR;
-      };
+      if (avatarImg) {
+        const result = await fetchUserProfile(user.id);
+        avatarImg.src = result.data.avatar || ASSETS.IMAGES.DEFAULT_AVATAR;
+        avatarImg.onerror = function () {
+          this.src = ASSETS.IMAGES.DEFAULT_AVATAR;
+        };
+      }
 
       const username = userItem.querySelector(".chat-users-list__username");
       username.textContent =
