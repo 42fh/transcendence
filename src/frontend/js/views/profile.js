@@ -21,7 +21,7 @@ import {
 } from "../services/friendshipService.js";
 import { renderModal, closeModal } from "../components/modal.js";
 import { load2FAPage } from "./2fa.js";
-// import { playFriendButton } from "../services/gameWithFriend.js"
+import { inviteFriend } from "../services/gameWithFriendService.js"
 
 export async function loadProfilePage(userId = null, addToHistory = true) {
   const loggedInUserId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
@@ -208,6 +208,7 @@ function populateOwnProfileHTML(content, userData) {
   });
 }
 
+
 function populatePublicProfileHTML(content, userData) {
   // Hide private elements: email, phone, name, friends
   const privateElements = content.querySelectorAll(".profile__private-info");
@@ -336,11 +337,29 @@ function populatePublicProfileHTML(content, userData) {
     }
   }
 
-  // Add click handler for friend button
-  friendshipButton.addEventListener("click", () =>
-    handleFriendshipButtonClick(friendshipButton.dataset.state, userData)
-  );
+
+
+  playFriendButton.addEventListener("click", async () => {
+    try {
+      const friendId = userData.id;
+      const result = await inviteFriend(friendId);
+  
+      // Check if the invitation was successful
+      if (result.success) {
+        const playIconSpan = playFriendButton.querySelector(
+          ".material-symbols-outlined"
+        );
+        playIconSpan.textContent = "rsvp";
+        console.log("Invitation sent successfully");
+        playFriendButton.setAttribute("title", "Invitation Sent");
+      }
+    } catch (error) {
+      console.error("Error inviting friend:", error);
+      showToast("Failed to send game invitation", "error");
+    }
+  });
 }
+
 
 async function handleFriendshipButtonClick(
   friendshipButtonDatasetState,

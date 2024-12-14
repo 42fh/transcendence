@@ -14,14 +14,14 @@
 
 // Invite a friend to play a game
 export async function inviteFriend(friendUuid) {
-  const currentUserId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
+  // const currentUserId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
   const response = await fetch("/api/game/invitation", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     // body: JSON.stringify({ currentUserId, friendId }),
-    body: JSON.stringify({ friendId }),
+    body: JSON.stringify({ friendUuid }),
 
   });
 
