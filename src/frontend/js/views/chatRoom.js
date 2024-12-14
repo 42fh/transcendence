@@ -1,7 +1,7 @@
 import { initializeChatWebSocket } from "../services/chatSocketService.js";
 import { loadChatPage } from "./chatHome.js";
 import { LOCAL_STORAGE_KEYS, ASSETS, CHAT_WS_MSG_TYPE } from "../config/constants.js";
-
+import { inviteFriend } from "../services/gameWithFriendService.js";
 
 //TODO: in chatHome this function is called, pass userId instead of username,
 //TODO SUITE or whole user so I can access both id and name
@@ -23,7 +23,7 @@ export function loadChatRoom(chatPartner) {
   }
 
   mainContent.appendChild(document.importNode(template.content, true));
-  console.log("Chat room template loaded");
+  console.log("Chat room template loadedXXXX");
 
   initializeChatRoom(chatPartner);
 }
@@ -50,6 +50,7 @@ function sendMessage(chatPartner) {
 }
 
 function initializeChatRoom(chatPartner) {
+
   const currentUserName = localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME);
   const currentUserId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
   // console.log("current user id:", currentUserId);
@@ -58,10 +59,18 @@ function initializeChatRoom(chatPartner) {
   const partnerAvatar = document.getElementById("chat-room-partner-avatar");
   const partnerUsername = document.getElementById("chat-room-partner-username");
   const backButton = document.querySelector(".chat-room-header__back-btn");
+  const inviteButton = document.getElementById("chat-room-invite");
+  if (!inviteButton) {
+    console.error("Invite button not found in the DOM.");
+    return;
+  }
+  console.log("XXX");
+
+  console.log("Invite Button:", inviteButton);
+
 
   partnerUsername.textContent = chatPartner.username;
 
-  // TODO: FETCH ACTUAL AVATAR
   partnerAvatar.src = `${ASSETS.IMAGES.DEFAULT_AVATAR}`;
   partnerAvatar.onerror = function () {
     this.src = ASSETS.IMAGES.DEFAULT_AVATAR;
@@ -145,10 +154,34 @@ function initializeChatRoom(chatPartner) {
       },
     };
 
+    
+      inviteButton.addEventListener("click", async () => {
+        console.log("Inviting friend:", chatPartner.id);
+        try {
+          await inviteFriend(chatPartner.id);
+          handlers.addMessageToChat(
+            CHAT_WS_MSG_TYPE.SYSTEM,
+            `Invitation sent to ${chatPartner.username}`,
+            CHAT_WS_MSG_TYPE.SYSTEM,
+            true
+          );
+        } catch (error) {
+          handlers.addMessageToChat(
+            CHAT_WS_MSG_TYPE.SYSTEM,
+            `Failed to send invitation: ${error.message}`,
+            CHAT_WS_MSG_TYPE.SYSTEM,
+            true
+          );
+        }
+      });
+    
+    
     initializeChatWebSocket(wsUrl, chatPartner.username, handlers);
   } catch (error) {
     displayModalError(`Failed to connect to chat: ${error.message}`);
   }
+
+
 
   sendButton.onclick = () => {
     if (messageInput.value.trim() === "" || currentUserName === CHAT_WS_MSG_TYPE.SYSTEM) {
@@ -163,4 +196,5 @@ function initializeChatRoom(chatPartner) {
       sendMessage(chatPartner);
     }
   };
+
 }
