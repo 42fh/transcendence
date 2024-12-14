@@ -48,38 +48,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-    ///////////////////////////     moved notifications from chatHome
-    try {
-      if (notificationSocket) {
-        try {
-          notificationSocket.close();
-        } catch (closeError) {
-          console.warn(
-            "Error closing existing notification socket:",
-            closeError
-          );
-        }
-      }
-        
-      const currentUser = LOCAL_STORAGE_KEYS.USERNAME;
-      if (currentUser) {
-        const wsUrl = `/ws/notifications/${currentUser}/`;
-    
-        notificationSocket = setupNotificationListener(wsUrl);
-      } else {
-        console.error("No current user found for notifications");
-      }
-  
-    } catch (error) {
-          console.error("Error with notification in main", error);
-          // displayModalError("Failed to load chat home");
-        }
-
-    ///////////////////////////     moved notifications from chatHome
-
-
-
-
 
 
     loadHomePage();

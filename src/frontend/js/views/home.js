@@ -3,6 +3,13 @@ import { loadTournamentsPage } from "./tournaments.js";
 import { updateActiveNavItem } from "../components/bottomNav.js";
 import { loadChatPage } from "./chatHome.js";
 import { loadGameList } from "./gameList.js";
+import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
+import { setupNotificationListener } from "../utils/notifications.js";
+import { renderNotifications } from "../components/chatNotification.js";
+
+
+let notificationSocket = null;
+
 
 export function loadHomePage(addToHistory = true) {
   try {
@@ -15,6 +22,48 @@ export function loadHomePage(addToHistory = true) {
       );
       if (!addToHistory) updateActiveNavItem("home");
     }
+
+
+
+
+
+    ///////////////////////////     moved notifications from chatHome
+    try {
+      if (notificationSocket) {
+        try {
+          consoele.log("XXXXXXXXXXXXXXXXXXXXXXXClosing existing notification socket");
+          notificationSocket.close();
+        } catch (closeError) {
+          console.warn(
+            "Error closing existing notification socket:",
+            closeError
+          );
+        }
+      }
+        
+      const currentUser = LOCAL_STORAGE_KEYS.USERNAME;
+      if (currentUser) {
+        console.log("XXXXXXXXXXXXXXXXXXXXXXXSetting up notification listener for user", currentUser);
+        const wsUrl = `/ws/notifications/${currentUser}/`;
+    
+        notificationSocket = setupNotificationListener(wsUrl);
+      } else {
+        console.error("No current user found for notifications");
+      }
+  
+    } catch (error) {
+          console.error("Error with notification in main", error);
+          // displayModalError("Failed to load chat home");
+    }
+    renderNotifications();
+
+
+    ///////////////////////////     moved notifications from chatHome
+
+
+
+
+
 
     const mainContent = document.getElementById("main-content");
     if (!mainContent) {
