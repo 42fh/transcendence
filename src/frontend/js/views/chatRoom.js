@@ -7,6 +7,7 @@ import {
 } from "../config/constants.js";
 import { inviteFriend } from "../services/gameWithFriendService.js";
 import { loadProfilePage } from "./profile.js";import { fetchUserProfile } from "../services/usersService.js";
+import { showToast } from "../utils/toast.js";
 
 //TODO: in chatHome this function is called, pass userId instead of username,
 //TODO SUITE or whole user so I can access both id and name
@@ -172,6 +173,7 @@ async function initializeChatRoom(chatPartner) {
             CHAT_WS_MSG_TYPE.SYSTEM,
             true
           );
+          showToast("Invitation sent", false);
         } catch (error) {
           handlers.addMessageToChat(
             CHAT_WS_MSG_TYPE.SYSTEM,

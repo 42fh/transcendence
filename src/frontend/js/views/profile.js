@@ -23,7 +23,6 @@ import { renderModal, closeModal } from "../components/modal.js";
 import { load2FAPage } from "./2fa.js";
 import { inviteFriend } from "../services/gameWithFriendService.js"
 import { loadChatRoom } from "./chatRoom.js";
-import { fetchConversationList } from "../services/conversationService.js";
 
 export async function loadProfilePage(userId = null, addToHistory = true) {
   const loggedInUserId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
@@ -230,18 +229,17 @@ function populatePublicProfileHTML(content, userData) {
   const phoneElement = content.querySelector(".profile__info-item--phone");
   const blockButton = content.querySelector('button[data-action="block"]');
   const playFriendButton = content.querySelector('button[data-action="play"]');
+  const friendshipButton = content.querySelector('button[data-action="friend"]');
   const chatButton = content.querySelector('button[data-action="chat"]');
+
 
   emailElement.style.display = "none";
   phoneElement.style.display = "none";
 
-  const friendshipButton = content.querySelector(
-    'button[data-action="friend"]'
-  );
-  if (!friendshipButton) {
-    console.warn("Friend button not found in template");
-    return;
-  }
+
+  friendshipButton.addEventListener("click", () => {
+    handleFriendshipButtonClick(friendshipButton.dataset.state, userData);
+  });
 
   // Check and set block button state  
   // Async function to set up block button
@@ -370,26 +368,8 @@ function populatePublicProfileHTML(content, userData) {
   });
 
   chatButton.addEventListener("click", async () => {
-    try {
-      // const data = await fetchConversationList(1, 500, "");
-      // if (!data || !data.users) throw new Error("Failed to fetch chat contacts");
-  
-      // console.log("userData.id", userData.id);
-      // console.log("data.users", data.users);
-      
-      // // Correct the find method to properly search the users array
-      // const user = data.users.find(u => u.id === userData.id);
-  
-      // if (!user) throw new Error("User not found");
-  
       loadChatRoom(userData);
-    } catch (error) {
-      console.error(error);
-    }
   });
-  
-  
-  
 }
 
 
