@@ -69,3 +69,7 @@ export const tournamentState = {
   // Rounds array
   rounds: [], // [[match1, match2, ...], [semifinal1, semifinal2], [final]]
 };
+
+export function getRoundWinners(roundNumber) {
+  return tournamentState.rounds[roundNumber - 1].games.map((game) => game.winner);
+}

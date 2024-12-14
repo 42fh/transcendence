@@ -1,6 +1,7 @@
 import { showToast } from "../utils/toast.js";
 import { tournamentState } from "../store/tournament/state.js";
 import { loadLocalTournamentRoundPage } from "./localTournamentRound.js";
+import { generateRound } from "./localTournamentSetup.js";
 
 export async function loadGameOffline(addToHistory = true, player1 = null, player2 = null, isTournament = false) {
   let gameCanvas, context;
@@ -15,7 +16,7 @@ export async function loadGameOffline(addToHistory = true, player1 = null, playe
     ballSpeedY = 1.4;
   let player1Score = 0,
     player2Score = 0;
-  const winningScore = 5;
+  const winningScore = 1;
   let gameRunning = true;
 
   function drawGameState() {
@@ -181,6 +182,7 @@ export function handleGameComplete(winner) {
     } else {
       // Tournament complete!
       tournamentState.tournamentInfo.status = "completed";
+      showToast(`The winner is ${winner.name}!`, true);
     }
   }
 

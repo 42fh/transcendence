@@ -1,7 +1,7 @@
 import { tournamentState } from "../store/tournament/state.js";
 import { showToast } from "../utils/toast.js";
 import { loadLocalTournamentRoundPage } from "./localTournamentRound.js";
-
+import { getRoundWinners } from "../store/tournament/state.js";
 export function loadLocalTournamentSetupPage(addToHistory = true) {
   try {
     if (addToHistory) {
@@ -91,12 +91,12 @@ async function handlePlayerRegistration(event) {
   loadLocalTournamentRoundPage();
 }
 
-function generateRound(roundNumber) {
+export function generateRound(roundNumber) {
   // Array of players for the round
   const players =
     roundNumber === 1
       ? [...tournamentState.players] // First round uses all players
-      : tournamentState.getRoundWinners(roundNumber - 1); // Subsequent rounds use previous winners
+      : getRoundWinners(roundNumber - 1); // Subsequent rounds use previous winners
 
   const shuffledPlayers = players.sort(() => Math.random() - 0.5);
   const numberOfGames = players.length / 2;
