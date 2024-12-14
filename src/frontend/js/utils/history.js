@@ -12,7 +12,6 @@ import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { updateActiveNavItem } from "../components/bottomNav.js";
 import { loadLocalTournamentSetupPage } from "../views/localTournamentSetup.js";
 import { loadLocalTournamentRoundPage } from "../views/localTournamentRound.js";
-}
 
 // TODO: Implement state management system to cache API responses
 // Consider using:
