@@ -16,6 +16,8 @@ import {
 } from "../services/friendshipService.js";
 import { renderModal, closeModal } from "../components/modal.js";
 import { load2FAPage } from "./2fa.js";
+// import { updateOnlineStatus } from "../utils/onlineStatus.js";
+import { startOnlineStatusPolling } from "../utils/onlineStatus.js";
 
 export async function loadProfilePage(userId = null, addToHistory = true) {
   const loggedInUserId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
@@ -96,6 +98,13 @@ export async function loadProfilePage(userId = null, addToHistory = true) {
     mainContent.appendChild(content);
     const matchesContainer = mainContent.querySelector(".profile__matches-list");
     renderMatchHistory(userData.recent_matches, matchesContainer);
+
+    // Start online status polling in the background
+    startOnlineStatusPolling(targetUserId).then((cleanup) => {
+      // Add cleanup handlers once polling is established
+      window.addEventListener("beforeunload", cleanup);
+      window.addEventListener("popstate", cleanup);
+    });
 
     // Add edit button handler only for own profile
     if (isOwnProfile) {
@@ -197,37 +206,36 @@ function populatePublicProfileHTML(content, userData) {
     element.style.display = "none";
   });
 
-  
   // TODO: doppelt gemoppelt just to be sure
   const emailElement = content.querySelector(".profile__info-item--email");
   const blockButton = content.querySelector('button[data-action="block"]');
   const phoneElement = content.querySelector(".profile__info-item--phone");
   emailElement.style.display = "none";
   phoneElement.style.display = "none";
-  
+
   const friendshipButton = content.querySelector('button[data-action="friend"]');
   if (!friendshipButton) {
     console.warn("Friend button not found in template");
     return;
   }
-  
+
   // if (!friendshipButton || !blockButton || !csrfToken) {
   //   console.warn("Friend button or block button not found or CSRF token missing");
   //   return;
   // }
-  
+
   const friendIconSpan = friendshipButton.querySelector(".material-symbols-outlined");
   if (!friendIconSpan) {
     console.warn("Icon span not found in friend button");
     return;
   }
-  
+
   const blockIconSpan = blockButton.querySelector(".material-symbols-outlined");
   if (!blockIconSpan) {
     console.warn("Icon span not found in block button");
     return;
   }
-  
+
   if (userData.is_friend) {
     friendIconSpan.textContent = "do_not_disturb_on";
     friendshipButton.setAttribute("title", "Remove Friend");
@@ -239,32 +247,32 @@ function populatePublicProfileHTML(content, userData) {
         friendshipButton.setAttribute("title", "Friend Request Sent. Click to withdraw.");
         friendshipButton.dataset.state = "pending_sent";
         break;
-        case "received":
-          friendIconSpan.textContent = "check_circle";
-          friendshipButton.setAttribute("title", "Friend Request Received. Click to accept, reject or ignore.");
-          friendshipButton.dataset.state = "pending_received";
-          break;
-          default:
-            friendIconSpan.textContent = "add_circle";
-            friendshipButton.setAttribute("title", "Add Friend");
-            friendshipButton.dataset.state = "not_friends";
+      case "received":
+        friendIconSpan.textContent = "check_circle";
+        friendshipButton.setAttribute("title", "Friend Request Received. Click to accept, reject or ignore.");
+        friendshipButton.dataset.state = "pending_received";
+        break;
+      default:
+        friendIconSpan.textContent = "add_circle";
+        friendshipButton.setAttribute("title", "Add Friend");
+        friendshipButton.dataset.state = "not_friends";
     }
   }
   // Add click handler for friend button
   //   friendButton.addEventListener("click", async () => {
-    //     // TODO: Implement friend request actions
-    //     // We'll add this functionality next
-    //     console.log("Friend button clicked:", {
-      //       is_friend: userData.is_friend,
-      //       status: userData.friend_request_status,
-      //     });
-      //   });
-      friendshipButton.addEventListener("click", () =>
-      handleFriendshipButtonClick(friendshipButton.dataset.state, userData)
-      );
-      
-      blockButton.addEventListener("click", async () => {
-        try {
+  //     // TODO: Implement friend request actions
+  //     // We'll add this functionality next
+  //     console.log("Friend button clicked:", {
+  //       is_friend: userData.is_friend,
+  //       status: userData.friend_request_status,
+  //     });
+  //   });
+  friendshipButton.addEventListener("click", () =>
+    handleFriendshipButtonClick(friendshipButton.dataset.state, userData)
+  );
+
+  blockButton.addEventListener("click", async () => {
+    try {
       const action = userData.is_blocked ? "unblock" : "block";
       const blockResult = await toggleBlockUser(userData.username, userData.is_blocked);
 
@@ -284,7 +292,6 @@ function populatePublicProfileHTML(content, userData) {
       showToast("Failed to block/unblock user", true);
     }
   });
-
 }
 
 async function handleFriendshipButtonClick(friendshipButtonDatasetState, userData) {

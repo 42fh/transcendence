@@ -30,6 +30,8 @@
   /* Status Colors */
   --color-status-online: var(--color-accent); /* Same as success color for now */
   --color-status-offline: var(--color-text-secondary); /* Using our secondary text color */
+  /* Status Colors */
+--color-status-away: #ffa726; /* Adding orange for away status */
 
   /* Typography */
   --font-family-primary: "Press Start 2P", cursive;

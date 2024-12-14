@@ -288,3 +288,24 @@ export async function sendUserOnlineStatus(isOnline, expirationTimestamp) {
     console.error("Error notifying server about user status:", error);
   }
 }
+
+export async function fetchUserOnlineStatus() {
+  try {
+    const accessToken = await manageJWT();
+    const response = await fetch(`${CONFIG.API_BASE_URL}/user/online/`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch user status: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.online; // This will return a boolean
+  } catch (error) {
+    console.error("Error fetching user online status:", error);
+    return false;
+  }
+}

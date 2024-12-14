@@ -1,4 +1,5 @@
 import { sendUserOnlineStatus } from "../services/usersService.js";
+import { fetchUserOnlineStatus } from "../services/usersService.js";
 
 let lastStatus = null; // Tracks the last sent online/offline status
 let lastExpirationTimestamp = 0; // Tracks the last sent expiration timestamp
@@ -56,4 +57,45 @@ export function initializeOnlineStatusTracking() {
   window.addEventListener("beforeunload", () => {
     sendUserOnlineStatus(false, Date.now());
   });
+}
+
+export function updateOnlineStatus(status) {
+  const statusElement = document.querySelectorAll(".profile__online-status");
+
+  // Remove all status classes
+  statusElement.forEach((element) => {
+    element.classList.remove(
+      "profile__online-status--online",
+      "profile__online-status--offline",
+      "profile__online-status--away"
+    );
+  });
+
+  statusElement.forEach((element) => {
+    element.classList.add(`profile__online-status--${status}`);
+  });
+}
+
+export async function startOnlineStatusPolling(userId) {
+  let currentStatus = null;
+
+  const pollStatus = async () => {
+    const isOnline = await fetchUserOnlineStatus();
+    const newStatus = isOnline ? "online" : "offline";
+
+    // Only update if status has changed
+    if (currentStatus !== newStatus) {
+      currentStatus = newStatus;
+      updateOnlineStatus(newStatus);
+    }
+  };
+
+  // Initial check
+  await pollStatus();
+
+  // Poll every 30 seconds
+  const intervalId = setInterval(pollStatus, 30000);
+
+  // Return cleanup function
+  return () => clearInterval(intervalId);
 }
