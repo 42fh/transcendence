@@ -21,7 +21,9 @@ def create_message_notification(sender, instance, created, **kwargs):
 
             # Create the notification
             notification = Notification.objects.create(
-                user=recipient, message=f"New message from {instance.sender.username}: {instance.content[:50]}"
+                user=recipient,
+                message=f"New message from {instance.sender.username}: {instance.content[:50]}",
+                url=f"/chat/{instance.room.room_id}/",
             )
             logger.info(f"Notification created: {notification.id} for user: {recipient.username}")
         except Exception as e:

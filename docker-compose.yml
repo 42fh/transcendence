@@ -20,20 +20,19 @@ services:
     networks:
       - transcendence_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} -p 5432"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d postgres -p 5432"]
       interval: 1s
-      timeout: 10s
-      retries: 3
+      timeout: 15s
+      retries: 5
+      start_period: 10s
   django:
     build: ./src/backend/django
     # mind that manage.py is in the tr_django folder 
     command: sh -c "echo Error the command of django must be overwritten"
     env_file:
       - ./.env
-    volumes:
-      # Probably we don't want to have a volume for the django app in production but just copy the files
-      - ./src/backend/django:/app
-      - ./media:/app/media
+    # volumes:
+      # volumes must be defined in override (dev) and production(prod) file
     ports:
       - "8000"
     depends_on:

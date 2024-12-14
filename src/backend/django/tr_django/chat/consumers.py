@@ -7,6 +7,9 @@ from django.utils import timezone
 from chat.models import ChatRoom, Message, BlockedUser
 from users.models import CustomUser
 from django.db import models
+from game.tournamentmanager.TournamentDisconnectHandler  import TournamentDisconnectHandler
+
+
 
 logger = logging.getLogger("chat")
 
@@ -236,8 +239,8 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             await self.close()
 
     async def disconnect(self, close_code):
-        # Remove user from the group
         if hasattr(self, "group_name"):
+            await TournamentDisconnectHandler.handle_tournament_disconnect(self.scope["user"])
             await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
     async def send_notification(self, event):
