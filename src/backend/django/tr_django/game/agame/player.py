@@ -129,6 +129,7 @@ async def _handle_normal_pregame_leave(self, player_id: str, side_index: int):
         pipeline.srem(self.players_key, player_id)
         pipeline.delete(f"{self.game_id}:player_side:{player_id}")
         pipeline.delete(f"{self.game_id}:side_player:{side_index}")
+        pipeline.delete(f"{self.game_id}:paddle_index:{player_id}")
         pipeline.delete(f"player_join_time:{self.game_id}:{player_id}")
         pipeline.delete(f"{GC.PLAYING_USER_PREFIX}{player_id}:{self.game_id}")
         await pipeline.execute()

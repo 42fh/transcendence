@@ -44,7 +44,7 @@ async def error_exit(self, error_message: str, error_details: str = None):
 async def start_game(self):
     """Start game with process-safe checks"""
 
-    waiting_after_leaving = 300 # 5min 
+    waiting_after_leaving = 120 # 2min 
     try:
         players = self.settings.get("num_players")
         await GameCoordinator.set_to_waiting_game(self.game_id)
