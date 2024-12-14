@@ -7,9 +7,7 @@ import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { setupNotificationListener } from "../utils/notifications.js";
 import { renderNotifications } from "../components/chatNotification.js";
 
-
 let notificationSocket = null;
-
 
 export function loadHomePage(addToHistory = true) {
   try {
@@ -23,15 +21,9 @@ export function loadHomePage(addToHistory = true) {
       if (!addToHistory) updateActiveNavItem("home");
     }
 
-
-
-
-
-    ///////////////////////////     moved notifications from chatHome
     try {
       if (notificationSocket) {
         try {
-          consoele.log("XXXXXXXXXXXXXXXXXXXXXXXClosing existing notification socket");
           notificationSocket.close();
         } catch (closeError) {
           console.warn(
@@ -43,7 +35,6 @@ export function loadHomePage(addToHistory = true) {
         
       const currentUser = LOCAL_STORAGE_KEYS.USERNAME;
       if (currentUser) {
-        console.log("XXXXXXXXXXXXXXXXXXXXXXXSetting up notification listener for user", currentUser);
         const wsUrl = `/ws/notifications/${currentUser}/`;
     
         notificationSocket = setupNotificationListener(wsUrl);
@@ -53,17 +44,8 @@ export function loadHomePage(addToHistory = true) {
   
     } catch (error) {
           console.error("Error with notification in main", error);
-          // displayModalError("Failed to load chat home");
     }
     renderNotifications();
-
-
-    ///////////////////////////     moved notifications from chatHome
-
-
-
-
-
 
     const mainContent = document.getElementById("main-content");
     if (!mainContent) {

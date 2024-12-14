@@ -197,6 +197,8 @@ function populateOwnProfileHTML(content, userData) {
 
   // Friends section with click handler
   const friendsSection = content.querySelector(".profile__section--friends");
+  const friendsCount = friendsSection.querySelector(".profile__friends-count");
+  friendsCount.textContent = userData.friends_count;
   friendsSection.setAttribute("role", "button");
   friendsSection.setAttribute("tabindex", "0");
 
