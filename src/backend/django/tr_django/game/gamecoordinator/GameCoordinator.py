@@ -11,8 +11,6 @@ import logging
 from asgiref.sync import sync_to_async
 
 
-
-
 logger = logging.getLogger(__name__)
 
 
@@ -63,6 +61,11 @@ class GameCoordinator:
     # user online
     USER_ONLINE_PREFIX = "user_online_"
     USER_ONLINE_EXPIRY = 60
+
+    # inventation
+    INVITATION_PREFIX = "invitation_"
+    INVITATION_EXPIRY = 300  # 5 minutes
+
 
     # more possible key
     # waiting_tournament_games_key  = "waiting_tournament_games" # tournament games has fixed players not pubblic
@@ -407,6 +410,75 @@ class GameCoordinator:
         except Exception as e:
             logger.error(f"Error checking player status: {e}")
             return False
+
+    @classmethod
+    async def create_invitation(cls, from_user_id: str, to_user_id: str, game_settings: dict) -> dict:
+        """Create a game invitation from one user to another"""
+       
+        from ..tournamentmanager.TournamentManager  import send_notification # send_notification(user , message, url=None)
+        from users.models import CustomUser
+        try:
+            async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
+                
+                async with redis_conn.scan_iter(match=f"{cls.INVITATION_PREFIX}{to_user_id}:*:{from_user_id}") as scan:
+                    async for key in scan:
+                        return {
+                                    "status": False, 
+                                    "message": "Invitation already exists between these users"
+                        }
+                # Create game
+                game_id = await cls.create_new_game(game_settings)
+                if not game_id:
+                    return {
+                        "status": False,
+                        "message": "Failed to create game"
+                    }
+                invitation_key = f"{cls.INVITATION_PREFIX}{to_user_id}:{game_id}:{from_user_id}"  
+                
+                await redis_conn.set(
+                    invitation_key,
+                    ex=cls.INVITATION_EXPIRY
+                )
+                url=f"/ws/game/{game_id}/"
+                user_from = sync_to_async(CustomUser.objects.get) (id=from_user_id)
+                user_to = sync_to_async(CustomUser.objects.get) (id=to_user_id)
+        
+                send_notification(user_from,f"Here is your Game to play against {user_to.username}"      ,url)
+                send_notification(user_to,f"Player: {user_to.username} invited  you)"      ,url)
+
+                return {
+                    "status": True,
+                    "game_id": game_id,
+                    "message": "Invitation sent successfully"
+                }
+                
+        except Exception as e:
+            logger.error(f"Error creating invitation: {e}")
+            return {
+                "status": False,
+                "message": f"Error creating invitation: {e}"
+            }
+
+    @classmethod
+    async def get_pending_invitations(cls, user_id: str) -> list:
+        """Get all pending invitations for a user"""
+        try:
+            async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_conn:
+                invitations = []
+                pattern = f"{cls.INVITATION_PREFIX}{user_id}:*"
+                
+                async for key in redis_conn.scan_iter(pattern):
+                    data = await redis_conn.get(key)
+                    if data:
+                        invitations.append(json.loads(data))
+                        
+                return invitations
+                     
+        except Exception as e:
+            logger.error(f"Error getting invitations: {e}")
+            return []
+
+
 
     @classmethod
     async def cleanup_invalid_bookings(cls, redis_conn: redis.Redis, game_id: str):
