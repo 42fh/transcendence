@@ -236,7 +236,7 @@ async def invitation(request):
             if await is_user_blocked(user, to_user_id):
                 return JsonResponse({
                     "error": "Bad Request",
-                    "message": "to_user_id"
+                    "message": "Cannot send invitation to blocked user"
                 }, status=403)
                 
             # Default game settings for invitation
