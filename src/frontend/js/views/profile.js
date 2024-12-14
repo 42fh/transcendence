@@ -146,6 +146,9 @@ function populateProfileHTML(content, userData, isOwnProfile) {
   // Shared elements
   populateSharedProfileHTML(content, userData);
 
+  const avatarElement = content.querySelector(".profile__avatar");
+  avatarElement.src = userData.avatar || ASSETS.IMAGES.DEFAULT_AVATAR;
+
   // Split based on profile type
   if (isOwnProfile) {
     populateOwnProfileHTML(content, userData);
@@ -155,14 +158,6 @@ function populateProfileHTML(content, userData, isOwnProfile) {
 }
 
 function populateSharedProfileHTML(content, userData) {
-  // Avatar
-  const avatarElement = content.querySelector(".profile__avatar");
-  console.log("avatar:", avatarElement);
-  avatarElement.onerror = function () {
-    console.log("Avatar failed to load, falling back to default");
-    avatarElement.src = ASSETS.IMAGES.DEFAULT_AVATAR;
-  };
-
   // Username
   const usernameElement = content.querySelector(".profile__username");
   applyUsernameTruncation(usernameElement, userData.username, 15);

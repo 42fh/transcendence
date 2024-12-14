@@ -53,6 +53,7 @@ export async function fetchUserProfile(userId) {
       };
     }
     const userData = await response.json();
+    console.log("User data fetched:", userData);
     return {
       success: true,
       data: userData,
@@ -147,7 +148,7 @@ export async function updateUserProfile(userId, userData) {
 export async function uploadUserAvatar(userId, avatarFile) {
   try {
     const formData = new FormData();
-    formData.append("avatar", avatarFile);
+    formData.append("file", avatarFile, avatarFile.name);
 
     const accessToken = await manageJWT();
 
@@ -156,7 +157,6 @@ export async function uploadUserAvatar(userId, avatarFile) {
       method: "POST",
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        "Content-Disposition": `attachment; filename=${avatarFile.name}`,
       },
       body: formData,
     });
