@@ -26,22 +26,24 @@
 .tournament-game {
   background: #000;
   border: 2px solid white;
-  padding: 1.5rem;
+  padding: 2rem; /* Increased from 1.5rem */
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.tournament-game__players {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  font-family: "Press Start 2P", cursive;
+  margin-bottom: 1rem; /* Add space between games */
 }
 
 .tournament-game__player {
-  font-size: 0.8rem;
+  font-size: 1.2rem; /* Increased from 0.8rem */
   min-width: 150px;
+  padding: 0.5rem 0;
+  text-align: center; /* Center the text */
+}
+
+.tournament-game__vs {
+  font-size: 1rem; /* Increased from 0.8rem */
+  color: #888;
+  padding: 0 1rem; /* Add some horizontal padding */
 }
 
 .tournament-game__vs {
@@ -54,9 +56,11 @@
   background: transparent;
   border: 2px solid white;
   color: white;
-  padding: 0.5rem 1rem;
+  padding: 1rem 2rem; /* Increased padding */
+  font-size: 1.2rem; /* Increased font size */
   cursor: pointer;
   transition: all 0.3s ease;
+  min-width: 120px; /* Ensure minimum width */
 }
 
 .tournament-game__play-btn:hover {
@@ -100,4 +104,21 @@
   color: #00ff00;
   text-align: center;
   display: none; /* Hidden by default */
+}
+
+@media (max-width: 600px) {
+  .tournament-game__players {
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%; /* Full width on mobile */
+  }
+
+  .tournament-game__vs {
+    padding: 0.5rem 0;
+  }
+
+  .tournament-game__player {
+    width: 100%; /* Full width on mobile */
+    min-width: unset;
+  }
 }
