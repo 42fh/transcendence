@@ -100,14 +100,14 @@ export async function loadProfilePage(userId = null, addToHistory = true) {
     renderMatchHistory(userData.recent_matches, matchesContainer);
 
     // Start online status polling in the background
-    startOnlineStatusPolling(targetUserId).then((cleanup) => {
-      // Add cleanup handlers once polling is established
-      window.addEventListener("beforeunload", cleanup);
-      window.addEventListener("popstate", cleanup);
+    startOnlineStatusPolling().then((cleanup) => {
+      // Store cleanup function for router to use
+      window._onlineStatusPollingCleanup = cleanup;
     });
 
     // Add edit button handler only for own profile
     if (isOwnProfile) {
+      //   updateOnlineStatus("online");
       const editButton = mainContent.querySelector(".profile__button--edit");
       if (editButton) {
         editButton.addEventListener("click", () => {

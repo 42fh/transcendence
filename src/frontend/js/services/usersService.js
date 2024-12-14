@@ -263,7 +263,7 @@ export async function fetchFriends(page = 1, perPage = 10, search = "") {
 export async function sendUserOnlineStatus(isOnline, expirationTimestamp) {
   try {
     const accessToken = await manageJWT();
-    const response = await fetch("/user_online_status", {
+    const response = await fetch("/api/game/user/online/", {
       method: isOnline ? "POST" : "DELETE", // Use POST for online, DELETE for offline
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -292,7 +292,7 @@ export async function sendUserOnlineStatus(isOnline, expirationTimestamp) {
 export async function fetchUserOnlineStatus() {
   try {
     const accessToken = await manageJWT();
-    const response = await fetch(`${CONFIG.API_BASE_URL}/user/online/`, {
+    const response = await fetch("/api/game/user/online/", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },

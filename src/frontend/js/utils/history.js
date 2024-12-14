@@ -24,7 +24,6 @@ import { updateActiveNavItem } from "../components/bottomNav.js";
 // };
 
 export function initializeHistory() {
-
   window.addEventListener("load", () => {
     const username = localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME);
 
@@ -39,11 +38,15 @@ export function initializeHistory() {
 
   window.addEventListener("popstate", (event) => {
     event.preventDefault();
+    if (window._onlineStatusPollingCleanup) {
+      window._onlineStatusPollingCleanup();
+      window._onlineStatusPollingCleanup = null;
+    }
 
     if (event.state) {
       // TODO: Check cache before making API calls in each case
       // If cached data exists and is not stale, use it instead of making new API calls
-      
+
       const state = event.state || { view: "home" };
       console.log("Navigating to:", state.view);
       if (state && state.view) {
@@ -80,7 +83,7 @@ export function initializeHistory() {
             break;
           case "chat-home":
             loadChatPage(false);
-            break;            
+            break;
           case "create-tournament":
             loadCreateTournamentPage(false);
             break;
@@ -120,6 +123,10 @@ export function initializeHistory() {
   document.addEventListener("click", (event) => {
     if (event.target.matches("[data-nav]")) {
       event.preventDefault();
+      if (window._onlineStatusPollingCleanup) {
+        window._onlineStatusPollingCleanup();
+        window._onlineStatusPollingCleanup = null;
+      }
       const view = event.target.getAttribute("data-nav");
       // TODO: Same caching logic as above should be applied here
       switch (view) {
@@ -137,10 +144,10 @@ export function initializeHistory() {
           break;
         case "profile":
           const userId = event.target.dataset.userId || localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
+          loadProfilePage(userId);
+          break;
         case "chat-home":
           loadChatPage();
-          break;
-          loadProfilePage(userId, false);
           break;
         default:
           loadHomePage();
