@@ -1,13 +1,11 @@
 # WebSocket Game API Documentation
 
-## Overview
-This document outlines the WebSocket API for the multiplayer game interface. It describes the messages you can send to the server and the events you'll receive from the server.
-
 ## Connection Setup
 
-# WebSocket Connection Setup
+### Connection URL Pattern
 
-## Connection URL Pattern
+<!-- // TODO: update this, cause it't not really coorect -->
+
 Connect to the game server using:
 
 ```
@@ -15,37 +13,46 @@ ws://[server-host]/ws/pong/[game_id]/
 ```
 
 Where:
+
 - `[server-host]` is your game server host
 - `[game_id]` is the unique identifier for the game session
 
-## Authentication
+### Authentication
+
+<!-- TODO: Maybe make it clear that the frontend doesn't need to do anything extra to authenticate the user, -->
+
 The WebSocket connection requires user authentication. The server will validate the user's session and assign appropriate roles based on game booking status.
 
 ## Connection Process
 
-1. **Initial Connection**
+1. **Initial Connection** Client --> Server
+
    - Client attempts WebSocket connection to the game URL
    - Server validates user authentication and game ID
    - Server checks game existence and player slot availability
 
-2. **Connection Response**
+2. **Connection Response** Server --> Client
    The server immediately sends an `initial_state` message with:
+
    - Game configuration
-   - Player role assignment
+   - Player role assignment (player | spectator)
    - Game state
    - Player-specific settings
 
 3. **Role Assignment**
    Players are assigned one of two roles:
+
    - `player`: Active game participant
    - `spectator`: Observer only
 
    Role assignment is based on:
+
    - Whether the game has available player slots
    - If the user has a valid game booking
    - Whether the user is already connected
 
 4. **Booking Validation**
+
    - Server checks for valid booking using the pattern: `booked_user:[user_id]:[game_id]`
    - Without valid booking, user connects as spectator
    - Existing players reconnect as spectators
@@ -53,6 +60,7 @@ The WebSocket connection requires user authentication. The server will validate 
 5. **Connection Results**
 
    Successful Connection (Player):
+
    ```json
    {
        "type": "initial_state",
@@ -64,17 +72,19 @@ The WebSocket connection requires user authentication. The server will validate 
    ```
 
    Successful Connection (Spectator):
+
    ```json
    {
-       "type": "initial_state",
-       "role": "spectator",
-       "player_index": null,
-       "message": "[Reason for spectator status]",
-       // ... additional game state
+     "type": "initial_state",
+     "role": "spectator",
+     "player_index": null,
+     "message": "[Reason for spectator status]"
+     // ... additional game state
    }
    ```
 
    Possible spectator messages:
+
    - "Game full - joining as spectator"
    - "Already connected - switching to spectator mode"
    - "No booking found - joining as spectator"
@@ -87,13 +97,14 @@ The WebSocket connection requires user authentication. The server will validate 
 ## Error Handling
 
 Connection will close with specific codes:
+
 - 1011: Server initialization failure
 - 1006: Connection timeout/health check failure
-
 
 ## Client-to-Server Messages
 
 ### Move Paddle
+
 Use this message to control paddle position during gameplay.
 
 ```json
@@ -104,13 +115,15 @@ Use this message to control paddle position during gameplay.
 ```
 
 #### Constraints:
+
 - Direction must be either "left" or "right"
-- user_id must match your assigned player_id -> user_id camo from  scope
+- user_id must match your assigned player_id -> user_id camo from scope
 - Must respect movement cooldown
 - Cannot move beyond paddle length boundaries
 - Game must be running
 
 #### Possible Error Responses:
+
 ```json
 // Invalid Player
 {
@@ -121,7 +134,7 @@ Use this message to control paddle position during gameplay.
 // Movement Too Fast
 {
     "type": "error",
-    "message": "Your are are to fast"
+    "message": "Your are are too fast"
 }
 
 // Invalid Direction
@@ -133,12 +146,12 @@ Use this message to control paddle position during gameplay.
 // Boundary Reached
 {
     "type": "error",
-    "message": "Your are reached beginning of paddle"
+    "message": "Your have reached beginning of paddle"
 }
 // or
 {
     "type": "error",
-    "message": "Your are reached end of paddle"
+    "message": "Your have reached end of paddle"
 }
 
 // Game Not Running
@@ -150,16 +163,19 @@ Use this message to control paddle position during gameplay.
 // Spectator Attempt
 {
     "type": "error",
-    "message": "Your are only allowed to watch"
+    "message": "Your are only allowed to watch 🌋"
 }
 ```
 
-## Server-to-Client Events
+## 1. Server -> Client Events
 
-### 1. Initial State
+### 1.1 Initial State
+
 Received immediately after successful connection. Contains complete game setup and your role.
 
-```json
+NB: The message are sent in Json, but we are representing here in JS, cause Json accept only string or numbers, to types or objects and no comments.
+
+```js
 {
     "type": "initial_state",
     "game_state": GameState,        // See GameState structure below
@@ -174,7 +190,8 @@ Received immediately after successful connection. Contains complete game setup a
 }
 ```
 
-### 2. Game State Update
+### 1.2 **Game State Update**
+
 Periodic updates during gameplay.
 
 ```json
@@ -184,7 +201,8 @@ Periodic updates during gameplay.
 }
 ```
 
-### 3. Collision Events
+### 1.3 **Game Events**
+
 Notifications of game collisions.
 
 ```json
@@ -198,6 +216,7 @@ Notifications of game collisions.
 ```
 
 ### 4. Player Join
+
 Notification when new players join.
 
 ```json
@@ -210,6 +229,7 @@ Notification when new players join.
 ```
 
 ### 5. Game Finished
+
 Sent when game ends.
 
 ```json
@@ -221,6 +241,7 @@ Sent when game ends.
 ```
 
 ### 6. Waiting
+
 Sent while waiting for players.
 
 ```json
@@ -234,8 +255,10 @@ Sent while waiting for players.
 ## Data Structure References
 
 ### GameState
+
 Used in: initial_state, game_state, game_finished
-```json
+
+```js
 {
     "balls": Ball[],           // Array of Ball objects
     "paddles": Paddle[],       // Array of Paddle objects
@@ -248,7 +271,9 @@ Used in: initial_state, game_state, game_finished
 ```
 
 ### Ball
+
 Used in: GameState.balls
+
 ```json
 {
     "x": number,            // Position in range [-1, 1]
@@ -260,7 +285,9 @@ Used in: GameState.balls
 ```
 
 ### Paddle
+
 Used in: GameState.paddles
+
 ```json
 {
     "position": number,     // Range [0, 1]
@@ -270,7 +297,9 @@ Used in: GameState.paddles
 ```
 
 ### Dimensions
+
 Used in: GameState.dimensions
+
 ```json
 {
     "paddle_length": number, // Relative to side (0-1)
@@ -279,7 +308,9 @@ Used in: GameState.dimensions
 ```
 
 ### PlayerValues
+
 Used in: initial_state.player_values
+
 ```json
 {
     "move_cooldown": number,    // Seconds between moves
@@ -290,9 +321,11 @@ Used in: initial_state.player_values
 ```
 
 ### Vertex
+
 Used in: initial_state.game_setup.vertices
 
 For Polygon Games:
+
 ```json
 {
     "x": number,           // Range [-1, 1]
@@ -302,6 +335,7 @@ For Polygon Games:
 ```
 
 For Circular Games:
+
 ```json
 {
     "x": number,           // Range [-1, 1]
@@ -317,7 +351,9 @@ For Circular Games:
 ```
 
 ### CollisionDetails
+
 Used in: game_event.game_state.details
+
 ```json
 {
     "side_index": number,         // Collision side
@@ -327,7 +363,6 @@ Used in: game_event.game_state.details
 }
 ```
 
-
 ### Initial State Event
 
 This event is crucial for setting up the game client. It contains all necessary information to initialize the game UI and player controls.
@@ -335,14 +370,14 @@ This event is crucial for setting up the game client. It contains all necessary 
 ```json
 {
     "type": "initial_state",
-    "game_state": GameState,        
+    "game_state": GameState,
     "role": "player" | "spectator",
-    "player_index": number | null,  
-    "message": string,              
-    "player_values": PlayerValues,  
+    "player_index": number | null,
+    "message": string,
+    "player_values": PlayerValues,
     "game_setup": {
-        "type": string,             
-        "vertices": Vertex[]        
+        "type": string,
+        "vertices": Vertex[]
     }
 }
 ```
@@ -350,7 +385,9 @@ This event is crucial for setting up the game client. It contains all necessary 
 #### Field Usage Guide
 
 ##### 1. `role` and `player_index`
+
 Use these to determine the player's capabilities in the game:
+
 - If `role === "player"`:
   - Enable paddle controls
   - Show player-specific UI elements (score, controls, etc.)
@@ -361,7 +398,9 @@ Use these to determine the player's capabilities in the game:
   - `player_index` will be null
 
 ##### 2. `game_state`
+
 Contains the initial game configuration:
+
 ```json
 {
     "balls": [
@@ -392,7 +431,9 @@ Contains the initial game configuration:
 ```
 
 ##### 3. `player_values`
+
 Use these values for player movement and control configuration:
+
 ```json
 {
     "move_cooldown": number,    // Minimum time (seconds) between move commands
@@ -403,7 +444,9 @@ Use these values for player movement and control configuration:
 ```
 
 ##### 4. `game_setup`
+
 Use this to set up the game arena:
+
 ```json
 {
     "type": string,     // "polygon" or "circular" - determines rendering approach
@@ -412,6 +455,7 @@ Use this to set up the game arena:
 ```
 
 For polygon games:
+
 - Connect vertices in order to draw game boundaries
 - Each vertex contains:
   ```json
@@ -423,6 +467,7 @@ For polygon games:
   ```
 
 For circular games:
+
 - Use additional arc information for curved boundaries:
   ```json
   {
@@ -441,38 +486,44 @@ For circular games:
 #### Implementation Guidelines
 
 1. **Game Arena Setup**:
+
    - Scale game area to fit your canvas/container while maintaining aspect ratio
    - Use `game_setup.vertices` to draw game boundaries
    - For polygon: Draw straight lines between vertices
    - For circular: Draw arc segments using the provided angles
 
 2. **Player Setup**:
+
    - If `role === "player"`:
      - Set up keyboard/touch controls
      - Implement move cooldown using `player_values.move_cooldown`
      - Configure movement distance using `player_values.move_speed`
 
 3. **Paddle Rendering**:
+
    - Use `dimensions.paddle_length` for paddle size relative to boundary length
    - Use `dimensions.paddle_width` for paddle thickness
    - Position paddles using their `position` value along their assigned side
 
 4. **Ball Setup**:
+
    - Scale ball size using `ball.size`
    - Position using `ball.x` and `ball.y`
    - Initialize any ball movement animations using velocity values
 
 5. **Score Display**:
+
    - Use `scores` array for initial score setup
    - Highlight current player's score if `role === "player"`
 
 6. **UI Elements**:
+
    - Show/hide controls based on `role`
    - Display `message` to indicate connection status
    - Set up score display based on number of active paddles
 
-
    ## Base Structure
+
    ```json
    {
        "type": "paddle_hit" | "wall_hit" | "miss",  // Type of collision
@@ -493,7 +544,9 @@ For circular games:
    ## Type-Specific Fields
 
    ### 1. Paddle Hit Collision
+
    Includes additional data for paddle collisions:
+
    ```json
    {
        // ... base structure fields ...
@@ -517,7 +570,9 @@ For circular games:
    ```
 
    ### 2. Wall Hit Collision
+
    Wall-specific collision information:
+
    ```json
    {
        // ... base structure fields ...
@@ -546,7 +601,9 @@ For circular games:
    ```
 
    ### 3. Miss Collision
+
    Information about paddle misses:
+
    ```json
    {
        // ... base structure fields ...
@@ -566,7 +623,9 @@ For circular games:
    ```
 
    ### Circular Game Additional Fields
+
    For circular game mode, collision details include:
+
    ```json
    {
        // ... type-specific fields ...
@@ -582,11 +641,12 @@ For circular games:
    }
    ```
 
-
 ## Vertex Object
+
 Represents a point in the game area's boundary. Used in game_setup.vertices.
 
 #### Common Properties (Both Game Types)
+
 ```json
 {
     "x": number,           // X coordinate (-1 to 1)
@@ -596,6 +656,7 @@ Represents a point in the game area's boundary. Used in game_setup.vertices.
 ```
 
 #### Circular Game Type
+
 ```json
 {
     // Common properties plus:
@@ -609,7 +670,10 @@ Represents a point in the game area's boundary. Used in game_setup.vertices.
 ```
 
 #### Polygon Game Type
+
 For polygon games, vertices are simpler as they only represent the corner points of the polygon. The server calculates lines between consecutive vertices to form the game boundary.
+
+is_player is atm (8/12) only on the circular
 
 ```json
 {
@@ -623,6 +687,7 @@ For polygon games, vertices are simpler as they only represent the corner points
 Note: Vertices are ordered counterclockwise. For a square game area (classic mode), vertices would form a rectangle with width 2 and appropriate height for the aspect ratio.
 
 Example Polygon Vertex Array:
+
 ```json
 // Example for a square game area (4 vertices)
 "vertices": [
@@ -633,9 +698,9 @@ Example Polygon Vertex Array:
 ]
 ```
 
-
 ## Connection Close Codes
 
 The server may close the connection with these codes:
+
 - 1011: Internal server error or initialization failure
 - 1006: Connection timeout or health check failure

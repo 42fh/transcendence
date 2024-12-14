@@ -1,0 +1,20 @@
+#gameoffline-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    max-width: 100%;
+    padding: var(--spacing-sm);
+}
+
+#gameoffline-container p {
+    color: var(--color-text-secondary);
+}
+
+#gameoffline-container p span{
+    color: var(--color-text-primary);
+}
+
+#game_offlinemode_canvas {
+    max-width: 100%;
+    padding-top: var(--spacing-sm);
+}

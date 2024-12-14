@@ -105,7 +105,7 @@ function animate(renderer, isCollision = false) {
 
   // Clear and redraw
   renderer.svg.innerHTML = "";
-  renderPolygonGame(renderer);
+  renderPolygonGame();
 
   // Continue animation
   if (isCollision) {

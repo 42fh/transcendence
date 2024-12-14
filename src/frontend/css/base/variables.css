@@ -34,8 +34,10 @@
   /* Typography */
   --font-family-primary: "Press Start 2P", cursive;
   --font-size-base: 16px;
+  --font-size-x-small: 0.7em;
   --font-size-small: 0.8em;
   --font-size-large: 1.2em;
+  --font-size-x-large: 1.5em;
   --font-size-title: 4em;
 
   /* Spacing */
@@ -76,6 +78,19 @@
   --profile-border-radius: var(--border-radius);
   --profile-section-bg: rgba(26, 26, 26, 0.9);
 
+<<<<<<< Updated upstream
+  /* Font Sizes */
+  /*  New specific size for panels */
+  --font-size-panel: 14px;
+
+  /* Colors */
+  --color-text-label: #666;
+
+  /* Font Weights */
+  --font-weight-label: 600;
+
+=======
+>>>>>>> Stashed changes
   /* Button Styles */
   --button-font-family: var(--font-family-primary);
   --button-background: transparent;

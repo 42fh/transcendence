@@ -127,7 +127,7 @@ export default class Drawer {
   }
 
   createGameFieldCircular(radius) {
-    const fieldGeometry = new THREE.CircleGeometry(radius + 0.5, 64);
+    const fieldGeometry = new THREE.CircleGeometry(radius + 1.5, 64);
     const fieldMaterial = new THREE.MeshStandardMaterial({
       map: this.game.loader.items["floorColorTexture"],
       alphaMap: this.game.loader.items["floorAplhaTexture"],

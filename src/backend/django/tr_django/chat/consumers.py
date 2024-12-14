@@ -7,13 +7,15 @@ from django.utils import timezone
 from chat.models import ChatRoom, Message, BlockedUser
 from users.models import CustomUser
 from django.db import models
+from game.tournamentmanager.TournamentDisconnectHandler  import TournamentDisconnectHandler
+
+
 
 logger = logging.getLogger("chat")
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
     connected_users = {}
-
     async def connect(self):
         try:
             self.room_name = self.scope["url_route"]["kwargs"].get("room_name")
@@ -125,13 +127,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
     def get_or_create_chat_room(self):
         try:
             # Sort usernames to ensure consistent room_id regardless of order
-            usernames = sorted(self.room_name.split("_"))
-            if len(usernames) != 2:
+            user_id = sorted(self.room_name.split("_"))
+            logger.debug("user_ids: ", user_id, user_id[0], user_id[1])
+            if len(user_id) != 2:
                 raise ValueError("Invalid room name format")
 
-            user1 = CustomUser.objects.get(username=usernames[0])
-            user2 = CustomUser.objects.get(username=usernames[1])
+            user1 = CustomUser.objects.get(id=user_id[0])
+            user2 = CustomUser.objects.get(id=user_id[1])
 
+            
             chat_room, created = ChatRoom.objects.create_room(user1, user2)
 
             if chat_room:
@@ -235,8 +239,8 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             await self.close()
 
     async def disconnect(self, close_code):
-        # Remove user from the group
         if hasattr(self, "group_name"):
+            await TournamentDisconnectHandler.handle_tournament_disconnect(self.scope["user"])
             await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
     async def send_notification(self, event):

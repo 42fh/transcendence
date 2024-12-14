@@ -2,11 +2,14 @@ import { initializeChatWebSocket } from "../services/chatSocketService.js";
 import { loadChatPage } from "./chatHome.js";
 import { LOCAL_STORAGE_KEYS, ASSETS, CHAT_WS_MSG_TYPE } from "../config/constants.js";
 
+
+//TODO: in chatHome this function is called, pass userId instead of username,
+//TODO SUITE or whole user so I can access both id and name
 export function loadChatRoom(chatPartner) {
   history.pushState(
     {
       view: "chat-room",
-      chatPartner,
+      chatPartner: chatPartner.username,
     },
     ""
   );
@@ -38,7 +41,7 @@ function sendMessage(chatPartner) {
     type: CHAT_WS_MSG_TYPE.MESSAGE,
     username: currentUser,
     message: message,
-    chatPartner: chatPartner,
+    chatPartner: chatPartner.username,
   };
 
   chatSocket.send(JSON.stringify(messageData));
@@ -47,13 +50,16 @@ function sendMessage(chatPartner) {
 }
 
 function initializeChatRoom(chatPartner) {
-  const currentUser = localStorage.getItem("pongUsername");
+  const currentUserName = localStorage.getItem(LOCAL_STORAGE_KEYS.USERNAME);
+  const currentUserId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
+  // console.log("current user id:", currentUserId);
+  // console.log("second user id:", chatPartner.id);
 
   const partnerAvatar = document.getElementById("chat-room-partner-avatar");
   const partnerUsername = document.getElementById("chat-room-partner-username");
   const backButton = document.querySelector(".chat-room-header__back-btn");
 
-  partnerUsername.textContent = chatPartner;
+  partnerUsername.textContent = chatPartner.username;
 
   // TODO: FETCH ACTUAL AVATAR
   partnerAvatar.src = `${ASSETS.IMAGES.DEFAULT_AVATAR}`;
@@ -65,13 +71,11 @@ function initializeChatRoom(chatPartner) {
     history.pushState({ view: "chat-home" }, "");
     loadChatPage(false);
   });
-  
 
-  console.log("pongUsername:", currentUser);
-  console.log("Chat Partner:", chatPartner);
+  const roomName = [currentUserId, chatPartner.id]
+  .sort()
+  .join("_");
 
-  const roomName = [currentUser, chatPartner].sort().join("_");
-  console.log("Room Name:", roomName);
 
   const wsUrl = `/ws/chat/${roomName}/`;
 
@@ -91,7 +95,7 @@ function initializeChatRoom(chatPartner) {
         textElement.textContent = message;
 
         // Apply classes based on message type
-        if (username === currentUser) {
+        if (username === currentUserName) {
           messageDiv.classList.add("chat-message-self");
         } else {
           messageDiv.classList.add("chat-message-other");
@@ -108,18 +112,18 @@ function initializeChatRoom(chatPartner) {
           handlers.addMessageToChat(
             data.username,
             data.message,
-            data.username === currentUser ? "self" : CHAT_WS_MSG_TYPE.SYSTEM,
+            data.username === currentUserName ? "self" : CHAT_WS_MSG_TYPE.SYSTEM,
             isSystemMessage
           );
         } else if (data.type === "message_history") {
-          console.log("Processing history messages:", data.messages);
+          // console.log("Processing history messages:", data.messages);
           data.messages.forEach((msg) => {
             const isSystemMessage = msg.username === CHAT_WS_MSG_TYPE.SYSTEM;
 
             handlers.addMessageToChat(
               msg.username,
               msg.message,
-              msg.username === currentUser ? "self" : CHAT_WS_MSG_TYPE.SYSTEM,
+              msg.username === currentUserName ? "self" : CHAT_WS_MSG_TYPE.SYSTEM,
               isSystemMessage
             );
           });
@@ -141,13 +145,13 @@ function initializeChatRoom(chatPartner) {
       },
     };
 
-    initializeChatWebSocket(wsUrl, chatPartner, handlers);
+    initializeChatWebSocket(wsUrl, chatPartner.username, handlers);
   } catch (error) {
     displayModalError(`Failed to connect to chat: ${error.message}`);
   }
 
   sendButton.onclick = () => {
-    if (messageInput.value.trim() === "" || currentUser === CHAT_WS_MSG_TYPE.SYSTEM) {
+    if (messageInput.value.trim() === "" || currentUserName === CHAT_WS_MSG_TYPE.SYSTEM) {
       return;
     }
 
@@ -155,7 +159,7 @@ function initializeChatRoom(chatPartner) {
   };
 
   messageInput.onkeyup = (e) => {
-    if (e.key === "Enter" && currentUser !== CHAT_WS_MSG_TYPE.SYSTEM) {
+    if (e.key === "Enter" && currentUserName !== CHAT_WS_MSG_TYPE.SYSTEM) {
       sendMessage(chatPartner);
     }
   };

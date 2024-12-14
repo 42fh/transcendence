@@ -21,18 +21,6 @@ def transcendance(request):
     return HttpResponse("Initial view for transcendance")
 
 
-# def print_request_details(request):
-#     # Print all attributes
-#     #    print("Attributes:", vars(request))
-
-#     # Print all methods and properties
-#     #   print("Methods and properties:", dir(request))
-
-#     # Print common request properties
-#     #  print(f"Path: {request.path}")
-#     # print(f"Method: {request.method}")
-#     # print(f"GET params: {request.GET}")
-#     print(f"USER: {request.user}, ID: {request.user.id} ")
 
 
 @csrf_exempt
@@ -48,7 +36,6 @@ async def create_new_game(request, use_redis_lock: bool = True):
             },
             status=405,
         )
-    # random.randint(1000, 9999) -> hardcoded for test
     # comment out because not connected to user yet
     is_authenticated = await sync_to_async(lambda: request.user.is_authenticated)()
     if not is_authenticated:
@@ -636,7 +623,7 @@ def create_tournament(request):
         return JsonResponse({"error": f"Server error: {str(e)}"}, status=500)
 
 
-# TODO: we have a naming issue here.
+@require_http_methods(["GET", "POST"])
 @csrf_exempt
 def all_tournaments(request):
     """
@@ -648,12 +635,27 @@ def all_tournaments(request):
         data = [build_tournament_data(t) for t in tournament_list]
         return JsonResponse({"tournaments": data})
     elif request.method == "POST":
-        return create_tournament(request)
+        try:
+            data = json.loads(request.body)
+            creator = Player.objects.get(user=request.user)
+            result = TournamentManager.create_tournament(data, data.get("game_settings", {}), creator)
+            if result["status"]:
+                tournament = Tournament.objects.get(pk=result["tournament_id"])
+                return JsonResponse(
+                    {
+                        "status": "success",
+                        "message": f"Tournament[{tournament.name}] created successfully. {result['message']}",
+                        "value_create_tournament_debug": result,
+                        "tournament": build_tournament_data(tournament),
+                     }
+                )
+            return JsonResponse({"error": result["message"]}, status=400)
 
+        except (json.JSONDecodeError, Player.DoesNotExist) as e:
+            return JsonResponse({"error": str(e)}, status=400)
     return JsonResponse({"error": "Method not allowed"}, status=405)
 
 
-# @require_http_methods(["GET", "POST"])
 # @csrf_exempt
 # def all_tournaments(request):
 #     if request.method == "GET":
@@ -662,22 +664,3 @@ def all_tournaments(request):
 #         return JsonResponse({"tournaments": data})
 
 #     elif request.method == "POST":
-#         try:
-#             data = json.loads(request.body)
-#             creator = Player.objects.get(user=request.user)
-#             result = TournamentManager.create_tournament(data, data.get("game_settings", {}), creator)
-#             if result["status"]:
-#                 tournament = Tournament.objects.get(pk=result["tournament_id"])
-#                 return JsonResponse(
-#                     {
-#                         "status": "success",
-#                         "message": f"Tournament[{tournament.name}] created successfully. {result['message']}",
-#                         "tournament_notification_url": result["tournament_notification_url"],
-#                         "value_create_tournament_debug": result,
-#                         "tournament_debug": build_tournament_data(tournament),
-#                     }
-#                 )
-#             return JsonResponse({"error": result["message"]}, status=400)
-
-#         except (json.JSONDecodeError, Player.DoesNotExist) as e:
-#             return JsonResponse({"error": str(e)}, status=400)

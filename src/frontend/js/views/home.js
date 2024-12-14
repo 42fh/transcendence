@@ -5,7 +5,9 @@ import { updateActiveNavItem } from "../components/bottomNav.js";
 import { loadChatPage } from "./chatHome.js";
 import { loadGameHome } from "./game.js";
 import { loadGame3D } from "./game3d.js";
+import { loadGameOffline } from "./gameOffline.js";
 import { loadGameSetupPage } from "./gameSetup.js";
+
 
 export function loadHomePage(addToHistory = true) {
   try {
@@ -50,9 +52,24 @@ export function loadHomePage(addToHistory = true) {
       playButton.addEventListener("click", loadGame3D);
     }
 
+    const playButton2d = document.getElementById("home__button-playoffline");
+    if (playButton2d) {
+      playButton2d.addEventListener("click", loadGameOffline);
+    }
+
     const ctaButton = document.getElementById("home__button-cta");
     if (ctaButton) {
       ctaButton.addEventListener("click", loadGameHome);
+    }
+
+    const chatsButton = document.getElementById("chats");
+    if (chatsButton) {
+      chatsButton.addEventListener("click", loadChatPage);
+    }
+
+    const tournamentsButton = document.getElementById("tournaments");
+    if (tournamentsButton) {
+      tournamentsButton.addEventListener("click", loadTournamentsPage);
     }
 
     console.log("Looking for 2D button...");
@@ -66,16 +83,6 @@ export function loadHomePage(addToHistory = true) {
       });
     } else {
       console.error("2D button not found in DOM");
-    }
-
-    const chatsButton = document.getElementById("chats");
-    if (chatsButton) {
-      chatsButton.addEventListener("click", loadChatPage);
-    }
-
-    const tournamentsButton = document.getElementById("tournaments");
-    if (tournamentsButton) {
-      tournamentsButton.addEventListener("click", loadTournamentsPage);
     }
   } catch (error) {
     console.error("Error loading home page:", error);

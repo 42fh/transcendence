@@ -48,12 +48,6 @@ export async function loadGame3D() {
         url: "static/textures/floor/arm.jpg",
       },
       {
-        name: "palmTree",
-        type: "gltf",
-        url: "static/models/palm/quiver_tree_02_1k.gltf",
-      },
-      { name: "bush", type: "gltf", url: "static/models/bush/fern_02_1k.gltf" },
-      {
         name: "coconut",
         type: "gltf",
         url: "static/models/coconut/scene.gltf",
@@ -68,11 +62,6 @@ export async function loadGame3D() {
         name: "chair",
         type: "gltf",
         url: "static/models/chair/plastic_monobloc_chair_01_1k.gltf",
-      },
-      {
-        name: "log",
-        type: "gltf",
-        url: "static/models/log/dead_quiver_trunk_1k.gltf",
       },
       {
         name: "duck",
@@ -101,103 +90,49 @@ export async function loadGame3D() {
     function setupResources() {
       this.loader.items["42berlin"].colorSpace = THREE.SRGBColorSpace;
 
-      const GAME_HEIGHT = 1;
-      const GAME_WIDTH = 0.5;
-
-      // Palm trees
-      const palmTree = this.loader.items["palmTree"].scene;
-      palmTree.scale.set(6, 6, 10);
-      palmTree.position.set(18, 0, 12);
-
-      const palmTree2 = palmTree.clone();
-      palmTree2.position.set(-6, 0, 12);
-
-      // Bush
-      const bush = this.loader.items["bush"].scene;
-      bush.scale.set(3, 3, 3);
-      bush.position.set(17, 0, 10);
-
       // Coconut
       const coconut = this.loader.items["coconut"].scene;
-      coconut.scale.set(1, 1, 1);
-      coconut.position.set(17, 0.5, 7);
-
-      const coconut2 = coconut.clone();
-      coconut2.position.set(-5.5, 1.3, 16);
-      coconut2.rotation.set(Math.PI, Math.PI * 0.2, 0);
+      coconut.scale.set(0.2, 0.2, 0.2);
+      coconut.position.set(-1.5, -0.12, 0.5);
+      coconut.rotation.set(Math.PI, Math.PI * 0.6, 0);
 
       // Umbrella
       const umbrella = this.loader.items["umbrella"].scene;
-      umbrella.scale.set(0.01, 0.01, 0.01);
-      umbrella.position.set(18, -0.3, 17);
-      umbrella.rotation.set(0, Math.PI * 0.08, 0);
+      umbrella.scale.set(0.002, 0.002, 0.002);
+      umbrella.position.set(-1.6, -0.5, 0);
+      umbrella.rotation.set(0, Math.PI * 2, 0);
 
       // Ball
       const ball = this.loader.items["ball"].scene;
-      ball.scale.set(0.5, 0.5, 0.5);
-      ball.position.set(17, 0.5, 16);
+      ball.scale.set(0.08, 0.08, 0.08);
+      ball.position.set(1.32, -0.35, 0.82);
 
       // Chairs
       const chair = this.loader.items["chair"].scene;
-      chair.scale.set(2, 2, 2);
-      chair.position.set(-5.5, 0, 18);
+      chair.scale.set(0.4, 0.4, 0.4);
+      chair.position.set(-1.5, -0.4, 0.5);
       chair.rotation.set(0, Math.PI * 0.5, 0);
 
       const chair2 = chair.clone();
-      chair2.position.set(-5.5, 0, 16);
-
-      const chair3 = chair.clone();
-      chair3.position.set(-5.5, 0, 14);
-
-      // Logs
-      const log = this.loader.items["log"].scene;
-      log.scale.set(8, 14, 10);
-      log.position.set(GAME_WIDTH - GAME_WIDTH - 0.8, 0.5, -3);
-      log.rotation.set(Math.PI * 0.5, Math.PI * 0.5, 0);
-
-      const log2 = log.clone();
-      log2.position.set(GAME_WIDTH + 0.8, 0.5, 25);
-      log2.rotation.set(Math.PI * 0.5, 0, Math.PI);
+      chair2.position.set(-1.5, -0.4, -0.5);
 
       // Rubber Duck
       const duck = this.loader.items["duck"].scene;
-      duck.scale.set(4, 4, 4);
-      duck.position.set(-5.5, 0.9, 14);
+      duck.scale.set(0.9, 0.9, 0.9);
+      duck.position.set(-1.5, -0.23, -0.52);
       duck.rotation.set(0, Math.PI * 0.5, 0);
 
       // Glasses
       const glasses = this.loader.items["glasses"].scene;
-      glasses.scale.set(0.8, 0.8, 0.8);
-      glasses.position.set(-5.32, 1.4, 16.02);
+      glasses.scale.set(0.15, 0.15, 0.15);
+      glasses.position.set(-1.45, -0.1, 0.5);
       glasses.rotation.set(0, Math.PI, 0);
-
-      // Floor
-      const floor = new THREE.Mesh(
-        new THREE.PlaneGeometry(45, 42, 100, 100),
-        new THREE.MeshStandardMaterial({
-          color: "#fffdff",
-          alphaMap: this.loader.items["floorAplhaTexture"],
-          transparent: true,
-          map: this.loader.items["floorColorTexture"],
-          normalMap: this.loader.items["floorNormalTexture"],
-          displacementMap: this.loader.items["floorDisplacementTexture"],
-          roughnessMap: this.loader.items["floorARMTexture"],
-          aoMap: this.loader.items["floorARMTexture"],
-          metalnessMap: this.loader.items["floorARMTexture"],
-          displacementScale: 0.2,
-          displacementBias: -0.1,
-        })
-      );
-      floor.rotation.x = -Math.PI * 0.5;
-      floor.position.y = 0.1;
-      floor.position.x = 6;
-      floor.position.z = 12;
 
       // Fins
       const sharkFin1 = this.loader.items["fin"].scene;
       sharkFin1.name = "sharkFin1";
-      sharkFin1.scale.set(2, 2, 2);
-      sharkFin1.position.set(6, 0, 12);
+      sharkFin1.scale.set(0.4, 0.4, 0.4);
+      sharkFin1.position.set(6, -0.5, 12);
       sharkFin1.rotation.y = Math.PI;
 
       const sharkFin2 = sharkFin1.clone();
@@ -207,29 +142,21 @@ export async function loadGame3D() {
       sharkFin3.name = "sharkFin3";
 
       this.addObjects([
-        // palmTree,
-        // palmTree2,
-        // bush,
-        // coconut,
-        // coconut2,
-        // umbrella,
-        // ball,
-        // chair,
-        // chair2,
-        // chair3,
-        // log,
-        // floor,
-        // log2,
-        // duck,
-        // glasses,
+        coconut,
+        umbrella,
+        ball,
+        chair,
+        chair2,
+        duck,
+        glasses,
         sharkFin1,
         sharkFin2,
         sharkFin3,
       ]);
 
-      // this.fin1 = this.scene.children[0].getObjectByName("sharkFin1");
-      // this.fin2 = this.scene.children[0].getObjectByName("sharkFin2");
-      // this.fin3 = this.scene.children[0].getObjectByName("sharkFin3");
+      this.fin1 = this.scene.children[0].getObjectByName("sharkFin1");
+      this.fin2 = this.scene.children[0].getObjectByName("sharkFin2");
+      this.fin3 = this.scene.children[0].getObjectByName("sharkFin3");
     }
   );
   document.querySelector(".joinGame").addEventListener("click", () => {

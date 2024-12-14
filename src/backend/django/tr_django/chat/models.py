@@ -1,18 +1,20 @@
+import logging
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
 
 class ChatRoomManager(models.Manager):
     def create_room(self, user1, user2):
         """Create a chat room with consistent room_id generation"""
-        # Sort usernames for room_id
-        usernames = sorted([user1.username, user2.username])
-        room_id = f"{usernames[0]}_{usernames[1]}"
+        # Sort users by their IDs to ensure consistent room_id generation
+        room_id = f"{min(user1.id, user2.id)}_{max(user1.id, user2.id)}" 
 
-        # Check if room exists with either user order
         existing_room = self.filter(
             models.Q(room_id=room_id) | models.Q(user1=user1, user2=user2) | models.Q(user1=user2, user2=user1)
         ).first()
@@ -20,10 +22,7 @@ class ChatRoomManager(models.Manager):
         if existing_room:
             return existing_room, False
 
-        # Sort users to match username order for consistency
-        if user2.username == usernames[0]:
-            user1, user2 = user2, user1
-
+        # Create a new chat room
         room = self.create(room_id=room_id, user1=user1, user2=user2)
         return room, True
 
@@ -100,6 +99,7 @@ class Notification(models.Model):
     message = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
+    url = models.URLField(blank=True, null=True)
 
     class Meta:
         ordering = ["-created_at"]

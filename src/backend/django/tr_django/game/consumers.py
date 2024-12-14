@@ -3,6 +3,7 @@ import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .agame.AGameManager import AGameManager
 from .gamecoordinator.GameCoordinator import GameCoordinator as GC
+from .gamecoordinator.GameCoordinator import RedisLock 
 import time
 import msgpack
 import redis.asyncio as redis
@@ -19,7 +20,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         super().__init__(*args, **kwargs)
 
         self.last_move_time = 0
-
+        self.role = None
         # Healthcheck RFC 6455
         self.ping_interval = 5  # seconds
         self.ping_timeout = 5  # seconds
@@ -28,8 +29,6 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.check_connection_task = None
 
     async def connect(self):
-        print("hallo world")
-
         self.game_id = self.scope["url_route"]["kwargs"]["game_id"]
         self.user = self.scope["user"]
         self.player_id = str(self.user.id)
@@ -43,27 +42,29 @@ class PongConsumer(AsyncWebsocketConsumer):
         try:
             # init game instance
             self.game_manager = await AGameManager.get_instance(self.game_id, game_type)
-
-            # Check Redis for existing players
-            player_count = await self.game_manager.redis_conn.scard(
-                self.game_manager.players_key
-            )
-
-            player_index = await self.game_manager.add_player(self.player_id)
-            if not player_index:
-                await self.close(code=1011)
-                logger.error("get instance: Error in add player")
-                return
-            if player_count == 0:
-                asyncio.create_task(self.game_manager.start_game())
+            
+            async with RedisLock(redis_game, f"{self.game_id}_player_situation"):
+                # Check Redis for existing players
+                player_count = await self.game_manager.redis_conn.scard(
+                    self.game_manager.players_key
+                )
+                player_index = await self.game_manager.add_player(self.player_id)
+                if not player_index:
+                    await self.close(code=1011)
+                    logger.error("get instance: Error in add player")
+                    return
+                if player_count == 0:
+                    asyncio.create_task(self.game_manager.start_game())
+            #
             self.role = player_index["role"]
             # load player settings
             if self.role == "player":
                 self.current_pos = player_index.get("position")
                 self.player_index = player_index.get("index")
+                self.paddle_index = player_index.get("paddle_index")
                 self.player_values = player_index.get("settings")
                 logger.info(
-                    f"Player[{self.player_id}] connected to game[{self.game_id}] as player: {self.player_index +1 } index {self.player_index +1 }"
+                    f"Player[{self.user.username}  /{self.player_id}] connected to game[{self.game_id}] as player: {self.paddle_index +1} index {self.player_index}"
                 )
             else:
                 logger.info(
@@ -95,11 +96,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                             "type": "initial_state",
                             "game_state": self.game_manager.settings["state"],
                             "role": self.role,
-                            "player_index": (
-                                self.game_manager.active_sides[self.player_index]
-                                if self.role == "player"
-                                else None
-                            ),
+                            "player_index": (self.player_index if self.role == "player" else None),
                             "player_names" : player_names, 
                             "message": player_index.get("message", "no message given"),
                             "player_values": self.player_values,
@@ -279,7 +276,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             )
 
         # Use player_index instead of index
-        await self.game_manager.update_paddle(self.player_index, self.current_pos)
+        await self.game_manager.update_paddle(self.paddle_index, self.current_pos)
 
     async def power_up_event(self, event):
         """Handle power-up events from GameManager"""
@@ -346,6 +343,18 @@ class PongConsumer(AsyncWebsocketConsumer):
             )
         )
 
+    async def player_disconnected(self, event):
+        await self.send(
+            text_data=json.dumps(
+            {
+                "type": "player_disconnected",
+                "player_id": event["player_id"],                                                            
+                "side_index":  event["side_index"],                                                          
+                "converted_to_wall":  event["converted_to_wall"],                                             
+                "game_over":  event["game_over"],                                                            
+                "state":  event["state"]        
+            }))
+
     async def game_finished(self, event):
         """Handle game finished events"""
         winner_index = event.get("winner")
@@ -373,6 +382,17 @@ class PongConsumer(AsyncWebsocketConsumer):
                     "type": "waiting",
                     "current_players": event.get("current_players", 0),
                     "required_players": event.get("required_players", 0),
+                }
+            )
+        )
+
+    async def timer(self, event):
+        """Handle waiting state events"""
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "type": "timer",
+                    "timer": event.get("current_players", 0),
                 }
             )
         )
@@ -418,7 +438,6 @@ class PongConsumer(AsyncWebsocketConsumer):
         
         # Get all player IDs
         player_ids = await self.game_manager.redis_conn.smembers(self.game_manager.players_key)
-        print("hallo ", player_ids) 
         # Get index for each player
         for player_id in player_ids:
             index = await self.game_manager.redis_conn.get(f"{self.game_id}:player_side:{player_id.decode('utf-8')}")

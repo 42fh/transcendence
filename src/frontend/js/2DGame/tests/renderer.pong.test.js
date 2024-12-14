@@ -48,7 +48,7 @@ function initGame() {
   console.log("Initializing game...");
   const renderer = createRenderer("pongGame");
   console.log("About to render game with renderer:", renderer);
-  renderPolygonGame(renderer);
+  renderPolygonGame();
   console.log("Game rendered");
 }
 

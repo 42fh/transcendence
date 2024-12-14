@@ -5,40 +5,89 @@ from .AGameManager import GameStateError
 import math
 from ..gamecoordinator.GameCoordinator import GameCoordinator, RedisLock
 import logging
+import time
+
+
 
 logger = logging.getLogger(__name__)
 
 
+async def error_exit(self, error_message: str, error_details: str = None):
+    """Handle graceful error exit with user communication and cleanup"""
+    try:
+        # Notify users about the error
+        await self.channel_layer.group_send(
+            f"game_{self.game_id}",
+            {
+                "type": "error",
+                "error": error_message,
+                "details": error_details or "Game terminated due to error",
+            }
+        )
+        
+        # Clean up game through GameCoordinator - will remove all game keys including running_key
+        await GameCoordinator.cleanup_game(self.game_id)
+        
+
+    except Exception as e:
+        logger.error(f"Error during error_exit cleanup: {e}")
+        # Attempt cleanup again in case of failure
+        try:
+            await GameCoordinator.cleanup_game(self.game_id)
+        except Exception as cleanup_error:
+            logger.error(f"Final cleanup attempt failed: {cleanup_error}")
+
+
+
+
+
 async def start_game(self):
     """Start game with process-safe checks"""
+
+    waiting_after_leaving = 300 # 5min 
     try:
-        num_players = self.settings.get("num_players")
+        players = self.settings.get("num_players")
         await GameCoordinator.set_to_waiting_game(self.game_id)
+
+        
+        redis_str = await GameCoordinator.get_redis(GameCoordinator.REDIS_GAME_URL)
+        redis_bin = await GameCoordinator.get_redis_binary(GameCoordinator.REDIS_GAME_URL)        
+
+        # Use async context managers for both Redis connections
+        # async with await GameCoordinator.get_redis(GameCoordinator.REDIS_GAME_URL) as redis_str, \
+        #          await GameCoordinator.get_redis_binary(GameCoordinator.REDIS_GAME_URL) as redis_bin:
+
+
         while True:
-            player_count = await self.redis_conn.scard(self.players_key)
-            if player_count == 0:
-                await self.end_game()
-                return
-            if player_count >= num_players:
-                break
-            logger.info(
-                f"{self.game_id}: Waiting for players... ({player_count}/{num_players})"
-            )
+            async with RedisLock(self.redis_conn, f"{self.game_id}_player_situation"):
+                player_count = await self.redis_conn.scard(self.players_key)
+                if player_count == 0:
+                    logger.info( f"{self.game_id}: exit task but stat stays in redis for {waiting_after_leaving}")
+                    await GameCoordinator.set_to_waiting_game(self.game_id, waiting_after_leaving)
+                    return
+                if player_count >= players:
+                    break
+            logger.info(f"{self.game_id}: Waiting for players... ({player_count}/{players})")
             await self.channel_layer.group_send(
                 f"game_{self.game_id}",
                 {
                     "type": "waiting",
                     "current_players": player_count,
-                    "required_players": num_players,
-                    "message": f"Waiting for players... ({player_count}/{num_players})",
+                    "required_players": players,
+                    "message": f"Waiting for players... ({player_count}/{players})",
                 },
             )
 
             await asyncio.sleep(1)
+        pipeline = self.redis_conn.pipeline()
+        current_time = time.time()
+        pipeline.set(self.running_key, b"1")
+        pipeline.set(f"game_start_time:{self.game_id}", str(current_time).encode())        
+        await pipeline.execute()
 
-        await self.redis_conn.set(self.running_key, b"1")
+
         logger.debug(
-            f"""DEBUG    
+        f"""DEBUG    
         sides: {self.num_sides} 
         paddles: {self.num_paddles} 
         mode: {self.game_mode} 
@@ -52,6 +101,19 @@ async def start_game(self):
         ball_mov: {self.previous_movements, type(self.previous_movements)}"""
         )
         await GameCoordinator.set_to_running_game(self.game_id)
+        # countdown
+        timer = 10
+        while timer:
+ 
+            await self.channel_layer.group_send(
+                f"game_{self.game_id}",
+                {
+                    "type": "timer",
+                    "timer": timer,
+                })
+            await asyncio.sleep(1) 
+            timer -= 1       
+
         while await self.redis_conn.get(self.running_key) == b"1":
             game_over = await self.update_game()
             if game_over:
@@ -60,35 +122,20 @@ async def start_game(self):
             await asyncio.sleep(0.016)  # ~60 FPS
     except Exception as e:
         logger.error(f"Error in start_game: {e}")
-        await self.end_game()
+        await self.error_exit("Error in start_game" , f"{e}")
         return
 
 
 async def end_game(self):
     """End game with process-safe cleanup"""
     try:
-        # await self.redis_conn.set(self.running_key, b"0")
         await GameCoordinator.set_to_finished_game(self.game_id)
+        await GameCoordinator.store_game_in_database(self.game_id)
         # Keep game state briefly for end-game display
         # would be handle by GameCoordinator 
-        for key in [
-            self.state_key,
-            self.players_key,
-            self.settings_key,
-            self.paddles_key,
-            self.running_key,
-            self.settings_key,
-            self.lock_key,
-            self.type_key,
-        ]:
-            # await self.redis_conn.expire(key, 300)  # 5 minute expiry
-            await self.redis_conn.expire(key, 1)  # 1 sec expiry
-
-        logger.info(f"Game {self.game_id} has ended.")
-
     except Exception as e:
         logger.error(f"Error ending game: {e}")
-        # TODO: cleanup requierd
+        await self.error_exit("Error in ending game" , f"{e}")
 
 async def update_game(self):
     """Process-safe game update with enhanced error handling"""
@@ -196,9 +243,9 @@ async def update_game(self):
 
     except Exception as e:
         logger.error(f"Error in update_game: {e}")
-        await self.channel_layer.group_send(
-            f"game_{self.game_id}",
-            {"type": "error", "error": "Game update failed", "details": str(e)},
-        )
-        await self.end_game()
+        await self.error_exit("Error in update_game" , f"{e}")
         return False
+
+
+
+
