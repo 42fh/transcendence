@@ -48,7 +48,7 @@ const defaultRound = {
   numberOfGames: 0,
 };
 
-const TournamentState = {
+export const tournamentState = {
   // Basic tournament info
   tournamentInfo: {
     name: "",

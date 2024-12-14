@@ -26,6 +26,7 @@
 @import "pages/gameSetup.css";
 @import "pages/game2D.css";
 @import "pages/tournamentCreate.css";
+@import "pages/localTournamentSetup.css";
 
 body {
   background-color: var(--color-background);

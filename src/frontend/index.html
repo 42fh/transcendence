@@ -246,12 +246,7 @@
 
           <div class="create-tournament-form-group create-tournament-form-group--hidden">
             <label class="create-tournament-label" for="tournament-description">DESCRIPTION</label>
-            <textarea
-              class="create-tournament-textarea"
-              id="tournament-description"
-              name="description"
-              required
-            ></textarea>
+            <textarea class="create-tournament-textarea" id="tournament-description" name="description"></textarea>
           </div>
           <div class="create-tournament-form-group">
             <label class="create-tournament-label">LOCATION</label>
@@ -348,7 +343,7 @@
                 32
               </button>
             </div>
-            <input type="hidden" name="maxPlayers" value="4" id="players-value" />
+            <input type="hidden" name="playersNumber" value="4" id="players-value" />
           </div>
 
           <!-- Tournament Type -->
@@ -926,6 +921,7 @@
       </div>
     </template>
 
+    <!-- Local Tournament Setup Template -->
     <template id="local-tournament-setup-template">
       <div class="local-tournament-setup">
         <!-- Tournament Info Section -->
@@ -943,6 +939,10 @@
             <div class="local-tournament-setup__info-item">
               <span class="local-tournament-setup__label">PLAYERS NEEDED:</span>
               <span class="local-tournament-setup__value" id="display-players-count"></span>
+            </div>
+            <div class="local-tournament-setup__info-item">
+              <span class="local-tournament-setup__label">TOTAL ROUNDS:</span>
+              <span class="local-tournament-setup__value" id="display-rounds"></span>
             </div>
           </div>
         </div>

@@ -86,7 +86,7 @@ export function loadCreateTournamentPage(addToHistory = true) {
         type: formData.get("type"),
         location: formData.get("location"), // Add location
         timing: formData.get("timing"), // Add timing
-        maxPlayers: formData.get("maxPlayers"), // Add max players
+        playersNumber: formData.get("playersNumber"),
         // Only include dates if timing is "planned"
         ...(formData.get("timing") === "planned" && {
           startingDate: formData.get("startingDate"),

@@ -5,6 +5,8 @@ import { loadTournamentsPage } from "../views/tournaments.js";
 import { updateGlobalTournaments } from "../store/index.js";
 import { manageJWT } from "./authService.js";
 import { loadLocalTournamentSetupPage } from "../views/localTournamentSetup.js";
+import { tournamentState } from "../store/tournament/state.js";
+
 // Fetch and enhance tournaments
 export async function fetchTournaments(source = CONFIG.CURRENT_SOURCE) {
   try {
@@ -141,11 +143,23 @@ export async function handleTournamentAction(tournament, isEnrolled) {
 export async function handleCreateTournamentSubmit(tournamentData) {
   try {
     // If it's a local tournament, redirect to player registration page
+    console.log("tournamentData", tournamentData);
+    console.log(tournamentData.location);
     if (tournamentData.location === "local") {
-      // Store tournament data in sessionStorage for the next page
-      sessionStorage.setItem("pendingLocalTournament", JSON.stringify(tournamentData));
+      // Initialize tournament state
+      tournamentState.tournamentInfo = {
+        name: tournamentData.name,
+        description: tournamentData.description || "",
+        location: "local",
+        type: tournamentData.type,
+        playersNumber: parseInt(tournamentData.playersNumber),
+        totalRounds: Math.log2(parseInt(tournamentData.playersNumber)), // For single elimination
+        currentRound: 0,
+        status: "setup",
+      };
+
       // Load the local tournament setup page
-      loadLocalTournamentSetupPage(tournamentData, false);
+      loadLocalTournamentSetupPage(false);
       return;
     }
     switch (CONFIG.CURRENT_SOURCE) {
