@@ -45,7 +45,7 @@ class Command(BaseCommand):
                 "visibility_user_profile": "everyone",
                 "email_verified": True,
                 "is_active": True,
-                "avatar": "avatars/dev.jpg",
+                "avatar": "avatars/default/default.jpeg",
                 "game_stats": {"wins": 5, "losses": 2},
             },
             {
