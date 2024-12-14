@@ -184,8 +184,6 @@ export default class GameConstructor {
         case "player_joined":
           console.log("player_joined: ", message);
           this.playerNames[message.player_index] = message.player_name;
-          console.log("padddles: ", this.paddles);
-          console.log("player_index: ", message.player_index);
           while (message.player_index >= 0) {
             if (this.paddles.has(message.player_index)) {
               this.paddles.get(message.player_index).material.map =
@@ -194,7 +192,6 @@ export default class GameConstructor {
             message.player_index--;
           }
 
-          console.log("playerNames: ", this.playerNames);
           if (
             this.playerCount ==
             this.playerNames.filter((element) => element).length
