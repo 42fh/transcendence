@@ -580,18 +580,18 @@ class GameCoordinator:
     async def set_to_finished_game(cls, game_id):
         async with await cls.get_redis(cls.REDIS_URL) as redis_conn:
             async with RedisLock(redis_conn, cls.LOCK_KEYS["finished"]):
-                # Remove from running games and add to finished games in a pipeline
-                pipe = redis_conn.pipeline()
-                pipe.srem(cls.RUNNING_GAMES, str(game_id))
-                pipe.sadd(cls.FINISHED_GAMES, str(game_id))
-                await pipe.execute()
-
                 # Update game status in game database
                 async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_game:
                     pipe = redis_game.pipeline()
                     pipe.set(f"game_running:{game_id}", "0")
                     pipe.set(f"game_finished:{game_id}", "1")
                     await pipe.execute()
+                # Remove from running games and add to finished games in a pipeline
+                pipe = redis_conn.pipeline()
+                pipe.srem(cls.RUNNING_GAMES, str(game_id))
+                pipe.sadd(cls.FINISHED_GAMES, str(game_id))
+                await pipe.execute()
+
 
     # 
     @classmethod

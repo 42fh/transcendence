@@ -196,25 +196,27 @@ async def _handle_ingame_leave(self, player_id: str, side_index: int, player_cou
             if not state_data:
                 raise ValueError("Game state not found")
             
-            current_state = msgpack.unpackb(state_data)
             
             if player_count <= 2:
-                # Last player leaving gives opponents 11 points, themselves 0
-                current_state["scores"] = [11 if i != paddle_index else 0 for i in range(len(current_state["scores"]))]
+                if not await self.redis_conn.exists(f"game_finished:{game_id}") 
+                    current_state = msgpack.unpackb(state_data)
+t 
+                    # Last player leaving gives opponents 11 points, themselves 0
+                    current_state["scores"] = [11 if i != paddle_index else 0 for i in range(len(current_state["scores"]))]
+                    await self.redis_conn.set(self.state_key, msgpack.packb(current_state))
                 game_over = True
-            else:
-                # Convert player's paddle to wall
-                if "paddles" in current_state:
-                    for paddle in current_state["paddles"]:
-                        if paddle.get("side_index") == side_index:
-                            paddle["is_wall"] = True
-                            paddle["active"] = False
-                current_state["scores"][side_index] = 0
-                for i, ball in enumerate(current_state.get("balls", [])):
-                    current_state["balls"][i] = self.reset_ball(ball, i)
-                game_over = False
-            # Update state within the same lock
-            await self.redis_conn.set(self.state_key, msgpack.packb(current_state))
+#            else:
+#                # Convert player's paddle to wall
+#                if "paddles" in current_state:
+#                    for paddle in current_state["paddles"]:
+#                        if paddle.get("side_index") == side_index:
+#                            paddle["is_wall"] = True
+#                            paddle["active"] = False
+#                current_state["scores"][side_index] = 0
+#                for i, ball in enumerate(current_state.get("balls", [])):
+#                    current_state["balls"][i] = self.reset_ball(ball, i)
+#                game_over = False
+#            # Update state within the same lock
         
         # Notify other players
         await self.channel_layer.group_send(
