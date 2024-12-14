@@ -23,6 +23,7 @@ import { renderModal, closeModal } from "../components/modal.js";
 import { load2FAPage } from "./2fa.js";
 import { inviteFriend } from "../services/gameWithFriendService.js"
 import { loadChatRoom } from "./chatRoom.js";
+import { fetchConversationList } from "../services/conversationService.js";
 
 export async function loadProfilePage(userId = null, addToHistory = true) {
   const loggedInUserId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
@@ -358,9 +359,26 @@ function populatePublicProfileHTML(content, userData) {
     }
   });
 
-  chatButton.addEventListener("click", () => {
-    loadChatRoom(userData);
+  chatButton.addEventListener("click", async () => {
+    try {
+      // const data = await fetchConversationList(1, 500, "");
+      // if (!data || !data.users) throw new Error("Failed to fetch chat contacts");
+  
+      // console.log("userData.id", userData.id);
+      // console.log("data.users", data.users);
+      
+      // // Correct the find method to properly search the users array
+      // const user = data.users.find(u => u.id === userData.id);
+  
+      // if (!user) throw new Error("User not found");
+  
+      loadChatRoom(user);
+    } catch (error) {
+      console.error(error);
+    }
   });
+  
+  
   
 }
 
