@@ -5,6 +5,7 @@ import { loadChatPage } from "../views/chatHome.js";
 import { loadUsersPage } from "../views/users.js";
 import { NAVIGATION, LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { renderNotifications } from "./chatNotification.js";
+import { ws as websocket } from "../utils/websocket.js";
 
 export function initBottomNav() {
   const bottomNavTemplate = document.getElementById("bottom-nav-template");
@@ -54,6 +55,9 @@ function handleNavClick(e) {
   };
 
   if (pageLoaders[page]) {
+    if (websocket) {
+      websocket.close();
+    }
     pageLoaders[page](); // No need to pass false here anymore
   }
 }

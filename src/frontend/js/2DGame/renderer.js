@@ -7,7 +7,10 @@ import { updateScoreDisplays, showGameOver, hideGameOver } from "./utils.js";
  * @param {Object} message - Initial state message from server
  */
 export function initializeRenderer(message) {
-  if (!message.game_setup.vertices || message.game_setup.vertices.length === 0) {
+  if (
+    !message.game_setup.vertices ||
+    message.game_setup.vertices.length === 0
+  ) {
     console.warn("No vertices available for renderer");
     return;
   }
@@ -78,14 +81,17 @@ function initializeSVG() {
 
   // Set viewBox from config
   const viewBox = renderer.config.viewBox;
-  renderer.svg.setAttribute("viewBox", `${viewBox.minX} ${viewBox.minY} ${viewBox.width} ${viewBox.height}`);
+  renderer.svg.setAttribute(
+    "viewBox",
+    `${viewBox.minX} ${viewBox.minY} ${viewBox.width} ${viewBox.height}`
+  );
 
   // Log verification
-  console.log("ViewBox verification:", {
-    config: renderer.config.viewBox,
-    svgAttribute: renderer.svg.getAttribute("viewBox"),
-    svgViewBox: renderer.svg.viewBox.baseVal,
-  });
+  // console.log("ViewBox verification:", {
+  //   config: renderer.config.viewBox,
+  //   svgAttribute: renderer.svg.getAttribute("viewBox"),
+  //   svgViewBox: renderer.svg.viewBox.baseVal,
+  // });
   verifyViewBoxConsistency();
 }
 
@@ -122,7 +128,7 @@ function verifyViewBoxConsistency() {
  * @param {Object} message - Initial state message from server
  */
 export function updateRenderer(message) {
-  console.log("updateRenderer", message);
+  // console.log("updateRenderer", message);
   const renderer = getRendererState();
   if (!renderer.type) {
     console.warn("Renderer not initialized");
@@ -172,11 +178,11 @@ export function createSVGElement(type, attributes) {
 export function renderSingleBall(ball, options = {}, debug = false) {
   const renderer = getRendererState();
   //   debug = true;
-  console.log("renderSingleBall - input:", {
-    ball,
-    options,
-    scale: renderer.config.scale,
-  });
+  // console.log("renderSingleBall - input:", {
+  //   ball,
+  //   options,
+  //   scale: renderer.config.scale,
+  // });
   if (!renderer.svg) return;
 
   const { shape = "circle", fill = "yellow", stroke = "black" } = options;
@@ -193,7 +199,10 @@ export function renderSingleBall(ball, options = {}, debug = false) {
   const scaledBallY = transformedPoint.y;
   //   const scaledBallSize = ball.size * renderer.config.scale;
   // Use the smaller dimension of the viewBox for consistent scaling
-  const scaleFactor = Math.min(renderer.config.viewBox.width, renderer.config.viewBox.height);
+  const scaleFactor = Math.min(
+    renderer.config.viewBox.width,
+    renderer.config.viewBox.height
+  );
   const scaledSize = ball.size * scaleFactor;
 
   // Log final SVG element properties
@@ -213,7 +222,7 @@ export function renderSingleBall(ball, options = {}, debug = false) {
           r: scaledSize,
         };
 
-  console.log("SVG element:", elementProps);
+  // console.log("SVG element:", elementProps);
 
   // Create and append the SVG element
   renderer.svg.appendChild(
@@ -232,13 +241,13 @@ export function renderBalls(debug = false) {
 
   //   debug = true;
 
-  if (debug) {
-    console.log("renderBalls - state:", {
-      hasSVG: !!renderer.svg,
-      balls: renderer.state.balls,
-      config: renderer.config.ball,
-    });
-  }
+  // if (debug) {
+  //   console.log("renderBalls - state:", {
+  //     hasSVG: !!renderer.svg,
+  //     balls: renderer.state.balls,
+  //     config: renderer.config.ball,
+  //   });
+  // }
 
   renderer.state.balls.forEach((ball) => {
     renderSingleBall(ball, {
@@ -286,11 +295,16 @@ export function render() {
  */
 export function renderPolygonGame() {
   const renderer = getRendererState();
-  console.log("Entering renderPolygonGame");
-  console.log(renderer);
+  // console.log("Entering renderPolygonGame");
+  // console.log(renderer);
 
   // Validate required data is available
-  if (!renderer.state || !renderer.svg || !renderer.vertices || renderer.vertices.length === 0) {
+  if (
+    !renderer.state ||
+    !renderer.svg ||
+    !renderer.vertices ||
+    renderer.vertices.length === 0
+  ) {
     console.warn("Missing required data for rendering", {
       hasState: !!renderer.state,
       hasSvg: !!renderer.svg,
@@ -298,23 +312,23 @@ export function renderPolygonGame() {
     });
     return;
   }
-  console.group("Game Area Debug");
-  console.log("Game Area Debug:", {
-    // SVG Container
-    viewBox: renderer.config.viewBox,
-    svgElement: {
-      width: renderer.svg.clientWidth,
-      height: renderer.svg.clientHeight,
-    },
-    // Game Boundaries
-    boundaries: renderer.config.boundaries,
-    // Scale and other configs
-    scale: renderer.config.scale,
-    centered: renderer.config.centered,
-    // Vertices
-    originalVertices: renderer.vertices,
-    transformedVertices: transformVertices(),
-  });
+  // console.group("Game Area Debug");
+  // console.log("Game Area Debug:", {
+  //   // SVG Container
+  //   viewBox: renderer.config.viewBox,
+  //   svgElement: {
+  //     width: renderer.svg.clientWidth,
+  //     height: renderer.svg.clientHeight,
+  //   },
+  //   // Game Boundaries
+  //   boundaries: renderer.config.boundaries,
+  //   // Scale and other configs
+  //   scale: renderer.config.scale,
+  //   centered: renderer.config.centered,
+  //   // Vertices
+  //   originalVertices: renderer.vertices,
+  //   transformedVertices: transformVertices(),
+  // });
   console.groupEnd();
 
   renderer.svg.innerHTML = "";
@@ -357,8 +371,10 @@ export function renderPolygonGame() {
  */
 function denormalizeCoordinates(x, y, viewBox, boundaries) {
   // Convert X and Y from cartesian normalized space (-1,1) to SVG graphic space (0,1)
-  const cartesianToGraphicX = (x - boundaries.xMin) / (boundaries.xMax - boundaries.xMin);
-  const cartesianToGraphicY = 1 - (y - boundaries.yMin) / (boundaries.yMax - boundaries.yMin); // Flip Y axis
+  const cartesianToGraphicX =
+    (x - boundaries.xMin) / (boundaries.xMax - boundaries.xMin);
+  const cartesianToGraphicY =
+    1 - (y - boundaries.yMin) / (boundaries.yMax - boundaries.yMin); // Flip Y axis
 
   // Scale to viewport dimensions
   const viewportWidth = viewBox.width - viewBox.minX;
@@ -409,8 +425,10 @@ export function transformVertices(vertices = []) {
 
   return vertices.map((vertex) => {
     // 1. First rotate in cartesian space
-    const rotatedX = vertex.x * Math.cos(angleInRadians) - vertex.y * Math.sin(angleInRadians);
-    const rotatedY = vertex.x * Math.sin(angleInRadians) + vertex.y * Math.cos(angleInRadians);
+    const rotatedX =
+      vertex.x * Math.cos(angleInRadians) - vertex.y * Math.sin(angleInRadians);
+    const rotatedY =
+      vertex.x * Math.sin(angleInRadians) + vertex.y * Math.cos(angleInRadians);
 
     // 2. Apply scale if needed
     const scaledX = rotatedX * renderer.config.scale;
@@ -446,24 +464,25 @@ export function renderPaddle(renderer, paddle, sideIndex, debug = false) {
   // Skip inactive paddles
   //   debug = true;
   if (!paddle.active || !renderer.vertices) return;
-  if (debug)
-    console.log("renderPaddle - debug inog:", {
-      debug,
-      paddle,
-      sideIndex,
-      active: paddle.active,
-      hasVertices: !!renderer.vertices,
-    });
+  // if (debug)
+  //   console.log("renderPaddle - debug inog:", {
+  //     debug,
+  //     paddle,
+  //     sideIndex,
+  //     active: paddle.active,
+  //     hasVertices: !!renderer.vertices,
+  //   });
   // Transform vertices
   const transformedVertices = transformVertices();
   const startVertex = transformedVertices[sideIndex];
-  const endVertex = transformedVertices[(sideIndex + 1) % transformedVertices.length];
+  const endVertex =
+    transformedVertices[(sideIndex + 1) % transformedVertices.length];
 
-  console.log("Geometry:", {
-    startVertex,
-    endVertex,
-    sideLength: Math.sqrt(Math.pow(endVertex.x - startVertex.x, 2) + Math.pow(endVertex.y - startVertex.y, 2)),
-  });
+  // console.log("Geometry:", {
+  //   startVertex,
+  //   endVertex,
+  //   sideLength: Math.sqrt(Math.pow(endVertex.x - startVertex.x, 2) + Math.pow(endVertex.y - startVertex.y, 2)),
+  // });
 
   // Calculate paddle geometry
   const sideX = endVertex.x - startVertex.x;
@@ -482,18 +501,21 @@ export function renderPaddle(renderer, paddle, sideIndex, debug = false) {
   const paddleLength = renderer.state.dimensions.paddle_length * sideLength;
   const paddleWidth = renderer.state.dimensions.paddle_width * sideLength;
   const hitZoneWidth =
-    (renderer.state.dimensions.paddle_width + (renderer.state.dimensions.ball_size || 0.1) * 2) * renderer.config.scale;
+    (renderer.state.dimensions.paddle_width +
+      (renderer.state.dimensions.ball_size || 0.1) * 2) *
+    renderer.config.scale;
 
-  console.log("Paddle Dimensions:", {
-    sideLength, // Should be ~140 pixels
-    paddleLength, // Should be ~28 pixels (20% of side)
-    paddleWidth, // Should be ~4.2 pixels (3% of side)
-    hitZoneWidth, // Should be ~7 pixels (paddle + 2*ball)
-    position: paddle.position, // Should be between 0-1
-  });
+  // console.log("Paddle Dimensions:", {
+  //   sideLength, // Should be ~140 pixels
+  //   paddleLength, // Should be ~28 pixels (20% of side)
+  //   paddleWidth, // Should be ~4.2 pixels (3% of side)
+  //   hitZoneWidth, // Should be ~7 pixels (paddle + 2*ball)
+  //   position: paddle.position, // Should be between 0-1
+  // });
 
   // Determine paddle state
-  const isCurrentPlayer = renderer.state.paddles.indexOf(paddle) === renderer.playerIndex;
+  const isCurrentPlayer =
+    renderer.state.paddles.indexOf(paddle) === renderer.playerIndex;
 
   // Render paddle
   const paddlePoints = calculatePaddlePoints(
@@ -508,13 +530,13 @@ export function renderPaddle(renderer, paddle, sideIndex, debug = false) {
   );
 
   // After calculating paddle points
-  console.log("Paddle Points:", {
-    paddleX,
-    paddleY,
-    paddleLength,
-    paddleWidth,
-    points: paddlePoints,
-  });
+  // console.log("Paddle Points:", {
+  //   paddleX,
+  //   paddleY,
+  //   paddleLength,
+  //   paddleWidth,
+  //   points: paddlePoints,
+  // });
 
   renderer.svg.appendChild(
     createSVGElement("polygon", {
@@ -526,7 +548,8 @@ export function renderPaddle(renderer, paddle, sideIndex, debug = false) {
   );
 
   if (debug) {
-    const isColliding = renderer.state.collision?.side_index === paddle.side_index;
+    const isColliding =
+      renderer.state.collision?.side_index === paddle.side_index;
 
     // Render hit zone if debug mode is on
     const hitZonePoints = calculatePaddlePoints(
@@ -589,7 +612,16 @@ export function renderPaddles() {
   });
 }
 
-function calculatePaddlePoints(x, y, normalizedSideX, normalizedSideY, normalX, normalY, length, width) {
+function calculatePaddlePoints(
+  x,
+  y,
+  normalizedSideX,
+  normalizedSideY,
+  normalX,
+  normalY,
+  length,
+  width
+) {
   // OLD version (going outward)
   //   return [
   //     `${x - (normalizedSideX * length) / 2},${y - (normalizedSideY * length) / 2}`,
@@ -600,17 +632,26 @@ function calculatePaddlePoints(x, y, normalizedSideX, normalizedSideY, normalX, 
 
   // NEW version (going inward)
   return [
-    `${x - (normalizedSideX * length) / 2},${y - (normalizedSideY * length) / 2}`,
-    `${x + (normalizedSideX * length) / 2},${y + (normalizedSideY * length) / 2}`,
-    `${x + (normalizedSideX * length) / 2 - normalX * width},${y + (normalizedSideY * length) / 2 - normalY * width}`,
-    `${x - (normalizedSideX * length) / 2 - normalX * width},${y - (normalizedSideY * length) / 2 - normalY * width}`,
+    `${x - (normalizedSideX * length) / 2},${
+      y - (normalizedSideY * length) / 2
+    }`,
+    `${x + (normalizedSideX * length) / 2},${
+      y + (normalizedSideY * length) / 2
+    }`,
+    `${x + (normalizedSideX * length) / 2 - normalX * width},${
+      y + (normalizedSideY * length) / 2 - normalY * width
+    }`,
+    `${x - (normalizedSideX * length) / 2 - normalX * width},${
+      y - (normalizedSideY * length) / 2 - normalY * width
+    }`,
   ].join(" ");
 }
 
 function renderPolygonDebugLabels(renderer) {
   // Add labels for each side
   transformedVertices.forEach((vertex, i) => {
-    const nextVertex = transformedVertices[(i + 1) % transformedVertices.length];
+    const nextVertex =
+      transformedVertices[(i + 1) % transformedVertices.length];
 
     // Calculate midpoint and offset for label
     const midX = (vertex.x + nextVertex.x) / 2;
@@ -652,7 +693,7 @@ function renderPolygonDebugLabels(renderer) {
  * @requires renderPolygonDebugLabels - Function for debug label rendering
  */
 export function renderPolygonOutline(options = {}) {
-  console.log("Entering renderPolygonOutline");
+  // console.log("Entering renderPolygonOutline");
   const defaultOptions = {
     // fill: "#000000", // Default black fill
     fill: "#000033", // Dark blue fill
@@ -671,7 +712,9 @@ export function renderPolygonOutline(options = {}) {
 
   const transformedVertices = transformVertices();
 
-  const pathData = transformedVertices.map((vertex, i) => `${i === 0 ? "M" : "L"} ${vertex.x} ${vertex.y}`).join(" ");
+  const pathData = transformedVertices
+    .map((vertex, i) => `${i === 0 ? "M" : "L"} ${vertex.x} ${vertex.y}`)
+    .join(" ");
 
   // Draw main polygon outline
   renderer.svg.appendChild(

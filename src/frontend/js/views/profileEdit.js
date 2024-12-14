@@ -1,8 +1,16 @@
-import { fetchUserProfile, updateUserProfile, uploadUserAvatar } from "../services/usersService.js";
+import {
+  fetchUserProfile,
+  updateUserProfile,
+  uploadUserAvatar,
+} from "../services/usersService.js";
 import { showToast } from "../utils/toast.js";
 import { LOCAL_STORAGE_KEYS, ASSETS } from "../config/constants.js";
 import { loadProfilePage } from "./profile.js";
-import { setupFormValidation, validateFormField } from "../utils/formValidation.js";
+import {
+  setupFormValidation,
+  validateFormField,
+} from "../utils/formValidation.js";
+import { loadAuthPage } from "./auth.js";
 
 export async function loadProfileEditPage() {
   try {
@@ -17,10 +25,14 @@ export async function loadProfileEditPage() {
     if (!mainContent) throw new Error("Main content element not found");
 
     // TODO: fix this nasty thing
-    mainContent.innerHTML = '<div class="loading">Loading profile editor...</div>';
+    mainContent.innerHTML =
+      '<div class="loading">Loading profile editor...</div>';
 
-    const profileEditTemplate = document.getElementById("profile-edit-template");
-    if (!profileEditTemplate) throw new Error("Profile edit template not found");
+    const profileEditTemplate = document.getElementById(
+      "profile-edit-template"
+    );
+    if (!profileEditTemplate)
+      throw new Error("Profile edit template not found");
 
     const content = document.importNode(profileEditTemplate.content, true);
     mainContent.innerHTML = "";
@@ -75,11 +87,15 @@ function populateFormFields(content, userData) {
     console.warn("Avatar image not found");
   }
 
-  content.querySelector('input[name="username"]').value = userData.username || "";
-  content.querySelector('input[name="first_name"]').value = userData.first_name || "";
-  content.querySelector('input[name="last_name"]').value = userData.last_name || "";
+  content.querySelector('input[name="username"]').value =
+    userData.username || "";
+  content.querySelector('input[name="first_name"]').value =
+    userData.first_name || "";
+  content.querySelector('input[name="last_name"]').value =
+    userData.last_name || "";
   content.querySelector('input[name="email"]').value = userData.email || "";
-  content.querySelector('input[name="telephone_number"]').value = userData.telephone_number || "";
+  content.querySelector('input[name="telephone_number"]').value =
+    userData.telephone_number || "";
   content.querySelector('textarea[name="bio"]').value = userData.bio || "";
 }
 
@@ -147,6 +163,9 @@ function setupAvatarUpload(content, userId) {
       console.warn("No file selected");
       return;
     }
+
+    console.log("Selected file:", file);
+    console.log("avatarImg:", avatarImg);
 
     handleAvatarUpload(file, avatarButton, avatarImg, userId);
   });

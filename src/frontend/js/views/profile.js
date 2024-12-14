@@ -18,6 +18,8 @@ import { renderModal, closeModal } from "../components/modal.js";
 import { load2FAPage } from "./2fa.js";
 // import { updateOnlineStatus } from "../utils/onlineStatus.js";
 import { startOnlineStatusPolling } from "../utils/onlineStatus.js";
+import { handleLogout } from "./auth.js";
+import { loadAuthPage } from "./auth.js";
 
 export async function loadProfilePage(userId = null, addToHistory = true) {
   const loggedInUserId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
@@ -120,6 +122,11 @@ export async function loadProfilePage(userId = null, addToHistory = true) {
         console.log("2FA button clicked");
         load2FAPage(userData);
       });
+      // Add logout button handler
+      const logoutButton = mainContent.querySelector(".profile__button--logout");
+      if (logoutButton) {
+        logoutButton.addEventListener("click", handleLogout);
+      }
     }
 
     // TODO: probably we don't need this
@@ -138,6 +145,9 @@ function populateProfileHTML(content, userData, isOwnProfile) {
   // Shared elements
   populateSharedProfileHTML(content, userData);
 
+  const avatarElement = content.querySelector(".profile__avatar");
+  avatarElement.src = userData.avatar || ASSETS.IMAGES.DEFAULT_AVATAR;
+
   // Split based on profile type
   if (isOwnProfile) {
     populateOwnProfileHTML(content, userData);
@@ -147,13 +157,6 @@ function populateProfileHTML(content, userData, isOwnProfile) {
 }
 
 function populateSharedProfileHTML(content, userData) {
-  // Avatar
-  const avatarElement = content.querySelector(".profile__avatar");
-  avatarElement.onerror = function () {
-    console.log("Avatar failed to load, falling back to default");
-    avatarElement.src = ASSETS.IMAGES.DEFAULT_AVATAR;
-  };
-
   // Username
   const usernameElement = content.querySelector(".profile__username");
   applyUsernameTruncation(usernameElement, userData.username, 15);

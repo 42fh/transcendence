@@ -75,6 +75,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             # self.ping_task = asyncio.create_task(self.send_ping())
             # self.check_connection_task = asyncio.create_task(self.check_connection())
             if self.role == "player":
+                print("player_index", self.player_index)
                 await self.channel_layer.group_send(
                     self.game_group,
                     {
@@ -217,7 +218,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         if current_time - self.last_move_time < self.player_values["move_cooldown"]:
             await self.send(
                 text_data=json.dumps(
-                    {"type": "error", "message": "You are to fast"}
+                    {"type": "error", "message": "You are too fast"}
                 )
             )
             return  # could send back feedback that is too fast or and log it in cheatlog
@@ -392,7 +393,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             text_data=json.dumps(
                 {
                     "type": "timer",
-                    "timer": event.get("current_players", 0),
+                    "timer": event.get("timer", 0),
                 }
             )
         )

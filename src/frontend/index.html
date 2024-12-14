@@ -87,7 +87,7 @@
             </button>
           </div>
 
-          <button type="submit" id="2fa-login" class="auth-form__button">
+          <button type="submit" verify" class="auth-form__button">
             Log In
           </button>
         </form>
@@ -117,41 +117,55 @@
       </form>
     </template>
 
+    <template id="game-list-template">
+      <div class="game-list-button-container">
+      <button class="create-game-btn home__button button--neon">Create Game</button>
+      <button class="offline-game-btn home__button button--neon">Offline Game</button>
+    </div>
+      <div class="game-list-container">
+        <div class="game-list">
+              <!-- Games will be inserted here by JavaScript -->
+          </div>
+      </div>
+    </template>
+
+    <template id="2fa-template">
+      <div class="modal-form">
+        <label for="code">Enter the code sent to your email</label>
+        <input type="text" id="code" name="code" required />
+    
+        <div class="resend-section">
+          <span id="countdown">1:00</span>
+          <button
+            type="button"
+            id="resend-button"
+            class="auth-form__button"
+            disabled
+          >
+            Resend Code
+          </button>
+        </div>
+    
+        <button id="2fa-verify" class="auth-form__button">
+          Verify
+        </button>
+      </div>
+      </template>
+  
+
     <!-- Home Page Template -->
     <template id="home-template">
       <div class="page-container page-container--home">
         <h1 class="page-container__title page-container__title--home">PONG</h1>
 
         <div class="home__content">
-          <div class="home__buttonsetleft">
-            <button id="home__button-logout" class="home__button button--red">Logout</button>
-            <button id="home__button-play" class="home__button button--neon">PLAY</button>
-            <button id="home__button-playoffline" class="home__button button--neon">OFFLINE</button>
-          </div>
-          <div class="home__net">
-            <div class="home__net-segment home__net-segment--black"></div>
-            <div class="home__net-segment home__net-segment--white"></div>
-            <div class="home__net-segment home__net-segment--black"></div>
-            <div class="home__net-segment home__net-segment--white"></div>
-            <div class="home__net-segment home__net-segment--black"></div>
-            <div class="home__net-segment home__net-segment--white"></div>
-            <div class="home__net-segment home__net-segment--black"></div>
-            <div class="home__net-segment home__net-segment--white"></div>
-            <div class="home__net-segment home__net-segment--black"></div>
-            <div class="home__net-segment home__net-segment--white"></div>
-          </div>
-          <!-- <button id="home__button-cta" class="home__button button--gradient">CTA</button> -->
-          <div class="home__buttons-right">
-            <button id="home__button-cta" class="home__button button--gradient">
-              CTA
-            </button>
+          <button id="home__button-play" class="home__button button--neon">PLAY</button>
+          <!-- <div class="home__buttons-right">
             <button id="home__button-2d" class="home__button button--stroke">
-              <span class="actual-text">&nbsp;2D GAME&nbsp;</span>
-              <span class="hover-text" aria-hidden="true"
-                >&nbsp;OR DIE&nbsp;</span
-              >
+              <span class="actual-text">&nbsp;PLAYE&nbsp;</span>
+              <span class="hover-text" aria-hidden="true">&nbsp;OR DIE&nbsp;</span>
             </button>
-          </div>
+          </div> -->
         </div>
       </div>
     </template>
@@ -174,7 +188,7 @@
     <!-- Offline Game Template -->
     <template id="gameoffline-template">
       <div id="gameoffline-container">
-        <h>Offline</p>
+        <h1>Offline</h1>
         <p>Player 1: press <span>[A]</span> and <span>[S]</span></p>
         <p>Player 2: press <span>[K]</span> and <span>[L]</span></p>
         <canvas id="game_offlinemode_canvas" height="500" width="500"></canvas><br />
@@ -512,7 +526,6 @@
             <div
               id="chat-conversations-list-item"
               class="chat-conversations-list__item"
-              id="chat-conversations"
               style="display: none"
             >
               <img
@@ -717,15 +730,10 @@
           </div>
 
           <!-- Private Profile Actions -->
-          <div
-            class="profile__section profile__section--private-actions profile__private-info"
-          >
-            <button class="profile__button profile__button--edit">
-              Edit Profile
-            </button>
-            <button class="profile__button profile__button--2fa">
-              2FA Settings
-            </button>
+          <div class="profile__section profile__section--private-actions profile__private-info">
+            <button class="profile__button profile__button--logout">Logout</button>
+            <button class="profile__button profile__button--edit">Edit Profile</button>
+            <button class="profile__button profile__button--2fa">2FA Settings</button>
             <!-- TODO: Add password change button if we decide to implement it -->
           </div>
         </div>
@@ -857,7 +865,8 @@
     <template id="2fa-edit-template">
       <div class="profile-edit">
         <h2 class="profile-edit__title">Edit 2FA</h2>
-        <p class="email-warning" style="display: none">Email is not set</p>
+        <p class="email-warning email-not-set" style="display: none">Email is not set</p>
+        <p class="email-warning email-not-verified" style="display: none">Email is not verified</p>
         <form class="profile-edit__form">
           <div class="profile-edit__field form-field">
             <label class="profile-edit__label form-label" for="email"
@@ -904,6 +913,12 @@
           <div class="profile-edit__buttons">
             <button
               type="button"
+              class="profile-edit__button profile-edit__button--verify-email"
+            >
+              Verify
+            </button>
+            <button
+              type="button"
               class="profile-edit__button profile-edit__button--cancel"
             >
               Cancel
@@ -922,33 +937,15 @@
     <!-- 3D Game -->
     <template id="3d-game-template">
       <canvas class="webgl"></canvas>
+      <div id="number-display"></div>
       <div class="mobile-controls">
-        <button class="control-btn left-btn">
-          <i class="fas fa-arrow-left"></i>
+        <button id="left-btn" class="control-btn">
+          <p>&lt;</p>
         </button>
-        <button class="control-btn right-btn">
-          <i class="fas fa-arrow-right"></i>
+        <button id="right-btn" class="control-btn">
+          <p>&gt;</p>
         </button>
-      </div>
-      <div class="game-menu-overlay" id="menu">
-        <div class="game-menu-container">
-          <div class="card bg-dark text-light">
-            <div class="card-header">
-              <h2 class="text-center mb-0">Game Setup</h2>
-            </div>
-            <div class="card-body">
-              <div class="mb-4">
-                <label for="playerCount">Player count</label>
-                <input type="text" id="playerCount" />
-              </div>
-
-              <div class="text-center">
-                <div class="joinGame btn btn-primary">Join</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    </div>
     </template>
 
     <!-- Users Template -->
@@ -1010,17 +1007,17 @@
       <div class="two-d-game__container">
         <form class="two-d-game__form" id="two-d-game__form">
           <div class="two-d-game__form-group">
-            <label class="two-d-game__label" for="two-d-game__game-type"
-              >Game Type</label
-            >
-            <select
-              class="two-d-game__select"
-              id="two-d-game__game-type"
-              disabled
-            >
-              <option value="regular">Regular Pong</option>
+            <label class="two-d-game__label" for="two-d-game__name">Game Name</label>
+            <input
+              class="two-d-game__input"
+              id="two-d-game__name"
+              value="My Game"
+            />
+          </div>
+          <div class="two-d-game__form-group">
+            <label class="two-d-game__label" for="two-d-game__game-type">Game Type</label>
+            <select class="two-d-game__select" id="two-d-game__game-type">
               <option value="circular">Circular Pong</option>
-              <option value="irregular">Irregular Pong</option>
               <option value="classic">Classic Pong</option>
             </select>
           </div>
@@ -1036,12 +1033,11 @@
               min="2"
               max="8"
               value="2"
-              disabled
             />
             <small class="two-d-game__help-text">Min: 2, Max: 8 players</small>
           </div>
 
-          <div class="two-d-game__form-group polygon-only">
+          <div class="two-d-game__form-group">
             <label class="two-d-game__label" for="two-d-game__num-sides"
               >Number of Sides</label
             >
@@ -1049,12 +1045,11 @@
               class="two-d-game__input"
               type="number"
               id="two-d-game__num-sides"
-              min="3"
-              max="12"
-              value="4"
-              disabled
+              min="2"
+              max="8"
+              value="2"
             />
-            <small class="two-d-game__help-text">Min: 3, Max: 12 sides</small>
+            <small class="two-d-game__help-text">Min: 2, Max: 8 sides</small>
           </div>
 
           <div class="two-d-game__form-group">
@@ -1076,25 +1071,8 @@
             >
             <select class="two-d-game__select" id="two-d-game__score-mode">
               <option value="classic">Classic (First to 11)</option>
-              <option value="timed">Timed (5 minutes)</option>
               <option value="survival">Survival</option>
             </select>
-          </div>
-
-          <div class="two-d-game__form-group">
-            <div class="two-d-game__checkbox-container">
-              <input
-                type="checkbox"
-                id="two-d-game__debug-mode"
-                class="two-d-game__checkbox"
-              />
-              <label
-                class="two-d-game__checkbox-label"
-                for="two-d-game__debug-mode"
-              >
-                Enable Debug Mode
-              </label>
-            </div>
           </div>
 
           <div class="two-d-game__form-group">
@@ -1109,12 +1087,12 @@
       <!-- Game Container -->
       <div id="two-d-game__container-game" class="two-d-game__container-game">
         <div class="two-d-game__game-layout">
-          <div class="two-d-game__game-main">
+           <div class="two-d-game__game-main">
             <div class="two-d-game__game-canvas-container">
               <svg id="two-d-game__pong-svg" viewBox="0 0 300 300"></svg>
             </div>
 
-            <div class="two-d-game__panel">
+            <!-- <div class="two-d-game__panel">
               <div class="two-d-game__panel-header">
                 <h3 class="two-d-game__panel-title">Event Log</h3>
               </div>
@@ -1125,11 +1103,11 @@
                   >
                 </div>
               </div>
-            </div>
+            </div> -->
           </div>
 
           <div class="two-d-game__game-sidebar">
-            <div class="two-d-game__panel">
+            <!-- <div class="two-d-game__panel">
               <div class="two-d-game__panel-header">
                 <h3 class="two-d-game__panel-title">Game Info</h3>
               </div>
@@ -1137,7 +1115,7 @@
                 id="two-d-game__game-info"
                 class="two-d-game__game-info"
               ></div>
-            </div>
+            </div> -->
 
             <div class="two-d-game__panel">
               <div class="two-d-game__panel-header">

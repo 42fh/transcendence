@@ -7,6 +7,8 @@ import { loadTournamentsPage } from "../views/tournaments.js";
 import { loadTournamentDetailsPage } from "../views/tournamentDetail.js";
 import { loadCreateTournamentPage } from "../views/tournamentCreate.js";
 import { loadTimetablePage } from "../views/timetable.js";
+import { loadGameList } from "../views/gameList.js";
+import { loadGameSetupPage } from "../views/gameSetup.js";
 import { loadProfilePage } from "../views/profile.js";
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { updateActiveNavItem } from "../components/bottomNav.js";
@@ -56,6 +58,12 @@ export function initializeHistory() {
         switch (state.view) {
           case "auth":
             loadAuthPage(false);
+            break;
+          case "game-list":
+            loadGameList(false);
+            break;
+          case "game-setup":
+            loadGameSetupPage(false);
             break;
           case "home":
             loadHomePage(false);
