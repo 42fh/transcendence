@@ -55,10 +55,8 @@ function handleNavClick(e) {
   };
 
   if (pageLoaders[page]) {
-    if (page !== "home") {
-      if (websocket) {
-        websocket.close();
-      }
+    if (websocket) {
+      websocket.close();
     }
     pageLoaders[page](); // No need to pass false here anymore
   }

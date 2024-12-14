@@ -21,6 +21,7 @@ import {
 import { renderModal, closeModal } from "../components/modal.js";
 import { load2FAPage } from "./2fa.js";
 import { handleLogout } from "./auth.js";
+import { loadAuthPage } from "./auth.js";
 
 export async function loadProfilePage(userId = null, addToHistory = true) {
   const loggedInUserId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);

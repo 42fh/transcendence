@@ -159,17 +159,13 @@ export async function handleLogout() {
   console.log("Attempting to log out...");
   try {
     await logoutUser();
-
-    localStorage.removeItem(LOCAL_STORAGE_KEYS.USERNAME);
-    localStorage.removeItem(LOCAL_STORAGE_KEYS.USER_ID);
-    history.pushState({ view: "auth" }, "");
-    loadAuthPage();
   } catch (error) {
-    console.error("Logout error:", error);
-    displayLogoutError(
-      "An error occurred while logging out. Please try again."
-    );
+    console.log("Could not logout, redirecting to login...", error);
   }
+  history.pushState({ view: "auth" }, "");
+  loadAuthPage();
+  localStorage.removeItem(LOCAL_STORAGE_KEYS.USERNAME);
+  localStorage.removeItem(LOCAL_STORAGE_KEYS.USER_ID);
 }
 
 async function handleAuthSuccess(result, form) {
