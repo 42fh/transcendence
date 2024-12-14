@@ -152,7 +152,10 @@ export default class GameConstructor {
           console.log("initial_state: ", message);
           this.playerIndex = message.player_index;
           this.playerNames = message.player_names;
-          this.playerCount = message.game_state.paddles.length;
+          this.playerCount = message.game_state.paddles.filter(
+            (paddle) => paddle.active
+          ).length;
+          console.log("playerCount: ", this.playerCount);
           this.lastWaitingMessage = Date.now();
           this.createGame(message.game_state);
 
@@ -181,12 +184,21 @@ export default class GameConstructor {
         case "player_joined":
           console.log("player_joined: ", message);
           this.playerNames[message.player_index] = message.player_name;
+          console.log("padddles: ", this.paddles);
+          console.log("player_index: ", message.player_index);
           while (message.player_index >= 0) {
-            this.paddles.get(message.player_index).material.map = this.skins[0];
+            if (this.paddles.has(message.player_index)) {
+              this.paddles.get(message.player_index).material.map =
+                this.skins[0];
+            }
             message.player_index--;
           }
 
-          if (this.playerCount == this.playerNames.length)
+          console.log("playerNames: ", this.playerNames);
+          if (
+            this.playerCount ==
+            this.playerNames.filter((element) => element).length
+          )
             this.world.zoomToPlayer();
 
           showToast(`${message.player_name} joined the game`);

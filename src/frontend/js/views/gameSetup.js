@@ -103,12 +103,11 @@ function collectFormData() {
   const numPlayers = parseInt(
     document.getElementById("two-d-game__num-players").value
   );
-  // const numSides = parseInt(
-  //   document.getElementById("two-d-game__num-sides").value
-  // );
+  const numSides = parseInt(
+    document.getElementById("two-d-game__num-sides").value
+  );
   // while only circular mode is ready
   const name = document.getElementById("two-d-game__name").value;
-  const numSides = numPlayers;
   const numBalls = parseInt(
     document.getElementById("two-d-game__num-balls").value
   );
