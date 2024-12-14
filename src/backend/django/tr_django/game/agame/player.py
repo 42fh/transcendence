@@ -41,7 +41,7 @@ async def add_player(self, player_id):
         booking_key = f"{GC.BOOKED_USER_PREFIX}{player_id}:{self.game_id}"
         tournament_key = f"{GC.TOURNAMENT_USER_PREFIX}{player_id}:{self.game_id}"
         #invitation_key = f"{GC.INVITATION_PREFIX}{to_user_id}:{game_id}:{from_user_id}"
-        logger.debug(f"KEYS: {booking_key} / {tournament_key} / {invitation_key}") 
+        # logger.debug(f"KEYS: {booking_key} / {tournament_key} / {invitation_key}")
         pipeline = self.redis_conn.pipeline() 
         pipeline.exists(booking_key) 
         pipeline.exists(tournament_key) 
