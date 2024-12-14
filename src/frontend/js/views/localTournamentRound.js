@@ -1,6 +1,7 @@
 import { tournamentState } from "../store/tournament/state.js";
 import { showToast } from "../utils/toast.js";
 import { loadLocalTournamentSetupPage } from "./localTournamentSetup.js";
+import { loadGameOffline } from "./gameOffline.js";
 
 export function loadLocalTournamentRoundPage(addToHistory = true) {
   try {
@@ -76,5 +77,6 @@ function handlePlayGame(game) {
   mainContent.innerHTML = template.innerHTML;
 
   // Initialize game with these players
-  initializeOfflineGame(game.players[0].name, game.players[1].name);
+  //   initializeOfflineGame(game.players[0].name, game.players[1].name);
+  loadGameOffline(game.players[0].name, game.players[1].name);
 }

@@ -1,6 +1,6 @@
 import { showToast } from "../utils/toast.js";
 
-export async function loadGameOffline(addToHistory = true) {
+export async function loadGameOffline(addToHistory = true, player1Name = "Player 1", player2Name = "Player 2") {
   let gameCanvas, context;
   let paddle1Y = 200,
     paddle2Y = 200;
@@ -42,8 +42,10 @@ export async function loadGameOffline(addToHistory = true) {
     // Draw scores
     context.fillStyle = "white";
     context.font = "20px Monospace";
-    context.fillText(`P1: ${player1Score}`, 20, 20);
-    context.fillText(`P2: ${player2Score}`, gameCanvas.width - 80, 20);
+    // context.fillText(`P1: ${player1Score}`, 20, 20);
+    // context.fillText(`P2: ${player2Score}`, gameCanvas.width - 80, 20);
+    context.fillText(`${player1Name}: ${player1Score}`, 20, 20);
+    context.fillText(`${player2Name}: ${player2Score}`, gameCanvas.width - 150, 20);
   }
 
   function moveBall() {
