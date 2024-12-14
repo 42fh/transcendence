@@ -211,20 +211,25 @@ export async function fetchUsers(page = 1, perPage = 10, search = "") {
 export async function fetchFriends(page = 1, perPage = 10, search = "") {
   const userId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
   if (!userId) throw new Error("User ID not found");
-  console.log("Fetching friends for user:", userId);
   try {
     const queryParams = new URLSearchParams();
     queryParams.set("page", page);
     queryParams.set("per_page", perPage);
     if (search) queryParams.set("search", search);
+
+    const accessToken = await manageJWT();
+
     const url = `${CONFIG.API_BASE_URL}/api/users/friends/?${queryParams}`;
 
-    console.log("Fetching from URL:", url);
-    const response = await fetch(url);
-    console.log("Response status:", response.status);
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+
     if (!response.ok) throw new Error("Failed to fetch friends");
     const data = await response.json();
-    console.log("Received friends data:", data);
     return data;
   } catch (error) {
     console.error("Error fetching friends:", error);
