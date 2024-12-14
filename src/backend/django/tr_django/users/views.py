@@ -61,7 +61,8 @@ class SignupView(APIView):
         password = data.get("password")
 
         # Check if username is taken
-        if CustomUser.objects.filter(username=username).exists() or username.startswith("42_"):            return Response(
+        if CustomUser.objects.filter(username=username).exists() or username.startswith("42_"):
+            return Response(
                 {
                     "success": False,
                     "error": "Username is already taken.",
@@ -69,7 +70,7 @@ class SignupView(APIView):
                 },
                 status=400,
             )
-        
+
         # rejects weak passwords
         try:
             validate_password(password)

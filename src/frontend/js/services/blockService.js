@@ -31,13 +31,13 @@ export async function isUserBlockedByCurrentUser(username) {
     }
 
     const data = await response.json();
-    // console.log("Data", data);
+    console.log("Data from isUserBlockedByCurrentUser", data);
     const blockedUsers = new Set(data.blocked_users);
     // console.log("blockedUsers", blockedUsers);
     const isBlocked = blockedUsers.has(username);
     // console.log("isBlocked", isBlocked);
 
-    return isBlocked;
+    return true;
   } catch (error) {
     console.error("Error checking blocked status:", error);
     return false;
