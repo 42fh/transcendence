@@ -42,27 +42,6 @@ export async function loadChatPage(addToHistory = true) {
     const content = document.importNode(template.content, true);
     mainContent.appendChild(content);
 
-    const currentUser = LOCAL_STORAGE_KEYS.USERNAME;
-    if (currentUser) {
-      const wsUrl = `/ws/notifications/${currentUser}/`;
-
-      if (notificationSocket) {
-        try {
-          notificationSocket.close();
-        } catch (closeError) {
-          console.warn(
-            "Error closing existing notification socket:",
-            closeError
-          );
-        }
-      }
-
-      notificationSocket = setupNotificationListener(wsUrl);
-    } else {
-      console.error("No current user found for notifications");
-    }
-    console.log("Before button");
-    // testButtonForNotificationsWithUrl();
     await loadChatList(1, "", "");
 
     // Load users list (Horizontal scroll), filtering out users in conversations with current user
