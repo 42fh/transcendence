@@ -3,6 +3,7 @@ import {
   formatWinRatio,
   renderMatchHistory,
 } from "../services/usersService.js";
+import { handleLogout } from "./auth.js";
 import { toggleBlockUser } from "../services/blockService.js";
 import { isUserBlockedByCurrentUser } from "../services/blockService.js";
 import { showToast } from "../utils/toast.js";
@@ -356,7 +357,7 @@ function populatePublicProfileHTML(content, userData) {
   
       if (result.status === 200) {
         const playIconSpan = playFriendButton.querySelector(".material-symbols-outlined");
-        playIconSpan.textContent = "rsvp";
+        playIconSpan.textContent = "hourglass_top";
         // console.log("Invitation sent successfully");
         playFriendButton.setAttribute("title", "Invitation Sent");
         showToast("Game invitation sent", false);
