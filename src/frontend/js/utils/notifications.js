@@ -1,6 +1,6 @@
 import { showToast } from "./toast.js";
 import { updateNotificationBadge } from "../components/bottomNav.js";
-import { WS_RECONNECTION, CHAT_WS_MSG_TYPE } from "../config/constants.js";
+import { WS_RECONNECTION, RECONNECT_DELAY, CHAT_WS_MSG_TYPE } from "../config/constants.js";
 
 let reconnectAttempts = 0;
 
