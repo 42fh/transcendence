@@ -22,6 +22,7 @@ import {
 import { renderModal, closeModal } from "../components/modal.js";
 import { load2FAPage } from "./2fa.js";
 import { inviteFriend } from "../services/gameWithFriendService.js"
+import { loadChatRoom } from "./chatRoom.js";
 
 export async function loadProfilePage(userId = null, addToHistory = true) {
   const loggedInUserId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
@@ -221,6 +222,7 @@ function populatePublicProfileHTML(content, userData) {
   const phoneElement = content.querySelector(".profile__info-item--phone");
   const blockButton = content.querySelector('button[data-action="block"]');
   const playFriendButton = content.querySelector('button[data-action="play"]');
+  const chatButton = content.querySelector('button[data-action="chat"]');
 
   emailElement.style.display = "none";
   phoneElement.style.display = "none";
@@ -295,7 +297,6 @@ function populatePublicProfileHTML(content, userData) {
     }
   };
 
-  // Call the setup function
   setupBlockButton();
 
   // Friendship button state and icon setup
@@ -355,6 +356,10 @@ function populatePublicProfileHTML(content, userData) {
       console.error("Error inviting friend:", error);
       showToast("Failed to send game invitation", "error");
     }
+  });
+
+  chatButton.addEventListener("click", () => {
+    loadChatRoom(userData);
   });
   
 }
