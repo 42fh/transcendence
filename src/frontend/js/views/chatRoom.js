@@ -2,6 +2,7 @@ import { initializeChatWebSocket } from "../services/chatSocketService.js";
 import { loadChatPage } from "./chatHome.js";
 import { LOCAL_STORAGE_KEYS, ASSETS, CHAT_WS_MSG_TYPE } from "../config/constants.js";
 import { inviteFriend } from "../services/gameWithFriendService.js";
+import { loadProfilePage } from "./profile.js";
 
 //TODO: in chatHome this function is called, pass userId instead of username,
 //TODO SUITE or whole user so I can access both id and name
@@ -60,13 +61,7 @@ function initializeChatRoom(chatPartner) {
   const partnerUsername = document.getElementById("chat-room-partner-username");
   const backButton = document.querySelector(".chat-room-header__back-btn");
   const inviteButton = document.getElementById("chat-room-invite");
-  if (!inviteButton) {
-    console.error("Invite button not found in the DOM.");
-    return;
-  }
-  console.log("XXX");
-
-  console.log("Invite Button:", inviteButton);
+  const profileButton = document.getElementById("chat-room-partner-username");
 
 
   partnerUsername.textContent = chatPartner.username;
@@ -80,6 +75,11 @@ function initializeChatRoom(chatPartner) {
     history.pushState({ view: "chat-home" }, "");
     loadChatPage(false);
   });
+
+  profileButton.addEventListener("click", () => {
+    loadProfilePage(chatPartner.id);
+  });
+
 
   const roomName = [currentUserId, chatPartner.id]
   .sort()
