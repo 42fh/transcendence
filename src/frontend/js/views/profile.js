@@ -156,6 +156,7 @@ function populateProfileHTML(content, userData, isOwnProfile) {
 function populateSharedProfileHTML(content, userData) {
   // Avatar
   const avatarElement = content.querySelector(".profile__avatar");
+  console.log("avatar:", avatarElement);
   avatarElement.onerror = function () {
     console.log("Avatar failed to load, falling back to default");
     avatarElement.src = ASSETS.IMAGES.DEFAULT_AVATAR;

@@ -164,6 +164,9 @@ function setupAvatarUpload(content, userId) {
       return;
     }
 
+    console.log("Selected file:", file);
+    console.log("avatarImg:", avatarImg);
+
     handleAvatarUpload(file, avatarButton, avatarImg, userId);
   });
 

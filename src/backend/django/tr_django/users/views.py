@@ -38,6 +38,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.contrib.auth.hashers import make_password
+from rest_framework.parsers import FileUploadParser
 
 logger = logging.getLogger(__name__)
 
@@ -668,12 +669,11 @@ class UserAvatarView(APIView):
     """Handle user avatar uploads"""
 
     permission_classes = [IsAuthenticated]
+    parser_classes = [FileUploadParser]
 
     ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/jpg"]
 
     MAX_AVATAR_SIZE = 2 * 1024 * 1024  # 2MB in bytes
-
-    print("ENTERED USER AVATAR VIEW")
 
     def post(self, request, user_id):
         """Upload a new avatar"""
@@ -688,19 +688,7 @@ class UserAvatarView(APIView):
         except CustomUser.DoesNotExist:
             return Response({"error": "User not found"}, status=404)
 
-        if "avatar" not in request.FILES:
-            return Response({"error": "No avatar file provided"}, status=status.HTTP_400_BAD_REQUEST)
-
-        avatar_file = request.FILES["avatar"]
-        # Validate file type
-        if avatar_file.content_type not in self.ALLOWED_TYPES:
-            return JsonResponse(
-                {"error": f"Invalid file type. Allowed types: {', '.join(self.ALLOWED_TYPES)}"}, status=400
-            )
-
-        # Validate file size
-        if avatar_file.size > self.MAX_AVATAR_SIZE:
-            return JsonResponse({"error": f"Avatar size exceeds the limit of {self.MAX_AVATAR_SIZE} bytes"}, status=400)
+        avatar_file = request.FILES["file"]
 
         # Add debug logging
         logger.debug(f"Saving avatar to: {settings.MEDIA_ROOT}")
