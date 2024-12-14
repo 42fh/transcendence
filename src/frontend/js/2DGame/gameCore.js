@@ -3,7 +3,7 @@ import { initializeRenderer, updateRenderer } from "./renderer.js";
 import { showGameOver } from "./utils.js";
 import { updateGameContext, getGameContext } from "../store/index.js";
 import { updateGameInfo } from "./utils.js";
-import { ws as websocket } from "../utils/websocket.js";
+import { websocket } from "../views/game2D.js";
 
 export function handleGameMessage(message, onEvent = null) {
   try {
@@ -137,9 +137,9 @@ export function handleGameEvent(message, onEvent) {
   }
 
   // Update renderer if available
-  if (renderer?.type) {
-    renderer.update(message.game_state);
-  }
+  // if (renderer?.type) {
+  //   renderer.update(message.game_state);
+  // }
 
   // Notify through callback
   if (onEvent) {
@@ -205,10 +205,6 @@ let lastMoveTime = 0;
 const MOVE_COOLDOWN = 0.1; // seconds, should come from player_values
 
 function sendPaddleMove(direction, debug = false) {
-  debug = true;
-  if (debug) {
-    console.log("Sending paddle move:", direction);
-  }
   const gameContext = getGameContext();
   const currentTime = Date.now() / 1000; // Convert to seconds
 
@@ -217,7 +213,8 @@ function sendPaddleMove(direction, debug = false) {
     return;
   }
 
-  websocket.send({
+  console.log("gameContext:", gameContext);
+  websocket.sendMessage({
     action: "move_paddle",
     direction,
     user_id: gameContext.player_id,
