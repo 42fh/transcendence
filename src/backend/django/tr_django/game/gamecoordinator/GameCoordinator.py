@@ -418,7 +418,7 @@ class GameCoordinator:
                     ),
                     asyncio.to_thread(send_notification, user_to, f"Player: {user_to.username} invited you", url),
                 )
-                return {"status": True, "game_id": game_id, "message": "Invitation sent successfully"}
+                return {"status": True, "game_id": url, "message": "Invitation sent successfully"}
 
         except Exception as e:
             logger.error(f"Error creating invitation: {e}")

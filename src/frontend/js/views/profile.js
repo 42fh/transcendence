@@ -337,27 +337,26 @@ function populatePublicProfileHTML(content, userData) {
     }
   }
 
-
-
   playFriendButton.addEventListener("click", async () => {
     try {
       const friendId = userData.id;
       const result = await inviteFriend(friendId);
+
+      console.log("reslt.success", result.success);
   
-      // Check if the invitation was successful
-      if (result.success) {
-        const playIconSpan = playFriendButton.querySelector(
-          ".material-symbols-outlined"
-        );
+      if (result.status === 200) {
+        const playIconSpan = playFriendButton.querySelector(".material-symbols-outlined");
         playIconSpan.textContent = "rsvp";
-        console.log("Invitation sent successfully");
+        // console.log("Invitation sent successfully");
         playFriendButton.setAttribute("title", "Invitation Sent");
+        showToast("Game invitation sent", false);
       }
     } catch (error) {
       console.error("Error inviting friend:", error);
       showToast("Failed to send game invitation", "error");
     }
   });
+  
 }
 
 
