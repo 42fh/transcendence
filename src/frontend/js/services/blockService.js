@@ -17,7 +17,8 @@ export async function toggleBlockUser(username, isCurrentlyBlocked) {
 }
 
 
-export async function isUserBlockedByCurrentUser(userId) {
+export async function isUserBlockedByCurrentUser(username) {
+  console.log("username in isUserBlockedByCurrentUser", username);
   try {
     const response = await fetch("/api/chat/blocked_user/", {
       method: "GET",
@@ -31,10 +32,12 @@ export async function isUserBlockedByCurrentUser(userId) {
     }
 
     const data = await response.json();
+    console.log("Data", data);
     const blockedUsers = new Set(data.blocked_users);
+    console.log("blockedUsers", blockedUsers);
+    const isBlocked = blockedUsers.has(username);
+    console.log("isBlocked", isBlocked);
 
-    const isBlocked = blockedUsers.has(userId);
-    
     return isBlocked;
   } catch (error) {
     console.error("Error checking blocked status:", error);

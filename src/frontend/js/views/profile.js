@@ -294,9 +294,8 @@ function populatePublicProfileHTML(content, userData) {
   console.log("3__________", userData);
 
   blockButton.addEventListener("click", async () => {
-    const isBlocked = await isUserBlockedByCurrentUser('userData.id');
-    console.log(isBlocked);
-
+    const isBlocked = await isUserBlockedByCurrentUser(userData.username);
+    console.log("isBlocked: ", isBlocked);
     try {
       console.log("Block button clicked");
       const action = userData.is_blocked ? "unblock" : "block";
