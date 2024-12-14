@@ -3,14 +3,11 @@ import { Sky } from "three/addons/objects/Sky.js";
 import { Water } from "three/addons/objects/Water.js";
 import Loader from "./loader3d.js";
 import World from "./world3d.js";
-import GameWebSocket from "./websocket3d.js";
+import GameWebSocket from "./websocket.js";
 import Drawer from "./drawer3d.js";
 import GameUI from "./gameui3d.js";
-import { joinGame } from "../services/gameService.js";
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { showToast } from "./toast.js";
-
-export let websocket = null;
 
 export default class GameConstructor {
   constructor() {
@@ -46,6 +43,8 @@ export default class GameConstructor {
     this.userId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
 
     this.type = "circular";
+
+    this.websocket = new GameWebSocket(this.handleMessage.bind(this));
   }
 
   addAmbientLight(intensity, color) {
@@ -123,15 +122,6 @@ export default class GameConstructor {
     this.setupResources = setupResources;
   }
 
-  async connectToWebsockets(ws_url) {
-    try {
-      websocket = new GameWebSocket(this.handleMessage.bind(this));
-      websocket.connect(ws_url);
-    } catch (error) {
-      console.error("Error creating game:", error);
-    }
-  }
-
   createGame(initialState) {
     this.drawer = new Drawer(initialState, this);
     this.ui.createSelector();
@@ -145,6 +135,14 @@ export default class GameConstructor {
 
   generateRandomId() {
     return Math.random().toString(36).substring(2, 15);
+  }
+
+  movePaddle(direction) {
+    this.websocket.sendMessage({
+      action: "move_paddle",
+      direction,
+      user_id: this.userId,
+    });
   }
 
   handleMessage(message) {

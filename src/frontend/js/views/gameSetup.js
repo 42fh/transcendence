@@ -1,14 +1,7 @@
 import { updateActiveNavItem } from "../components/bottomNav.js";
-import { GameInterface2D } from "../2DGame/gameInterface.js";
-import { GAME_2D_CONFIG_TYPE_DEFAULT } from "../config/constants.js";
 import { showToast } from "../utils/toast.js";
-import {
-  fetchWaitingGames,
-  createGame,
-  findMatchingGame,
-} from "../services/gameService.js";
-import { loadGame2DPage } from "./game2D.js";
-import { initializeGameConfig } from "../store/index.js";
+import { createGame } from "../services/gameService.js";
+import { loadGame2D } from "./game2D.js";
 import { loadGame3D } from "./game3d.js";
 
 export function loadGameSetupPage(addToHistory = true) {
@@ -72,7 +65,11 @@ export function loadGameSetupPage(addToHistory = true) {
         let result = await createGame(data);
         console.log("Game creation result:", result);
 
-        loadGame3D(result.ws_url);
+        if (formData.gameType === "circular") {
+          loadGame3D(result.ws_url);
+        } else {
+          loadGame2D(result.game_id, result.ws_url, true);
+        }
       }
     });
   } catch (error) {

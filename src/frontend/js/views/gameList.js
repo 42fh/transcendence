@@ -2,6 +2,7 @@ import { fetchWaitingGames, joinGame } from "../services/gameService.js";
 import { showToast } from "../utils/toast.js";
 import { loadGame3D } from "./game3d.js";
 import { loadGameSetupPage } from "./gameSetup.js";
+import { loadGame2D } from "./game2D.js";
 
 export async function loadGameList() {
   try {
@@ -50,7 +51,11 @@ function generateGameListHTML(games) {
     gameCard.addEventListener("click", async () => {
       try {
         const result = await joinGame(game.game_id);
-        loadGame3D(result.ws_url);
+        if (game.mode === "circular") {
+          loadGame3D(result.ws_url);
+        } else {
+          loadGame2D(result.game_id, result.ws_url);
+        }
       } catch (error) {
         console.error("Error joining game:", error);
         showToast("Error joining game", CubeTexture);

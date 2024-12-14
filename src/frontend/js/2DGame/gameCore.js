@@ -1,12 +1,9 @@
-// TODO: Implement game controller functional
-// TODO: Rename maybe to gameCore.js
-// Import necessary dependencies
 import { gameState, gameConfig, updateGameState } from "../store/index.js";
 import { initializeRenderer, updateRenderer } from "./renderer.js";
-import { disconnectGameSocket, sendGameMessage } from "../services/gameSocketService.js";
 import { showGameOver } from "./utils.js";
 import { updateGameContext, getGameContext } from "../store/index.js";
 import { updateGameInfo } from "./utils.js";
+import { ws as websocket } from "../utils/websocket.js";
 
 export function handleGameMessage(message, onEvent = null) {
   try {
@@ -69,7 +66,8 @@ function handleInitialState(message, onEvent) {
       "gameContext.player_index": gameContext.player_index,
       "gameContext.game_setup.type": gameContext.game_setup.type,
       "gameContext.players.length": gameContext.players.length,
-      "gameContext.game_state.balls.length": gameContext.game_state.balls.length,
+      "gameContext.game_state.balls.length":
+        gameContext.game_state.balls.length,
     });
     return;
   }
@@ -77,14 +75,23 @@ function handleInitialState(message, onEvent) {
     { label: "Player ID", value: gameContext.player_index },
     { label: "Game Type", value: gameContext.game_setup.type },
     { label: "Players", value: gameContext.players.length || INVALID_VALUE },
-    { label: "Balls", value: gameContext.game_state.balls.length || INVALID_VALUE },
+    {
+      label: "Balls",
+      value: gameContext.game_state.balls.length || INVALID_VALUE,
+    },
   ];
 
   if (gameContext.game_setup.sides) {
-    gameContextInfoItems.push({ label: "Sides", value: gameContext.game_setup.sides || INVALID_VALUE });
+    gameContextInfoItems.push({
+      label: "Sides",
+      value: gameContext.game_setup.sides || INVALID_VALUE,
+    });
   }
   if (gameContext.game_setup.shape) {
-    gameContextInfoItems.push({ label: "Shape", value: gameContext.game_setup.shape || INVALID_VALUE });
+    gameContextInfoItems.push({
+      label: "Shape",
+      value: gameContext.game_setup.shape || INVALID_VALUE,
+    });
   }
 
   updateGameInfo(gameContextInfoItems);
@@ -150,7 +157,7 @@ export function handleGameFinished(message, onEvent) {
   // Show game over in renderer
   showGameOver(message.winner === "you");
   updateRenderer(message);
-  disconnectGameSocket();
+  websocket.disconnect();
 
   if (onEvent) {
     onEvent({
@@ -210,7 +217,7 @@ function sendPaddleMove(direction, debug = false) {
     return;
   }
 
-  sendGameMessage({
+  websocket.send({
     action: "move_paddle",
     direction,
     user_id: gameContext.player_id,
