@@ -61,6 +61,8 @@ export const tournamentState = {
     status: "setup", // setup, in_progress, completed
   },
 
+  currentGame: null,
+
   // Players array
   players: [], // [player1, player2, ...]
 

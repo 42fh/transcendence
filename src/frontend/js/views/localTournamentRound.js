@@ -77,6 +77,5 @@ function handlePlayGame(game) {
   mainContent.innerHTML = template.innerHTML;
 
   // Initialize game with these players
-  //   initializeOfflineGame(game.players[0].name, game.players[1].name);
-  loadGameOffline(game.players[0].name, game.players[1].name);
+  loadGameOffline(game.players[0], game.players[1], true);
 }

@@ -1,6 +1,7 @@
 import { showToast } from "../utils/toast.js";
+import { tournamentState } from "../store/tournament/state.js";
 
-export async function loadGameOffline(addToHistory = true, player1Name = "Player 1", player2Name = "Player 2") {
+export async function loadGameOffline(addToHistory = true, player1 = null, player2 = null, isTournament = false) {
   let gameCanvas, context;
   let paddle1Y = 200,
     paddle2Y = 200;
@@ -44,6 +45,8 @@ export async function loadGameOffline(addToHistory = true, player1Name = "Player
     context.font = "20px Monospace";
     // context.fillText(`P1: ${player1Score}`, 20, 20);
     // context.fillText(`P2: ${player2Score}`, gameCanvas.width - 80, 20);
+    const player1Name = isTournament ? player1.name : "Player 1";
+    const player2Name = isTournament ? player2.name : "Player 2";
     context.fillText(`${player1Name}: ${player1Score}`, 20, 20);
     context.fillText(`${player2Name}: ${player2Score}`, gameCanvas.width - 150, 20);
   }
@@ -84,8 +87,12 @@ export async function loadGameOffline(addToHistory = true, player1Name = "Player
 
     // Check for winner
     if (player1Score === winningScore || player2Score === winningScore) {
-      gameRunning = false;
-      showToast(`${player1Score === winningScore ? "Player 1" : "Player 2"} wins!`, true);
+      gameRunning = false; // this ends the game loop
+      if (isTournament) {
+        handleGameComplete(player1Score === winningScore ? player1 : player2);
+      } else {
+        showToast(`${player1Score === winningScore ? "Player 1" : "Player 2"} wins!`, true);
+      }
     }
   }
 
