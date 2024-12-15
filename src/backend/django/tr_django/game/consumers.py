@@ -67,6 +67,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                     f"Player[{self.user.username}  /{self.player_id}] connected to game[{self.game_id}] as player: {self.paddle_index +1} index {self.player_index}"
                 )
             else:
+                selff.player_values = None
                 logger.info(
                     f"Player[{self.player_id}] connected to game[{self.game_id}] as spectator"
                 )

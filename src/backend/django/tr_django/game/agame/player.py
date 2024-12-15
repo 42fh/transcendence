@@ -154,15 +154,15 @@ async def _handle_normal_pregame_leave(self, player_id: str, side_index: int):
         await pipeline.execute()
         
         # Notify other players
-        await self.channel_layer.group_send(
-            f"game_{self.game_id}",
-            {
-                "type": "player_left",
-                "player_id": player_id,
-                "side_index": side_index,
-                "message": "Player left before game started"
-            }
-        )
+        #await self.channel_layer.group_send(
+        #    f"game_{self.game_id}",
+        #    {
+        #        "type": "player_left",
+        #        "player_id": player_id,
+        #        "side_index": side_index,
+        #        "message": "Player left before game started"
+        #    }
+        # )
         
     except Exception as e:
         logger.error(f"Error handling normal pre-game leave: {e}")
