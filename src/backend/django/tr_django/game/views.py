@@ -236,7 +236,7 @@ async def invitation(request):
 
             # Default game settings for invitation
             game_settings = {
-                "mode": "classic",
+                "mode": "invite", "name": "hell no"
             }
 
             result = await GameCoordinator.create_invitation(str(request.user.id), str(to_user_id), game_settings)

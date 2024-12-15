@@ -12,6 +12,8 @@ from .game_config import (
     DEFAULT_IRREGULAR,
     DEFAULT_CIRCULAR,
     DEFAULT_CLASSIC,
+    INVITE_FIXED,
+    DEFAULT_INVITE,
     DEFAULT_PLAYER,
 )
 import asyncio
@@ -38,6 +40,7 @@ class GameSettingsManager:
         },
         EnumGameMode.CIRCULAR: {"default": DEFAULT_CIRCULAR, "fixed": CIRCULAR_FIXED},
         EnumGameMode.CLASSIC: {"default": DEFAULT_CLASSIC, "fixed": CLASSIC_FIXED},
+        EnumGameMode.INVITE: {"default": DEFAULT_INVITE, "fixed": INVITE_FIXED}
     }
 
     def create_game_settings(
