@@ -10,6 +10,21 @@ import time
 logger = logging.getLogger(__name__)
 
 
+
+async def has_pending_invitations(user_id: str, redis_conn) -> bool:
+   """Check if user has any pending invitations as sender or recipient"""
+   async with redis_conn.scan_iter(match=f"{cls.INVITATION_PREFIX}{user_id}:*:*") as scan1:
+       async for _ in scan1:
+           return True
+           
+   async with redis_conn.scan_iter(match=f"{cls.INVITATION_PREFIX}*:*:{user_id}") as scan2:
+       async for _ in scan2:
+           return True
+   
+   return False
+
+
+
 async def add_player(self, player_id):
     """Add player with process-safe checks"""
     try:
@@ -24,13 +39,17 @@ async def add_player(self, player_id):
  
         # Check if player is booked -> add also already tournament key
         booking_key = f"{GC.BOOKED_USER_PREFIX}{player_id}:{self.game_id}"
-        tournament_key = f"{GC.TOURNAMENT_USER_PREFIX}{player_id}:{self.game_id}"   # f"{GC.TOURNAMENT_USER_PREFIX}{player_id}:{self.game_id}" 
-        logger.debug(f"KEYS: {booking_key} / {tournament_key}") 
+        tournament_key = f"{GC.TOURNAMENT_USER_PREFIX}{player_id}:{self.game_id}"
+        #invitation_key = f"{GC.INVITATION_PREFIX}{to_user_id}:{game_id}:{from_user_id}"
+        # logger.debug(f"KEYS: {booking_key} / {tournament_key} / {invitation_key}")
         pipeline = self.redis_conn.pipeline() 
         pipeline.exists(booking_key) 
         pipeline.exists(tournament_key) 
         is_booked, is_tournament_player = await pipeline.execute() 
-        if not (is_booked or is_tournament_player):  
+        
+    
+        if not (is_booked or is_tournament_player or has_pending_invitations(player_id, self.redis)):
+  
             return {  
                 "role": "spectator", 
                 "message": "No booking found - joining as spectator", 

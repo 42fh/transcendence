@@ -1,6 +1,6 @@
 import { showToast } from "./toast.js";
 import { updateNotificationBadge } from "../components/bottomNav.js";
-import { WS_RECONNECTION, CHAT_WS_MSG_TYPE } from "../config/constants.js";
+import { WS_RECONNECTION } from "../config/constants.js";
 
 let reconnectAttempts = 0;
 
@@ -15,7 +15,7 @@ function reconnectWebSocket(wsUrl) {
 
   setTimeout(() => {
     setupNotificationListener(wsUrl);
-  }, RECONNECT_DELAY);
+  }, WS_RECONNECTION.RECONNECT_DELAY);
 }
 
 
@@ -42,6 +42,7 @@ export function setupNotificationListener(wsUrl) {
         console.log("Received WebSocket message:", data);
 
         if (data.type === "CHAT_WS_MSG_TYPE.SEND_NOTIFICATION") {
+          console.log("Received notification:", data.notification);
           showToast(data.notification.message, false);
 
           const unread = data.notification.is_read ? 0 : 1;

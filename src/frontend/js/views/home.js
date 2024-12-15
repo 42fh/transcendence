@@ -3,6 +3,10 @@ import { loadTournamentsPage } from "./tournaments.js";
 import { updateActiveNavItem } from "../components/bottomNav.js";
 import { loadChatPage } from "./chatHome.js";
 import { loadGameList } from "./gameList.js";
+import { setupNotificationListener } from "../utils/notifications.js";
+import { renderNotifications } from "../components/chatNotification.js";
+
+let notificationSocket = null;
 
 export function loadHomePage(addToHistory = true) {
   try {
@@ -15,6 +19,24 @@ export function loadHomePage(addToHistory = true) {
       );
       if (!addToHistory) updateActiveNavItem("home");
     }
+
+    try {
+      if (notificationSocket) {
+        try {
+          notificationSocket.close();
+        } catch (closeError) {
+          console.warn(
+            "Error closing existing notification socket:",
+            closeError
+          );
+        }
+      }
+      // notificationSocket = setupNotificationListener();
+          
+    } catch (error) {
+          console.error("Error with notification in main", error);
+    }
+    renderNotifications();
 
     const mainContent = document.getElementById("main-content");
     if (!mainContent) {
