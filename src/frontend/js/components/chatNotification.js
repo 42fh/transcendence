@@ -1,7 +1,10 @@
 import { fetchNotifications } from "../services/chatNotificationService.js";
 import { updateNotificationBadge } from "./bottomNav.js";
-
+import { loadGame3D } from "../views/game3d.js";
 //Render notifications in the chat home template
+
+window.loadGame3D = loadGame3D;
+
 export async function renderNotifications() {
   const chatHomeTemplate = document.querySelector("#chat-home-template");
   if (!chatHomeTemplate) {
@@ -54,16 +57,26 @@ export async function renderNotifications() {
       dateSpan.classList.add("notification-date");
       dateSpan.textContent = new Date(notification.created_at).toLocaleString();
 
-      // Create "Accept" link if URL is present
       if (notification.url) {
-        const acceptLink = document.createElement("a");
-        acceptLink.href = notification.url; // Set the URL
-        acceptLink.textContent = "Accept"; // Link text
-        acceptLink.classList.add("notification-accept"); // Optional: add a class for styling
-        acceptLink.target = "_blank"; // Open in a new tab
-        acceptLink.rel = "noopener noreferrer"; // Security best practice
+        const acceptButton = document.createElement("button");
+        acceptButton.textContent = "Accept";
+        acceptButton.classList.add("notification-accept");
+        acceptButton.type = "button";
+        acceptButton.setAttribute(
+          "onclick",
+          `console.log('Button clicked!'); 
+           loadGame3D('${notification.url}');`
+        );
 
-        notificationElement.appendChild(acceptLink);
+        acceptButton.onclick = () => {
+          loadGame3D(notification.url);
+        };
+
+        acceptButton.style.pointerEvents = "auto";
+        acceptButton.addEventListener("click", () =>
+          console.log("Clicked via addEventListener")
+        );
+        notificationElement.appendChild(acceptButton);
       }
 
       notificationElement.appendChild(messageSpan);

@@ -1,4 +1,5 @@
 import { fetchUserProfile, formatWinRatio, renderMatchHistory } from "../services/usersService.js";
+import { fetchUserProfile, formatWinRatio, renderMatchHistory } from "../services/usersService.js";
 import { handleLogout } from "./auth.js";
 import { toggleBlockUser } from "../services/blockService.js";
 import { isUserBlockedByCurrentUser } from "../services/blockService.js";
@@ -20,13 +21,10 @@ import { renderModal, closeModal } from "../components/modal.js";
 import { load2FAPage } from "./2fa.js";
 // import { updateOnlineStatus } from "../utils/onlineStatus.js";
 import { startOnlineStatusPolling } from "../utils/onlineStatus.js";
-<<<<<<< Updated upstream
 import { inviteFriend } from "../services/gameWithFriendService.js";
 import { loadChatRoom } from "./chatRoom.js";
-=======
 import { handleLogout } from "./auth.js";
 import { loadAuthPage } from "./auth.js";
->>>>>>> Stashed changes
 
 export async function loadProfilePage(userId = null, addToHistory = true) {
   const loggedInUserId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
@@ -106,6 +104,7 @@ export async function loadProfilePage(userId = null, addToHistory = true) {
     mainContent.innerHTML = "";
     mainContent.appendChild(content);
     const matchesContainer = mainContent.querySelector(".profile__matches-list");
+    const matchesContainer = mainContent.querySelector(".profile__matches-list");
     renderMatchHistory(userData.recent_matches, matchesContainer);
 
     // Start online status polling in the background
@@ -130,6 +129,7 @@ export async function loadProfilePage(userId = null, addToHistory = true) {
         load2FAPage(userData);
       });
       // Add logout button handler
+      const logoutButton = mainContent.querySelector(".profile__button--logout");
       const logoutButton = mainContent.querySelector(".profile__button--logout");
       if (logoutButton) {
         logoutButton.addEventListener("click", handleLogout);
@@ -170,9 +170,14 @@ function populateSharedProfileHTML(content, userData) {
 
   // Bio
   content.querySelector(".profile__bio-text").textContent = userData.bio || "No bio available";
+  content.querySelector(".profile__bio-text").textContent = userData.bio || "No bio available";
 
   // Stats (always visible)
   if (userData.stats) {
+    content.querySelector(".profile__stats-wins").textContent = userData.stats.wins;
+    content.querySelector(".profile__stats-losses").textContent = userData.stats.losses;
+    content.querySelector(".profile__stats-wins").textContent = userData.stats.wins;
+    content.querySelector(".profile__stats-losses").textContent = userData.stats.losses;
     content.querySelector(".profile__stats-wins").textContent = userData.stats.wins;
     content.querySelector(".profile__stats-losses").textContent = userData.stats.losses;
     content.querySelector(".profile__stats-ratio").textContent = formatWinRatio(
@@ -199,6 +204,7 @@ function populateOwnProfileHTML(content, userData) {
   friendsSection.addEventListener("click", () => {
     history.pushState({ view: "users", showFriendsOnly: true }, "");
     loadUsersPage(false);
+    const friendsFilter = document.querySelector(".users-filter__button--friends");
     const friendsFilter = document.querySelector(".users-filter__button--friends");
     friendsFilter.click();
   });
@@ -229,16 +235,65 @@ function populatePublicProfileHTML(content, userData) {
   emailElement.style.display = "none";
   phoneElement.style.display = "none";
 
-  if (!friendshipButton) {
-    console.warn("Friend button not found in template");
-    return;
-  }
+  friendshipButton.addEventListener("click", () => {
+    handleFriendshipButtonClick(friendshipButton.dataset.state, userData);
+  });
 
-  // if (!friendshipButton || !blockButton || !csrfToken) {
-  //   console.warn("Friend button or block button not found or CSRF token missing");
-  //   return;
-  // }
+  // Check and set block button state
+  // Async function to set up block button
+  const setupBlockButton = async () => {
+    try {
+      const isBlocked = await isUserBlockedByCurrentUser(userData.username);
 
+      if (isBlocked) {
+        blockIconSpan.textContent = "lock_open";
+        blockButton.setAttribute("title", "Unblock User");
+        blockButton.dataset.state = "blocked";
+      } else {
+        blockIconSpan.textContent = "lock";
+        blockButton.setAttribute("title", "Block User");
+        blockButton.dataset.state = "not_blocked";
+      }
+
+      // Block button click handler
+      blockButton.addEventListener("click", async () => {
+        try {
+          const currentBlockStatus = blockButton.dataset.state === "blocked";
+
+          const blockResult = await toggleBlockUser(userData.username, currentBlockStatus);
+
+          if (blockResult.status === "success") {
+            const newBlockedState = !currentBlockStatus;
+
+            if (newBlockedState) {
+              blockIconSpan.textContent = "lock_open";
+              blockButton.setAttribute("title", "Unblock User");
+              blockButton.dataset.state = "blocked";
+            } else {
+              blockIconSpan.textContent = "lock";
+              blockButton.setAttribute("title", "Block User");
+              blockButton.dataset.state = "not_blocked";
+            }
+
+            showToast(newBlockedState ? "User blocked successfully" : "User unblocked successfully", false);
+          }
+        } catch (error) {
+          console.error("Error blocking/unblocking user:", error);
+          showToast("Failed to block/unblock user", true);
+        }
+      });
+    } catch (error) {
+      console.error("Error checking block status:", error);
+      // Fallback to default state
+      blockIconSpan.textContent = "lock";
+      blockButton.setAttribute("title", "Block User");
+      blockButton.dataset.state = "not_blocked";
+    }
+  };
+
+  setupBlockButton();
+
+  // Friendship button state and icon setup
   const friendIconSpan = friendshipButton.querySelector(".material-symbols-outlined");
   if (!friendIconSpan) {
     console.warn("Icon span not found in friend button");
@@ -273,34 +328,20 @@ function populatePublicProfileHTML(content, userData) {
         friendshipButton.dataset.state = "not_friends";
     }
   }
-  // Add click handler for friend button
-  //   friendButton.addEventListener("click", async () => {
-  //     // TODO: Implement friend request actions
-  //     // We'll add this functionality next
-  //     console.log("Friend button clicked:", {
-  //       is_friend: userData.is_friend,
-  //       status: userData.friend_request_status,
-  //     });
-  //   });
-  friendshipButton.addEventListener("click", () =>
-    handleFriendshipButtonClick(friendshipButton.dataset.state, userData)
-  );
 
-  blockButton.addEventListener("click", async () => {
+  playFriendButton.addEventListener("click", async () => {
     try {
-      const action = userData.is_blocked ? "unblock" : "block";
-      const blockResult = await toggleBlockUser(userData.username, userData.is_blocked);
+      const friendId = userData.id;
+      const result = await inviteFriend(friendId);
 
-      if (blockResult.success) {
-        // Update UI based on the block status
-        userData.is_blocked = !userData.is_blocked;
-        blockIconSpan.textContent = userData.is_blocked ? "block" : "block_outlined";
-        blockButton.setAttribute("title", userData.is_blocked ? "Unblock User" : "Block User");
+      console.log("reslt.success", result.success);
 
-        //TODO: Fix the toast, it's not showing, probably due to DOM elements timeline (added before EventListener would work)
-        //TODO ALTERNATIVE: replace by an icon changing like slombard friend adding
-        showToast("test toast 2", false);
-        showToast(userData.is_blocked ? "User blocked successfully" : "User unblocked successfully", true);
+      if (result.status === 200) {
+        const playIconSpan = playFriendButton.querySelector(".material-symbols-outlined");
+        playIconSpan.textContent = "hourglass_top";
+        // console.log("Invitation sent successfully");
+        playFriendButton.setAttribute("title", "Invitation Sent");
+        showToast("Game invitation sent", false);
       }
     } catch (error) {
       console.error("Error inviting friend:", error);
