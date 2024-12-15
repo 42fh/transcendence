@@ -5,9 +5,13 @@ import {
   ASSETS,
   CHAT_WS_MSG_TYPE,
 } from "../config/constants.js";
+<<<<<<< Updated upstream
 import { inviteFriend } from "../services/gameWithFriendService.js";
 import { loadProfilePage } from "./profile.js";import { fetchUserProfile } from "../services/usersService.js";
 import { showToast } from "../utils/toast.js";
+=======
+import { fetchUserProfile } from "../services/usersService.js";
+>>>>>>> Stashed changes
 
 //TODO: in chatHome this function is called, pass userId instead of username,
 //TODO SUITE or whole user so I can access both id and name
@@ -81,6 +85,7 @@ async function initializeChatRoom(chatPartner) {
     loadChatPage(false);
   });
 
+<<<<<<< Updated upstream
   profileButton.addEventListener("click", () => {
     loadProfilePage(chatPartner.id);
   });
@@ -90,6 +95,9 @@ async function initializeChatRoom(chatPartner) {
   .sort()
   .join("_");
 
+=======
+  const roomName = [currentUserId, chatPartner.id].sort().join("_");
+>>>>>>> Stashed changes
 
   const wsUrl = `/ws/chat/${roomName}/`;
 

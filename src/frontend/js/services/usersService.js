@@ -205,8 +205,11 @@ export async function fetchFriends(page = 1, perPage = 10, search = "") {
     queryParams.set("per_page", perPage);
     if (search) queryParams.set("search", search);
 
+<<<<<<< Updated upstream
     const accessToken = await manageJWT();
 
+=======
+>>>>>>> Stashed changes
     const url = `${CONFIG.API_BASE_URL}/api/users/friends/?${queryParams}`;
 
     console.log("Fetching from URL:", url);
@@ -260,7 +263,8 @@ export async function fetchFriends(page = 1, perPage = 10, search = "") {
 //   }
 // }
 
-export async function sendUserOnlineStatus(isOnline, expirationTimestamp) {
+// export async function sendUserOnlineStatus(isOnline, expirationTimestamp) {
+export async function sendUserOnlineStatus(isOnline) {
   try {
     console.log("Sending user online status", isOnline ? "Online" : "Offline");
     const accessToken = await manageJWT();
@@ -272,7 +276,7 @@ export async function sendUserOnlineStatus(isOnline, expirationTimestamp) {
       },
       body: JSON.stringify({
         isOnline,
-        expiration: expirationTimestamp,
+        // expiration: expirationTimestamp,
       }),
     });
 
@@ -283,7 +287,8 @@ export async function sendUserOnlineStatus(isOnline, expirationTimestamp) {
 
     const data = await response.json();
     console.log(
-      `Status sent: ${isOnline ? "Online" : "Offline"}, Expires at: ${new Date(expirationTimestamp).toISOString()}`
+      //   `Status sent: ${isOnline ? "Online" : "Offline"}, Expires at: ${new Date(expirationTimestamp).toISOString()}`
+      `Status sent: ${isOnline ? "Online" : "Offline"}`
     );
     return data; // Return the parsed response for further use
   } catch (error) {

@@ -1,10 +1,10 @@
 import { sendUserOnlineStatus } from "../services/usersService.js";
 import { fetchUserOnlineStatus } from "../services/usersService.js";
 
-let lastStatus = null; // Tracks the last sent online/offline status
-let lastExpirationTimestamp = 0; // Tracks the last sent expiration timestamp
-const EXPIRATION_INTERVAL = 60000; // Expiration interval in milliseconds (1 minute)
-const PING_BUFFER = 5000; // Buffer time before expiration to ensure timely updates (5 seconds)
+// let lastStatus = null; // Tracks the last sent online/offline status
+// let lastExpirationTimestamp = 0; // Tracks the last sent expiration timestamp
+// const EXPIRATION_INTERVAL = 60000; // Expiration interval in milliseconds (1 minute)
+// const PING_BUFFER = 5000; // Buffer time before expiration to ensure timely updates (5 seconds)
 let currentPollingCleanup = null;
 
 /**
@@ -27,26 +27,19 @@ export function checkUserStatus() {
     document.hasFocus() && // Window is focused
     navigator.onLine; // Internet connection is available
 
-  const currentTimestamp = Date.now();
-  const expirationNear = lastExpirationTimestamp - currentTimestamp <= PING_BUFFER;
+  //   const currentTimestamp = Date.now();
+  //   const expirationNear = lastExpirationTimestamp - currentTimestamp <= PING_BUFFER;
 
   // Check if status has changed or expiration is near
-  if (isOnline !== lastStatus || expirationNear) {
-    lastStatus = isOnline;
 
-    // Calculate and update the new expiration timestamp
-    const newExpirationTimestamp = currentTimestamp + EXPIRATION_INTERVAL;
-    lastExpirationTimestamp = newExpirationTimestamp;
+  // Calculate and update the new expiration timestamp
+  //   const newExpirationTimestamp = currentTimestamp + EXPIRATION_INTERVAL;
+  //   lastExpirationTimestamp = newExpirationTimestamp;
 
-    // Notify the server based on the current status
-    if (isOnline) {
-      console.log("User is online");
-      sendUserOnlineStatus(isOnline, newExpirationTimestamp); // Notify online
-    } else {
-      console.log("User is offline");
-      sendUserOnlineStatus(isOnline, newExpirationTimestamp); // Notify offline
-    }
-  }
+  // Notify the server based on the current status
+  //   sendUserOnlineStatus(isOnline, newExpirationTimestamp); // Notify online
+  sendUserOnlineStatus(isOnline); // Notify online
+  console.log("User is ", isOnline ? "online" : "offline");
 }
 
 /**
@@ -91,6 +84,7 @@ export function initializeOnlineStatusTracking() {
   window.addEventListener("beforeunload", () => {
     sendUserOnlineStatus(false, Date.now());
   });
+  // window.addEventListener("unload", () => {
 }
 
 export function updateOnlineStatus(status) {

@@ -32,6 +32,7 @@ class Command(BaseCommand):
         # Create users with full profile data
         users_data = [
             {
+<<<<<<< Updated upstream
                 "username": "dev",
                 "email": "dev@1719.anonaddy.com",
                 "password": "dev",
@@ -49,6 +50,8 @@ class Command(BaseCommand):
                 "game_stats": {"wins": 5, "losses": 2},
             },
             {
+=======
+>>>>>>> Stashed changes
                 "username": "ThePrimeagen",
                 "email": "prime@1719.anonaddy.com",
                 "password": "test1pass",

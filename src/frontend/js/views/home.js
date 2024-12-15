@@ -3,10 +3,13 @@ import { loadTournamentsPage } from "./tournaments.js";
 import { updateActiveNavItem } from "../components/bottomNav.js";
 import { loadChatPage } from "./chatHome.js";
 import { loadGameList } from "./gameList.js";
+<<<<<<< Updated upstream
 import { setupNotificationListener } from "../utils/notifications.js";
 import { renderNotifications } from "../components/chatNotification.js";
 
 let notificationSocket = null;
+=======
+>>>>>>> Stashed changes
 
 export function loadHomePage(addToHistory = true) {
   try {

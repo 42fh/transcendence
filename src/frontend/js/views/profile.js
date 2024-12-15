@@ -20,8 +20,13 @@ import { renderModal, closeModal } from "../components/modal.js";
 import { load2FAPage } from "./2fa.js";
 // import { updateOnlineStatus } from "../utils/onlineStatus.js";
 import { startOnlineStatusPolling } from "../utils/onlineStatus.js";
+<<<<<<< Updated upstream
 import { inviteFriend } from "../services/gameWithFriendService.js";
 import { loadChatRoom } from "./chatRoom.js";
+=======
+import { handleLogout } from "./auth.js";
+import { loadAuthPage } from "./auth.js";
+>>>>>>> Stashed changes
 
 export async function loadProfilePage(userId = null, addToHistory = true) {
   const loggedInUserId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);

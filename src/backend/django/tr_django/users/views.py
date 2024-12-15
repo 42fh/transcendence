@@ -675,20 +675,28 @@ class UserDetailView(APIView):
 class UserAvatarView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser]
+<<<<<<< Updated upstream
 
+=======
+    
+>>>>>>> Stashed changes
     ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/jpg"]
     MAX_AVATAR_SIZE = 2 * 1024 * 1024  # 2MB in bytes
-
+    
     def post(self, request, user_id):
         if str(request.user.id) != str(user_id):
-            return Response({"error": "Cannot update other users' avatars"}, status=status.HTTP_403_FORBIDDEN)
-
+            return Response(
+                {"error": "Cannot update other users' avatars"}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+            
         try:
             user = CustomUser.objects.get(id=user_id)
         except CustomUser.DoesNotExist:
             return Response({"error": "User not found"}, status=404)
 
         if "file" not in request.FILES:
+<<<<<<< Updated upstream
             return Response({"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST)
 
         avatar_file = request.FILES["file"]
@@ -696,16 +704,42 @@ class UserAvatarView(APIView):
         # Validate file type
         if avatar_file.content_type not in self.ALLOWED_TYPES:
             return Response({"error": "Invalid file type"}, status=status.HTTP_400_BAD_REQUEST)
+=======
+            return Response(
+                {"error": "No file provided"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+>>>>>>> Stashed changes
 
+        avatar_file = request.FILES["file"]
+        
+        # Validate file type
+        if avatar_file.content_type not in self.ALLOWED_TYPES:
+            return Response(
+                {"error": "Invalid file type"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
         # Validate file size
         if avatar_file.size > self.MAX_AVATAR_SIZE:
+<<<<<<< Updated upstream
             return Response({"error": "File too large"}, status=status.HTTP_400_BAD_REQUEST)
+=======
+            return Response(
+                {"error": "File too large"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+>>>>>>> Stashed changes
 
         # Save the new avatar
         user.avatar = avatar_file
         user.save()
 
-        return Response({"message": "Avatar updated successfully", "avatar": user.avatar.url})
+        return Response({
+            "message": "Avatar updated successfully",
+            "avatar": user.avatar.url
+        })
+
 
 
 @method_decorator(csrf_exempt, name="dispatch")
