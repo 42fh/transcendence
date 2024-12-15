@@ -60,7 +60,7 @@ class GameCoordinator:
 
     # user online
     USER_ONLINE_PREFIX = "user_online_"
-    USER_ONLINE_EXPIRY = 600
+    USER_ONLINE_EXPIRY = 60  # 1 minute
 
     # inventation
     INVITATION_PREFIX = "invitation_"
@@ -432,7 +432,7 @@ class GameCoordinator:
                     asyncio.to_thread(
                         send_notification, user_from, f"Here is your Game to play against {user_to.username}", url
                     ),
-                    asyncio.to_thread(send_notification, user_to, f"Player: {user_to.username} invited you", url),
+                    asyncio.to_thread(send_notification, user_to, f"Player: {user_from.username} invited you", url),
                 )
                 return {"status": True, "game_id": url, "message": "Invitation sent successfully"}
 
