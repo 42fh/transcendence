@@ -79,10 +79,11 @@ export function initializeOnlineStatusTracking() {
   window.addEventListener("focus", checkUserStatus);
   window.addEventListener("blur", checkUserStatus);
 
-  const online_circle = document.getElementById("profile__online-status-circle");
-  online_circle.addEventListener("click", (ev) => {
-    sendUserOnlineStatus(true, Date.now());
-  })
+  document.addEventListener("keydown", (ev) => {
+    if (ev.key === "o" || ev.key === "O") {
+      sendUserOnlineStatus(true, Date.now());
+    }
+  });
   
   
   // Periodic check (every 30 seconds)
