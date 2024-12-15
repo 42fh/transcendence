@@ -17,14 +17,14 @@ export async function loadGameList(addToHistory = true) {
     }
 
     const games = await fetchWaitingGames();
-    const runningGames = await fetchRunningGames();
-    console.log(games, runningGames);
+    // const runningGames = await fetchRunningGames();
+    console.log(games);
 
     const mainContent = document.getElementById("main-content");
     mainContent.innerHTML = "";
     mainContent.appendChild(document.importNode(template.content, true));
 
-    generateGameListHTML(games, runningGames);
+    generateGameListHTML(games, []);
 
     document.querySelector(".create-game-btn").addEventListener("click", () => {
       loadGameSetupPage();
