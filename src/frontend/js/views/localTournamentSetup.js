@@ -1,12 +1,15 @@
 import { tournamentState } from "../store/tournament/state.js";
 import { showToast } from "../utils/toast.js";
 import { loadLocalTournamentRoundPage } from "./localTournamentRound.js";
-import { getRoundWinners } from "../store/tournament/state.js";
+import { getRoundWinners, resetTournamentState } from "../store/tournament/state.js";
 export function loadLocalTournamentSetupPage(addToHistory = true) {
   try {
     if (addToHistory) {
       history.pushState({ view: "local-tournament-setup" }, "");
     }
+
+    // delete state
+    resetTournamentState();
 
     const template = document.getElementById("local-tournament-setup-template");
     const mainContent = document.getElementById("main-content");

@@ -73,3 +73,24 @@ export const tournamentState = {
 export function getRoundWinners(roundNumber) {
   return tournamentState.rounds[roundNumber - 1].games.map((game) => game.winner);
 }
+
+export function resetTournamentState() {
+  // Reset global state
+  globalTournaments = null;
+
+  // Reset local tournament state
+  tournamentState.tournamentInfo = {
+    name: "",
+    description: "",
+    location: "local",
+    type: "",
+    playersNumber: 0,
+    totalRounds: 0,
+    currentRound: 0,
+    status: "setup",
+  };
+
+  tournamentState.currentGame = null;
+  tournamentState.players = [];
+  tournamentState.rounds = [];
+}
