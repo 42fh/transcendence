@@ -6,25 +6,22 @@ from typing import Tuple, Dict, List
 
 class BallUtils:
     @staticmethod
-    def get_random_direction(
-        active_sides: List[int], initial_speed: float
-    ) -> Tuple[float, float]:
-        """Calculate random direction for ball towards a player."""
-        # Choose a random player
+    def get_random_direction(active_sides: List[int], initial_speed: float) -> Tuple[float, float]:
+        """Calculate random direction for ball towards any number of players."""
         target_side = random.choice(active_sides)
-
-        # Base angle for that player (0° for right, 180° for left)
-        base_direction = target_side * 2 * math.pi / 4
-
-        # Add random variation within ±45°
-        variation = random.uniform(-math.pi / 4, math.pi / 4)
+        total_positions = max(active_sides) + 1
+        
+        # Calculate base angle (points away from player for initial serve)
+        base_direction = (target_side * 2 * math.pi / total_positions)
+        
+        variation = random.uniform(-math.pi / 8, math.pi / 8)
         final_angle = base_direction + variation
-
+        
         return (
             float(initial_speed * math.cos(final_angle)),
-            float(initial_speed * math.sin(final_angle)),
+            float(initial_speed * math.sin(final_angle))
         )
-
+    
     @staticmethod
     def reset_ball_position(
         ball: Dict, active_sides: List[int], initial_speed: float
