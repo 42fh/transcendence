@@ -200,7 +200,6 @@ export async function fetchFriends(page = 1, perPage = 10, search = "") {
   const userId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
   if (!userId) throw new Error("User ID not found");
   try {
-    const accessToken = await manageJWT();
     const queryParams = new URLSearchParams();
     queryParams.set("page", page);
     queryParams.set("per_page", perPage);
