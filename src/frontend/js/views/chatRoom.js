@@ -1,9 +1,12 @@
 import { initializeChatWebSocket } from "../services/chatSocketService.js";
 import { loadChatPage } from "./chatHome.js";
-import { LOCAL_STORAGE_KEYS, ASSETS, CHAT_WS_MSG_TYPE } from "../config/constants.js";
+import {
+  LOCAL_STORAGE_KEYS,
+  ASSETS,
+  CHAT_WS_MSG_TYPE,
+} from "../config/constants.js";
 import { inviteFriend } from "../services/gameWithFriendService.js";
 import { loadProfilePage } from "./profile.js";
-import { fetchUserProfile } from "../services/usersService.js";
 import { showToast } from "../utils/toast.js";
 import { fetchUserProfile } from "../services/usersService.js";
 
@@ -119,7 +122,9 @@ async function initializeChatRoom(chatPartner) {
           handlers.addMessageToChat(
             data.username,
             data.message,
-            data.username === currentUserName ? "self" : CHAT_WS_MSG_TYPE.SYSTEM,
+            data.username === currentUserName
+              ? "self"
+              : CHAT_WS_MSG_TYPE.SYSTEM,
             isSystemMessage
           );
         } else if (data.type === "message_history") {
@@ -130,13 +135,20 @@ async function initializeChatRoom(chatPartner) {
             handlers.addMessageToChat(
               msg.username,
               msg.message,
-              msg.username === currentUserName ? "self" : CHAT_WS_MSG_TYPE.SYSTEM,
+              msg.username === currentUserName
+                ? "self"
+                : CHAT_WS_MSG_TYPE.SYSTEM,
               isSystemMessage
             );
           });
           handlers.state.messageHistoryLoaded = true;
         } else if (data.type === "send_notification") {
-          handlers.addMessageToChat(CHAT_WS_MSG_TYPE.SYSTEM, data.notification.message, CHAT_WS_MSG_TYPE.SYSTEM, true);
+          handlers.addMessageToChat(
+            CHAT_WS_MSG_TYPE.SYSTEM,
+            data.notification.message,
+            CHAT_WS_MSG_TYPE.SYSTEM,
+            true
+          );
         }
       },
       state: {
@@ -173,7 +185,10 @@ async function initializeChatRoom(chatPartner) {
   }
 
   sendButton.onclick = () => {
-    if (messageInput.value.trim() === "" || currentUserName === CHAT_WS_MSG_TYPE.SYSTEM) {
+    if (
+      messageInput.value.trim() === "" ||
+      currentUserName === CHAT_WS_MSG_TYPE.SYSTEM
+    ) {
       return;
     }
 
