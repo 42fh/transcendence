@@ -551,7 +551,7 @@ class GameCoordinator:
                         return {
                             "available": False,
                             "message": "No available slots in this game",
-                            "status": 503,
+                            "status": 403,
                         }
                     async with RedisLock(redis_conn, f"{game_id}_player_situation"):
                         # create
@@ -568,7 +568,7 @@ class GameCoordinator:
             return {
                 "available": False,
                 "message": f"Error in join_game: {e}",
-                "status": 500,
+                "status": 418,
             }
 
     # from AGameManager
