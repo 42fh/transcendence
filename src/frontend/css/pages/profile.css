@@ -77,21 +77,6 @@
   gap: var(--spacing-xs);
 }
 
-.profile__online-status {
-  font-size: 0.8em;
-  /* Remove the crossed-out font-size */
-  /* color: var(--color-success); */
-  color: var(--color-status-online);
-}
-
-.profile__username-container .profile__online-status.material-symbols-outlined {
-  font-size: 0.8em;
-  color: var(--color-status-online);
-  font-variation-settings: "FILL" 1, "wght" 700;
-  /* Filled and bold */
-  /* font-variation-settings: "FILL" 0, "wght" 100; */
-}
-
 .profile__username {
   font-size: var(--font-size-large);
   color: var(--color-text-primary);
@@ -420,4 +405,30 @@
   color: var(--color-text-secondary);
   font-family: var(--font-family-primary);
   transition: color 0.2s ease;
+}
+
+/* .profile__online-status {
+  font-size: 0.8em;
+  color: var(--color-status-online);
+} */
+
+.profile__online-status {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+  background-color: #9e9e9e; /* Default gray for unknown status */
+}
+
+.profile__online-status--online {
+  background-color: #4caf50; /* Green for online */
+}
+
+.profile__online-status--offline {
+  background-color: #9e9e9e; /* Gray for offline */
+}
+
+.profile__online-status--away {
+  background-color: #ffa726; /* Orange for away/idle status if needed */
 }

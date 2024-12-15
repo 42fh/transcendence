@@ -42,6 +42,10 @@ export function initializeHistory() {
 
   window.addEventListener("popstate", (event) => {
     event.preventDefault();
+    if (window._onlineStatusPollingCleanup) {
+      window._onlineStatusPollingCleanup();
+      window._onlineStatusPollingCleanup = null;
+    }
 
     if (event.state) {
       // TODO: Check cache before making API calls in each case
@@ -133,6 +137,10 @@ export function initializeHistory() {
   document.addEventListener("click", (event) => {
     if (event.target.matches("[data-nav]")) {
       event.preventDefault();
+      if (window._onlineStatusPollingCleanup) {
+        window._onlineStatusPollingCleanup();
+        window._onlineStatusPollingCleanup = null;
+      }
       const view = event.target.getAttribute("data-nav");
       // TODO: Same caching logic as above should be applied here
       switch (view) {

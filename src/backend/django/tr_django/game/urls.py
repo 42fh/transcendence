@@ -21,7 +21,7 @@ urlpatterns = [
         name="tournament_schedule",
     ),
     # User status
-    path("user/online/", views.user_online_status, name="user_online_status"),
+    path("user/online/<str:userId>", views.user_online_status, name="user_online_status"),
     # Debug endpoints
     path("debug/create/", views.debug_create_games, name="debug_create_games"),
     path("tournament/debug/", views.debug_tournament, name="debug_tournament"),

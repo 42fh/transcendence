@@ -1,3 +1,4 @@
+// import { CONFIG, LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { CONFIG, LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { manageJWT } from "./authService.js";
 
@@ -185,11 +186,11 @@ export async function uploadUserAvatar(userId, avatarFile) {
 
 export async function fetchUsers(page = 1, perPage = 10, search = "") {
   try {
+    const accessToken = await manageJWT();
     const queryParams = new URLSearchParams();
     queryParams.set("page", page);
     queryParams.set("per_page", perPage);
     if (search) queryParams.set("search", search);
-    const accessToken = await manageJWT();
 
     const url = `${CONFIG.API_BASE_URL}/api/users/?${queryParams}`;
     const response = await fetch(url, {
@@ -220,18 +221,114 @@ export async function fetchFriends(page = 1, perPage = 10, search = "") {
 
     const url = `${CONFIG.API_BASE_URL}/api/users/friends/?${queryParams}`;
 
+    console.log("Fetching from URL:", url);
     const response = await fetch(url, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
       },
     });
-
+    console.log("Response status:", response.status);
     if (!response.ok) throw new Error("Failed to fetch friends");
     const data = await response.json();
     return data;
   } catch (error) {
     console.error("Error fetching friends:", error);
     throw error;
+  }
+}
+
+// export async function setUserOnline() {
+//   try {
+//     const accessToken = await manageJWT();
+//     const response = await fetch("/game/user_online_status/", {
+//       method: "POST",
+//       headers: {
+//         Authorization: `Bearer ${accessToken}`,
+//         "Content-Type": "application/json",
+//       },
+//     });
+//     const data = await response.json();
+//     console.log("User online status:", data);
+//   } catch (error) {
+//     console.error("Error setting user online:", error);
+//   }
+// }
+
+// export async function setUserOffline() {
+//   try {
+//     const accessToken = await manageJWT();
+//     const response = await fetch("/user_online_status", {
+//       method: "DELETE",
+//       headers: {
+//         Authorization: `Bearer ${accessToken}`,
+//         "Content-Type": "application/json",
+//       },
+//     });
+//     const data = await response.json();
+//     console.log("User offline status:", data);
+//   } catch (error) {
+//     console.error("Error setting user offline:", error);
+//   }
+// }
+
+// export async function sendUserOnlineStatus(isOnline, expirationTimestamp) {
+export async function sendUserOnlineStatus(isOnline) {
+  try {
+    console.log("Sending user online status", isOnline ? "Online" : "Offline");
+    const accessToken = await manageJWT();
+    const userId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
+    const response = await fetch(`/api/game/user/online/${userId}`, {
+      method: isOnline ? "POST" : "DELETE", // Use POST for online, DELETE for offline
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        isOnline,
+        // expiration: expirationTimestamp,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error(
+        "Failed to notify server about user status:",
+        response.statusText
+      );
+      throw new Error(`Failed to notify server: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log(
+      //   `Status sent: ${isOnline ? "Online" : "Offline"}, Expires at: ${new Date(expirationTimestamp).toISOString()}`
+      `Status sent: ${isOnline ? "Online" : "Offline"}`
+    );
+    return data; // Return the parsed response for further use
+  } catch (error) {
+    console.error("Error notifying server about user status:", error);
+  }
+}
+
+export async function fetchUserOnlineStatus(user_id) {
+  try {
+    console.log("Fetching user online status");
+    const accessToken = await manageJWT();
+    const response = await fetch(`/api/game/user/online/${user_id}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.error("Failed to fetch user status:", response.statusText);
+      throw new Error(`Failed to fetch user status: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log("User online status:", data);
+    return data.online; // This will return a boolean
+  } catch (error) {
+    console.error("Error fetching user online status:", error);
+    return false;
   }
 }

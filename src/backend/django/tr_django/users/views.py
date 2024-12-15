@@ -328,73 +328,74 @@ class DeleteUserView(APIView):
             return JsonResponse({"error": "Failed to delete account"}, status=500)
 
 
-def login_with_42(request):
-    base_url = "https://api.intra.42.fr/oauth/authorize"
-    params = {
-        "client_id": settings.FORTYTWO_CLIENT_ID,
-        "redirect_uri": settings.FORTYTWO_REDIRECT_URI,
-        "response_type": "code",
-        "scope": "public",
-    }
-    query_string = "&".join([f"{key}={value}" for key, value in params.items()])
-    return redirect(f"{base_url}?{query_string}")
+# Duplicate of the 42 login view
+# def login_with_42(request):
+#     base_url = "https://api.intra.42.fr/oauth/authorize"
+#     params = {
+#         "client_id": settings.FORTYTWO_CLIENT_ID,
+#         "redirect_uri": settings.FORTYTWO_REDIRECT_URI,
+#         "response_type": "code",
+#         "scope": "public",
+#     }
+#     query_string = "&".join([f"{key}={value}" for key, value in params.items()])
+#     return redirect(f"{base_url}?{query_string}")
 
+# Duplicate of the 42 callback view
+# def callback(request):
+#     code = request.GET.get("code")
+#     if not code:
+#         return redirect("/")
 
-def callback(request):
-    code = request.GET.get("code")
-    if not code:
-        return redirect("/")
+#     # Exchange the code for an access token
+#     token_url = "https://api.intra.42.fr/oauth/token"
+#     data = {
+#         "grant_type": "authorization_code",
+#         "client_id": settings.FORTYTWO_CLIENT_ID,
+#         "client_secret": settings.FORTYTWO_CLIENT_SECRET,
+#         "code": code,
+#         "redirect_uri": settings.FORTYTWO_REDIRECT_URI,
+#     }
 
-    # Exchange the code for an access token
-    token_url = "https://api.intra.42.fr/oauth/token"
-    data = {
-        "grant_type": "authorization_code",
-        "client_id": settings.FORTYTWO_CLIENT_ID,
-        "client_secret": settings.FORTYTWO_CLIENT_SECRET,
-        "code": code,
-        "redirect_uri": settings.FORTYTWO_REDIRECT_URI,
-    }
+#     response = requests.post(token_url, data=data)
+#     if response.status_code != 200:
+#         return JsonResponse({"error": "Failed to obtain access token"}, status=403)
 
-    response = requests.post(token_url, data=data)
-    if response.status_code != 200:
-        return JsonResponse({"error": "Failed to obtain access token"}, status=403)
+#     access_token = response.json().get("access_token")
 
-    access_token = response.json().get("access_token")
+#     # Fetch user information
+#     user_info_url = "https://api.intra.42.fr/v2/me"
+#     headers = {"Authorization": f"Bearer {access_token}"}
+#     user_info_response = requests.get(user_info_url, headers=headers)
+#     if user_info_response.status_code != 200:
+#         return JsonResponse({"error": "Failed to fetch user info"}, status=403)
 
-    # Fetch user information
-    user_info_url = "https://api.intra.42.fr/v2/me"
-    headers = {"Authorization": f"Bearer {access_token}"}
-    user_info_response = requests.get(user_info_url, headers=headers)
-    if user_info_response.status_code != 200:
-        return JsonResponse({"error": "Failed to fetch user info"}, status=403)
+#     user_data = user_info_response.json()
 
-    user_data = user_info_response.json()
+#     # Create or log in the user
+#     username = user_data["login"]
+#     user, created = CustomUser.objects.get_or_create(username=f"42_{username}")
 
-    # Create or log in the user
-    username = user_data["login"]
-    user, created = CustomUser.objects.get_or_create(username=f"42_{username}")
+#     if user is not None:
+#         login(request, user)  # Creates the session for the new user
+#         print("Session Data:", request.session.items())  # Debug session contents
 
-    if user is not None:
-        login(request, user)  # Creates the session for the new user
-        print("Session Data:", request.session.items())  # Debug session contents
+#         # Generate token pair
+#         token_serializer = TokenObtainPairSerializer()
+#         tokens = token_serializer.get_token(user)
+#         access_token = str(tokens.access_token)
+#         refresh_token = str(tokens)
 
-        # Generate token pair
-        token_serializer = TokenObtainPairSerializer()
-        tokens = token_serializer.get_token(user)
-        access_token = str(tokens.access_token)
-        refresh_token = str(tokens)
+#         response = redirect("/")  # Redirect to a post-login page
 
-        response = redirect("/")  # Redirect to a post-login page
+#         # Set tokens and UUID in cookies
+#         response.set_cookie("pongUserId", str(user.id), httponly=False, samesite="Strict")
+#         response.set_cookie("pongUsername", str(user.username), httponly=False, samesite="Strict")
+#         response.set_cookie("access_token", access_token, httponly=False, samesite="Strict")
+#         response.set_cookie("refresh_token", refresh_token, httponly=False, samesite="Strict")
 
-        # Set tokens and UUID in cookies
-        response.set_cookie("pongUserId", str(user.id), httponly=False, samesite="Strict")
-        response.set_cookie("pongUsername", str(user.username), httponly=False, samesite="Strict")
-        response.set_cookie("access_token", access_token, httponly=False, samesite="Strict")
-        response.set_cookie("refresh_token", refresh_token, httponly=False, samesite="Strict")
-
-        return response
-    else:
-        return JsonResponse({"error": "Failed to fetch user info"}, status=403)
+#         return response
+#     else:
+#         return JsonResponse({"error": "Failed to fetch user info"}, status=403)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -675,7 +676,6 @@ class UserDetailView(APIView):
 class UserAvatarView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser]
-
     ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/jpg"]
     MAX_AVATAR_SIZE = 2 * 1024 * 1024  # 2MB in bytes
 
@@ -690,6 +690,12 @@ class UserAvatarView(APIView):
 
         if "file" not in request.FILES:
             return Response({"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+        avatar_file = request.FILES["file"]
+
+        # Validate file type
+        if avatar_file.content_type not in self.ALLOWED_TYPES:
+            return Response({"error": "Invalid file type"}, status=status.HTTP_400_BAD_REQUEST)
 
         avatar_file = request.FILES["file"]
 
