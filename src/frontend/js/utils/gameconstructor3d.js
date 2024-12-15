@@ -231,6 +231,9 @@ export default class GameConstructor {
           console.log("game_finished: ", message);
           showToast("Game finished, Winner: " + message.winner);
           break;
+        case "player_disconnected":
+          showToast("Player has disconnected, You win!");
+          break;
         case "error":
           if (message != "You are too fast")
             console.error("Error message:", message);
