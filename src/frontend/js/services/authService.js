@@ -34,7 +34,7 @@ export async function refreshJWT(token) {
 
 export async function logoutUser() {
 
-  sendUserOnlineStatus(false, Date.now());
+  await sendUserOnlineStatus(false, Date.now());
 
   const response = await fetch("/api/users/auth/logout/", {
     method: "POST",
