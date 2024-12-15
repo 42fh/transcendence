@@ -61,11 +61,7 @@ export async function renderNotifications() {
         acceptButton.type = "button";
         console.log("Clicked via onclick property");
 
-        acceptButton.addEventListener("click", () =>
-          console.log("Clicked via addEventListener")
-        );
         acceptButton.onclick = () => {
-          console.log("Button clicked!");
           loadGame3D(notification.url);
         };
 
