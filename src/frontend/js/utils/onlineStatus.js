@@ -38,7 +38,9 @@ export function checkUserStatus() {
 
   // Notify the server based on the current status
   //   sendUserOnlineStatus(isOnline, newExpirationTimestamp); // Notify online
-  sendUserOnlineStatus(isOnline); // Notify online
+  if (isOnline) {
+    sendUserOnlineStatus(isOnline);
+  }
   console.log("User is ", isOnline ? "online" : "offline");
 }
 
@@ -134,7 +136,7 @@ export function updateOnlineStatus(status) {
  * @see {@link updateOnlineStatus} for the UI update function
  */
 
-export async function startOnlineStatusPolling() {
+export async function startOnlineStatusPolling(user_id) {
   // Clean up any existing polling
   if (currentPollingCleanup) {
     currentPollingCleanup();
@@ -142,7 +144,7 @@ export async function startOnlineStatusPolling() {
   let currentStatus = null;
 
   const pollStatus = async () => {
-    const isOnline = await fetchUserOnlineStatus();
+    const isOnline = await fetchUserOnlineStatus(user_id);
     const newStatus = isOnline ? "online" : "offline";
 
     // Only update if status has changed

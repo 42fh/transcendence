@@ -36,12 +36,15 @@ export async function fetchUserProfile(userId) {
   try {
     const accessToken = await manageJWT();
 
-    const response = await fetch(`${CONFIG.API_BASE_URL}/api/users/${userId}/`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await fetch(
+      `${CONFIG.API_BASE_URL}/api/users/${userId}/`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
     if (!response.ok) {
       return {
         success: false,
@@ -72,7 +75,8 @@ export function formatWinRatio(wins, losses) {
 
 export function renderMatchHistory(matches, container) {
   if (!matches || matches.length === 0) {
-    container.innerHTML = '<p class="profile__matches-empty">No recent matches</p>';
+    container.innerHTML =
+      '<p class="profile__matches-empty">No recent matches</p>';
     return;
   }
 
@@ -85,12 +89,18 @@ export function renderMatchHistory(matches, container) {
     const matchItem = matchElement.querySelector(".profile__match-item");
 
     // Add won/lost class
-    matchItem.classList.add(match.won ? "profile__match-item--won" : "profile__match-item--lost");
+    matchItem.classList.add(
+      match.won ? "profile__match-item--won" : "profile__match-item--lost"
+    );
 
     // Fill in the data
-    matchItem.querySelector(".profile__match-date").textContent = new Date(match.date).toLocaleDateString();
+    matchItem.querySelector(".profile__match-date").textContent = new Date(
+      match.date
+    ).toLocaleDateString();
     matchItem.querySelector(".profile__match-result").textContent = match.score;
-    matchItem.querySelector(".profile__match-opponent").textContent = `vs ${match.opponent?.username || "Unknown"}`;
+    matchItem.querySelector(".profile__match-opponent").textContent = `vs ${
+      match.opponent?.username || "Unknown"
+    }`;
 
     container.appendChild(matchElement);
   });
@@ -100,14 +110,17 @@ export async function updateUserProfile(userId, userData) {
   try {
     const accessToken = await manageJWT();
 
-    const response = await fetch(`${CONFIG.API_BASE_URL}/api/users/${userId}/`, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(userData),
-    });
+    const response = await fetch(
+      `${CONFIG.API_BASE_URL}/api/users/${userId}/`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
+      }
+    );
 
     if (!response.ok) {
       return {
@@ -264,7 +277,8 @@ export async function sendUserOnlineStatus(isOnline) {
   try {
     console.log("Sending user online status", isOnline ? "Online" : "Offline");
     const accessToken = await manageJWT();
-    const response = await fetch("/api/game/user/online/", {
+    const userId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
+    const response = await fetch(`/api/game/user/online/${userId}`, {
       method: isOnline ? "POST" : "DELETE", // Use POST for online, DELETE for offline
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -277,7 +291,10 @@ export async function sendUserOnlineStatus(isOnline) {
     });
 
     if (!response.ok) {
-      console.error("Failed to notify server about user status:", response.statusText);
+      console.error(
+        "Failed to notify server about user status:",
+        response.statusText
+      );
       throw new Error(`Failed to notify server: ${response.statusText}`);
     }
 
@@ -292,11 +309,11 @@ export async function sendUserOnlineStatus(isOnline) {
   }
 }
 
-export async function fetchUserOnlineStatus() {
+export async function fetchUserOnlineStatus(user_id) {
   try {
     console.log("Fetching user online status");
     const accessToken = await manageJWT();
-    const response = await fetch("/api/game/user/online/", {
+    const response = await fetch(`/api/game/user/online/${user_id}`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },

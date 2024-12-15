@@ -113,7 +113,7 @@ export async function loadProfilePage(userId = null, addToHistory = true) {
     renderMatchHistory(userData.recent_matches, matchesContainer);
 
     // Start online status polling in the background
-    startOnlineStatusPolling().then((cleanup) => {
+    startOnlineStatusPolling(userData.id).then((cleanup) => {
       // Store cleanup function for router to use
       window._onlineStatusPollingCleanup = cleanup;
     });

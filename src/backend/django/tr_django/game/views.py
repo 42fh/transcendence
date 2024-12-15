@@ -443,7 +443,7 @@ async def cancel_booking(request):
 @csrf_exempt
 @async_only_middleware
 @require_http_methods(["GET", "POST", "DELETE"])
-async def user_online_status(request):
+async def user_online_status(request, userId=None):
     """
     GET: Check if user is online
     POST: Set user as online
@@ -465,9 +465,9 @@ async def user_online_status(request):
         logger.info(f"Processing online status for user_id: {user_id}")
 
         if request.method == "GET":
-            is_online = await GameCoordinator.is_user_online(user_id)
-            logger.info(f"User {user_id} is online: {is_online}")
-            return JsonResponse({"online": is_online, "user_id": user_id})
+            is_online = await GameCoordinator.is_user_online(userId)
+            logger.info(f"User {userId} is online: {is_online}")
+            return JsonResponse({"online": is_online, "user_id": userId})
 
         elif request.method == "POST":
             logger.info(f"Setting user {user_id} to online")
