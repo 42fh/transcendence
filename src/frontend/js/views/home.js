@@ -4,7 +4,7 @@ import { updateActiveNavItem } from "../components/bottomNav.js";
 import { loadChatPage } from "./chatHome.js";
 import { loadGameList } from "./gameList.js";
 import { renderNotifications } from "../components/chatNotification.js";
-
+import { initializeOnlineStatusTracking } from "../utils/onlineStatus.js";
 let notificationSocket = null;
 
 export function loadHomePage(addToHistory = true) {
@@ -32,6 +32,9 @@ export function loadHomePage(addToHistory = true) {
       console.error("Error with notification in main", error);
     }
     renderNotifications();
+
+    initializeOnlineStatusTracking(); // Initialize for already logged-in users
+
 
     const mainContent = document.getElementById("main-content");
     if (!mainContent) {

@@ -79,14 +79,18 @@ export function initializeOnlineStatusTracking() {
   window.addEventListener("focus", checkUserStatus);
   window.addEventListener("blur", checkUserStatus);
 
+  const online_circle = document.getElementById("profile__online-status-circle");
+  online_circle.onclick = () => sendUserOnlineStatus(true, Date.now());
+  
   // Periodic check (every 30 seconds)
   setInterval(checkUserStatus, 30000);
 
   // Check before page unload
   window.addEventListener("beforeunload", () => {
+    console.log("beforeunload event happend, user going offline")
     sendUserOnlineStatus(false, Date.now());
   });
-  // window.addEventListener("unload", () => {
+
 }
 
 export function updateOnlineStatus(status) {
