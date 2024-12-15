@@ -585,8 +585,38 @@ class GameCoordinator:
                 else:
                     await redis_conn.set(f"{cls.WAITING_GAMES}:{game_id}",  game_id, ex=time)
                     await redis_conn.set(f"{cls.ALL_GAMES}:{game_id}",  game_id, ex=time)
+                    await cls.set_game_expiration(game_id, time)
                     logger.info(f"game[{str(game_id)}] will set to ex:{time}")
+    
+    
+    @classmethod
+    async def set_game_expiration(cls, game_id: str, time: int):
+        """
+        Set expiration for all Redis keys containing game_id in any position
+        """
+        try:
+            patterns = [
+                f"*{game_id}",    # Suffix match
+                f"{game_id}*",    # Prefix match
+                f"*{game_id}*"    # Contains match
+            ]
             
+            keys_updated = 0
+            
+            # Update both Redis DBs
+            for redis_url in [cls.REDIS_URL, cls.REDIS_GAME_URL]:
+                async with await cls.get_redis(redis_url) as redis_conn:
+                    for pattern in patterns:
+                        async for key in redis_conn.scan_iter(pattern):
+                            await redis_conn.expire(key, time)
+                            keys_updated += 1
+            
+            logger.info(f"Set {time}s expiration for {keys_updated} keys matching game {game_id}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Error setting game expiration for {game_id}: {e}")
+            return False        
 
 
     @classmethod
