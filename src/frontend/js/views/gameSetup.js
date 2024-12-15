@@ -121,7 +121,7 @@ function collectFormData() {
 }
 
 function validateFormData(formData) {
-  const { gameType, numSides, numBalls } = formData;
+  const { gameType, numSides, numBalls, numPlayers } = formData;
   // Validate sides based on game type
   if (gameType === "circular") {
     if (numSides < 2 || numSides > 12) {
@@ -136,6 +136,14 @@ function validateFormData(formData) {
       );
       return false;
     }
+  }
+
+  if (numSides < numPlayers) {
+    showToast(
+      "Number of sides must be greater than or equal to number of players",
+      true
+    );
+    return false;
   }
 
   if (numBalls < 1 || numBalls > 4) {
