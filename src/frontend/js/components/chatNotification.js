@@ -93,12 +93,18 @@ export async function renderNotifications() {
         //   `console.log('Button clicked!');
         // 	loadGame3D('${notification.url}');`
         // );
-        window.loadGame3D = loadGame3D; // Make it global
-        acceptButton.setAttribute(
-          "onclick",
-          `console.log('Button clicked!'); 
-			loadGame3D('${notification.url}');`
-        );
+        // window.loadGame3D = loadGame3D; // Make it global
+        // acceptButton.setAttribute(
+        //   "onclick",
+        //   `console.log('Button clicked!');
+        // 	loadGame3D('${notification.url}');`
+        // );
+
+        // window.loadGame3D = loadGame3D; // Make it global
+        acceptButton.onclick = () => {
+          console.log("Button clicked!");
+          loadGame3D(notification.url);
+        };
 
         // 4. Add a mousedown event to see if it's registering any interaction
         acceptButton.addEventListener("mousedown", () => console.log("Mouse down on button"));
