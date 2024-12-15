@@ -6,10 +6,7 @@
     <title>Pong Game - Welcome</title>
     <link rel="stylesheet" href="css/fonts.css" />
     <link rel="stylesheet" href="css/main.css" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <script type="importmap">
       {
         "imports": {
@@ -77,23 +74,10 @@
 
           <div class="resend-section">
             <span id="countdown">1:00</span>
-            <button
-              type="button"
-              id="resend-button"
-              class="auth-form__button"
-              disabled
-            >
-              Resend Code
-            </button>
+            <button type="button" id="resend-button" class="auth-form__button" disabled>Resend Code</button>
           </div>
 
-<<<<<<< Updated upstream
-          <button type="submit" class="auth-form__button">
-=======
-          <button type="submit" verify" class="auth-form__button">
->>>>>>> Stashed changes
-            Log In
-          </button>
+          <button type="submit" class="auth-form__button">Log In</button>
         </form>
       </div>
     </template>
@@ -110,12 +94,7 @@
         <input type="password" id="password" name="password" required />
 
         <label for="confirm-password">Confirm Password</label>
-        <input
-          type="password"
-          id="confirm-password"
-          name="confirm-password"
-          required
-        />
+        <input type="password" id="confirm-password" name="confirm-password" required />
 
         <button type="submit" class="auth-form__button">Sign Up</button>
       </form>
@@ -123,13 +102,13 @@
 
     <template id="game-list-template">
       <div class="game-list-button-container">
-      <button class="create-game-btn home__button button--neon">Create Game</button>
-      <button class="offline-game-btn home__button button--neon">Offline Game</button>
-    </div>
+        <button class="create-game-btn home__button button--neon">Create Game</button>
+        <button class="offline-game-btn home__button button--neon">Offline Game</button>
+      </div>
       <div class="game-list-container">
         <div class="game-list">
-              <!-- Games will be inserted here by JavaScript -->
-          </div>
+          <!-- Games will be inserted here by JavaScript -->
+        </div>
       </div>
     </template>
 
@@ -137,25 +116,15 @@
       <div class="modal-form">
         <label for="code">Enter the code sent to your email</label>
         <input type="text" id="code" name="code" required />
-    
+
         <div class="resend-section">
           <span id="countdown">1:00</span>
-          <button
-            type="button"
-            id="resend-button"
-            class="auth-form__button"
-            disabled
-          >
-            Resend Code
-          </button>
+          <button type="button" id="resend-button" class="auth-form__button" disabled>Resend Code</button>
         </div>
-    
-        <button id="2fa-verify" class="auth-form__button">
-          Verify
-        </button>
+
+        <button id="2fa-verify" class="auth-form__button">Verify</button>
       </div>
-      </template>
-  
+    </template>
 
     <!-- Home Page Template -->
     <template id="home-template">
@@ -212,9 +181,7 @@
         </div>
 
         <div class="button-wrapper">
-          <button id="create-tournament" class="tournament-button">
-            CREATE NEW TOURNAMENT
-          </button>
+          <button id="create-tournament" class="tournament-button">CREATE NEW TOURNAMENT</button>
         </div>
       </div>
     </template>
@@ -246,9 +213,7 @@
               Registration End:
               <span class="tournament-detail-closing-date"></span>
             </div>
-            <div>
-              Start: <span class="tournament-detail-starting-date"></span>
-            </div>
+            <div>Start: <span class="tournament-detail-starting-date"></span></div>
           </div>
           <div class="tournament-detail-type"></div>
 
@@ -283,22 +248,12 @@
         <form class="create-tournament-form">
           <!-- Basic Info -->
           <div class="create-tournament-form-group">
-            <label class="create-tournament-label" for="tournament-name"
-              >NAME</label
-            >
-            <input
-              class="create-tournament-input"
-              type="text"
-              id="tournament-name"
-              name="name"
-              required
-            />
+            <label class="create-tournament-label" for="tournament-name">NAME</label>
+            <input class="create-tournament-input" type="text" id="tournament-name" name="name" required />
           </div>
 
           <div class="create-tournament-form-group">
-            <label class="create-tournament-label" for="tournament-description"
-              >DESCRIPTION</label
-            >
+            <label class="create-tournament-label" for="tournament-description">DESCRIPTION</label>
             <textarea
               class="create-tournament-textarea"
               id="tournament-description"
@@ -309,15 +264,8 @@
 
           <!-- Tournament Type -->
           <div class="create-tournament-form-group">
-            <label class="create-tournament-label" for="tournament-type"
-              >TYPE</label
-            >
-            <select
-              class="create-tournament-select"
-              id="tournament-type"
-              name="type"
-              required
-            >
+            <label class="create-tournament-label" for="tournament-type">TYPE</label>
+            <select class="create-tournament-select" id="tournament-type" name="type" required>
               <option value="single_elimination">Single Elimination</option>
               <option value="double_elimination">Double Elimination</option>
               <option value="round_robin">Round Robin</option>
@@ -326,9 +274,7 @@
 
           <!-- Dates -->
           <div class="create-tournament-form-group">
-            <label class="create-tournament-label" for="tournament-start"
-              >START DATE</label
-            >
+            <label class="create-tournament-label" for="tournament-start">START DATE</label>
             <input
               class="create-tournament-input"
               type="datetime-local"
@@ -339,9 +285,7 @@
           </div>
 
           <div class="create-tournament-form-group">
-            <label class="create-tournament-label" for="registration-start"
-              >REGISTRATION START</label
-            >
+            <label class="create-tournament-label" for="registration-start">REGISTRATION START</label>
             <input
               class="create-tournament-input"
               type="datetime-local"
@@ -352,9 +296,7 @@
           </div>
 
           <div class="create-tournament-form-group">
-            <label class="create-tournament-label" for="registration-close"
-              >REGISTRATION CLOSE</label
-            >
+            <label class="create-tournament-label" for="registration-close">REGISTRATION CLOSE</label>
             <input
               class="create-tournament-input"
               type="datetime-local"
@@ -366,61 +308,27 @@
 
           <!-- Visibility -->
           <div class="create-tournament-form-group">
-            <label class="create-tournament-label" for="tournament-visibility"
-              >VISIBILITY</label
-            >
-            <select
-              class="create-tournament-select"
-              id="tournament-visibility"
-              name="visibility"
-              required
-            >
+            <label class="create-tournament-label" for="tournament-visibility">VISIBILITY</label>
+            <select class="create-tournament-select" id="tournament-visibility" name="visibility" required>
               <option value="public">Public</option>
               <option value="private">Private</option>
             </select>
           </div>
 
           <!-- Allowed Users (only shown when private is selected) -->
-          <div
-            class="create-tournament-form-group"
-            id="allowed-users-group"
-            style="display: none"
-          >
-            <label class="create-tournament-label" for="allowed-users-input"
-              >ALLOWED USERS</label
-            >
+          <div class="create-tournament-form-group" id="allowed-users-group" style="display: none">
+            <label class="create-tournament-label" for="allowed-users-input">ALLOWED USERS</label>
             <div class="create-tournament-users-input-container">
-              <input
-                type="text"
-                class="create-tournament-input"
-                id="allowed-users-input"
-                placeholder="Type username"
-              />
-              <button
-                type="button"
-                class="create-tournament-button-secondary"
-                id="add-user-btn"
-              >
-                ADD
-              </button>
+              <input type="text" class="create-tournament-input" id="allowed-users-input" placeholder="Type username" />
+              <button type="button" class="create-tournament-button-secondary" id="add-user-btn">ADD</button>
             </div>
-            <div
-              id="allowed-users-list"
-              class="create-tournament-users-list"
-            ></div>
+            <div id="allowed-users-list" class="create-tournament-users-list"></div>
           </div>
 
           <!-- Game Mode -->
           <div class="create-tournament-form-group">
-            <label class="create-tournament-label" for="game-mode"
-              >GAME MODE</label
-            >
-            <select
-              class="create-tournament-select"
-              id="game-mode"
-              name="gameMode"
-              required
-            >
+            <label class="create-tournament-label" for="game-mode">GAME MODE</label>
+            <select class="create-tournament-select" id="game-mode" name="gameMode" required>
               <option value="1v1">1 vs 1</option>
               <option value="multiplayer">Multiplayer</option>
             </select>
@@ -428,16 +336,8 @@
 
           <!-- Action Buttons -->
           <div class="create-tournament-actions">
-            <button
-              type="button"
-              class="create-tournament-button-secondary"
-              id="cancel-tournament"
-            >
-              CANCEL
-            </button>
-            <button type="submit" class="create-tournament-button-primary">
-              CREATE TOURNAMENT
-            </button>
+            <button type="button" class="create-tournament-button-secondary" id="cancel-tournament">CANCEL</button>
+            <button type="submit" class="create-tournament-button-primary">CREATE TOURNAMENT</button>
           </div>
         </form>
       </div>
@@ -486,22 +386,12 @@
         <div class="chat__section">
           <h2 class="chat-page__title">Users</h2>
           <div class="chat-users-horizontal-scroll">
-            <div
-              id="chat-users-horizontal-container"
-              class="chat-users-horizontal-container"
-            >
+            <div id="chat-users-horizontal-container" class="chat-users-horizontal-container">
               <!-- Horizontal user items will be populated dynamically here -->
-              <div
-                class="chat-users-horizontal-item"
-                id="chat-users"
-                style="display: none"
-              >
+              <div class="chat-users-horizontal-item" id="chat-users" style="display: none">
                 <img class="chat-users-list__avatar" src="" alt="User avatar" />
                 <div class="chat-users-list__info">
-                  <span
-                    id="chat-users-list-username"
-                    class="chat-users-list__username"
-                  ></span>
+                  <span id="chat-users-list-username" class="chat-users-list__username"></span>
                   <span class="chat-users-list__status-indicator"></span>
                 </div>
               </div>
@@ -521,32 +411,16 @@
             </div>
           </div>
         </div>
-        
 
         <div class="chat__section">
           <h2 class="chat-page__title">Conversations</h2>
           <div id="chat-conversations-list" class="conversations-list">
             <!-- Vertical list of users will be populated dynamically here -->
-            <div
-              id="chat-conversations-list-item"
-              class="chat-conversations-list__item"
-              style="display: none"
-            >
-              <img
-                id="chat-avatar"
-                class="chat-conversations-list__avatar"
-                src=""
-                alt="User avatar"
-              />
+            <div id="chat-conversations-list-item" class="chat-conversations-list__item" style="display: none">
+              <img id="chat-avatar" class="chat-conversations-list__avatar" src="" alt="User avatar" />
               <div class="chat-conversations-list__info">
-                <span
-                  id="chat-conversations-list-username"
-                  class="chat-conversations-list__username"
-                ></span>
-                <span
-                  id="chat-conversations-list-status"
-                  class="chat-conversations-list__status-indicator"
-                ></span>
+                <span id="chat-conversations-list-username" class="chat-conversations-list__username"></span>
+                <span id="chat-conversations-list-status" class="chat-conversations-list__status-indicator"></span>
               </div>
             </div>
           </div>
@@ -560,17 +434,8 @@
             <i class="icon-back">←</i>
           </div>
           <div class="chat-room-header__user-info">
-            <img
-              id="chat-room-partner-avatar"
-              class="chat-room-header__avatar"
-              src=""
-              alt="Chat Partner Avatar"
-            />
-            <span
-              id="chat-room-partner-username"
-              class="chat-room-header__username"
-            ></span>
-            
+            <img id="chat-room-partner-avatar" class="chat-room-header__avatar" src="" alt="Chat Partner Avatar" />
+            <span id="chat-room-partner-username" class="chat-room-header__username"></span>
           </div>
           <div class="chat-room-header__actions">
             <span id="chat-room-invite" class="chat-room-header__invite">Play</span>
@@ -578,14 +443,8 @@
         </div>
         <div id="chat-messages" class="chat-messages"></div>
         <div class="chat-input-container">
-          <input
-            id="chat-message-input"
-            class="chat-input"
-            placeholder="Type here"
-          />
-          <button id="chat-message-submit" class="chat-submit-button">
-            Send
-          </button>
+          <input id="chat-message-input" class="chat-input" placeholder="Type here" />
+          <button id="chat-message-submit" class="chat-submit-button">Send</button>
         </div>
       </div>
     </template>
@@ -606,24 +465,14 @@
           <span class="bottom-nav__icon material-symbols-outlined">trophy</span>
         </button>
         <button class="bottom-nav__item" data-page="profile">
-          <span class="bottom-nav__icon material-symbols-outlined"
-            >account_circle</span
-          >
+          <span class="bottom-nav__icon material-symbols-outlined">account_circle</span>
         </button>
         <button class="bottom-nav__item" data-page="users">
-          <span class="bottom-nav__icon material-symbols-outlined"
-            >person_search</span
-          >
+          <span class="bottom-nav__icon material-symbols-outlined">person_search</span>
         </button>
         <button class="bottom-nav__item" data-page="chat">
-          <span class="bottom-nav__icon material-symbols-outlined"
-            >chat_bubble</span
-          >
-          <span
-            id="bottom-nav-notification-badge"
-            class="bottom-nav__notification-badge"
-            style="display: none"
-          ></span>
+          <span class="bottom-nav__icon material-symbols-outlined">chat_bubble</span>
+          <span id="bottom-nav-notification-badge" class="bottom-nav__notification-badge" style="display: none"></span>
         </button>
       </nav>
     </template>
@@ -646,53 +495,27 @@
           </div> -->
             <div class="profile__info">
               <div class="profile__username-container">
-                <div
-                  class="profile__online-status profile__online-status--offline profile__public-info"
-                ></div>
+                <div class="profile__online-status profile__online-status--offline profile__public-info"></div>
                 <h2 class="profile__username username"></h2>
               </div>
               <!-- Private info will be hidden/shown based on view type -->
-              <p
-                class="profile__info-item profile__info-item--name profile__private-info"
-              ></p>
-              <p
-                class="profile__info-item profile__info-item--email profile__private-info"
-              ></p>
-              <p
-                class="profile__info-item profile__info-item--phone profile__private-info"
-              ></p>
+              <p class="profile__info-item profile__info-item--name profile__private-info"></p>
+              <p class="profile__info-item profile__info-item--email profile__private-info"></p>
+              <p class="profile__info-item profile__info-item--phone profile__private-info"></p>
             </div>
           </div>
           <!-- Public Profile Actions -->
-          <div
-            class="profile__section profile__section--public-actions profile__public-info"
-          >
-            <button
-              class="profile__action-button"
-              data-action="friend"
-              title="Add Friend"
-            >
+          <div class="profile__section profile__section--public-actions profile__public-info">
+            <button class="profile__action-button" data-action="friend" title="Add Friend">
               <span class="material-symbols-outlined">add_circle</span>
             </button>
-            <button
-              class="profile__action-button"
-              data-action="chat"
-              title="Send Message"
-            >
+            <button class="profile__action-button" data-action="chat" title="Send Message">
               <span class="material-symbols-outlined">maps_ugc</span>
             </button>
-            <button
-              class="profile__action-button"
-              data-action="play"
-              title="Challenge to Game"
-            >
+            <button class="profile__action-button" data-action="play" title="Challenge to Game">
               <span class="material-symbols-outlined">play_circle</span>
             </button>
-            <button
-              class="profile__action-button"
-              data-action="block"
-              title="Block User"
-            >
+            <button class="profile__action-button" data-action="block" title="Block User">
               <span class="material-symbols-outlined">lock</span>
             </button>
           </div>
@@ -700,9 +523,7 @@
             <h3 class="profile__section-title">Bio</h3>
             <p class="profile__bio-text"></p>
           </div>
-          <div
-            class="profile__section profile__section--friends profile__private-info"
-          >
+          <div class="profile__section profile__section--friends profile__private-info">
             <h3 class="profile__section-title">Friends</h3>
             <span class="profile__friends-count">0</span>
           </div>
@@ -773,89 +594,37 @@
           </div>
 
           <div class="profile-edit__field form-field">
-            <label class="profile-edit__label form-label" for="username"
-              >Username</label
-            >
-            <input
-              type="text"
-              id="username"
-              class="profile-edit__input form-input"
-              name="username"
-              value="Mark"
-            />
+            <label class="profile-edit__label form-label" for="username">Username</label>
+            <input type="text" id="username" class="profile-edit__input form-input" name="username" value="Mark" />
           </div>
           <div class="profile-edit__field form-field">
-            <label class="profile-edit__label form-label" for="first-name"
-              >First Name</label
-            >
-            <input
-              type="text"
-              id="first-name"
-              class="profile-edit__input form-input"
-              name="first_name"
-            />
+            <label class="profile-edit__label form-label" for="first-name">First Name</label>
+            <input type="text" id="first-name" class="profile-edit__input form-input" name="first_name" />
           </div>
 
           <div class="profile-edit__field form-field">
-            <label class="profile-edit__label form-label" for="last-name"
-              >Last Name</label
-            >
-            <input
-              type="text"
-              id="last-name"
-              class="profile-edit__input form-input"
-              name="last_name"
-            />
+            <label class="profile-edit__label form-label" for="last-name">Last Name</label>
+            <input type="text" id="last-name" class="profile-edit__input form-input" name="last_name" />
           </div>
 
           <div class="profile-edit__field form-field">
-            <label class="profile-edit__label form-label" for="email"
-              >Email</label
-            >
-            <input
-              type="email"
-              id="email"
-              class="profile-edit__input form-input"
-              name="email"
-            />
+            <label class="profile-edit__label form-label" for="email">Email</label>
+            <input type="email" id="email" class="profile-edit__input form-input" name="email" />
           </div>
 
           <div class="profile-edit__field form-field">
-            <label class="profile-edit__label form-label" for="phone"
-              >Phone</label
-            >
-            <input
-              type="tel"
-              id="phone"
-              class="profile-edit__input form-input"
-              name="telephone_number"
-            />
+            <label class="profile-edit__label form-label" for="phone">Phone</label>
+            <input type="tel" id="phone" class="profile-edit__input form-input" name="telephone_number" />
           </div>
 
           <div class="profile-edit__field form-field">
             <label class="profile-edit__label form-label" for="bio">Bio</label>
-            <textarea
-              id="bio"
-              class="profile-edit__textarea"
-              name="bio"
-              rows="4"
-              maxlength="500"
-            ></textarea>
+            <textarea id="bio" class="profile-edit__textarea" name="bio" rows="4" maxlength="500"></textarea>
           </div>
 
           <div class="profile-edit__buttons">
-            <button
-              type="button"
-              class="profile-edit__button profile-edit__button--cancel"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              class="profile-edit__button profile-edit__button--save"
-            >
-              Save
-            </button>
+            <button type="button" class="profile-edit__button profile-edit__button--cancel">Cancel</button>
+            <button type="submit" class="profile-edit__button profile-edit__button--save">Save</button>
           </div>
         </form>
       </div>
@@ -869,66 +638,26 @@
         <p class="email-warning email-not-verified" style="display: none">Email is not verified</p>
         <form class="profile-edit__form">
           <div class="profile-edit__field form-field">
-            <label class="profile-edit__label form-label" for="email"
-              >Email</label
-            >
-            <input
-              type="email"
-              id="email"
-              class="profile-edit__input form-input"
-              name="email"
-            />
+            <label class="profile-edit__label form-label" for="email">Email</label>
+            <input type="email" id="email" class="profile-edit__input form-input" name="email" />
           </div>
           <div class="profile-edit__field form-field radio-form">
-            <label class="profile-edit__label form-label"
-              >2FA Authentication</label
-            >
+            <label class="profile-edit__label form-label">2FA Authentication</label>
             <div class="profile-edit__radio-group">
               <div class="profile-edit__radio-item">
-                <input
-                  type="radio"
-                  id="2fa-enabled"
-                  name="2fa"
-                  value="enabled"
-                  class="profile-edit__radio"
-                />
-                <label for="2fa-enabled" class="profile-edit__radio-label"
-                  >Enabled</label
-                >
+                <input type="radio" id="2fa-enabled" name="2fa" value="enabled" class="profile-edit__radio" />
+                <label for="2fa-enabled" class="profile-edit__radio-label">Enabled</label>
               </div>
               <div class="profile-edit__radio-item">
-                <input
-                  type="radio"
-                  id="2fa-disabled"
-                  name="2fa"
-                  value="disabled"
-                  class="profile-edit__radio"
-                />
-                <label for="2fa-disabled" class="profile-edit__radio-label"
-                  >Disabled</label
-                >
+                <input type="radio" id="2fa-disabled" name="2fa" value="disabled" class="profile-edit__radio" />
+                <label for="2fa-disabled" class="profile-edit__radio-label">Disabled</label>
               </div>
             </div>
           </div>
           <div class="profile-edit__buttons">
-            <button
-              type="button"
-              class="profile-edit__button profile-edit__button--verify-email"
-            >
-              Verify
-            </button>
-            <button
-              type="button"
-              class="profile-edit__button profile-edit__button--cancel"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              class="profile-edit__button profile-edit__button--save"
-            >
-              Save
-            </button>
+            <button type="button" class="profile-edit__button profile-edit__button--verify-email">Verify</button>
+            <button type="button" class="profile-edit__button profile-edit__button--cancel">Cancel</button>
+            <button type="submit" class="profile-edit__button profile-edit__button--save">Save</button>
           </div>
         </form>
       </div>
@@ -945,7 +674,7 @@
         <button id="right-btn" class="control-btn">
           <p>&gt;</p>
         </button>
-    </div>
+      </div>
     </template>
 
     <!-- Users Template -->
@@ -955,21 +684,13 @@
         <h2 class="users-page__title">Folks around</h2>
         <div class="users-selection">
           <div class="users-filter">
-            <button
-              class="users-filter__button users-filter__button--all users-filter__button--active"
-            >
+            <button class="users-filter__button users-filter__button--all users-filter__button--active">
               All of Them
             </button>
-            <button class="users-filter__button users-filter__button--friends">
-              Only Friends
-            </button>
+            <button class="users-filter__button users-filter__button--friends">Only Friends</button>
           </div>
           <div class="users-search">
-            <input
-              type="text"
-              class="users-search__input"
-              placeholder="Search users..."
-            />
+            <input type="text" class="users-search__input" placeholder="Search users..." />
             <!-- <span class="material-symbols-outlined users-search__icon">search</span> -->
           </div>
         </div>
@@ -1008,11 +729,7 @@
         <form class="two-d-game__form" id="two-d-game__form">
           <div class="two-d-game__form-group">
             <label class="two-d-game__label" for="two-d-game__name">Game Name</label>
-            <input
-              class="two-d-game__input"
-              id="two-d-game__name"
-              value="My Game"
-            />
+            <input class="two-d-game__input" id="two-d-game__name" value="My Game" />
           </div>
           <div class="two-d-game__form-group">
             <label class="two-d-game__label" for="two-d-game__game-type">Game Type</label>
@@ -1023,52 +740,25 @@
           </div>
 
           <div class="two-d-game__form-group">
-            <label class="two-d-game__label" for="two-d-game__num-players"
-              >Number of Players</label
-            >
-            <input
-              class="two-d-game__input"
-              type="number"
-              id="two-d-game__num-players"
-              min="2"
-              max="8"
-              value="2"
-            />
+            <label class="two-d-game__label" for="two-d-game__num-players">Number of Players</label>
+            <input class="two-d-game__input" type="number" id="two-d-game__num-players" min="2" max="8" value="2" />
             <small class="two-d-game__help-text">Min: 2, Max: 8 players</small>
           </div>
 
           <div class="two-d-game__form-group">
-            <label class="two-d-game__label" for="two-d-game__num-sides"
-              >Number of Sides</label
-            >
-            <input
-              class="two-d-game__input"
-              type="number"
-              id="two-d-game__num-sides"
-              min="2"
-              max="8"
-              value="2"
-            />
+            <label class="two-d-game__label" for="two-d-game__num-sides">Number of Sides</label>
+            <input class="two-d-game__input" type="number" id="two-d-game__num-sides" min="2" max="8" value="2" />
             <small class="two-d-game__help-text">Min: 2, Max: 8 sides</small>
           </div>
 
           <div class="two-d-game__form-group">
-            <label class="two-d-game__label" for="two-d-game__num-balls"
-              >Number of Balls</label
-            >
-            <input
-              class="two-d-game__input"
-              type="number"
-              id="two-d-game__num-balls"
-              value="1"
-            />
+            <label class="two-d-game__label" for="two-d-game__num-balls">Number of Balls</label>
+            <input class="two-d-game__input" type="number" id="two-d-game__num-balls" value="1" />
             <small class="two-d-game__help-text">Min: 1, Max: 4 balls</small>
           </div>
 
           <div class="two-d-game__form-group">
-            <label class="two-d-game__label" for="two-d-game__score-mode"
-              >Score Mode</label
-            >
+            <label class="two-d-game__label" for="two-d-game__score-mode">Score Mode</label>
             <select class="two-d-game__select" id="two-d-game__score-mode">
               <option value="classic">Classic (First to 11)</option>
               <option value="survival">Survival</option>
@@ -1087,7 +777,7 @@
       <!-- Game Container -->
       <div id="two-d-game__container-game" class="two-d-game__container-game">
         <div class="two-d-game__game-layout">
-           <div class="two-d-game__game-main">
+          <div class="two-d-game__game-main">
             <div class="two-d-game__game-canvas-container">
               <svg id="two-d-game__pong-svg" viewBox="0 0 300 300"></svg>
             </div>
@@ -1121,10 +811,7 @@
               <div class="two-d-game__panel-header">
                 <h3 class="two-d-game__panel-title">Scores</h3>
               </div>
-              <div
-                id="two-d-game__score-display"
-                class="two-d-game__score-display"
-              >
+              <div id="two-d-game__score-display" class="two-d-game__score-display">
                 <template id="two-d-game__score-item-template">
                   <div class="two-d-game__score-item">
                     <span class="two-d-game__player-name"></span>

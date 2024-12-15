@@ -3,13 +3,9 @@ import { loadTournamentsPage } from "./tournaments.js";
 import { updateActiveNavItem } from "../components/bottomNav.js";
 import { loadChatPage } from "./chatHome.js";
 import { loadGameList } from "./gameList.js";
-<<<<<<< Updated upstream
-import { setupNotificationListener } from "../utils/notifications.js";
 import { renderNotifications } from "../components/chatNotification.js";
 
 let notificationSocket = null;
-=======
->>>>>>> Stashed changes
 
 export function loadHomePage(addToHistory = true) {
   try {
@@ -28,16 +24,12 @@ export function loadHomePage(addToHistory = true) {
         try {
           notificationSocket.close();
         } catch (closeError) {
-          console.warn(
-            "Error closing existing notification socket:",
-            closeError
-          );
+          console.warn("Error closing existing notification socket:", closeError);
         }
       }
       // notificationSocket = setupNotificationListener();
-          
     } catch (error) {
-          console.error("Error with notification in main", error);
+      console.error("Error with notification in main", error);
     }
     renderNotifications();
 

@@ -204,11 +204,8 @@ export async function fetchFriends(page = 1, perPage = 10, search = "") {
     queryParams.set("per_page", perPage);
     if (search) queryParams.set("search", search);
 
-<<<<<<< Updated upstream
     const accessToken = await manageJWT();
 
-=======
->>>>>>> Stashed changes
     const url = `${CONFIG.API_BASE_URL}/api/users/friends/?${queryParams}`;
 
     console.log("Fetching from URL:", url);

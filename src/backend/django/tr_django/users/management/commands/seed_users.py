@@ -32,7 +32,6 @@ class Command(BaseCommand):
         # Create users with full profile data
         users_data = [
             {
-<<<<<<< Updated upstream
                 "username": "dev",
                 "email": "dev@1719.anonaddy.com",
                 "password": "dev",
@@ -50,8 +49,6 @@ class Command(BaseCommand):
                 "game_stats": {"wins": 5, "losses": 2},
             },
             {
-=======
->>>>>>> Stashed changes
                 "username": "ThePrimeagen",
                 "email": "prime@1719.anonaddy.com",
                 "password": "test1pass",
@@ -180,9 +177,10 @@ class Command(BaseCommand):
 
             # Create game history
             self._create_game_history(player, game_mode, game_stats)
-            self.stdout.write(self.style.SUCCESS(f'Created user "{user.username}" with game history'))
             self.stdout.write(
-                self.style.SUCCESS(f'User "{user.username}" has been successfully seeded with game stats.')
+                self.style.SUCCESS(
+                    f'Created user "{user.username}" with game history (W: {game_stats["wins"]}, L: {game_stats["losses"]})'
+                )
             )
 
     def _create_game_history(self, player, game_mode, stats):
