@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // User is logged in, load notiication and show home page
 
     loadHomePage();
-    initializeOnlineStatusTracking(); // Initialize for already logged-in users
+    // initializeOnlineStatusTracking(); // Initialize for already logged-in users
   }
 
   initializeTournaments(CONFIG.CURRENT_SOURCE);

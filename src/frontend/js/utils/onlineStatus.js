@@ -22,10 +22,11 @@ let currentPollingCleanup = null;
  * checkUserStatus(); // Will send current status to server
  */
 export function checkUserStatus() {
-  const isOnline =
-    document.visibilityState === "visible" && // Tab is in foreground
-    document.hasFocus() && // Window is focused
-    navigator.onLine; // Internet connection is available
+  const isOnline = document.hasFocus();
+
+    // document.visibilityState === "visible" && // Tab is in foreground
+    // document.hasFocus() && // Window is focused
+    // navigator.onLine; // Internet connection is available
 
   //   const currentTimestamp = Date.now();
   //   const expirationNear = lastExpirationTimestamp - currentTimestamp <= PING_BUFFER;
@@ -73,20 +74,30 @@ export function initializeOnlineStatusTracking() {
 
   // Check when online/offline status changes
   window.addEventListener("online", checkUserStatus);
-  window.addEventListener("offline", checkUserStatus);
+  window.addEventListener("offline", (ev) => {
+    sendUserOnlineStatus(false, Date.now());
+  });
 
   // Check when window focus changes
   window.addEventListener("focus", checkUserStatus);
   window.addEventListener("blur", checkUserStatus);
 
+  document.addEventListener("keydown", (ev) => {
+    if (ev.key === "o" || ev.key === "O") {
+      sendUserOnlineStatus(true, Date.now());
+    }
+  });
+  
+  
   // Periodic check (every 30 seconds)
   setInterval(checkUserStatus, 30000);
 
   // Check before page unload
   window.addEventListener("beforeunload", () => {
+    console.log("beforeunload event happend, user going offline")
     sendUserOnlineStatus(false, Date.now());
   });
-  // window.addEventListener("unload", () => {
+
 }
 
 export function updateOnlineStatus(status) {
