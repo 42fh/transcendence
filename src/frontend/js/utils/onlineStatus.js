@@ -80,7 +80,10 @@ export function initializeOnlineStatusTracking() {
   window.addEventListener("blur", checkUserStatus);
 
   const online_circle = document.getElementById("profile__online-status-circle");
-  online_circle.onclick = () => sendUserOnlineStatus(true, Date.now());
+  online_circle.addEventListener("click", (ev) => {
+    sendUserOnlineStatus(true, Date.now());
+  })
+  
   
   // Periodic check (every 30 seconds)
   setInterval(checkUserStatus, 30000);
