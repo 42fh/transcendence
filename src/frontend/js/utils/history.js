@@ -85,7 +85,8 @@ export function initializeHistory() {
             break;
           case "chat-room":
             if (state.chatPartner) {
-              loadChatRoom(state.chatPartner, false);
+              loadChatRoom(state.chatPartner);
+              // console.log("Chat partner:", state.chatPartner);
             } else {
               console.error("No chat partner in state");
               loadChatPage(false);

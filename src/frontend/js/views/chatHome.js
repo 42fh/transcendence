@@ -17,10 +17,8 @@ let notificationSocket = null;
 
 export async function loadChatPage(addToHistory = true) {
   try {
-    if (addToHistory) {
       history.pushState({ view: "chat-home" }, "Chat Home");
       updateActiveNavItem("chat");
-    }
 
     try {
       const chatHomeTemplate = document.querySelector("#chat-home-template");

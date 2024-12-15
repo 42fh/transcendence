@@ -16,7 +16,7 @@ export async function loadChatRoom(chatPartner) {
   history.pushState(
     {
       view: "chat-room",
-      chatPartner: chatPartner.username,
+      chatPartner: chatPartner,
     },
     ""
   );
