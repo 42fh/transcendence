@@ -9,6 +9,7 @@ import { setupNotificationListener } from "./utils/notifications.js";
 
 let notificationSocket = null;
 
+import { initializeOnlineStatusTracking } from "./utils/onlineStatus.js";
 
 // deleting a cookie must be done by setting expiration to a past time
 const deleteCookie = (name) => {
@@ -45,12 +46,8 @@ document.addEventListener("DOMContentLoaded", () => {
   } else {
     // User is logged in, load notiication and show home page
 
-
-
-
-
-
     loadHomePage();
+    initializeOnlineStatusTracking(); // Initialize for already logged-in users
   }
 
   initializeTournaments(CONFIG.CURRENT_SOURCE);

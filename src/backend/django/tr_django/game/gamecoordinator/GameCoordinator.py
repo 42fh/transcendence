@@ -60,7 +60,7 @@ class GameCoordinator:
 
     # user online
     USER_ONLINE_PREFIX = "user_online_"
-    USER_ONLINE_EXPIRY = 60
+    USER_ONLINE_EXPIRY = 600
 
     # inventation
     INVITATION_PREFIX = "invitation_"
