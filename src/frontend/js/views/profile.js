@@ -224,7 +224,6 @@ function populatePublicProfileHTML(content, userData) {
   emailElement.style.display = "none";
   phoneElement.style.display = "none";
 
-  const friendshipButton = content.querySelector('button[data-action="friend"]');
   if (!friendshipButton) {
     console.warn("Friend button not found in template");
     return;
