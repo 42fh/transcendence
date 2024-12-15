@@ -53,7 +53,6 @@ export async function fetchUserProfile(userId) {
       };
     }
     const userData = await response.json();
-    console.log("User data fetched:", userData);
     return {
       success: true,
       data: userData,
