@@ -2,7 +2,6 @@ import { showToast } from "../utils/toast.js";
 import { handleCreateTournamentSubmit } from "../services/tournamentService.js";
 import { updateActiveNavItem } from "../components/bottomNav.js";
 function setDefaultDates() {
-  // Get current date and time
   const now = new Date();
 
   // Registration start: now
@@ -21,10 +20,12 @@ function setDefaultDates() {
     return date.toISOString().slice(0, 16);
   };
 
-  // Set the values with correct IDs
-  document.getElementById("registration-start").value = formatDateForInput(registrationStart);
-  document.getElementById("registration-close").value = formatDateForInput(registrationEnd);
-  document.getElementById("tournament-start").value = formatDateForInput(tournamentStart);
+  document.getElementById("registration-start").value =
+    formatDateForInput(registrationStart);
+  document.getElementById("registration-close").value =
+    formatDateForInput(registrationEnd);
+  document.getElementById("tournament-start").value =
+    formatDateForInput(tournamentStart);
 }
 
 export function loadCreateTournamentPage(addToHistory = true) {
@@ -55,6 +56,20 @@ export function loadCreateTournamentPage(addToHistory = true) {
     initLocationToggle();
     initTimingToggle();
     initPlayersToggle();
+
+    // Set default location to "local"
+    const locationInput = document.getElementById("location-value");
+    locationInput.value = "local"; // Set default location to local
+    // Trigger the location toggle to disable relevant fields
+    initLocationToggle(); // Call again to apply the default setting
+
+    // Disable timing, visibility, and game mode fields initially
+    const typeInput = document.getElementById("tournament-type");
+    const visibilityInput = document.getElementById("tournament-visibility");
+    const gameModeInput = document.getElementById("game-mode");
+    if (typeInput) typeInput.disabled = true; // Disable type input
+    if (visibilityInput) visibilityInput.disabled = true; // Disable visibility input
+    if (gameModeInput) gameModeInput.disabled = true; // Disable game mode input
 
     // Add event listeners for form interactions
     const form = mainContent.querySelector(".create-tournament-form");
@@ -95,7 +110,10 @@ export function loadCreateTournamentPage(addToHistory = true) {
         }),
         visibility: formData.get("visibility"),
         gameMode: formData.get("gameMode"),
-        allowedUsers: formData.get("visibility") === "private" ? Array.from(allowedUsers) : [],
+        allowedUsers:
+          formData.get("visibility") === "private"
+            ? Array.from(allowedUsers)
+            : [],
       };
 
       await handleCreateTournamentSubmit(tournamentData);
@@ -108,14 +126,36 @@ export function loadCreateTournamentPage(addToHistory = true) {
 
 function initLocationToggle() {
   const locationToggle = document.getElementById("location-toggle");
-  const locationButtons = locationToggle.querySelectorAll(".create-tournament-toggle__btn");
+  const locationButtons = locationToggle.querySelectorAll(
+    ".create-tournament-toggle__btn"
+  );
   const locationInput = document.getElementById("location-value");
+  const typeInput = document.getElementById("tournament-type");
+  const visibilityInput = document.getElementById("tournament-visibility");
+  const gameModeInput = document.getElementById("game-mode");
 
   locationButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      locationButtons.forEach((btn) => btn.classList.remove("create-tournament-toggle__btn--active"));
+      locationButtons.forEach((btn) =>
+        btn.classList.remove("create-tournament-toggle__btn--active")
+      );
       button.classList.add("create-tournament-toggle__btn--active");
       locationInput.value = button.dataset.value;
+
+      if (locationInput.value === "local") {
+        if (typeInput) typeInput.disabled = true;
+        if (visibilityInput) visibilityInput.disabled = true;
+      } else if (locationInput.value === "remote") {
+        if (typeInput) typeInput.disabled = false;
+        if (visibilityInput) visibilityInput.disabled = false;
+        if (gameModeInput) {
+          gameModeInput.value = "1vs 1";
+          gameModeInput.disabled = false;
+        }
+      } else {
+        if (typeInput) typeInput.disabled = false;
+        if (visibilityInput) visibilityInput.disabled = false;
+      }
     });
   });
 }
@@ -153,17 +193,23 @@ function initLocationToggle() {
 
 function initTimingToggle() {
   const timingToggle = document.getElementById("timing-toggle");
-  const timingButtons = timingToggle.querySelectorAll(".create-tournament-toggle__btn");
+  const timingButtons = timingToggle.querySelectorAll(
+    ".create-tournament-toggle__btn"
+  );
   const timingInput = document.getElementById("timing-value"); // Now it will find the input
 
   timingButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      timingButtons.forEach((btn) => btn.classList.remove("create-tournament-toggle__btn--active"));
+      timingButtons.forEach((btn) =>
+        btn.classList.remove("create-tournament-toggle__btn--active")
+      );
       button.classList.add("create-tournament-toggle__btn--active");
       timingInput.value = button.dataset.value;
 
       const plannedDates = document.getElementById("planned-dates");
-      const dateInputs = plannedDates.querySelectorAll('input[type="datetime-local"]');
+      const dateInputs = plannedDates.querySelectorAll(
+        'input[type="datetime-local"]'
+      );
 
       if (button.dataset.value === "planned") {
         plannedDates.classList.remove("create-tournament-form-group--hidden");
@@ -179,12 +225,16 @@ function initTimingToggle() {
 
 function initPlayersToggle() {
   const playersToggle = document.getElementById("players-toggle");
-  const playerButtons = playersToggle.querySelectorAll(".create-tournament-toggle__btn");
+  const playerButtons = playersToggle.querySelectorAll(
+    ".create-tournament-toggle__btn"
+  );
   const playersInput = document.getElementById("players-value");
 
   playerButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      playerButtons.forEach((btn) => btn.classList.remove("create-tournament-toggle__btn--active"));
+      playerButtons.forEach((btn) =>
+        btn.classList.remove("create-tournament-toggle__btn--active")
+      );
       button.classList.add("create-tournament-toggle__btn--active");
       playersInput.value = button.dataset.value;
     });
