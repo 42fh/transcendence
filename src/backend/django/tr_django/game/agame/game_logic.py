@@ -69,7 +69,7 @@ async def game_logic(self, current_state):
             if not collision_result:
                 continue
             if collision_result.get("game_over"):
-                from .gamecoordinator.GameCoordinator import GameCoordinator
+                from game.gamecoordinator.GameCoordinator import GameCoordinator
                 await GameCoordinator.set_to_finished_game(self.game_id)
                 game_over = True
                 

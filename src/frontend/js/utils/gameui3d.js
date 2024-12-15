@@ -209,7 +209,12 @@ export default class GameUI {
         console.log(`Player ${index + 1} score: ${score}`);
         this.game.scores[index] = score;
 
-        const player = this.game.paddles.get(index);
+        let player = this.game.paddles.get(index);
+        if (!player) {
+          const maxIndex = Math.max(...this.game.paddles.keys());
+          player = this.game.paddles.get(maxIndex);
+        }
+
         if (player && player.scoreButton && player.scoreButton.children[0]) {
           const textMesh = player.scoreButton.children[0];
 

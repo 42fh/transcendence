@@ -585,7 +585,7 @@ class GameCoordinator:
                 else:
                     await redis_conn.set(f"{cls.WAITING_GAMES}:{game_id}",  game_id, ex=time)
                     await redis_conn.set(f"{cls.ALL_GAMES}:{game_id}",  game_id, ex=time)
-                    logge.info(f"game[{str(game_id)}] will set to ex:{time}")
+                    logger.info(f"game[{str(game_id)}] will set to ex:{time}")
             
 
 
