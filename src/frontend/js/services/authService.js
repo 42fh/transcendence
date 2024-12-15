@@ -1,6 +1,7 @@
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { handleLogout } from "../views/auth.js";
 import { displayModalError } from "../components/modal.js";
+import { sendUserOnlineStatus } from "../utils/onlineStatus.js"
 
 export async function loginUser(data) {
   return handleAuthRequest(data, "/api/users/auth/login/");
@@ -32,6 +33,9 @@ export async function refreshJWT(token) {
 }
 
 export async function logoutUser() {
+
+  sendUserOnlineStatus(false, Date.now());
+
   const response = await fetch("/api/users/auth/logout/", {
     method: "POST",
     headers: {

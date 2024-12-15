@@ -39,7 +39,9 @@ export function checkUserStatus() {
 
   // Notify the server based on the current status
   //   sendUserOnlineStatus(isOnline, newExpirationTimestamp); // Notify online
-  sendUserOnlineStatus(isOnline);
+  if (isOnline) {
+    sendUserOnlineStatus(isOnline);
+  }
   console.log("User is ", isOnline ? "online" : "offline");
 }
 
@@ -72,7 +74,9 @@ export function initializeOnlineStatusTracking() {
 
   // Check when online/offline status changes
   window.addEventListener("online", checkUserStatus);
-  window.addEventListener("offline", checkUserStatus);
+  window.addEventListener("offline", (ev) => {
+    sendUserOnlineStatus(false, Date.now());
+  });
 
   // Check when window focus changes
   window.addEventListener("focus", checkUserStatus);
