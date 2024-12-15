@@ -155,17 +155,28 @@ export async function loadProfilePage(userId = null, addToHistory = true) {
 }
 
 function populateProfileHTML(content, userData, isOwnProfile) {
-  // Shared elements
-  populateSharedProfileHTML(content, userData);
+  try {
+    populateSharedProfileHTML(content, userData);
 
-  const avatarElement = content.querySelector(".profile__avatar");
-  avatarElement.src = userData.avatar || ASSETS.IMAGES.DEFAULT_AVATAR;
+    const avatarElement = content.querySelector(".profile__avatar");
+    if (!avatarElement) {
+      console.error("Avatar element not found in content", content);
+      return;
+    }
+    avatarElement.src = userData.avatar || ASSETS.IMAGES.DEFAULT_AVATAR;
 
-  // Split based on profile type
-  if (isOwnProfile) {
-    populateOwnProfileHTML(content, userData);
-  } else {
-    populatePublicProfileHTML(content, userData);
+    if (isOwnProfile) {
+      populateOwnProfileHTML(content, userData);
+    } else {
+      populatePublicProfileHTML(content, userData);
+    }
+  } catch (error) {
+    console.error("Error in populateProfileHTML:", error, {
+      content,
+      userData,
+      isOwnProfile
+    });
+    throw error;
   }
 }
 
@@ -262,46 +273,43 @@ function populatePublicProfileHTML(content, userData) {
   // Check and set block button state
   // Async function to set up block button
   const setupBlockButton = async () => {
-    try {
+    // try {
       const isBlocked = await isUserBlockedByCurrentUser(userData.username);
-
+      // console.log("isBlocked in profile.js", isBlocked);  
+    
       if (isBlocked) {
-        blockIconSpan.textContent = "lock_open";
+        blockIconSpan.textContent = "lock";
         blockButton.setAttribute("title", "Unblock User");
         blockButton.dataset.state = "blocked";
       } else {
-        blockIconSpan.textContent = "lock";
+        blockIconSpan.textContent = "lock_open";
         blockButton.setAttribute("title", "Block User");
         blockButton.dataset.state = "not_blocked";
       }
-
-      // Block button click handler
+  
       blockButton.addEventListener("click", async () => {
         try {
-          const currentBlockStatus = blockButton.dataset.state === "blocked";
-
+  
           const blockResult = await toggleBlockUser(
             userData.username,
-            currentBlockStatus
+            isBlocked 
           );
 
           if (blockResult.status === "success") {
-            const newBlockedState = !currentBlockStatus;
-
-            if (newBlockedState) {
+            if (isBlocked) {
               blockIconSpan.textContent = "lock_open";
-              blockButton.setAttribute("title", "Unblock User");
-              blockButton.dataset.state = "blocked";
-            } else {
-              blockIconSpan.textContent = "lock";
               blockButton.setAttribute("title", "Block User");
               blockButton.dataset.state = "not_blocked";
+            } else {
+              blockIconSpan.textContent = "lock";
+              blockButton.setAttribute("title", "Unblock User");
+              blockButton.dataset.state = "blocked";
             }
 
             showToast(
-              newBlockedState
-                ? "User blocked successfully"
-                : "User unblocked successfully",
+              isBlocked
+              ? "User unblocked successfully"
+              : "User blocked successfully",
               false
             );
           }
@@ -310,15 +318,14 @@ function populatePublicProfileHTML(content, userData) {
           showToast("Failed to block/unblock user", true);
         }
       });
-    } catch (error) {
-      console.error("Error checking block status:", error);
+    // } catch (error) {
+      // console.error("Error checking block status:", error);
       // Fallback to default state
-      blockIconSpan.textContent = "lock";
-      blockButton.setAttribute("title", "Block User");
-      blockButton.dataset.state = "not_blocked";
-    }
+      // blockIconSpan.textContent = "lock";
+      // blockButton.setAttribute("title", "Unblock User");
+      // blockButton.dataset.state = "not_blocked";
+    // }
   };
-
   setupBlockButton();
 
   // Friendship button state and icon setup
@@ -579,26 +586,5 @@ function updateFriendButton(newStatus) {
       friendshipButton.setAttribute("title", "Remove Friend");
       friendshipButton.dataset.state = "friends";
       break;
-  }
-}
-
-function updateBlockButton(isBlocked) {
-  console.log("updateBlockButton isBlocked: ", isBlocked);
-  const blockButton = document.querySelector('button[data-action="block"]');
-  const blockIconSpan = blockButton.querySelector(".material-symbols-outlined");
-  if (!blockButton || !blockIconSpan) {
-    console.warn("Block button or icon not found");
-    return;
-  }
-  if (isBlocked) {
-    console.log("The user is currently blocked");
-    blockIconSpan.textContent = "lock_open";
-    blockButton.setAttribute("title", "Unblock User");
-    blockButton.dataset.state = "blocked";
-  } else {
-    console.log("The user is NOT currently blocked");
-    blockIconSpan.textContent = "lock";
-    blockButton.setAttribute("title", "Block User");
-    blockButton.dataset.state = "not_blocked";
   }
 }
