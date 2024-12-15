@@ -45,33 +45,37 @@ export function loadGameSetupPage(addToHistory = true) {
     };
     updateAllFormElements("two-d-game__", formData);
 
-    document.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const formData = collectFormData();
-      if (validateFormData(formData)) {
-        console.log("Form data:", formData);
+    document.addEventListener(
+      "submit",
+      async (event) => {
+        event.preventDefault();
+        const formData = collectFormData();
+        if (validateFormData(formData)) {
+          console.log("Form data:", formData);
 
-        const data = {
-          mode: formData.gameType,
-          name: formData.name,
-          gameType: formData.gameType,
-          num_players: Number(formData.numPlayers),
-          sides: Number(formData.numSides),
-          num_balls: Number(formData.numBalls),
-          score_mode: formData.scoreMode,
-          debug: true,
-        };
+          const data = {
+            mode: formData.gameType,
+            name: formData.name,
+            gameType: formData.gameType,
+            num_players: Number(formData.numPlayers),
+            sides: Number(formData.numSides),
+            num_balls: Number(formData.numBalls),
+            score_mode: formData.scoreMode,
+            debug: true,
+          };
 
-        let result = await createGame(data);
-        console.log("Game creation result:", result);
+          let result = await createGame(data);
+          console.log("Game creation result:", result);
 
-        if (formData.gameType === "circular") {
-          loadGame3D(result.ws_url);
-        } else {
-          loadGame2D(result.game_id, result.ws_url, true);
+          if (formData.gameType === "circular") {
+            loadGame3D(result.ws_url);
+          } else {
+            loadGame2D(result.game_id, result.ws_url, true);
+          }
         }
-      }
-    });
+      },
+      { once: true }
+    );
   } catch (error) {
     console.error("Error loading game creation:", error);
   }
