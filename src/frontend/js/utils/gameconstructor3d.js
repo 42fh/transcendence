@@ -193,7 +193,7 @@ export default class GameConstructor {
           }
 
           if (
-            this.playerCount ==
+            this.playerCount <=
             this.playerNames.filter((element) => element).length
           )
             this.world.zoomToPlayer();
@@ -232,8 +232,7 @@ export default class GameConstructor {
           showToast("Game finished, Winner: " + message.winner);
           break;
         case "error":
-          if (message != "You are too fast")
-            console.error("Error message:", message);
+          console.log("Error message:", message);
           break;
         default:
           console.log("Unknown message type:", message);

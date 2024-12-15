@@ -41,7 +41,6 @@ export function loadGameSetupPage(addToHistory = true) {
       "num-sides": 2,
       "num-balls": 1,
       "score-mode": "classic",
-      "debug-mode": false,
     };
     updateAllFormElements("two-d-game__", formData);
 

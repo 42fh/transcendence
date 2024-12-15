@@ -113,7 +113,7 @@ export default class Drawer {
         sectorSize
       );
       const ringMaterial = new THREE.MeshMatcapMaterial({
-        color: paddles[i].active ? sectorColors[i] : "0xC2B280",
+        color: paddles[i].active ? sectorColors[i] : "0x000000",
         transparent: true,
         opacity: 0.5,
         side: THREE.DoubleSide,
