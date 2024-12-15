@@ -34,7 +34,7 @@ export async function refreshJWT(token) {
 
 export async function logoutUser() {
 
-  sendUserOnlineStatus(false, Date.now());
+  await sendUserOnlineStatus(false, Date.now());
   // let isOnline = false;
   // console.log("Sending user online status", isOnline ? "Online" : "Offline");
   // const accessToken = await manageJWT();
