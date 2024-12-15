@@ -2,6 +2,9 @@ import { fetchNotifications } from "../services/chatNotificationService.js";
 import { updateNotificationBadge } from "./bottomNav.js";
 import { loadGame3D } from "../views/game3d.js";
 //Render notifications in the chat home template
+
+window.loadGame3D = loadGame3D;
+
 export async function renderNotifications() {
   const chatHomeTemplate = document.querySelector("#chat-home-template");
   if (!chatHomeTemplate) {
@@ -59,7 +62,11 @@ export async function renderNotifications() {
         acceptButton.textContent = "Accept";
         acceptButton.classList.add("notification-accept");
         acceptButton.type = "button";
-        console.log("Clicked via onclick property");
+        acceptButton.setAttribute(
+          "onclick",
+          `console.log('Button clicked!'); 
+           loadGame3D('${notification.url}');`
+        );
 
         acceptButton.onclick = () => {
           loadGame3D(notification.url);
