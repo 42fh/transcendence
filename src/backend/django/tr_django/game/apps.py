@@ -18,6 +18,12 @@ class GameConfig(AppConfig):
         # async def create_games():
         #     try:
                 # First check existing waiting games
+                #waiting_games = await GameCoordinator.get_waiting_games_info()
+                #logger.info(f"waiting games: {waiting_games}")
+                #empty_games = [
+                #    game for game in waiting_games 
+                #    if game['players']['current'] == 0 and game['players']['reserved'] == 0
+                #]
                 # waiting_games = await GameCoordinator.get_waiting_games_info()
                 # empty_games = [
                 #     game for game in waiting_games 

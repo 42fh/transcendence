@@ -60,7 +60,7 @@ class GameCoordinator:
 
     # user online
     USER_ONLINE_PREFIX = "user_online_"
-    USER_ONLINE_EXPIRY = 600
+    USER_ONLINE_EXPIRY = 60  # 1 minute
 
     # inventation
     INVITATION_PREFIX = "invitation_"
@@ -124,8 +124,11 @@ class GameCoordinator:
         """Generate a unique game ID using UUID and verify it's unique in Redis"""
         while True:
             game_id = str(uuid.uuid4())
+            key = f"{cls.ALL_GAMES}:{game_id}"
+            # SET with NX returns None if key exists
+            if await redis_conn.set(key, game_id, nx=True):
             # SADD returns 1 if the element was added, 0 if it already existed
-            if await redis_conn.sadd(cls.ALL_GAMES, game_id):
+            #if await redis_conn.sadd(cls.ALL_GAMES, game_id):
                 return game_id
 
     @classmethod
@@ -140,9 +143,9 @@ class GameCoordinator:
             pipeline = redis_conn.pipeline()
 
             # Boolean flags (using strings as Redis doesn't have boolean type)
-            pipeline.set(f"game_recorded:{game_id}", "0")  # Not recorded
-            pipeline.set(f"game_running:{game_id}", "0")  # Not running
-            pipeline.set(f"game_finished:{game_id}", "0")  # Not finished
+            # pipeline.set(f"game_recorded:{game_id}", "0")  # Not recorded
+            # pipeline.set(f"game_running:{game_id}", "0")  # Not running
+            # pipeline.set(f"game_finished:{game_id}", "0")  # Not finished
             # pipeline.set(f"game_is_tournament:{game_id}", "0")  # Not tournament
             current_time = time.time()
             pipeline.set(f"game_created_time:{game_id}", str(current_time))
@@ -229,9 +232,15 @@ class GameCoordinator:
 
     @classmethod
     async def get_waiting_games(cls):
-        """Get all game IDs"""
+        """Get all waiting game IDs in a single Redis call"""
         async with await cls.get_redis(cls.REDIS_URL) as redis_conn:
-            return await redis_conn.smembers(cls.WAITING_GAMES)
+            # Get all keys first
+            keys = [key async for key in redis_conn.scan_iter(f"{cls.WAITING_GAMES}:*")]
+            if not keys:
+                return []
+            # Get all values in a single MGET call
+            game_ids = await redis_conn.mget(keys)
+            return [game_id for game_id in game_ids if game_id]
 
     @classmethod
     async def get_running_games(cls):
@@ -337,7 +346,13 @@ class GameCoordinator:
         """Get detailed information for all waiting games"""
         try:
             games = await cls.get_waiting_games()
-            game_ids = [game_id.decode("utf-8") if isinstance(game_id, bytes) else game_id for game_id in games]
+            if not games:
+                logger.info("No waiting games at the moment")
+                return []         
+            game_ids = [
+                game_id.decode("utf-8") if isinstance(game_id, bytes) else game_id
+                for game_id in games
+            ]
             return await cls._get_games_detail(game_ids)
         except Exception as e:
             logger.error(f"Error getting waiting games info: {e}")
@@ -417,7 +432,7 @@ class GameCoordinator:
                     asyncio.to_thread(
                         send_notification, user_from, f"Here is your Game to play against {user_to.username}", url
                     ),
-                    asyncio.to_thread(send_notification, user_to, f"Player: {user_to.username} invited you", url),
+                    asyncio.to_thread(send_notification, user_to, f"Player: {user_from.username} invited you", url),
                 )
                 return {"status": True, "game_id": url, "message": "Invitation sent successfully"}
 
@@ -461,7 +476,7 @@ class GameCoordinator:
                     pipe.sadd(temp_set, user_id)
                 if not found_bookings:
                     return True
-                # Use Redis SDIFF to find invalid users
+               # Use Redis SDIFF to find invalid users
                 pipe.sdiff(f"game_booked_players:{game_id}", temp_set)
                 pipe.delete(temp_set)
 
@@ -562,13 +577,17 @@ class GameCoordinator:
     async def set_to_waiting_game(cls, game_id, time=None):
         """set a game to waiting, set expire redis1 time"""
         async with await cls.get_redis(cls.REDIS_URL) as redis_conn:
-            await redis_conn.sadd(cls.WAITING_GAMES, str(game_id))
-        # open game url redis
-        if not time:
-            # r.persist(key)
-            logger.info(f"game[{str(game_id)}] will set waiting infiniti ")
-        else:
-            logger.info(f"game[{str(game_id)}] will set to ex:{time}")
+            async with RedisLock(redis_conn, cls.LOCK_KEYS["game_id"]):
+                if not time:
+                    await redis_conn.set(f"{cls.WAITING_GAMES}:{game_id}",  game_id)
+                    await redis_conn.set(f"{cls.ALL_GAMES}:{game_id}",  game_id)
+                    logger.info(f"game[{str(game_id)}] will set waiting infiniti ")
+                else:
+                    await redis_conn.set(f"{cls.WAITING_GAMES}:{game_id}",  game_id, ex=time)
+                    await redis_conn.set(f"{cls.ALL_GAMES}:{game_id}",  game_id, ex=time)
+                    logger.info(f"game[{str(game_id)}] will set to ex:{time}")
+            
+
 
     @classmethod
     async def set_to_running_game(cls, game_id):
@@ -578,6 +597,7 @@ class GameCoordinator:
                 pipe = redis_conn.pipeline()
                 pipe.srem(cls.WAITING_GAMES, str(game_id))
                 pipe.sadd(cls.RUNNING_GAMES, str(game_id))
+                pipe.delete(f"{cls.WAITING_GAMES}:{game_id}")
                 await pipe.execute()
 
                 # Update game status in game database
@@ -588,18 +608,18 @@ class GameCoordinator:
     async def set_to_finished_game(cls, game_id):
         async with await cls.get_redis(cls.REDIS_URL) as redis_conn:
             async with RedisLock(redis_conn, cls.LOCK_KEYS["finished"]):
-                # Remove from running games and add to finished games in a pipeline
-                pipe = redis_conn.pipeline()
-                pipe.srem(cls.RUNNING_GAMES, str(game_id))
-                pipe.sadd(cls.FINISHED_GAMES, str(game_id))
-                await pipe.execute()
-
                 # Update game status in game database
                 async with await cls.get_redis(cls.REDIS_GAME_URL) as redis_game:
                     pipe = redis_game.pipeline()
                     pipe.set(f"game_running:{game_id}", "0")
                     pipe.set(f"game_finished:{game_id}", "1")
                     await pipe.execute()
+                # Remove from running games and add to finished games in a pipeline
+                pipe = redis_conn.pipeline()
+                pipe.srem(cls.RUNNING_GAMES, str(game_id))
+                pipe.sadd(cls.FINISHED_GAMES, str(game_id))
+                await pipe.execute()
+
 
     #
     @classmethod
@@ -607,7 +627,7 @@ class GameCoordinator:
         """Clean up all Redis entries related to a specific game using UNLINK for async deletion"""
         try:
             async with await cls.get_redis(cls.REDIS_URL) as redis_conn:
-                await redis_conn.srem(cls.ALL_GAMES, game_id)
+                await redis_conn.delete(f"{cls.ALL_GAMES}:{game_id}")
                 await redis_conn.srem(cls.WAITING_GAMES, game_id)
                 await redis_conn.srem(cls.RUNNING_GAMES, game_id)
                 await redis_conn.srem(cls.FINISHED_GAMES, game_id)

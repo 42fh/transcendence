@@ -44,7 +44,7 @@ async def error_exit(self, error_message: str, error_details: str = None):
 async def start_game(self):
     """Start game with process-safe checks"""
 
-    waiting_after_leaving = 300 # 5min 
+    waiting_after_leaving = 120 # 2min 
     try:
         players = self.settings.get("num_players")
         await GameCoordinator.set_to_waiting_game(self.game_id)
@@ -132,6 +132,7 @@ async def end_game(self):
     try:
         await GameCoordinator.set_to_finished_game(self.game_id)
         await GameCoordinator.store_game_in_database(self.game_id)
+        await GameCoordinator.cleanup_game(self.game_id)
         # Keep game state briefly for end-game display
         # would be handle by GameCoordinator 
     except Exception as e:
