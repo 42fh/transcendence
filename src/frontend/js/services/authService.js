@@ -1,7 +1,7 @@
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { handleLogout } from "../views/auth.js";
 import { displayModalError } from "../components/modal.js";
-import { sendUserOnlineStatus } from "../utils/onlineStatus.js"
+import { sendUserOnlineStatus } from "../services/usersService.js"
 
 export async function loginUser(data) {
   return handleAuthRequest(data, "/api/users/auth/login/");
@@ -34,21 +34,22 @@ export async function refreshJWT(token) {
 
 export async function logoutUser() {
 
-  let isOnline = false;
-  console.log("Sending user online status", isOnline ? "Online" : "Offline");
-  const accessToken = await manageJWT();
-  const userId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
-  const online_response = await fetch(`/api/game/user/online/${userId}`, {
-    method: isOnline ? "POST" : "DELETE", // Use POST for online, DELETE for offline
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      isOnline,
-      // expiration: expirationTimestamp,
-    }),
-  });
+  sendUserOnlineStatus(false, Date.now());
+  // let isOnline = false;
+  // console.log("Sending user online status", isOnline ? "Online" : "Offline");
+  // const accessToken = await manageJWT();
+  // const userId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
+  // const online_response = await fetch(`/api/game/user/online/${userId}`, {
+  //   method: isOnline ? "POST" : "DELETE", // Use POST for online, DELETE for offline
+  //   headers: {
+  //     Authorization: `Bearer ${accessToken}`,
+  //     "Content-Type": "application/json",
+  //   },
+  //   body: JSON.stringify({
+  //     isOnline,
+  //     // expiration: expirationTimestamp,
+  //   }),
+  // });
 
   const response = await fetch("/api/users/auth/logout/", {
     method: "POST",
