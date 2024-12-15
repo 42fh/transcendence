@@ -243,7 +243,7 @@
     <!-- Create Tournament Page Template -->
     <template id="create-tournament-template">
       <div class="create-tournament-container">
-        <h1 class="create-tournament-title">CREATE TOURNAMENT</h1>
+        <!-- <h1 class="create-tournament-title">CREATE TOURNAMENT</h1> -->
 
         <form class="create-tournament-form">
           <!-- Basic Info -->
@@ -252,14 +252,106 @@
             <input class="create-tournament-input" type="text" id="tournament-name" name="name" required />
           </div>
 
-          <div class="create-tournament-form-group">
+          <div class="create-tournament-form-group create-tournament-form-group--hidden">
             <label class="create-tournament-label" for="tournament-description">DESCRIPTION</label>
-            <textarea
-              class="create-tournament-textarea"
-              id="tournament-description"
-              name="description"
-              required
-            ></textarea>
+            <textarea class="create-tournament-textarea" id="tournament-description" name="description"></textarea>
+          </div>
+          <div class="create-tournament-form-group">
+            <label class="create-tournament-label">LOCATION</label>
+            <div class="create-tournament-toggle" id="location-toggle">
+              <button
+                type="button"
+                class="create-tournament-toggle__btn create-tournament-toggle__btn--active"
+                data-value="local"
+                id="location-local-btn"
+              >
+                Local
+              </button>
+              <!-- <button type="button" class="create-tournament-toggle__btn" data-value="remote" id="location-remote-btn">
+                Remote
+              </button> -->
+            </div>
+            <input type="hidden" name="location" value="local" id="location-value" />
+          </div>
+
+          <div class="create-tournament-form-group">
+            <label class="create-tournament-label">TIMING</label>
+            <div class="create-tournament-timing-toggle" id="timing-toggle">
+              <!-- This class matches -->
+              <button
+                type="button"
+                class="create-tournament-toggle__btn create-tournament-toggle__btn--active"
+                data-value="now"
+                id="timing-now-btn"
+              >
+                Now
+              </button>
+              <!-- <button type="button" class="create-tournament-toggle__btn" data-value="planned" id="timing-planned-btn">
+                Planned
+              </button> -->
+            </div>
+            <input type="hidden" name="timing" value="now" id="timing-value" />
+            <!-- Added ID -->
+          </div>
+
+          <!-- Wrap existing date fields in a container -->
+          <div id="planned-dates" class="create-tournament-form-group--hidden">
+            <!-- Existing date fields structure unchanged -->
+            <div class="create-tournament-form-group">
+              <label class="create-tournament-label" for="tournament-start">START DATE</label>
+              <input
+                class="create-tournament-input"
+                type="datetime-local"
+                id="tournament-start"
+                name="startingDate"
+                required
+              />
+            </div>
+
+            <div class="create-tournament-form-group">
+              <label class="create-tournament-label" for="registration-start">REGISTRATION START</label>
+              <input
+                class="create-tournament-input"
+                type="datetime-local"
+                id="registration-start"
+                name="registrationStart"
+                required
+              />
+            </div>
+
+            <div class="create-tournament-form-group">
+              <label class="create-tournament-label" for="registration-close">REGISTRATION CLOSE</label>
+              <input
+                class="create-tournament-input"
+                type="datetime-local"
+                id="registration-close"
+                name="registrationClose"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Number of Players -->
+          <div class="create-tournament-form-group">
+            <label class="create-tournament-label">NUMBER OF PLAYERS</label>
+            <div class="create-tournament-players-toggle" id="players-toggle">
+              <button
+                type="button"
+                class="create-tournament-toggle__btn create-tournament-toggle__btn--active"
+                data-value="4"
+                id="players-4-btn"
+              >
+                4
+              </button>
+              <button type="button" class="create-tournament-toggle__btn" data-value="8" id="players-8-btn">8</button>
+              <button type="button" class="create-tournament-toggle__btn" data-value="16" id="players-16-btn">
+                16
+              </button>
+              <button type="button" class="create-tournament-toggle__btn" data-value="32" id="players-32-btn">
+                32
+              </button>
+            </div>
+            <input type="hidden" name="playersNumber" value="4" id="players-value" />
           </div>
 
           <!-- Tournament Type -->
@@ -270,40 +362,6 @@
               <option value="double_elimination">Double Elimination</option>
               <option value="round_robin">Round Robin</option>
             </select>
-          </div>
-
-          <!-- Dates -->
-          <div class="create-tournament-form-group">
-            <label class="create-tournament-label" for="tournament-start">START DATE</label>
-            <input
-              class="create-tournament-input"
-              type="datetime-local"
-              id="tournament-start"
-              name="startingDate"
-              required
-            />
-          </div>
-
-          <div class="create-tournament-form-group">
-            <label class="create-tournament-label" for="registration-start">REGISTRATION START</label>
-            <input
-              class="create-tournament-input"
-              type="datetime-local"
-              id="registration-start"
-              name="registrationStart"
-              required
-            />
-          </div>
-
-          <div class="create-tournament-form-group">
-            <label class="create-tournament-label" for="registration-close">REGISTRATION CLOSE</label>
-            <input
-              class="create-tournament-input"
-              type="datetime-local"
-              id="registration-close"
-              name="registrationClose"
-              required
-            />
           </div>
 
           <!-- Visibility -->
@@ -330,7 +388,6 @@
             <label class="create-tournament-label" for="game-mode">GAME MODE</label>
             <select class="create-tournament-select" id="game-mode" name="gameMode" required>
               <option value="1v1">1 vs 1</option>
-              <option value="multiplayer">Multiplayer</option>
             </select>
           </div>
 
@@ -416,7 +473,11 @@
           <h2 class="chat-page__title">Conversations</h2>
           <div id="chat-conversations-list" class="conversations-list">
             <!-- Vertical list of users will be populated dynamically here -->
-            <div id="chat-conversations-list-item" class="chat-conversations-list__item" style="display: none">
+            <div
+              id="chat-conversations-list-item"
+              class="chat-conversations-list__item"
+              style="display: none"
+            >
               <img id="chat-avatar" class="chat-conversations-list__avatar" src="" alt="User avatar" />
               <div class="chat-conversations-list__info">
                 <span id="chat-conversations-list-username" class="chat-conversations-list__username"></span>
@@ -495,7 +556,8 @@
           </div> -->
             <div class="profile__info">
               <div class="profile__username-container">
-                <div class="profile__online-status profile__online-status--offline profile__public-info"></div>
+                <!-- TODO: think about this h2 if it has really to be -->
+                <span class="profile__online-status material-symbols-outlined profile__public-info">circle</span>
                 <h2 class="profile__username username"></h2>
               </div>
               <!-- Private info will be hidden/shown based on view type -->
@@ -735,13 +797,19 @@
             <label class="two-d-game__label" for="two-d-game__game-type">Game Type</label>
             <select class="two-d-game__select" id="two-d-game__game-type">
               <option value="circular">Circular Pong</option>
-              <option value="classic">Classic Pong</option>
             </select>
           </div>
 
           <div class="two-d-game__form-group">
             <label class="two-d-game__label" for="two-d-game__num-players">Number of Players</label>
-            <input class="two-d-game__input" type="number" id="two-d-game__num-players" min="2" max="8" value="2" />
+            <input
+              class="two-d-game__input"
+              type="number"
+              id="two-d-game__num-players"
+              min="2"
+              max="8"
+              value="2"
+            />
             <small class="two-d-game__help-text">Min: 2, Max: 8 players</small>
           </div>
 
@@ -761,7 +829,6 @@
             <label class="two-d-game__label" for="two-d-game__score-mode">Score Mode</label>
             <select class="two-d-game__select" id="two-d-game__score-mode">
               <option value="classic">Classic (First to 11)</option>
-              <option value="survival">Survival</option>
             </select>
           </div>
 
@@ -788,9 +855,7 @@
               </div>
               <div id="two-d-game__event-log" class="two-d-game__event-log">
                 <div class="two-d-game__log-entry">
-                  <span id="two-d-game__event-log-message"
-                    >Waiting for game events...</span
-                  >
+                  <span id="two-d-game__event-log-message">Waiting for game events...</span>
                 </div>
               </div>
             </div> -->
@@ -830,6 +895,98 @@
             </div>
           </div>
         </div>
+      </div>
+    </template>
+
+    <!-- Local Tournament Setup Template -->
+    <template id="local-tournament-setup-template">
+      <div class="local-tournament-setup">
+        <!-- Tournament Info Section -->
+        <div class="local-tournament-setup__header">
+          <h2 class="local-tournament-setup__title">LOCAL TOURNAMENT SETUP</h2>
+          <div class="local-tournament-setup__info">
+            <div class="local-tournament-setup__info-item">
+              <span class="local-tournament-setup__label">TOURNAMENT NAME:</span>
+              <span class="local-tournament-setup__value" id="display-tournament-name"></span>
+            </div>
+            <div class="local-tournament-setup__info-item">
+              <span class="local-tournament-setup__label">TYPE:</span>
+              <span class="local-tournament-setup__value">SINGLE ELIMINATION</span>
+            </div>
+            <div class="local-tournament-setup__info-item">
+              <span class="local-tournament-setup__label">PLAYERS NEEDED:</span>
+              <span class="local-tournament-setup__value" id="display-players-count"></span>
+            </div>
+            <div class="local-tournament-setup__info-item">
+              <span class="local-tournament-setup__label">TOTAL ROUNDS:</span>
+              <span class="local-tournament-setup__value" id="display-rounds"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Player Registration Form -->
+        <form class="local-tournament-setup__form">
+          <div class="local-tournament-setup__players-grid" id="players-inputs">
+            <!-- Player inputs will be generated dynamically based on maxPlayers -->
+            <!-- Example of one player input: -->
+            <div class="local-tournament-setup__player-input">
+              <label class="local-tournament-setup__label">PLAYER 1</label>
+              <input
+                type="text"
+                class="create-tournament-input"
+                name="player1"
+                placeholder="Enter player name"
+                required
+              />
+            </div>
+            <!-- More players will be added dynamically -->
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="local-tournament-setup__actions">
+            <button type="button" class="create-tournament-button-secondary" id="cancel-local-setup">CANCEL</button>
+            <button type="submit" class="create-tournament-button-primary">START TOURNAMENT</button>
+          </div>
+        </form>
+      </div>
+    </template>
+    <!-- Player Input Template -->
+    <template id="player-input-template">
+      <div class="local-tournament-setup__player-input">
+        <label class="local-tournament-setup__label">PLAYER ${number}</label>
+        <input
+          type="text"
+          class="create-tournament-input"
+          name="player${number}"
+          placeholder="Enter player name"
+          required
+        />
+      </div>
+    </template>
+
+    <!-- Tournament Round Template -->
+    <template id="tournament-round-template">
+      <div class="tournament-round">
+        <div class="tournament-round__header">
+          <h2 class="tournament-round__title">ROUND ${currentRound}</h2>
+        </div>
+
+        <div class="tournament-round__games">
+          <!-- Games will be added here dynamically -->
+        </div>
+      </div>
+    </template>
+
+    <!-- Tournament Game Template -->
+    <template id="tournament-game-template">
+      <div class="tournament-game">
+        <div class="tournament-game__players">
+          <div id="tournament-game__player1" class="tournament-game__player"></div>
+          <div class="tournament-game__vs">VS</div>
+          <div id="tournament-game__player2" class="tournament-game__player"></div>
+        </div>
+        <div class="tournament-game__result"></div>
+        <button class="tournament-game__play-btn">PLAY</button>
       </div>
     </template>
 

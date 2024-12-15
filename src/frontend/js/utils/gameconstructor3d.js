@@ -193,7 +193,7 @@ export default class GameConstructor {
           }
 
           if (
-            this.playerCount ==
+            this.playerCount <=
             this.playerNames.filter((element) => element).length
           )
             this.world.zoomToPlayer();
@@ -231,9 +231,11 @@ export default class GameConstructor {
           console.log("game_finished: ", message);
           showToast("Game finished, Winner: " + message.winner);
           break;
+        case "player_disconnected":
+          showToast("Player has disconnected, You win!");
+          break;
         case "error":
-          if (message != "You are too fast")
-            console.error("Error message:", message);
+          console.log("Error message:", message);
           break;
         default:
           console.log("Unknown message type:", message);

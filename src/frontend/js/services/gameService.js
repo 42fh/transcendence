@@ -65,6 +65,37 @@ export async function fetchWaitingGames() {
   }
 }
 
+export async function fetchRunningGames() {
+  try {
+    const accessToken = await manageJWT();
+    const response = await fetch(`${CONFIG.API_BASE_URL}/api/game/running/`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      const text = await response.text();
+      console.error("Non-JSON response received:", text);
+      throw new TypeError("Expected JSON response");
+    }
+
+    const data = await response.json();
+    return JSON.parse(data.games);
+  } catch (error) {
+    console.error("Error fetching waiting games:", error);
+    throw error;
+  }
+}
+
 /**
  * Creates a new game
  * @param {Object} gameConfig - Game configuration object
@@ -101,12 +132,15 @@ export async function createGame(gameConfig) {
  */
 export async function joinGame(gameId) {
   try {
-    const response = await fetch(`${CONFIG.API_BASE_URL}/api/game/${gameId}/join`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await fetch(
+      `${CONFIG.API_BASE_URL}/api/game/${gameId}/join`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     const data = await response.json();
     return {
@@ -163,14 +197,16 @@ export function findMatchingGame(games, formData) {
     console.log("game", game);
 
     // Check if there's room for more players
-    const hasSpace = game.players.current + game.players.reserved < game.players.total_needed;
+    const hasSpace =
+      game.players.current + game.players.reserved < game.players.total_needed;
 
     // Match conditions
     const modeMatches = game.mode === formData.gameType;
     console.log("game.num_players", game.num_players);
     console.log("formData.num_players", formData.numPlayers);
     const playerCountMatches = game.num_players === formData.numPlayers;
-    const sidesMatch = formData.gameType === "classic" || game.sides === formData.sides;
+    const sidesMatch =
+      formData.gameType === "classic" || game.sides === formData.sides;
 
     console.log("Checking game:", game.game_id, {
       hasSpace,

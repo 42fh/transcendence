@@ -6,6 +6,7 @@ class EnumGameMode(Enum):
     CLASSIC = "classic"
     CIRCULAR = "circular"
     IRREGULAR = "irregular"
+    INVITE = "invite"
 
 
 DEFAULT_PLAYER = {
@@ -36,6 +37,7 @@ DEFAULT_REGULAR = {
     "paddle_length": float(0.3),
     "paddle_width": float(0.06),
     "ball_size": float(0.05),
+    "name": "unknown",
 }
 
 
@@ -45,7 +47,27 @@ DEFAULT_IRREGULAR = {
     "paddle_width": float(0.06),
     "ball_size": float(0.05),
     "shape": "irregular",
+    "name": "unknown",
 }
+
+
+INVITE_FIXED = {
+    "num_players": int(2),
+    "num_balls": int(2),
+    "initial_ball_speed": float(0.02),
+    "sides": int(4),
+    "type": "circular",
+    "mode": "circular",
+    "shape": "circular",
+    "initial_ball_speed": float(0.02),
+    "paddle_length": float(0.3),
+    "paddle_width": float(0.06),
+    "ball_size": float(0.05),
+    "min_players": int(2),
+} 
+
+DEFAULT_INVITE = {"score": "first11", "name": "unknown" }
+
 
 CIRCULAR_FIXED = {"type": "circular", "mode": "circular", "shape": "circular"}
 

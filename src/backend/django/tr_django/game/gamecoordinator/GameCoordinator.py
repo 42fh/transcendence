@@ -778,15 +778,12 @@ class GameCoordinator:
                     if paddle_index is not None:
                         side_index = int(paddle_index)
                         score = final_state["scores"][side_index]
-                        players_data.append(
-                            {
-                                "player_id": player_id,
-                                "score": score,
-                                "side_index": side_index,
-                                "joined_at": float(join_time) if join_time else None,
-                            }
-                        )
-            print(players_data)
+                        players_data.append({
+                            "player_id": player_id,
+                            "score": score,
+                            "side_index": side_index,
+                            "joined_at": float(join_time) if join_time else None
+                        })           
             # Sort by score to determine winner and rankings
             players_data.sort(key=lambda x: x["score"], reverse=True)
             for rank, player_data in enumerate(players_data, 1):
