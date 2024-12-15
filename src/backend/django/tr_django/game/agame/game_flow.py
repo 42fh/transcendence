@@ -132,6 +132,7 @@ async def end_game(self):
     try:
         await GameCoordinator.set_to_finished_game(self.game_id)
         await GameCoordinator.store_game_in_database(self.game_id)
+        await GameCoordinator.cleanup_game(self.game_id)
         # Keep game state briefly for end-game display
         # would be handle by GameCoordinator 
     except Exception as e:
