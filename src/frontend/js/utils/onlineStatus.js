@@ -22,10 +22,11 @@ let currentPollingCleanup = null;
  * checkUserStatus(); // Will send current status to server
  */
 export function checkUserStatus() {
-  const isOnline =
-    document.visibilityState === "visible" && // Tab is in foreground
-    document.hasFocus() && // Window is focused
-    navigator.onLine; // Internet connection is available
+  const isOnline = document.hasFocus();
+
+    // document.visibilityState === "visible" && // Tab is in foreground
+    // document.hasFocus() && // Window is focused
+    // navigator.onLine; // Internet connection is available
 
   //   const currentTimestamp = Date.now();
   //   const expirationNear = lastExpirationTimestamp - currentTimestamp <= PING_BUFFER;
@@ -38,9 +39,7 @@ export function checkUserStatus() {
 
   // Notify the server based on the current status
   //   sendUserOnlineStatus(isOnline, newExpirationTimestamp); // Notify online
-  if (isOnline) {
-    sendUserOnlineStatus(isOnline);
-  }
+  sendUserOnlineStatus(isOnline);
   console.log("User is ", isOnline ? "online" : "offline");
 }
 
