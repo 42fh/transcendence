@@ -82,7 +82,7 @@ class AGameManager:
 
     def __del__(self):
         if not self._is_closed:
-            logger.warning("Warning: Redis connection was not properly closed")
+            logger.info("Watch out")
 
     @classmethod
     def register_game_type(cls, game_type_name):
