@@ -83,11 +83,11 @@ async def create_new_game(request, use_redis_lock: bool = True):
         )
 
     async def create_game_logic():
-        # if await GameCoordinator.is_player_playing(user_id):
-        #     return JsonResponse(
-        #         {"error": "Double booking", "message": "Player already in active game"},
-        #         status=409,
-        #     )
+        #if await GameCoordinator.is_player_playing(user_id):
+        #    return JsonResponse(
+        #            {"error": "Double booking", "message": "Player already in active game"},
+        #        status=409,
+        #    )
         game_id = await GameCoordinator.create_new_game(data)
         if not game_id:
             return JsonResponse(
@@ -95,7 +95,7 @@ async def create_new_game(request, use_redis_lock: bool = True):
                     "error": "Game Creation Failed",
                     "message": "Unable to create new game. Please try again.",
                 },
-                status=500,  # Service Unavailable
+                status=418,  # Service Unavailable
             )
 
         message = "NEW Game created successfully! Joined Gaime."
@@ -116,7 +116,7 @@ async def create_new_game(request, use_redis_lock: bool = True):
 
         return JsonResponse(
             {"available": False, "message": response.get("message", "NOT SET ERROR")},
-            status=response.get("status", 500),
+            status=response.get("status", 418),
         )
 
     try:
@@ -127,7 +127,7 @@ async def create_new_game(request, use_redis_lock: bool = True):
         return await create_game_logic()
 
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+        return JsonResponse({"error": str(e)}, status=418)
 
 
 @csrf_exempt
@@ -152,11 +152,11 @@ async def join_game(request, game_id, use_redis_lock: bool = True):
     user_id = await sync_to_async(lambda: request.user.id)()
 
     async def join_logic():
-        # if await GameCoordinator.is_player_playing(user_id):
-        #     return JsonResponse(
-        #         {"error": "Double booking", "message": "Player already in active game"},
-        #         status=409,
-        #     )
+        #if await GameCoordinator.is_player_playing(user_id):
+        #    return JsonResponse(
+        #        {"error": "Double booking", "message": "Player already in active game"},
+        #        status=409,
+        #    )
         message = "Joined Game! "
 
         response = await GameCoordinator.join_game(user_id, game_id)
@@ -175,7 +175,7 @@ async def join_game(request, game_id, use_redis_lock: bool = True):
 
         return JsonResponse(
             {"available": False, "message": response.get("message", "NOT SET ERROR")},
-            status=response.get("status", 500),
+            status=response.get("status", 418),
         )
 
     try:
@@ -186,7 +186,7 @@ async def join_game(request, game_id, use_redis_lock: bool = True):
         return await join_logic()
 
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+        return JsonResponse({"error": str(e)}, status=418)
 
 
 @sync_to_async
@@ -215,19 +215,22 @@ def is_user_blocked(user, to_user_id):
 @require_http_methods(["POST", "GET"])
 async def invitation(request):
     """Handle game invitations"""
-    print(request)
-    # print(request.user)
-    # print(request.body)
-
-    # if not request.user.is_authenticated:
-    #     return JsonResponse({"error": "Unauthorized", "message": "Authentication required"}, status=401)
-
+    # comment out because not connected to user yet
+    is_authenticated = await sync_to_async(lambda: request.user.is_authenticated)()
+    if not is_authenticated:
+        return JsonResponse(
+            {
+                "error": "Unauthorized - missing authentication",
+                "message": "only login users can create new game",
+            },
+            status=401,
+        )
     if request.method == "POST":
         try:
             data = json.loads(request.body)
-            print("data: ", data)
+            #print("data: ", data)
             to_user_id = data.get("to_user_id")
-            print("to_user_id: ", to_user_id)
+            #print("to_user_id: ", to_user_id)
             # to_user_id is required
             if not to_user_id:
                 return JsonResponse({"error": "Bad Request", "message": "to_user_id is required"}, status=400)
@@ -253,8 +256,8 @@ async def invitation(request):
         #     return JsonResponse({"error": "Invalid JSON", "message": "Invalid request format"}, status=400)
 
         except Exception as e:
-            print(f"error {e}")
-            return JsonResponse({"error": str(e)}, status=500)
+            #print(f"error {e}")
+            return JsonResponse({"error": str(e)}, status=418)
 
     elif request.method == "GET":
         invitations = await GameCoordinator.get_pending_invitations(str(request.user.id))
@@ -334,7 +337,7 @@ async def debug_create_games(request):
         return JsonResponse({"message": "Debug games created successfully", "status": 201})
 
     except Exception as e:
-        return JsonResponse({"error": str(e), "status": 500})
+        return JsonResponse({"error": str(e), "status": 418})
 
 
 @async_only_middleware
@@ -392,13 +395,13 @@ async def player_count(request, game_id):
                         "error": "Failed to retrieve player counts",
                         "message": "Unable to get current player counts",
                     },
-                    status=500,
+                    status=418,
                 )
 
         except Exception as e:
             return JsonResponse(
                 {"error": str(e), "message": "Error retrieving player counts"},
-                status=500,
+                status=418,
             )
 
     return JsonResponse({"message": "only GET requests are allowed"}, status=405)
@@ -436,7 +439,7 @@ async def cancel_booking(request):
     except Exception as e:
         return JsonResponse(
             {"error": str(e), "message": "Server error while cancelling booking"},
-            status=500,
+            status=418,
         )
 
 
@@ -481,7 +484,7 @@ async def user_online_status(request, userId=None):
 
     except Exception as e:
         logger.error(f"Error processing online status request: {str(e)}")
-        return JsonResponse({"error": str(e), "message": "Failed to process request"}, status=500)
+        return JsonResponse({"error": str(e), "message": "Failed to process request"}, status=418)
 
 
 @csrf_exempt
@@ -540,22 +543,22 @@ def debug_tournament(request):
         result = TournamentManager.create_tournament(tournament_data, {}, creator)
         if not result["status"]:
             return JsonResponse(result, status=400)
-        print("debug: ", result)
+        #print("debug: ", result)
         tournament_id = result["tournament_id"]
 
         # Add 4 sample players
         sample_players = Player.objects.all()[:4]
-        print("players: ", sample_players)
+        #print("players: ", sample_players)
         for player in sample_players:
             result = TournamentManager.add_player(tournament_id, player)
-            print("debug2: ", result)
+            #print("debug2: ", result)
         # Get schedule
         schedule = TournamentManager.get_game_schedule(tournament_id)
 
         return JsonResponse({"tournament_id": tournament_id, "schedule": schedule})
 
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+        return JsonResponse({"error": str(e)}, status=418)
 
 
 @csrf_exempt
@@ -707,7 +710,7 @@ def create_tournament(request):
     except (json.JSONDecodeError, KeyError) as e:
         return JsonResponse({"error": f"Invalid request data: {str(e)}"}, status=400)
     except Exception as e:
-        return JsonResponse({"error": f"Server error: {str(e)}"}, status=500)
+        return JsonResponse({"error": f"Server error: {str(e)}"}, status=418)
 
 
 @require_http_methods(["GET", "POST"])
