@@ -21,10 +21,10 @@ export async function inviteFriend(friendUuid) {
       "Content-Type": "application/json",
     },
     // body: JSON.stringify({ currentUserId, friendId }),
-    body: JSON.stringify({ to_user_id: friendUuid }), 
+    body: JSON.stringify({ to_user_id: friendUuid }),
   });
   console.log("response", response);
 
-  if (!response.ok) throw new Error("API request to invite friend failed");
+  if (!response.ok) throw new Error("You already invited this person");
   return response;
 }
