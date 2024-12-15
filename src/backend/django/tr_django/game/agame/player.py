@@ -198,9 +198,9 @@ async def _handle_ingame_leave(self, player_id: str, side_index: int, player_cou
             
             
             if player_count <= 2:
-                if not await self.redis_conn.exists(f"game_finished:{game_id}") 
+                if not await self.redis_conn.exists(f"game_finished:{game_id}"):
                     current_state = msgpack.unpackb(state_data)
-t 
+
                     # Last player leaving gives opponents 11 points, themselves 0
                     current_state["scores"] = [11 if i != paddle_index else 0 for i in range(len(current_state["scores"]))]
                     await self.redis_conn.set(self.state_key, msgpack.packb(current_state))
