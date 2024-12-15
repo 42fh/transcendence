@@ -1,5 +1,5 @@
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
-import { handleLogout } from "../views/auth.js";
+import { loadAuthPage } from "../views/auth.js";
 import { displayModalError } from "../components/modal.js";
 import { sendUserOnlineStatus } from "../services/usersService.js"
 
@@ -157,7 +157,7 @@ export async function manageJWT(data = {}, login = false) {
     return getCookie("access_token");
   } catch (error) {
     console.error("Error managing JWT:", error);
-    await handleLogout();
+    await loadAuthPage();
     displayModalError("Your session has expired");
     return null;
   }
