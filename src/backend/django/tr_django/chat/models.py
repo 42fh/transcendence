@@ -13,7 +13,7 @@ class ChatRoomManager(models.Manager):
     def create_room(self, user1, user2):
         """Create a chat room with consistent room_id generation"""
         # Sort users by their IDs to ensure consistent room_id generation
-        room_id = f"{min(user1.id, user2.id)}_{max(user1.id, user2.id)}" 
+        room_id = f"{min(user1.id, user2.id)}_{max(user1.id, user2.id)}"
 
         existing_room = self.filter(
             models.Q(room_id=room_id) | models.Q(user1=user1, user2=user2) | models.Q(user1=user2, user2=user1)
@@ -92,6 +92,13 @@ class BlockedUser(models.Model):
 
     def __str__(self):
         return f"{self.user.username} blocked {self.blocked_user.username}"
+
+
+def is_blocked_user(user, blocked_user_id):
+    """Check if the user is blocked by the requested user."""
+    from chat.models import BlockedUser  # Import inside the function to avoid circular import
+
+    return BlockedUser.objects.filter(blocked_user=blocked_user_id, user=user).exists()
 
 
 class Notification(models.Model):

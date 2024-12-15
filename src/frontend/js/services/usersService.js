@@ -35,12 +35,15 @@ export async function fetchUserProfile(userId) {
   try {
     const accessToken = await manageJWT();
 
-    const response = await fetch(`${CONFIG.API_BASE_URL}/api/users/${userId}/`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await fetch(
+      `${CONFIG.API_BASE_URL}/api/users/${userId}/`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
     if (!response.ok) {
       return {
         success: false,
@@ -71,7 +74,8 @@ export function formatWinRatio(wins, losses) {
 
 export function renderMatchHistory(matches, container) {
   if (!matches || matches.length === 0) {
-    container.innerHTML = '<p class="profile__matches-empty">No recent matches</p>';
+    container.innerHTML =
+      '<p class="profile__matches-empty">No recent matches</p>';
     return;
   }
 
@@ -84,12 +88,18 @@ export function renderMatchHistory(matches, container) {
     const matchItem = matchElement.querySelector(".profile__match-item");
 
     // Add won/lost class
-    matchItem.classList.add(match.won ? "profile__match-item--won" : "profile__match-item--lost");
+    matchItem.classList.add(
+      match.won ? "profile__match-item--won" : "profile__match-item--lost"
+    );
 
     // Fill in the data
-    matchItem.querySelector(".profile__match-date").textContent = new Date(match.date).toLocaleDateString();
+    matchItem.querySelector(".profile__match-date").textContent = new Date(
+      match.date
+    ).toLocaleDateString();
     matchItem.querySelector(".profile__match-result").textContent = match.score;
-    matchItem.querySelector(".profile__match-opponent").textContent = `vs ${match.opponent?.username || "Unknown"}`;
+    matchItem.querySelector(".profile__match-opponent").textContent = `vs ${
+      match.opponent?.username || "Unknown"
+    }`;
 
     container.appendChild(matchElement);
   });
@@ -99,14 +109,17 @@ export async function updateUserProfile(userId, userData) {
   try {
     const accessToken = await manageJWT();
 
-    const response = await fetch(`${CONFIG.API_BASE_URL}/api/users/${userId}/`, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(userData),
-    });
+    const response = await fetch(
+      `${CONFIG.API_BASE_URL}/api/users/${userId}/`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
+      }
+    );
 
     if (!response.ok) {
       return {
@@ -134,7 +147,7 @@ export async function updateUserProfile(userId, userData) {
 export async function uploadUserAvatar(userId, avatarFile) {
   try {
     const formData = new FormData();
-    formData.append("avatar", avatarFile);
+    formData.append("file", avatarFile, avatarFile.name);
 
     const accessToken = await manageJWT();
 
@@ -143,7 +156,6 @@ export async function uploadUserAvatar(userId, avatarFile) {
       method: "POST",
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
       },
       body: formData,
     });
@@ -198,20 +210,25 @@ export async function fetchUsers(page = 1, perPage = 10, search = "") {
 export async function fetchFriends(page = 1, perPage = 10, search = "") {
   const userId = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
   if (!userId) throw new Error("User ID not found");
-  console.log("Fetching friends for user:", userId);
   try {
     const queryParams = new URLSearchParams();
     queryParams.set("page", page);
     queryParams.set("per_page", perPage);
     if (search) queryParams.set("search", search);
+
+    const accessToken = await manageJWT();
+
     const url = `${CONFIG.API_BASE_URL}/api/users/friends/?${queryParams}`;
 
-    console.log("Fetching from URL:", url);
-    const response = await fetch(url);
-    console.log("Response status:", response.status);
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+
     if (!response.ok) throw new Error("Failed to fetch friends");
     const data = await response.json();
-    console.log("Received friends data:", data);
     return data;
   } catch (error) {
     console.error("Error fetching friends:", error);

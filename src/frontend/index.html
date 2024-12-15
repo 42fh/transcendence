@@ -6,10 +6,7 @@
     <title>Pong Game - Welcome</title>
     <link rel="stylesheet" href="css/fonts.css" />
     <link rel="stylesheet" href="css/main.css" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <script type="importmap">
       {
         "imports": {
@@ -77,19 +74,13 @@
 
           <div class="resend-section">
             <span id="countdown">1:00</span>
-            <button
-              type="button"
-              id="resend-button"
-              class="auth-form__button"
-              disabled
-            >
-              Resend Code
-            </button>
+            <button type="button" id="resend-button" class="auth-form__button" disabled>Resend Code</button>
           </div>
 
-          <button type="submit" id="2fa-login" class="auth-form__button">
+          <button type="submit" verify" class="auth-form__button">
             Log In
           </button>
+          <button type="submit" id="2fa-login" class="auth-form__button">Log In</button>
         </form>
       </div>
     </template>
@@ -106,16 +97,47 @@
         <input type="password" id="password" name="password" required />
 
         <label for="confirm-password">Confirm Password</label>
-        <input
-          type="password"
-          id="confirm-password"
-          name="confirm-password"
-          required
-        />
+        <input type="password" id="confirm-password" name="confirm-password" required />
 
         <button type="submit" class="auth-form__button">Sign Up</button>
       </form>
     </template>
+
+    <template id="game-list-template">
+      <div class="game-list-button-container">
+      <button class="create-game-btn home__button button--neon">Create Game</button>
+      <button class="offline-game-btn home__button button--neon">Offline Game</button>
+    </div>
+      <div class="game-list-container">
+        <div class="game-list">
+              <!-- Games will be inserted here by JavaScript -->
+          </div>
+      </div>
+    </template>
+
+    <template id="2fa-template">
+      <div class="modal-form">
+        <label for="code">Enter the code sent to your email</label>
+        <input type="text" id="code" name="code" required />
+    
+        <div class="resend-section">
+          <span id="countdown">1:00</span>
+          <button
+            type="button"
+            id="resend-button"
+            class="auth-form__button"
+            disabled
+          >
+            Resend Code
+          </button>
+        </div>
+    
+        <button id="2fa-verify" class="auth-form__button">
+          Verify
+        </button>
+      </div>
+      </template>
+  
 
     <!-- Home Page Template -->
     <template id="home-template">
@@ -123,35 +145,13 @@
         <h1 class="page-container__title page-container__title--home">PONG</h1>
 
         <div class="home__content">
-          <div class="home__buttonsetleft">
-            <button id="home__button-logout" class="home__button button--red">Logout</button>
-            <button id="home__button-play" class="home__button button--neon">PLAY</button>
-            <button id="home__button-playoffline" class="home__button button--neon">OFFLINE</button>
-          </div>
-          <div class="home__net">
-            <div class="home__net-segment home__net-segment--black"></div>
-            <div class="home__net-segment home__net-segment--white"></div>
-            <div class="home__net-segment home__net-segment--black"></div>
-            <div class="home__net-segment home__net-segment--white"></div>
-            <div class="home__net-segment home__net-segment--black"></div>
-            <div class="home__net-segment home__net-segment--white"></div>
-            <div class="home__net-segment home__net-segment--black"></div>
-            <div class="home__net-segment home__net-segment--white"></div>
-            <div class="home__net-segment home__net-segment--black"></div>
-            <div class="home__net-segment home__net-segment--white"></div>
-          </div>
-          <!-- <button id="home__button-cta" class="home__button button--gradient">CTA</button> -->
-          <div class="home__buttons-right">
-            <button id="home__button-cta" class="home__button button--gradient">
-              CTA
-            </button>
+          <button id="home__button-play" class="home__button button--neon">PLAY</button>
+          <!-- <div class="home__buttons-right">
             <button id="home__button-2d" class="home__button button--stroke">
-              <span class="actual-text">&nbsp;2D GAME&nbsp;</span>
-              <span class="hover-text" aria-hidden="true"
-                >&nbsp;OR DIE&nbsp;</span
-              >
+              <span class="actual-text">&nbsp;PLAYE&nbsp;</span>
+              <span class="hover-text" aria-hidden="true">&nbsp;OR DIE&nbsp;</span>
             </button>
-          </div>
+          </div> -->
         </div>
       </div>
     </template>
@@ -174,7 +174,7 @@
     <!-- Offline Game Template -->
     <template id="gameoffline-template">
       <div id="gameoffline-container">
-        <h>Offline</p>
+        <h1>Offline</h1>
         <p>Player 1: press <span>[A]</span> and <span>[S]</span></p>
         <p>Player 2: press <span>[K]</span> and <span>[L]</span></p>
         <canvas id="game_offlinemode_canvas" height="500" width="500"></canvas><br />
@@ -194,9 +194,7 @@
         </div>
 
         <div class="button-wrapper">
-          <button id="create-tournament" class="tournament-button">
-            CREATE NEW TOURNAMENT
-          </button>
+          <button id="create-tournament" class="tournament-button">CREATE NEW TOURNAMENT</button>
         </div>
       </div>
     </template>
@@ -228,9 +226,7 @@
               Registration End:
               <span class="tournament-detail-closing-date"></span>
             </div>
-            <div>
-              Start: <span class="tournament-detail-starting-date"></span>
-            </div>
+            <div>Start: <span class="tournament-detail-starting-date"></span></div>
           </div>
           <div class="tournament-detail-type"></div>
 
@@ -260,166 +256,158 @@
     <!-- Create Tournament Page Template -->
     <template id="create-tournament-template">
       <div class="create-tournament-container">
-        <h1 class="create-tournament-title">CREATE TOURNAMENT</h1>
+        <!-- <h1 class="create-tournament-title">CREATE TOURNAMENT</h1> -->
 
         <form class="create-tournament-form">
           <!-- Basic Info -->
           <div class="create-tournament-form-group">
-            <label class="create-tournament-label" for="tournament-name"
-              >NAME</label
-            >
-            <input
-              class="create-tournament-input"
-              type="text"
-              id="tournament-name"
-              name="name"
-              required
-            />
+            <label class="create-tournament-label" for="tournament-name">NAME</label>
+            <input class="create-tournament-input" type="text" id="tournament-name" name="name" required />
+          </div>
+
+          <div class="create-tournament-form-group create-tournament-form-group--hidden">
+            <label class="create-tournament-label" for="tournament-description">DESCRIPTION</label>
+            <textarea class="create-tournament-textarea" id="tournament-description" name="description"></textarea>
+          </div>
+          <div class="create-tournament-form-group">
+            <label class="create-tournament-label">LOCATION</label>
+            <div class="create-tournament-toggle" id="location-toggle">
+              <button
+                type="button"
+                class="create-tournament-toggle__btn create-tournament-toggle__btn--active"
+                data-value="local"
+                id="location-local-btn"
+              >
+                Local
+              </button>
+              <!-- <button type="button" class="create-tournament-toggle__btn" data-value="remote" id="location-remote-btn">
+                Remote
+              </button> -->
+            </div>
+            <input type="hidden" name="location" value="local" id="location-value" />
           </div>
 
           <div class="create-tournament-form-group">
-            <label class="create-tournament-label" for="tournament-description"
-              >DESCRIPTION</label
-            >
-            <textarea
-              class="create-tournament-textarea"
-              id="tournament-description"
-              name="description"
-              required
-            ></textarea>
+            <label class="create-tournament-label">TIMING</label>
+            <div class="create-tournament-timing-toggle" id="timing-toggle">
+              <!-- This class matches -->
+              <button
+                type="button"
+                class="create-tournament-toggle__btn create-tournament-toggle__btn--active"
+                data-value="now"
+                id="timing-now-btn"
+              >
+                Now
+              </button>
+              <!-- <button type="button" class="create-tournament-toggle__btn" data-value="planned" id="timing-planned-btn">
+                Planned
+              </button> -->
+            </div>
+            <input type="hidden" name="timing" value="now" id="timing-value" />
+            <!-- Added ID -->
+          </div>
+
+          <!-- Wrap existing date fields in a container -->
+          <div id="planned-dates" class="create-tournament-form-group--hidden">
+            <!-- Existing date fields structure unchanged -->
+            <div class="create-tournament-form-group">
+              <label class="create-tournament-label" for="tournament-start">START DATE</label>
+              <input
+                class="create-tournament-input"
+                type="datetime-local"
+                id="tournament-start"
+                name="startingDate"
+                required
+              />
+            </div>
+
+            <div class="create-tournament-form-group">
+              <label class="create-tournament-label" for="registration-start">REGISTRATION START</label>
+              <input
+                class="create-tournament-input"
+                type="datetime-local"
+                id="registration-start"
+                name="registrationStart"
+                required
+              />
+            </div>
+
+            <div class="create-tournament-form-group">
+              <label class="create-tournament-label" for="registration-close">REGISTRATION CLOSE</label>
+              <input
+                class="create-tournament-input"
+                type="datetime-local"
+                id="registration-close"
+                name="registrationClose"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Number of Players -->
+          <div class="create-tournament-form-group">
+            <label class="create-tournament-label">NUMBER OF PLAYERS</label>
+            <div class="create-tournament-players-toggle" id="players-toggle">
+              <button
+                type="button"
+                class="create-tournament-toggle__btn create-tournament-toggle__btn--active"
+                data-value="4"
+                id="players-4-btn"
+              >
+                4
+              </button>
+              <button type="button" class="create-tournament-toggle__btn" data-value="8" id="players-8-btn">8</button>
+              <button type="button" class="create-tournament-toggle__btn" data-value="16" id="players-16-btn">
+                16
+              </button>
+              <button type="button" class="create-tournament-toggle__btn" data-value="32" id="players-32-btn">
+                32
+              </button>
+            </div>
+            <input type="hidden" name="playersNumber" value="4" id="players-value" />
           </div>
 
           <!-- Tournament Type -->
           <div class="create-tournament-form-group">
-            <label class="create-tournament-label" for="tournament-type"
-              >TYPE</label
-            >
-            <select
-              class="create-tournament-select"
-              id="tournament-type"
-              name="type"
-              required
-            >
+            <label class="create-tournament-label" for="tournament-type">TYPE</label>
+            <select class="create-tournament-select" id="tournament-type" name="type" required>
               <option value="single_elimination">Single Elimination</option>
               <option value="double_elimination">Double Elimination</option>
               <option value="round_robin">Round Robin</option>
             </select>
           </div>
 
-          <!-- Dates -->
-          <div class="create-tournament-form-group">
-            <label class="create-tournament-label" for="tournament-start"
-              >START DATE</label
-            >
-            <input
-              class="create-tournament-input"
-              type="datetime-local"
-              id="tournament-start"
-              name="startingDate"
-              required
-            />
-          </div>
-
-          <div class="create-tournament-form-group">
-            <label class="create-tournament-label" for="registration-start"
-              >REGISTRATION START</label
-            >
-            <input
-              class="create-tournament-input"
-              type="datetime-local"
-              id="registration-start"
-              name="registrationStart"
-              required
-            />
-          </div>
-
-          <div class="create-tournament-form-group">
-            <label class="create-tournament-label" for="registration-close"
-              >REGISTRATION CLOSE</label
-            >
-            <input
-              class="create-tournament-input"
-              type="datetime-local"
-              id="registration-close"
-              name="registrationClose"
-              required
-            />
-          </div>
-
           <!-- Visibility -->
           <div class="create-tournament-form-group">
-            <label class="create-tournament-label" for="tournament-visibility"
-              >VISIBILITY</label
-            >
-            <select
-              class="create-tournament-select"
-              id="tournament-visibility"
-              name="visibility"
-              required
-            >
+            <label class="create-tournament-label" for="tournament-visibility">VISIBILITY</label>
+            <select class="create-tournament-select" id="tournament-visibility" name="visibility" required>
               <option value="public">Public</option>
               <option value="private">Private</option>
             </select>
           </div>
 
           <!-- Allowed Users (only shown when private is selected) -->
-          <div
-            class="create-tournament-form-group"
-            id="allowed-users-group"
-            style="display: none"
-          >
-            <label class="create-tournament-label" for="allowed-users-input"
-              >ALLOWED USERS</label
-            >
+          <div class="create-tournament-form-group" id="allowed-users-group" style="display: none">
+            <label class="create-tournament-label" for="allowed-users-input">ALLOWED USERS</label>
             <div class="create-tournament-users-input-container">
-              <input
-                type="text"
-                class="create-tournament-input"
-                id="allowed-users-input"
-                placeholder="Type username"
-              />
-              <button
-                type="button"
-                class="create-tournament-button-secondary"
-                id="add-user-btn"
-              >
-                ADD
-              </button>
+              <input type="text" class="create-tournament-input" id="allowed-users-input" placeholder="Type username" />
+              <button type="button" class="create-tournament-button-secondary" id="add-user-btn">ADD</button>
             </div>
-            <div
-              id="allowed-users-list"
-              class="create-tournament-users-list"
-            ></div>
+            <div id="allowed-users-list" class="create-tournament-users-list"></div>
           </div>
 
           <!-- Game Mode -->
           <div class="create-tournament-form-group">
-            <label class="create-tournament-label" for="game-mode"
-              >GAME MODE</label
-            >
-            <select
-              class="create-tournament-select"
-              id="game-mode"
-              name="gameMode"
-              required
-            >
+            <label class="create-tournament-label" for="game-mode">GAME MODE</label>
+            <select class="create-tournament-select" id="game-mode" name="gameMode" required>
               <option value="1v1">1 vs 1</option>
-              <option value="multiplayer">Multiplayer</option>
             </select>
           </div>
 
           <!-- Action Buttons -->
           <div class="create-tournament-actions">
-            <button
-              type="button"
-              class="create-tournament-button-secondary"
-              id="cancel-tournament"
-            >
-              CANCEL
-            </button>
-            <button type="submit" class="create-tournament-button-primary">
-              CREATE TOURNAMENT
-            </button>
+            <button type="button" class="create-tournament-button-secondary" id="cancel-tournament">CANCEL</button>
+            <button type="submit" class="create-tournament-button-primary">CREATE TOURNAMENT</button>
           </div>
         </form>
       </div>
@@ -468,22 +456,12 @@
         <div class="chat__section">
           <h2 class="chat-page__title">Users</h2>
           <div class="chat-users-horizontal-scroll">
-            <div
-              id="chat-users-horizontal-container"
-              class="chat-users-horizontal-container"
-            >
+            <div id="chat-users-horizontal-container" class="chat-users-horizontal-container">
               <!-- Horizontal user items will be populated dynamically here -->
-              <div
-                class="chat-users-horizontal-item"
-                id="chat-users"
-                style="display: none"
-              >
+              <div class="chat-users-horizontal-item" id="chat-users" style="display: none">
                 <img class="chat-users-list__avatar" src="" alt="User avatar" />
                 <div class="chat-users-list__info">
-                  <span
-                    id="chat-users-list-username"
-                    class="chat-users-list__username"
-                  ></span>
+                  <span id="chat-users-list-username" class="chat-users-list__username"></span>
                   <span class="chat-users-list__status-indicator"></span>
                 </div>
               </div>
@@ -503,7 +481,6 @@
             </div>
           </div>
         </div>
-        
 
         <div class="chat__section">
           <h2 class="chat-page__title">Conversations</h2>
@@ -512,24 +489,12 @@
             <div
               id="chat-conversations-list-item"
               class="chat-conversations-list__item"
-              id="chat-conversations"
               style="display: none"
             >
-              <img
-                id="chat-avatar"
-                class="chat-conversations-list__avatar"
-                src=""
-                alt="User avatar"
-              />
+              <img id="chat-avatar" class="chat-conversations-list__avatar" src="" alt="User avatar" />
               <div class="chat-conversations-list__info">
-                <span
-                  id="chat-conversations-list-username"
-                  class="chat-conversations-list__username"
-                ></span>
-                <span
-                  id="chat-conversations-list-status"
-                  class="chat-conversations-list__status-indicator"
-                ></span>
+                <span id="chat-conversations-list-username" class="chat-conversations-list__username"></span>
+                <span id="chat-conversations-list-status" class="chat-conversations-list__status-indicator"></span>
               </div>
             </div>
           </div>
@@ -553,26 +518,16 @@
               id="chat-room-partner-username"
               class="chat-room-header__username"
             ></span>
+            
           </div>
           <div class="chat-room-header__actions">
-            <button
-              id="chat-room-more-actions"
-              class="chat-room-header__more-btn"
-            >
-              ⋮
-            </button>
+            <span id="chat-room-invite" class="chat-room-header__invite">Play</span>
           </div>
         </div>
         <div id="chat-messages" class="chat-messages"></div>
         <div class="chat-input-container">
-          <input
-            id="chat-message-input"
-            class="chat-input"
-            placeholder="Type here"
-          />
-          <button id="chat-message-submit" class="chat-submit-button">
-            Send
-          </button>
+          <input id="chat-message-input" class="chat-input" placeholder="Type here" />
+          <button id="chat-message-submit" class="chat-submit-button">Send</button>
         </div>
       </div>
     </template>
@@ -593,24 +548,14 @@
           <span class="bottom-nav__icon material-symbols-outlined">trophy</span>
         </button>
         <button class="bottom-nav__item" data-page="profile">
-          <span class="bottom-nav__icon material-symbols-outlined"
-            >account_circle</span
-          >
+          <span class="bottom-nav__icon material-symbols-outlined">account_circle</span>
         </button>
         <button class="bottom-nav__item" data-page="users">
-          <span class="bottom-nav__icon material-symbols-outlined"
-            >person_search</span
-          >
+          <span class="bottom-nav__icon material-symbols-outlined">person_search</span>
         </button>
         <button class="bottom-nav__item" data-page="chat">
-          <span class="bottom-nav__icon material-symbols-outlined"
-            >chat_bubble</span
-          >
-          <span
-            id="bottom-nav-notification-badge"
-            class="bottom-nav__notification-badge"
-            style="display: none"
-          ></span>
+          <span class="bottom-nav__icon material-symbols-outlined">chat_bubble</span>
+          <span id="bottom-nav-notification-badge" class="bottom-nav__notification-badge" style="display: none"></span>
         </button>
       </nav>
     </template>
@@ -634,47 +579,24 @@
             <div class="profile__info">
               <div class="profile__username-container">
                 <!-- TODO: think about this h2 if it has really to be -->
-                <span
-                  class="profile__online-status material-symbols-outlined profile__public-info"
-                  >circle</span
-                >
+                <span class="profile__online-status material-symbols-outlined profile__public-info">circle</span>
                 <h2 class="profile__username username"></h2>
               </div>
               <!-- Private info will be hidden/shown based on view type -->
-              <p
-                class="profile__info-item profile__info-item--name profile__private-info"
-              ></p>
-              <p
-                class="profile__info-item profile__info-item--email profile__private-info"
-              ></p>
-              <p
-                class="profile__info-item profile__info-item--phone profile__private-info"
-              ></p>
+              <p class="profile__info-item profile__info-item--name profile__private-info"></p>
+              <p class="profile__info-item profile__info-item--email profile__private-info"></p>
+              <p class="profile__info-item profile__info-item--phone profile__private-info"></p>
             </div>
           </div>
           <!-- Public Profile Actions -->
-          <div
-            class="profile__section profile__section--public-actions profile__public-info"
-          >
-            <button
-              class="profile__action-button"
-              data-action="friend"
-              title="Add Friend"
-            >
+          <div class="profile__section profile__section--public-actions profile__public-info">
+            <button class="profile__action-button" data-action="friend" title="Add Friend">
               <span class="material-symbols-outlined">add_circle</span>
             </button>
-            <button
-              class="profile__action-button"
-              data-action="chat"
-              title="Send Message"
-            >
+            <button class="profile__action-button" data-action="chat" title="Send Message">
               <span class="material-symbols-outlined">maps_ugc</span>
             </button>
-            <button
-              class="profile__action-button"
-              data-action="play"
-              title="Challenge to Game"
-            >
+            <button class="profile__action-button" data-action="play" title="Challenge to Game">
               <span class="material-symbols-outlined">play_circle</span>
             </button>
             <button
@@ -682,16 +604,14 @@
               data-action="block"
               title="Block User"
             >
-              <span class="material-symbols-outlined">block</span>
+              <span class="material-symbols-outlined">lock</span>
             </button>
           </div>
           <div class="profile__section profile__section--bio">
             <h3 class="profile__section-title">Bio</h3>
             <p class="profile__bio-text"></p>
           </div>
-          <div
-            class="profile__section profile__section--friends profile__private-info"
-          >
+          <div class="profile__section profile__section--friends profile__private-info">
             <h3 class="profile__section-title">Friends</h3>
             <span class="profile__friends-count">0</span>
           </div>
@@ -719,15 +639,10 @@
           </div>
 
           <!-- Private Profile Actions -->
-          <div
-            class="profile__section profile__section--private-actions profile__private-info"
-          >
-            <button class="profile__button profile__button--edit">
-              Edit Profile
-            </button>
-            <button class="profile__button profile__button--2fa">
-              2FA Settings
-            </button>
+          <div class="profile__section profile__section--private-actions profile__private-info">
+            <button class="profile__button profile__button--logout">Logout</button>
+            <button class="profile__button profile__button--edit">Edit Profile</button>
+            <button class="profile__button profile__button--2fa">2FA Settings</button>
             <!-- TODO: Add password change button if we decide to implement it -->
           </div>
         </div>
@@ -767,89 +682,37 @@
           </div>
 
           <div class="profile-edit__field form-field">
-            <label class="profile-edit__label form-label" for="username"
-              >Username</label
-            >
-            <input
-              type="text"
-              id="username"
-              class="profile-edit__input form-input"
-              name="username"
-              value="Mark"
-            />
+            <label class="profile-edit__label form-label" for="username">Username</label>
+            <input type="text" id="username" class="profile-edit__input form-input" name="username" value="Mark" />
           </div>
           <div class="profile-edit__field form-field">
-            <label class="profile-edit__label form-label" for="first-name"
-              >First Name</label
-            >
-            <input
-              type="text"
-              id="first-name"
-              class="profile-edit__input form-input"
-              name="first_name"
-            />
+            <label class="profile-edit__label form-label" for="first-name">First Name</label>
+            <input type="text" id="first-name" class="profile-edit__input form-input" name="first_name" />
           </div>
 
           <div class="profile-edit__field form-field">
-            <label class="profile-edit__label form-label" for="last-name"
-              >Last Name</label
-            >
-            <input
-              type="text"
-              id="last-name"
-              class="profile-edit__input form-input"
-              name="last_name"
-            />
+            <label class="profile-edit__label form-label" for="last-name">Last Name</label>
+            <input type="text" id="last-name" class="profile-edit__input form-input" name="last_name" />
           </div>
 
           <div class="profile-edit__field form-field">
-            <label class="profile-edit__label form-label" for="email"
-              >Email</label
-            >
-            <input
-              type="email"
-              id="email"
-              class="profile-edit__input form-input"
-              name="email"
-            />
+            <label class="profile-edit__label form-label" for="email">Email</label>
+            <input type="email" id="email" class="profile-edit__input form-input" name="email" />
           </div>
 
           <div class="profile-edit__field form-field">
-            <label class="profile-edit__label form-label" for="phone"
-              >Phone</label
-            >
-            <input
-              type="tel"
-              id="phone"
-              class="profile-edit__input form-input"
-              name="telephone_number"
-            />
+            <label class="profile-edit__label form-label" for="phone">Phone</label>
+            <input type="tel" id="phone" class="profile-edit__input form-input" name="telephone_number" />
           </div>
 
           <div class="profile-edit__field form-field">
             <label class="profile-edit__label form-label" for="bio">Bio</label>
-            <textarea
-              id="bio"
-              class="profile-edit__textarea"
-              name="bio"
-              rows="4"
-              maxlength="500"
-            ></textarea>
+            <textarea id="bio" class="profile-edit__textarea" name="bio" rows="4" maxlength="500"></textarea>
           </div>
 
           <div class="profile-edit__buttons">
-            <button
-              type="button"
-              class="profile-edit__button profile-edit__button--cancel"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              class="profile-edit__button profile-edit__button--save"
-            >
-              Save
-            </button>
+            <button type="button" class="profile-edit__button profile-edit__button--cancel">Cancel</button>
+            <button type="submit" class="profile-edit__button profile-edit__button--save">Save</button>
           </div>
         </form>
       </div>
@@ -859,51 +722,33 @@
     <template id="2fa-edit-template">
       <div class="profile-edit">
         <h2 class="profile-edit__title">Edit 2FA</h2>
-        <p class="email-warning" style="display: none">Email is not set</p>
+        <p class="email-warning email-not-set" style="display: none">Email is not set</p>
+        <p class="email-warning email-not-verified" style="display: none">Email is not verified</p>
         <form class="profile-edit__form">
           <div class="profile-edit__field form-field">
-            <label class="profile-edit__label form-label" for="email"
-              >Email</label
-            >
-            <input
-              type="email"
-              id="email"
-              class="profile-edit__input form-input"
-              name="email"
-            />
+            <label class="profile-edit__label form-label" for="email">Email</label>
+            <input type="email" id="email" class="profile-edit__input form-input" name="email" />
           </div>
           <div class="profile-edit__field form-field radio-form">
-            <label class="profile-edit__label form-label"
-              >2FA Authentication</label
-            >
+            <label class="profile-edit__label form-label">2FA Authentication</label>
             <div class="profile-edit__radio-group">
               <div class="profile-edit__radio-item">
-                <input
-                  type="radio"
-                  id="2fa-enabled"
-                  name="2fa"
-                  value="enabled"
-                  class="profile-edit__radio"
-                />
-                <label for="2fa-enabled" class="profile-edit__radio-label"
-                  >Enabled</label
-                >
+                <input type="radio" id="2fa-enabled" name="2fa" value="enabled" class="profile-edit__radio" />
+                <label for="2fa-enabled" class="profile-edit__radio-label">Enabled</label>
               </div>
               <div class="profile-edit__radio-item">
-                <input
-                  type="radio"
-                  id="2fa-disabled"
-                  name="2fa"
-                  value="disabled"
-                  class="profile-edit__radio"
-                />
-                <label for="2fa-disabled" class="profile-edit__radio-label"
-                  >Disabled</label
-                >
+                <input type="radio" id="2fa-disabled" name="2fa" value="disabled" class="profile-edit__radio" />
+                <label for="2fa-disabled" class="profile-edit__radio-label">Disabled</label>
               </div>
             </div>
           </div>
           <div class="profile-edit__buttons">
+            <button
+              type="button"
+              class="profile-edit__button profile-edit__button--verify-email"
+            >
+              Verify
+            </button>
             <button
               type="button"
               class="profile-edit__button profile-edit__button--cancel"
@@ -924,33 +769,15 @@
     <!-- 3D Game -->
     <template id="3d-game-template">
       <canvas class="webgl"></canvas>
+      <div id="number-display"></div>
       <div class="mobile-controls">
-        <button class="control-btn left-btn">
-          <i class="fas fa-arrow-left"></i>
+        <button id="left-btn" class="control-btn">
+          <p>&lt;</p>
         </button>
-        <button class="control-btn right-btn">
-          <i class="fas fa-arrow-right"></i>
+        <button id="right-btn" class="control-btn">
+          <p>&gt;</p>
         </button>
-      </div>
-      <div class="game-menu-overlay" id="menu">
-        <div class="game-menu-container">
-          <div class="card bg-dark text-light">
-            <div class="card-header">
-              <h2 class="text-center mb-0">Game Setup</h2>
-            </div>
-            <div class="card-body">
-              <div class="mb-4">
-                <label for="playerCount">Player count</label>
-                <input type="text" id="playerCount" />
-              </div>
-
-              <div class="text-center">
-                <div class="joinGame btn btn-primary">Join</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    </div>
     </template>
 
     <!-- Users Template -->
@@ -960,21 +787,13 @@
         <h2 class="users-page__title">Folks around</h2>
         <div class="users-selection">
           <div class="users-filter">
-            <button
-              class="users-filter__button users-filter__button--all users-filter__button--active"
-            >
+            <button class="users-filter__button users-filter__button--all users-filter__button--active">
               All of Them
             </button>
-            <button class="users-filter__button users-filter__button--friends">
-              Only Friends
-            </button>
+            <button class="users-filter__button users-filter__button--friends">Only Friends</button>
           </div>
           <div class="users-search">
-            <input
-              type="text"
-              class="users-search__input"
-              placeholder="Search users..."
-            />
+            <input type="text" class="users-search__input" placeholder="Search users..." />
             <!-- <span class="material-symbols-outlined users-search__icon">search</span> -->
           </div>
         </div>
@@ -1012,25 +831,22 @@
       <div class="two-d-game__container">
         <form class="two-d-game__form" id="two-d-game__form">
           <div class="two-d-game__form-group">
-            <label class="two-d-game__label" for="two-d-game__game-type"
-              >Game Type</label
-            >
-            <select
-              class="two-d-game__select"
-              id="two-d-game__game-type"
-              disabled
-            >
-              <option value="regular">Regular Pong</option>
+            <label class="two-d-game__label" for="two-d-game__name">Game Name</label>
+            <input
+              class="two-d-game__input"
+              id="two-d-game__name"
+              value="My Game"
+            />
+          </div>
+          <div class="two-d-game__form-group">
+            <label class="two-d-game__label" for="two-d-game__game-type">Game Type</label>
+            <select class="two-d-game__select" id="two-d-game__game-type">
               <option value="circular">Circular Pong</option>
-              <option value="irregular">Irregular Pong</option>
-              <option value="classic">Classic Pong</option>
             </select>
           </div>
 
           <div class="two-d-game__form-group">
-            <label class="two-d-game__label" for="two-d-game__num-players"
-              >Number of Players</label
-            >
+            <label class="two-d-game__label" for="two-d-game__num-players">Number of Players</label>
             <input
               class="two-d-game__input"
               type="number"
@@ -1038,12 +854,11 @@
               min="2"
               max="8"
               value="2"
-              disabled
             />
             <small class="two-d-game__help-text">Min: 2, Max: 8 players</small>
           </div>
 
-          <div class="two-d-game__form-group polygon-only">
+          <div class="two-d-game__form-group">
             <label class="two-d-game__label" for="two-d-game__num-sides"
               >Number of Sides</label
             >
@@ -1051,52 +866,24 @@
               class="two-d-game__input"
               type="number"
               id="two-d-game__num-sides"
-              min="3"
-              max="12"
-              value="4"
-              disabled
+              min="2"
+              max="8"
+              value="2"
             />
-            <small class="two-d-game__help-text">Min: 3, Max: 12 sides</small>
+            <small class="two-d-game__help-text">Min: 2, Max: 8 sides</small>
           </div>
 
           <div class="two-d-game__form-group">
-            <label class="two-d-game__label" for="two-d-game__num-balls"
-              >Number of Balls</label
-            >
-            <input
-              class="two-d-game__input"
-              type="number"
-              id="two-d-game__num-balls"
-              value="1"
-            />
+            <label class="two-d-game__label" for="two-d-game__num-balls">Number of Balls</label>
+            <input class="two-d-game__input" type="number" id="two-d-game__num-balls" value="1" />
             <small class="two-d-game__help-text">Min: 1, Max: 4 balls</small>
           </div>
 
           <div class="two-d-game__form-group">
-            <label class="two-d-game__label" for="two-d-game__score-mode"
-              >Score Mode</label
-            >
+            <label class="two-d-game__label" for="two-d-game__score-mode">Score Mode</label>
             <select class="two-d-game__select" id="two-d-game__score-mode">
               <option value="classic">Classic (First to 11)</option>
-              <option value="timed">Timed (5 minutes)</option>
-              <option value="survival">Survival</option>
             </select>
-          </div>
-
-          <div class="two-d-game__form-group">
-            <div class="two-d-game__checkbox-container">
-              <input
-                type="checkbox"
-                id="two-d-game__debug-mode"
-                class="two-d-game__checkbox"
-              />
-              <label
-                class="two-d-game__checkbox-label"
-                for="two-d-game__debug-mode"
-              >
-                Enable Debug Mode
-              </label>
-            </div>
           </div>
 
           <div class="two-d-game__form-group">
@@ -1111,27 +898,25 @@
       <!-- Game Container -->
       <div id="two-d-game__container-game" class="two-d-game__container-game">
         <div class="two-d-game__game-layout">
-          <div class="two-d-game__game-main">
+           <div class="two-d-game__game-main">
             <div class="two-d-game__game-canvas-container">
               <svg id="two-d-game__pong-svg" viewBox="0 0 300 300"></svg>
             </div>
 
-            <div class="two-d-game__panel">
+            <!-- <div class="two-d-game__panel">
               <div class="two-d-game__panel-header">
                 <h3 class="two-d-game__panel-title">Event Log</h3>
               </div>
               <div id="two-d-game__event-log" class="two-d-game__event-log">
                 <div class="two-d-game__log-entry">
-                  <span id="two-d-game__event-log-message"
-                    >Waiting for game events...</span
-                  >
+                  <span id="two-d-game__event-log-message">Waiting for game events...</span>
                 </div>
               </div>
-            </div>
+            </div> -->
           </div>
 
           <div class="two-d-game__game-sidebar">
-            <div class="two-d-game__panel">
+            <!-- <div class="two-d-game__panel">
               <div class="two-d-game__panel-header">
                 <h3 class="two-d-game__panel-title">Game Info</h3>
               </div>
@@ -1139,16 +924,13 @@
                 id="two-d-game__game-info"
                 class="two-d-game__game-info"
               ></div>
-            </div>
+            </div> -->
 
             <div class="two-d-game__panel">
               <div class="two-d-game__panel-header">
                 <h3 class="two-d-game__panel-title">Scores</h3>
               </div>
-              <div
-                id="two-d-game__score-display"
-                class="two-d-game__score-display"
-              >
+              <div id="two-d-game__score-display" class="two-d-game__score-display">
                 <template id="two-d-game__score-item-template">
                   <div class="two-d-game__score-item">
                     <span class="two-d-game__player-name"></span>
@@ -1167,6 +949,98 @@
             </div>
           </div>
         </div>
+      </div>
+    </template>
+
+    <!-- Local Tournament Setup Template -->
+    <template id="local-tournament-setup-template">
+      <div class="local-tournament-setup">
+        <!-- Tournament Info Section -->
+        <div class="local-tournament-setup__header">
+          <h2 class="local-tournament-setup__title">LOCAL TOURNAMENT SETUP</h2>
+          <div class="local-tournament-setup__info">
+            <div class="local-tournament-setup__info-item">
+              <span class="local-tournament-setup__label">TOURNAMENT NAME:</span>
+              <span class="local-tournament-setup__value" id="display-tournament-name"></span>
+            </div>
+            <div class="local-tournament-setup__info-item">
+              <span class="local-tournament-setup__label">TYPE:</span>
+              <span class="local-tournament-setup__value">SINGLE ELIMINATION</span>
+            </div>
+            <div class="local-tournament-setup__info-item">
+              <span class="local-tournament-setup__label">PLAYERS NEEDED:</span>
+              <span class="local-tournament-setup__value" id="display-players-count"></span>
+            </div>
+            <div class="local-tournament-setup__info-item">
+              <span class="local-tournament-setup__label">TOTAL ROUNDS:</span>
+              <span class="local-tournament-setup__value" id="display-rounds"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Player Registration Form -->
+        <form class="local-tournament-setup__form">
+          <div class="local-tournament-setup__players-grid" id="players-inputs">
+            <!-- Player inputs will be generated dynamically based on maxPlayers -->
+            <!-- Example of one player input: -->
+            <div class="local-tournament-setup__player-input">
+              <label class="local-tournament-setup__label">PLAYER 1</label>
+              <input
+                type="text"
+                class="create-tournament-input"
+                name="player1"
+                placeholder="Enter player name"
+                required
+              />
+            </div>
+            <!-- More players will be added dynamically -->
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="local-tournament-setup__actions">
+            <button type="button" class="create-tournament-button-secondary" id="cancel-local-setup">CANCEL</button>
+            <button type="submit" class="create-tournament-button-primary">START TOURNAMENT</button>
+          </div>
+        </form>
+      </div>
+    </template>
+    <!-- Player Input Template -->
+    <template id="player-input-template">
+      <div class="local-tournament-setup__player-input">
+        <label class="local-tournament-setup__label">PLAYER ${number}</label>
+        <input
+          type="text"
+          class="create-tournament-input"
+          name="player${number}"
+          placeholder="Enter player name"
+          required
+        />
+      </div>
+    </template>
+
+    <!-- Tournament Round Template -->
+    <template id="tournament-round-template">
+      <div class="tournament-round">
+        <div class="tournament-round__header">
+          <h2 class="tournament-round__title">ROUND ${currentRound}</h2>
+        </div>
+
+        <div class="tournament-round__games">
+          <!-- Games will be added here dynamically -->
+        </div>
+      </div>
+    </template>
+
+    <!-- Tournament Game Template -->
+    <template id="tournament-game-template">
+      <div class="tournament-game">
+        <div class="tournament-game__players">
+          <div id="tournament-game__player1" class="tournament-game__player"></div>
+          <div class="tournament-game__vs">VS</div>
+          <div id="tournament-game__player2" class="tournament-game__player"></div>
+        </div>
+        <div class="tournament-game__result"></div>
+        <button class="tournament-game__play-btn">PLAY</button>
       </div>
     </template>
 

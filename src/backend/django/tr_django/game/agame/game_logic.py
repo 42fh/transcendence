@@ -34,7 +34,7 @@ async def game_logic(self, current_state):
             # Boundary Phase
             distance_from_center = self.get_distance(ball)
             # self.update_distance_metrics(distance_from_center, cycle_data)
-            logger.info(f"{self.game_id}/ball[{ball_index}]: {distance_from_center} / ball ({ball['x']} / {ball['x']})")
+            logger.debug(f"{self.game_id}/ball[{ball_index}]: {distance_from_center} / ball ({ball['x']} / {ball['x']})")
             boundary_check = self.handle_distance_check(
                 ball_index, ball, distance_from_center, new_state, cycle_data
             )
@@ -140,12 +140,12 @@ def handle_distance_check(self, ball_index, ball, distance, state, cycle_data):
     # Normal deadzone transitioni
     # Only reset when entering deadzone
     elif is_in_deadzone and not was_in_deadzone:
-        logger.info(f"{self.game_id}/ball[{ball_index}]: set deadzone")
+        logger.debug(f"{self.game_id}/ball[{ball_index}]: set deadzone")
         self.reset_ball_movement(ball_index)
     # When exiting, just update the state
     elif was_in_deadzone and not is_in_deadzone:
         self.previous_movements[ball_index]["in_deadzone"] = False
-        logger.info(f"{self.game_id}/ball[{ball_index}]: out of deadzone")
+        logger.debug(f"{self.game_id}/ball[{ball_index}]: out of deadzone")
     # Store current position for next frame's comparison
     self.previous_movements[ball_index]["last_position"] = {
         "x": ball["x"],

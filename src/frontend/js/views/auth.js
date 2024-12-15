@@ -1,5 +1,9 @@
 import { displayLogoutError } from "../utils/errors.js";
-import { renderModal, closeModal, displayModalError } from "../components/modal.js";
+import {
+  renderModal,
+  closeModal,
+  displayModalError,
+} from "../components/modal.js";
 import { fetchUserProfile } from "../services/usersService.js";
 import { loadHomePage } from "./home.js";
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
@@ -112,7 +116,7 @@ async function handleAuth(form, authFunction) {
   try {
     const result = await authFunction(data);
 
-    const _accessToken = await manageJWT(data, true);
+    await manageJWT(data, true);
 
     let userData = await fetchUserProfile(result.id);
     if (!userData.success) {
@@ -155,22 +159,22 @@ export async function handleLogout() {
   console.log("Attempting to log out...");
   try {
     await logoutUser();
-
-    localStorage.removeItem(LOCAL_STORAGE_KEYS.USERNAME);
-    localStorage.removeItem(LOCAL_STORAGE_KEYS.USER_ID);
-    history.pushState({ view: "auth" }, "");
-    loadAuthPage();
   } catch (error) {
-    console.error("Logout error:", error);
-    displayLogoutError("An error occurred while logging out. Please try again.");
+    console.log("Could not logout, redirecting to login...", error);
   }
+  history.pushState({ view: "auth" }, "");
+  loadAuthPage();
+  localStorage.removeItem(LOCAL_STORAGE_KEYS.USERNAME);
+  localStorage.removeItem(LOCAL_STORAGE_KEYS.USER_ID);
 }
 
 async function handleAuthSuccess(result, form) {
   const messageElement = document.getElementById("modal-message");
 
   messageElement.style.color = "white";
-  messageElement.innerText = `${result.message || "Signup or Login successful! 🎉 Redirecting..."}`;
+  messageElement.innerText = `${
+    result.message || "Signup or Login successful! 🎉 Redirecting..."
+  }`;
 
   localStorage.setItem(LOCAL_STORAGE_KEYS.USERNAME, result.username);
   localStorage.setItem(LOCAL_STORAGE_KEYS.USER_ID, result.id);
@@ -184,7 +188,7 @@ async function handleAuthSuccess(result, form) {
   }, 2000);
 }
 
-async function startResendTimer() {
+export async function startResendTimer() {
   const countdown = document.getElementById("countdown");
   const resendButton = document.getElementById("resend-button");
 
@@ -205,34 +209,38 @@ async function startResendTimer() {
   }, 1000);
 }
 
-function resendButtonListener(userData) {
-  document.getElementById("resend-button").addEventListener("click", async () => {
-    try {
-      console.log("Resending email verification...");
-      await sendEmailVerification(userData);
-      console.log("Email verification sent");
-      await startResendTimer(userData);
-      showToast("Verification code resent");
-    } catch (error) {
-      console.error("Error resending email verification:", error);
-      showToast("Failed to resend verification code", true);
-    }
-  });
+export function resendButtonListener(userData) {
+  document
+    .getElementById("resend-button")
+    .addEventListener("click", async () => {
+      try {
+        console.log("Resending email verification...");
+        await sendEmailVerification(userData);
+        console.log("Email verification sent");
+        await startResendTimer(userData);
+        showToast("Verification code resent");
+      } catch (error) {
+        console.error("Error resending email verification:", error);
+        showToast("Failed to resend verification code", true);
+      }
+    });
 }
 
 function twoFaFormListener(result, form) {
-  document.getElementById("2fa-form").addEventListener("submit", async (event) => {
-    event.preventDefault();
+  document
+    .getElementById("2fa-form")
+    .addEventListener("submit", async (event) => {
+      event.preventDefault();
 
-    const code = document.getElementById("code").value.trim();
+      const code = document.getElementById("code").value.trim();
 
-    try {
-      await validateEmailVerification(code);
-      console.log("Email verification successful");
-      handleAuthSuccess(result, form);
-    } catch (error) {
-      console.error("Error validating email verification:", error);
-      showToast("Verification code is invalid", true);
-    }
-  });
+      try {
+        await validateEmailVerification(code);
+        console.log("Email verification successful");
+        handleAuthSuccess(result, form);
+      } catch (error) {
+        console.error("Error validating email verification:", error);
+        showToast("Verification code is invalid", true);
+      }
+    });
 }

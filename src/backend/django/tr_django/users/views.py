@@ -38,6 +38,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.contrib.auth.hashers import make_password
+from rest_framework.parsers import MultiPartParser
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +62,8 @@ class SignupView(APIView):
         password = data.get("password")
 
         # Check if username is taken
-        if CustomUser.objects.filter(username=username).exists() or username.startswith("42_"):            return Response(
+        if CustomUser.objects.filter(username=username).exists() or username.startswith("42_"):
+            return Response(
                 {
                     "success": False,
                     "error": "Username is already taken.",
@@ -69,7 +71,7 @@ class SignupView(APIView):
                 },
                 status=400,
             )
-        
+
         # rejects weak passwords
         try:
             validate_password(password)
@@ -485,6 +487,7 @@ class UserDetailView(APIView):
                 "bio": user.bio,
                 "pronoun": user.pronoun,
                 "is_active": user.is_active,
+                "friends_count": user.friends.count(),
             }
 
             # Add friendship status if not own profile
@@ -506,6 +509,7 @@ class UserDetailView(APIView):
             if is_own_profile:
                 user_data.update(
                     {
+                        "email_verified": user.email_verified,
                         "email": user.email,
                         "two_factor_enabled": user.two_factor_enabled,
                         "telephone_number": user.telephone_number,
@@ -591,6 +595,8 @@ class UserDetailView(APIView):
                     "first_name": user.first_name,
                     "last_name": user.last_name,
                     "email": user.email,
+                    "email_verified": user.email_verified,
+                    "two_factor_enabled": user.two_factor_enabled,
                     "bio": user.bio,
                     "telephone_number": user.telephone_number,
                     "pronoun": user.pronoun,
@@ -603,6 +609,7 @@ class UserDetailView(APIView):
                 "first_name",
                 "last_name",
                 "email",
+                "email_verified",
                 "bio",
                 "telephone_number",
                 "pronoun",
@@ -625,6 +632,7 @@ class UserDetailView(APIView):
                     "first_name": user.first_name,
                     "last_name": user.last_name,
                     "email": user.email,
+                    "email_verified": user.email_verified,
                     "bio": user.bio,
                     "telephone_number": user.telephone_number,
                     "pronoun": user.pronoun,
@@ -665,19 +673,13 @@ class UserDetailView(APIView):
 
 @method_decorator(csrf_exempt, name="dispatch")
 class UserAvatarView(APIView):
-    """Handle user avatar uploads"""
-
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser]
 
     ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/jpg"]
-
     MAX_AVATAR_SIZE = 2 * 1024 * 1024  # 2MB in bytes
 
     def post(self, request, user_id):
-        """Upload a new avatar"""
-        if not request.user.is_authenticated:
-            return Response({"error": "Not authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
-
         if str(request.user.id) != str(user_id):
             return Response({"error": "Cannot update other users' avatars"}, status=status.HTTP_403_FORBIDDEN)
 
@@ -686,29 +688,22 @@ class UserAvatarView(APIView):
         except CustomUser.DoesNotExist:
             return Response({"error": "User not found"}, status=404)
 
-        if "avatar" not in request.FILES:
-            return Response({"error": "No avatar file provided"}, status=status.HTTP_400_BAD_REQUEST)
+        if "file" not in request.FILES:
+            return Response({"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST)
 
-        avatar_file = request.FILES["avatar"]
+        avatar_file = request.FILES["file"]
+
         # Validate file type
         if avatar_file.content_type not in self.ALLOWED_TYPES:
-            return JsonResponse(
-                {"error": f"Invalid file type. Allowed types: {', '.join(self.ALLOWED_TYPES)}"}, status=400
-            )
+            return Response({"error": "Invalid file type"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Validate file size
         if avatar_file.size > self.MAX_AVATAR_SIZE:
-            return JsonResponse({"error": f"Avatar size exceeds the limit of {self.MAX_AVATAR_SIZE} bytes"}, status=400)
-
-        # Add debug logging
-        logger.debug(f"Saving avatar to: {settings.MEDIA_ROOT}")
-        logger.debug(f"File name: {avatar_file.name}")
+            return Response({"error": "File too large"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Save the new avatar
         user.avatar = avatar_file
         user.save()
-        logger.debug(f"Saved avatar path: {user.avatar.path}")
-        logger.debug(f"Saved avatar URL: {user.avatar.url}")
 
         return Response({"message": "Avatar updated successfully", "avatar": user.avatar.url})
 
