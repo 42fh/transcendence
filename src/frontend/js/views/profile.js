@@ -1,8 +1,4 @@
-import {
-  fetchUserProfile,
-  formatWinRatio,
-  renderMatchHistory,
-} from "../services/usersService.js";
+import { fetchUserProfile, formatWinRatio, renderMatchHistory } from "../services/usersService.js";
 import { handleLogout } from "./auth.js";
 import { toggleBlockUser } from "../services/blockService.js";
 import { isUserBlockedByCurrentUser } from "../services/blockService.js";
@@ -22,7 +18,7 @@ import {
 } from "../services/friendshipService.js";
 import { renderModal, closeModal } from "../components/modal.js";
 import { load2FAPage } from "./2fa.js";
-import { inviteFriend } from "../services/gameWithFriendService.js"
+import { inviteFriend } from "../services/gameWithFriendService.js";
 import { loadChatRoom } from "./chatRoom.js";
 
 export async function loadProfilePage(userId = null, addToHistory = true) {
@@ -95,18 +91,14 @@ export async function loadProfilePage(userId = null, addToHistory = true) {
     const content = document.importNode(profileTemplate.content, true);
 
     // Add the appropriate class to control visibility on the child classes
-    content
-      .querySelector(".profile")
-      .classList.add(isOwnProfile ? "profile--private" : "profile--public");
+    content.querySelector(".profile").classList.add(isOwnProfile ? "profile--private" : "profile--public");
     // Populate all profile data
     populateProfileHTML(content, userData, isOwnProfile);
 
     // Add content to main container and render match history
     mainContent.innerHTML = "";
     mainContent.appendChild(content);
-    const matchesContainer = mainContent.querySelector(
-      ".profile__matches-list"
-    );
+    const matchesContainer = mainContent.querySelector(".profile__matches-list");
     renderMatchHistory(userData.recent_matches, matchesContainer);
 
     // Add edit button handler only for own profile
@@ -124,9 +116,7 @@ export async function loadProfilePage(userId = null, addToHistory = true) {
         load2FAPage(userData);
       });
       // Add logout button handler
-      const logoutButton = mainContent.querySelector(
-        ".profile__button--logout"
-      );
+      const logoutButton = mainContent.querySelector(".profile__button--logout");
       if (logoutButton) {
         logoutButton.addEventListener("click", handleLogout);
       }
@@ -165,19 +155,14 @@ function populateSharedProfileHTML(content, userData) {
   applyUsernameTruncation(usernameElement, userData.username, 15);
 
   // Bio
-  content.querySelector(".profile__bio-text").textContent =
-    userData.bio || "No bio available";
+  content.querySelector(".profile__bio-text").textContent = userData.bio || "No bio available";
 
   // Stats (always visible)
   if (userData.stats) {
-    content.querySelector(".profile__stats-wins").textContent =
-      userData.stats.wins;
-    content.querySelector(".profile__stats-losses").textContent =
-      userData.stats.losses;
-    content.querySelector(".profile__stats-wins").textContent =
-      userData.stats.wins;
-    content.querySelector(".profile__stats-losses").textContent =
-      userData.stats.losses;
+    content.querySelector(".profile__stats-wins").textContent = userData.stats.wins;
+    content.querySelector(".profile__stats-losses").textContent = userData.stats.losses;
+    content.querySelector(".profile__stats-wins").textContent = userData.stats.wins;
+    content.querySelector(".profile__stats-losses").textContent = userData.stats.losses;
     content.querySelector(".profile__stats-ratio").textContent = formatWinRatio(
       userData.stats.wins,
       userData.stats.losses
@@ -188,12 +173,9 @@ function populateSharedProfileHTML(content, userData) {
 function populateOwnProfileHTML(content, userData) {
   // Private info
   content.querySelector(".profile__info-item--name").textContent =
-    `${userData.first_name || ""} ${userData.last_name || ""}`.trim() ||
-    "No name set";
-  content.querySelector(".profile__info-item--email").textContent =
-    userData.email || "No email set";
-  content.querySelector(".profile__info-item--phone").textContent =
-    userData.telephone_number || "No phone set";
+    `${userData.first_name || ""} ${userData.last_name || ""}`.trim() || "No name set";
+  content.querySelector(".profile__info-item--email").textContent = userData.email || "No email set";
+  content.querySelector(".profile__info-item--phone").textContent = userData.telephone_number || "No phone set";
 
   // Friends section with click handler
   const friendsSection = content.querySelector(".profile__section--friends");
@@ -205,9 +187,7 @@ function populateOwnProfileHTML(content, userData) {
   friendsSection.addEventListener("click", () => {
     history.pushState({ view: "users", showFriendsOnly: true }, "");
     loadUsersPage(false);
-    const friendsFilter = document.querySelector(
-      ".users-filter__button--friends"
-    );
+    const friendsFilter = document.querySelector(".users-filter__button--friends");
     friendsFilter.click();
   });
 
@@ -218,7 +198,6 @@ function populateOwnProfileHTML(content, userData) {
     }
   });
 }
-
 
 function populatePublicProfileHTML(content, userData) {
   // Hide private elements: email, phone, name, friends
@@ -235,21 +214,19 @@ function populatePublicProfileHTML(content, userData) {
   const friendshipButton = content.querySelector('button[data-action="friend"]');
   const chatButton = content.querySelector('button[data-action="chat"]');
 
-
   emailElement.style.display = "none";
   phoneElement.style.display = "none";
-
 
   friendshipButton.addEventListener("click", () => {
     handleFriendshipButtonClick(friendshipButton.dataset.state, userData);
   });
 
-  // Check and set block button state  
+  // Check and set block button state
   // Async function to set up block button
   const setupBlockButton = async () => {
     try {
       const isBlocked = await isUserBlockedByCurrentUser(userData.username);
-      
+
       if (isBlocked) {
         blockIconSpan.textContent = "lock_open";
         blockButton.setAttribute("title", "Unblock User");
@@ -264,15 +241,12 @@ function populatePublicProfileHTML(content, userData) {
       blockButton.addEventListener("click", async () => {
         try {
           const currentBlockStatus = blockButton.dataset.state === "blocked";
-          
-          const blockResult = await toggleBlockUser(
-            userData.username,
-            currentBlockStatus
-          );
-          
+
+          const blockResult = await toggleBlockUser(userData.username, currentBlockStatus);
+
           if (blockResult.status === "success") {
             const newBlockedState = !currentBlockStatus;
-            
+
             if (newBlockedState) {
               blockIconSpan.textContent = "lock_open";
               blockButton.setAttribute("title", "Unblock User");
@@ -282,13 +256,8 @@ function populatePublicProfileHTML(content, userData) {
               blockButton.setAttribute("title", "Block User");
               blockButton.dataset.state = "not_blocked";
             }
-            
-            showToast(
-              newBlockedState
-                ? "User blocked successfully"
-                : "User unblocked successfully",
-              false
-            );
+
+            showToast(newBlockedState ? "User blocked successfully" : "User unblocked successfully", false);
           }
         } catch (error) {
           console.error("Error blocking/unblocking user:", error);
@@ -307,9 +276,7 @@ function populatePublicProfileHTML(content, userData) {
   setupBlockButton();
 
   // Friendship button state and icon setup
-  const friendIconSpan = friendshipButton.querySelector(
-    ".material-symbols-outlined"
-  );
+  const friendIconSpan = friendshipButton.querySelector(".material-symbols-outlined");
   if (!friendIconSpan) {
     console.warn("Icon span not found in friend button");
     return;
@@ -329,18 +296,12 @@ function populatePublicProfileHTML(content, userData) {
     switch (userData.friend_request_status) {
       case "sent":
         friendIconSpan.textContent = "hourglass_top";
-        friendshipButton.setAttribute(
-          "title",
-          "Friend Request Sent. Click to withdraw."
-        );
+        friendshipButton.setAttribute("title", "Friend Request Sent. Click to withdraw.");
         friendshipButton.dataset.state = "pending_sent";
         break;
       case "received":
         friendIconSpan.textContent = "check_circle";
-        friendshipButton.setAttribute(
-          "title",
-          "Friend Request Received. Click to accept, reject or ignore."
-        );
+        friendshipButton.setAttribute("title", "Friend Request Received. Click to accept, reject or ignore.");
         friendshipButton.dataset.state = "pending_received";
         break;
       default:
@@ -356,7 +317,7 @@ function populatePublicProfileHTML(content, userData) {
       const result = await inviteFriend(friendId);
 
       console.log("reslt.success", result.success);
-  
+
       if (result.status === 200) {
         const playIconSpan = playFriendButton.querySelector(".material-symbols-outlined");
         playIconSpan.textContent = "hourglass_top";
@@ -371,10 +332,9 @@ function populatePublicProfileHTML(content, userData) {
   });
 
   chatButton.addEventListener("click", async () => {
-      loadChatRoom(userData);
+    loadChatRoom(userData);
   });
 }
-
 
 async function handleFriendshipButtonClick(friendshipButtonDatasetState, userData) {
   try {
@@ -510,9 +470,7 @@ function showFriendshipActionModal({ title, message, actions }) {
         // Warning about dynamic creation of buttons: They needs to be created dynamically cause we could have two or three buttons. The other solution would be two different templates, but this is more scalable!
         actions.forEach((action) => {
           const button = document.createElement("button");
-          button.className = `modal-button ${
-            action.type ? `modal-button--${action.type}` : ""
-          }`;
+          button.className = `modal-button ${action.type ? `modal-button--${action.type}` : ""}`;
           button.dataset.action = action.value;
           button.textContent = action.text;
           actionsDiv.appendChild(button);
@@ -525,9 +483,7 @@ function showFriendshipActionModal({ title, message, actions }) {
 // TODO: we need to refactor this, cause we are not going to change the button text, but the icon and the title
 function updateFriendButton(newStatus) {
   //   const friendButton = document.getElementById("friend-button");
-  const friendshipButton = document.querySelector(
-    'button[data-action="friend"]'
-  );
+  const friendshipButton = document.querySelector('button[data-action="friend"]');
   const iconSpan = friendshipButton.querySelector(".material-symbols-outlined");
   if (!friendshipButton || !iconSpan) {
     console.warn("Friend button or icon not found");
@@ -541,18 +497,12 @@ function updateFriendButton(newStatus) {
       break;
     case "pending_sent":
       iconSpan.textContent = "hourglass_top";
-      friendshipButton.setAttribute(
-        "title",
-        "Friend Request Sent. Click to withdraw."
-      );
+      friendshipButton.setAttribute("title", "Friend Request Sent. Click to withdraw.");
       friendshipButton.dataset.state = "pending_sent";
       break;
     case "pending_received":
       iconSpan.textContent = "check_circle";
-      friendshipButton.setAttribute(
-        "title",
-        "Friend Request Received. Click to accept, reject or ignore."
-      );
+      friendshipButton.setAttribute("title", "Friend Request Received. Click to accept, reject or ignore.");
       friendshipButton.dataset.state = "pending_received";
       break;
     case "friends":
