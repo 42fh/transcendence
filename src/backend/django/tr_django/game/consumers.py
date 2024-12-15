@@ -216,11 +216,11 @@ class PongConsumer(AsyncWebsocketConsumer):
         current_time = time.time()
 
         if current_time - self.last_move_time < self.player_values["move_cooldown"]:
-            await self.send(
-                text_data=json.dumps(
-                    {"type": "error", "message": "You are too fast"}
-                )
-            )
+            # await self.send(
+            #     text_data=json.dumps(
+            #         {"type": "error", "message": "You are too fast"}
+            #     )
+            # )
             return  # could send back feedback that is too fast or and log it in cheatlog
 
         if await self.is_valid_paddle_move(direction):

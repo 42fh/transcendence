@@ -12,6 +12,8 @@ import { loadGameSetupPage } from "../views/gameSetup.js";
 import { loadProfilePage } from "../views/profile.js";
 import { LOCAL_STORAGE_KEYS } from "../config/constants.js";
 import { updateActiveNavItem } from "../components/bottomNav.js";
+import { loadLocalTournamentSetupPage } from "../views/localTournamentSetup.js";
+import { loadLocalTournamentRoundPage } from "../views/localTournamentRound.js";
 
 // TODO: Implement state management system to cache API responses
 // Consider using:
@@ -110,6 +112,9 @@ export function initializeHistory() {
 
             loadProfilePage(userId, false);
             break;
+          case "local-tournament-setup":
+            loadLocalTournamentSetupPage(false);
+            break;
           default:
             loadHomePage(false);
         }
@@ -147,10 +152,16 @@ export function initializeHistory() {
           const userId =
             event.target.dataset.userId ||
             localStorage.getItem(LOCAL_STORAGE_KEYS.USER_ID);
+          loadProfilePage(userId);
+          break;
         case "chat-home":
           loadChatPage();
           break;
-          loadProfilePage(userId, false);
+        case "local-tournament-setup":
+          loadLocalTournamentSetupPage();
+          break;
+        case "local-tournament-round":
+          loadLocalTournamentRoundPage();
           break;
         default:
           loadHomePage();

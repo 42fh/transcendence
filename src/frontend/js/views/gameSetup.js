@@ -41,37 +41,40 @@ export function loadGameSetupPage(addToHistory = true) {
       "num-sides": 2,
       "num-balls": 1,
       "score-mode": "classic",
-      "debug-mode": false,
     };
     updateAllFormElements("two-d-game__", formData);
 
-    document.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const formData = collectFormData();
-      if (validateFormData(formData)) {
-        console.log("Form data:", formData);
+    document.addEventListener(
+      "submit",
+      async (event) => {
+        event.preventDefault();
+        const formData = collectFormData();
+        if (validateFormData(formData)) {
+          console.log("Form data:", formData);
 
-        const data = {
-          mode: formData.gameType,
-          name: formData.name,
-          gameType: formData.gameType,
-          num_players: Number(formData.numPlayers),
-          sides: Number(formData.numSides),
-          num_balls: Number(formData.numBalls),
-          score_mode: formData.scoreMode,
-          debug: true,
-        };
+          const data = {
+            mode: formData.gameType,
+            name: formData.name,
+            gameType: formData.gameType,
+            num_players: Number(formData.numPlayers),
+            sides: Number(formData.numSides),
+            num_balls: Number(formData.numBalls),
+            score_mode: formData.scoreMode,
+            debug: true,
+          };
 
-        let result = await createGame(data);
-        console.log("Game creation result:", result);
+          let result = await createGame(data);
+          console.log("Game creation result:", result);
 
-        if (formData.gameType === "circular") {
-          loadGame3D(result.ws_url);
-        } else {
-          loadGame2D(result.game_id, result.ws_url, true);
+          if (formData.gameType === "circular") {
+            loadGame3D(result.ws_url);
+          } else {
+            loadGame2D(result.game_id, result.ws_url, true);
+          }
         }
-      }
-    });
+      },
+      { once: true }
+    );
   } catch (error) {
     console.error("Error loading game creation:", error);
   }
@@ -117,7 +120,7 @@ function collectFormData() {
 }
 
 function validateFormData(formData) {
-  const { gameType, numSides, numBalls } = formData;
+  const { gameType, numSides, numBalls, numPlayers } = formData;
   // Validate sides based on game type
   if (gameType === "circular") {
     if (numSides < 2 || numSides > 12) {
@@ -132,6 +135,14 @@ function validateFormData(formData) {
       );
       return false;
     }
+  }
+
+  if (numSides < numPlayers) {
+    showToast(
+      "Number of sides must be greater than or equal to number of players",
+      true
+    );
+    return false;
   }
 
   if (numBalls < 1 || numBalls > 4) {

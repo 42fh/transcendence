@@ -210,7 +210,7 @@ export default class GameUI {
         this.game.scores[index] = score;
 
         const player = this.game.paddles.get(index);
-        if (player.scoreButton && player.scoreButton.children[0]) {
+        if (player && player.scoreButton && player.scoreButton.children[0]) {
           const textMesh = player.scoreButton.children[0];
 
           this.fontLoader.load(this.fontUrl, (font) => {
