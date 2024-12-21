@@ -1,5 +1,5 @@
 # Use Nginx base image
-FROM nginx:1.26.1
+FROM nginx:1.26
 
 ARG ENVIRONMENT
 # Print the ENVIRONMENT variable for debugging
