@@ -194,7 +194,7 @@ class SendEmailVerificationView(APIView):
             send_mail(
                 "PONG | Verification code",
                 f"Your verification code is: {verification_code}",
-                f"{os.getenv("EMAIL_HOST_USER")}",
+                f"{os.getenv('EMAIL_HOST_USER')}",
                 [request.user.email],
                 fail_silently=False,
             )
