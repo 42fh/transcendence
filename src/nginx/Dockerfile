@@ -3,7 +3,6 @@ FROM nginx:1.26.1
 
 ARG ENVIRONMENT
 # Print the ENVIRONMENT variable for debugging
-RUN echo "The ENVIRONMENT variable is:" ${ENVIRONMENT}
 RUN echo "The ENVIRONMENT variable is: ${ENVIRONMENT}"
 
 # Copy the appropriate configuration file based on the environment
