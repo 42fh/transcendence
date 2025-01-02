@@ -1,4 +1,10 @@
 services:
+  redis:
+    ports:
+      - "6380:6380"
+  postgres:
+      ports:
+      - "5432:5432"
   django:
     depends_on:
       - postgres
@@ -25,6 +31,8 @@ services:
     volumes:
       - ./src/backend/django:/app
       - ./media:/app/media
+    ports:
+      - "8000"
     environment:
       - Debug=True
       - ENVIRONMENT=development
